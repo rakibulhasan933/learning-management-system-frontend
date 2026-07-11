@@ -96,6 +96,16 @@ export async function signInWithPasswordAction(formData: FormData) {
   try {
     await postAuthSession("/auth/login", { email, password })
   } catch (error) {
+    if (
+      error instanceof ApiClientError &&
+      error.status === 403 &&
+      error.message.toLowerCase().includes("verify")
+    ) {
+      redirect(
+        `/auth/login?error=${encodeURIComponent(error.message)}&unverifiedEmail=${encodeURIComponent(email)}`,
+      )
+    }
+
     redirectWithError(
       "/auth/login",
       error instanceof Error ? error.message : "Sign in failed.",
@@ -103,6 +113,34 @@ export async function signInWithPasswordAction(formData: FormData) {
   }
 
   redirect(next)
+}
+
+export async function resendVerificationEmailAction(formData: FormData) {
+  const email = getRequiredString(formData, "email")
+  const origin = await getOrigin()
+
+  if (!email) {
+    redirectWithError("/auth/login", "Email is required.")
+  }
+
+  try {
+    await publicApiFetch("/auth/verification/resend", {
+      body: JSON.stringify({ email, origin }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      method: "POST",
+    })
+  } catch (error) {
+    redirectWithError(
+      `/auth/login?unverifiedEmail=${encodeURIComponent(email)}`,
+      error instanceof Error
+        ? error.message
+        : "Verification email could not be resent.",
+    )
+  }
+
+  redirect("/auth/verify")
 }
 
 export async function signInWithGoogleAction(formData: FormData) {

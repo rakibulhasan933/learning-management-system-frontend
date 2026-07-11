@@ -8,6 +8,8 @@ import {
   updateInstructorLectureAction,
   updateInstructorSectionAction,
 } from "./actions"
+import { QuizBuilder } from "./quiz-builder"
+import { VideoUploadControl } from "./video-upload-control"
 
 interface CourseOutlineEditorProps {
   courseId: string
@@ -171,6 +173,17 @@ export function CourseOutlineEditor({
                   </form>
                 </div>
 
+                <div className="grid gap-3">
+                  <h3 className="text-lg tracking-tight">Section quiz</h3>
+                  <QuizBuilder
+                    courseId={courseId}
+                    quiz={section.quiz}
+                    targetId={section.id}
+                    targetLabel={section.title}
+                    targetType="section"
+                  />
+                </div>
+
                 <div className="border-l border-primary pl-4">
                   <h3 className="text-lg tracking-tight">Lectures</h3>
                   <div className="mt-4 grid gap-4">
@@ -222,6 +235,19 @@ export function CourseOutlineEditor({
                             placeholder="r2/object-key.mp4"
                           />
                         </label>
+                        <VideoUploadControl
+                          courseId={courseId}
+                          lectureId={lecture.id}
+                        />
+                        <div className="md:col-span-4">
+                          <QuizBuilder
+                            courseId={courseId}
+                            quiz={lecture.quiz}
+                            targetId={lecture.id}
+                            targetLabel={lecture.title}
+                            targetType="lecture"
+                          />
+                        </div>
                         <label className="block text-sm">
                           Provider
                           <select

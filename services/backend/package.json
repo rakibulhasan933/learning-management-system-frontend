@@ -15,18 +15,22 @@
     "db:studio": "pnpm --filter @workspace/db db:studio"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1085.0",
+    "@aws-sdk/s3-request-presigner": "^3.1085.0",
     "@workspace/db": "workspace:*",
     "@workspace/types": "workspace:*",
     "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
     "dotenv": "^16.6.1",
     "express": "^5.1.0",
+    "nodemailer": "^7.0.9",
     "zod": "^4.4.3"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.5",
     "@types/node": "^20",
+    "@types/nodemailer": "^8.0.1",
     "@workspace/config": "workspace:*",
     "eslint": "^9",
     "tsup": "^8.5.1",

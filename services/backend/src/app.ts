@@ -6,8 +6,13 @@ import type { ApiHealthResponse } from "@workspace/types"
 import { env } from "./config/env.js"
 import { errorHandler, notFoundHandler } from "./http/errors.js"
 import { authRouter } from "./routes/auth.js"
+import { certificatesRouter } from "./routes/certificates.js"
 import { coursesRouter } from "./routes/courses.js"
 import { instructorCoursesRouter } from "./routes/instructor-courses.js"
+import { learningRouter } from "./routes/learning.js"
+import { lecturesRouter } from "./routes/lectures.js"
+import { paymentsRouter } from "./routes/payments.js"
+import { quizzesRouter } from "./routes/quizzes.js"
 
 export const app: Express = express()
 
@@ -27,7 +32,12 @@ app.get("/health", (_request, response) => {
 })
 
 app.use("/auth", authRouter)
+app.use("/certificates", certificatesRouter)
 app.use("/courses", coursesRouter)
 app.use("/instructor/courses", instructorCoursesRouter)
+app.use("/learning", learningRouter)
+app.use("/lectures", lecturesRouter)
+app.use("/payments", paymentsRouter)
+app.use("/quizzes", quizzesRouter)
 app.use(notFoundHandler)
 app.use(errorHandler)

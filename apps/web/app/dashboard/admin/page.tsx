@@ -1,4 +1,5 @@
 import { signOutAction } from "@/app/auth/actions"
+import Link from "next/link"
 
 export const dynamic = "force-dynamic"
 
@@ -13,6 +14,20 @@ export default function AdminDashboardPage() {
           User management, course approval, revenue reporting, and pending manual
           payment review will be built here.
         </p>
+        <div className="mt-8 border border-border bg-card p-5">
+          <p className="font-mono text-sm text-muted-foreground">Manual payments</p>
+          <h2 className="mt-2 text-2xl">Pending verification queue</h2>
+          <p className="mt-3 text-sm leading-6 text-muted-foreground">
+            Review submitted transaction details and activate enrollments after
+            approval.
+          </p>
+          <Link
+            className="mt-5 inline-block bg-primary px-4 py-2 text-sm text-primary-foreground"
+            href="/dashboard/admin/payments"
+          >
+            Review payments
+          </Link>
+        </div>
         <form action={signOutAction} className="mt-6">
           <button
             className="border border-border px-4 py-2 text-sm text-foreground"

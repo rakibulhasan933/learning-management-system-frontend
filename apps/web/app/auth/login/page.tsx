@@ -1,6 +1,7 @@
 import Link from "next/link"
 
 import {
+  resendVerificationEmailAction,
   signInWithGoogleAction,
   signInWithPasswordAction,
 } from "@/app/auth/actions"
@@ -9,6 +10,7 @@ interface LoginPageProps {
   searchParams: Promise<{
     error?: string
     next?: string
+    unverifiedEmail?: string
   }>
 }
 
@@ -42,6 +44,22 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             <p className="mt-4 border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
               {params.error}
             </p>
+          ) : null}
+
+          {params.unverifiedEmail ? (
+            <form action={resendVerificationEmailAction} className="mt-3">
+              <input
+                type="hidden"
+                name="email"
+                value={params.unverifiedEmail}
+              />
+              <button
+                className="text-sm text-primary hover:text-foreground"
+                type="submit"
+              >
+                Resend verification email
+              </button>
+            </form>
           ) : null}
 
           <form action={signInWithPasswordAction} className="mt-6 space-y-4">

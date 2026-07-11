@@ -1,6 +1,7 @@
 import Link from "next/link"
 import type { CourseDetailDto } from "@workspace/types"
 
+import { createEnrollmentOrderAction } from "@/app/courses/[slug]/enroll/actions"
 import { publicApiFetch } from "@/lib/api-client"
 
 export const dynamic = "force-dynamic"
@@ -72,11 +73,29 @@ export default async function CourseDetailPage({ params }: CourseDetailPageProps
             Paid courses use manual payment verification. Enrollment activates
             after admin approval.
           </p>
+          <form action={createEnrollmentOrderAction} className="mt-6 space-y-3">
+            <input name="courseId" type="hidden" value={course.id} />
+            <input name="slug" type="hidden" value={course.slug} />
+            <label className="block text-sm">
+              Coupon code
+              <input
+                className="mt-2 w-full border border-input bg-background px-3 py-2 text-foreground outline-none focus:border-primary"
+                name="couponCode"
+                placeholder="Optional"
+              />
+            </label>
+            <button
+              className="w-full bg-primary px-4 py-3 text-center text-sm text-primary-foreground"
+              type="submit"
+            >
+              Enroll
+            </button>
+          </form>
           <Link
-            className="mt-6 block bg-primary px-4 py-3 text-center text-sm text-primary-foreground"
+            className="mt-3 block text-center text-sm text-muted-foreground hover:text-foreground"
             href="/auth/login"
           >
-            Enroll
+            Sign in first
           </Link>
         </aside>
       </section>

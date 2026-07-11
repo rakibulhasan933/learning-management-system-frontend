@@ -376,6 +376,17 @@ JWT_REFRESH_SECRET=
 GOOGLE_OAUTH_CLIENT_ID=
 GOOGLE_OAUTH_CLIENT_SECRET=
 GOOGLE_OAUTH_REDIRECT_URI=
+GMAIL_SMTP_USER=
+GMAIL_SMTP_APP_PASSWORD=
+
+# Manual payment
+MANUAL_PAYMENT_BKASH_NUMBER=
+MANUAL_PAYMENT_NAGAD_NUMBER=
+MANUAL_PAYMENT_ROCKET_NUMBER=
+MANUAL_PAYMENT_BANK_DETAILS=
+MANUAL_PAYMENT_COUPONS=         # format: CODE:percent:10,CODE2:amount:500
+SUPABASE_STORAGE_PAYMENT_PROOFS_BUCKET=payment-proofs
+SUPABASE_STORAGE_CERTIFICATES_BUCKET=certificates
 
 # apps/web
 NEXT_PUBLIC_BACKEND_API_URL=
@@ -418,17 +429,28 @@ NEXT_PUBLIC_BACKEND_API_URL=
 - Drizzle schema and initial migration cover `profiles`, `courses`, `sections`,
   `lectures`, `orders`, `enrollments`, and `progress`, including R2-oriented video
   fields (`video_provider`, `video_ref`) and manual-payment-ready order fields.
-  **Needs update**: add `users`, `refresh_tokens`, `password_reset_tokens`,
-  `email_verification_tokens` tables per the new custom-auth data model, and drop the
-  dependency of `profiles` on `auth.users`.
-- **ARCHITECTURE CHANGE (supersedes earlier auth entries below): Supabase Auth has been
-  removed from this project. Authentication is now fully custom, owned by
-  `services/backend`** (own `users` table, bcrypt/argon2 password hashing,
-  backend-issued JWT access + refresh tokens, backend-handled Google OAuth). Any
-  previously scaffolded Supabase Auth code (login/signup/OAuth callback pages, session
-  middleware, the `auth.users` trigger) needs to be reworked to call the new backend
-  auth endpoints instead of the Supabase Auth client. See "Custom Authentication"
-  section above for the full spec.
+  Custom auth tables (`users`, `refresh_tokens`, `password_reset_tokens`,
+  `email_verification_tokens`) are now included, and `profiles.user_id` references the
+  backend-owned `users.id` instead of `auth.users`.
+- Supabase Auth has been removed from active code paths. Authentication is fully custom
+  and owned by `services/backend`: backend-owned users/profiles, bcrypt password
+  hashing, backend-issued JWT access tokens, hashed refresh-token rotation, logout
+  revocation, backend-handled Google OAuth, email verification, and password reset.
+- Custom auth hardening completed this session: password login now rejects unverified
+  email accounts with a clear error, the login UI exposes a resend-verification action,
+  Google OAuth callback sets httpOnly cookies directly from the backend and redirects
+  without `access_token`/`refresh_token` query params, and the old web callback route no
+  longer accepts tokens from URL params.
+- Real email sending is wired through `services/backend/src/lib/mailer.ts` using
+  Nodemailer + Gmail SMTP (`smtp.gmail.com`, port `465`, secure), with reusable dark
+  navy/brass templates for verification and password reset links. Gmail SMTP env vars
+  are documented as `GMAIL_SMTP_USER` and `GMAIL_SMTP_APP_PASSWORD`.
+- Custom auth E2E verification is pending local credentials: the loaded environment has
+  database/JWT/backend URL values, but Google OAuth and Gmail SMTP variables are missing
+  locally, so real signup-email delivery, verify-click-login, and Google OAuth browser
+  tests could not be completed in this session.
+- Follow-up items for custom auth: add rate limiting on login/reset endpoints and add
+  automated tests for auth flows.
 - ~~Supabase auth integration is scaffolded in the web app with login, signup, OAuth
   callback, verify/reset pages, session-aware middleware/proxy, and role-based
   dashboard routing.~~ (superseded — see architecture change above)
@@ -439,6 +461,83 @@ NEXT_PUBLIC_BACKEND_API_URL=
   handlers)
 - Public catalog and course detail pages are connected to backend REST reads; the web
   app still does not import `packages/db` or query the database directly.
+- Manual payment MVP is implemented: order/enrollment schema is in place with coupon
+  audit fields (`coupon_code`, `discount_amount`), backend payment endpoints create
+  reference-code orders, apply configured coupons, instantly enroll free/fully
+  discounted courses, accept proof submissions with optional Supabase Storage
+  screenshot upload, expose student order status, and provide admin pending-payment
+  approve/reject endpoints that activate enrollments and send mailer-based
+  notifications when email credentials are configured.
+- Manual payment web flow is implemented: course detail enrollment creates an order,
+  `/courses/[slug]/enroll` shows payment instructions and proof submission,
+  `/dashboard/student` shows pending/paid/rejected order status with resubmission for
+  rejected orders, and `/dashboard/admin/payments` provides a filterable pending
+  payments queue with approve/reject actions and screenshot links.
+- Manual payment E2E verification is pending external credentials/configuration:
+  Supabase Storage credentials/bucket are needed to verify screenshot upload,
+  Gmail SMTP credentials are needed to verify approval/rejection emails, and manual
+  payment account env vars are needed to display real bKash/Nagad/Rocket/bank details.
+  Drizzle generation also exposed an existing migration metadata limitation:
+  `_journal.json` lists post-0000 migrations but only `0000_snapshot.json` exists, so
+  `drizzle-kit generate` reaches an interactive conflict prompt in non-TTY mode; the
+  manual SQL migration `0002_manual_payment_coupons.sql` was added for this session's
+  schema change.
+- Video storage milestone is implemented: backend R2 integration uses the S3-compatible
+  AWS SDK to generate time-limited presigned PUT URLs for instructor lecture uploads
+  and time-limited presigned GET URLs through `GET /lectures/:id/video-url`. The video
+  URL resolver is provider-aware and currently supports `video_provider = 'r2'`, with
+  unsupported providers returning a clear not-implemented response for future migration.
+- Instructor course builder now includes an MP4 upload control that requests a backend
+  presigned upload URL, uploads directly from the browser to R2, then saves the
+  returned abstract R2 object key in `lectures.video_ref`.
+- Student learning page now loads enrolled course outlines from the backend and renders
+  a custom video player on `/learn/[courseId]` with signed video URL loading, custom
+  play/progress controls, and the mandatory dynamic low-opacity email watermark that
+  repositions every 8-12 seconds.
+- Video access control is enforced server-side: only users with an active enrollment
+  for the lecture's course can fetch a signed lecture video URL. The web player never
+  reads raw R2 URLs from the database.
+- R2 E2E verification is pending real Cloudflare credentials and bucket CORS:
+  `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET_NAME`, and a
+  bucket CORS rule allowing browser PUT uploads from the web origin are required to
+  verify actual upload/playback against R2.
+- Quiz MVP is implemented for MCQ quizzes only. The Drizzle schema now includes
+  `quizzes`, `quiz_questions`, `quiz_options`, and `quiz_attempts`, with each quiz
+  attached to exactly one section or lecture, normalized MCQ options with
+  `is_correct`, and scored attempts storing submitted answer maps, score,
+  total-question count, and completion timestamp.
+- Instructor quiz APIs are implemented under the existing course-builder backend
+  surface: instructors/admins can create or update a section quiz via
+  `PUT /instructor/courses/:id/sections/:sectionId/quiz`, create or update a lecture
+  quiz via `PUT /instructor/courses/:id/lectures/:lectureId/quiz`, and delete a quiz
+  via `DELETE /instructor/courses/:id/quizzes/:quizId`. Ownership checks reuse the
+  course/section/lecture guards already used by the course builder.
+- Student quiz APIs are implemented under `/quizzes`: enrolled students/admins can
+  fetch a published quiz by target (`GET /quizzes/target?sectionId=...` or
+  `lectureId=...`), fetch a quiz by id, and submit answers through
+  `POST /quizzes/:quizId/submit`. Submission is auto-graded immediately by exact
+  correct-option matching, supports single-answer and multi-answer MCQs, returns score
+  and percentage, and persists a `quiz_attempts` row.
+- Learning responses now include published section and lecture quizzes with latest
+  attempt summaries. The instructor course builder includes quiz builder controls for
+  section and lecture quizzes with add/remove question, add/remove option, correct
+  option marking, publish toggle, save, and delete. The student learning page renders
+  quiz-taking panels, submits selected answers to the backend, and shows the immediate
+  score/result.
+- Quiz access control is enforced server-side: only users with an active enrollment in
+  the quiz's course can fetch or submit student quiz endpoints; instructor mutation
+  endpoints still require course ownership.
+- Quiz verification completed: `pnpm --filter @workspace/db typecheck`,
+  `pnpm --filter @workspace/types typecheck`,
+  `pnpm --filter @workspace/backend typecheck`,
+  `pnpm --filter @workspace/web typecheck`, `pnpm lint`, and `pnpm build` all pass.
+  `pnpm --filter @workspace/db db:migrate` applied pending migrations and the quiz
+  tables were confirmed present in the configured database. Full HTTP E2E was
+  attempted with temporary instructor/student/course/enrollment data, but the
+  configured database is missing the backend-owned `users` table, so the setup failed
+  before exercising the quiz routes. Once the custom-auth migrations are aligned on
+  that database, rerun an HTTP E2E covering instructor quiz creation, enrolled student
+  quiz fetch, submission, score calculation, and `quiz_attempts` persistence.
 - Instructor course CRUD is implemented with list, new, edit, update, and delete
   screens calling backend REST mutations through server actions.
 - Instructor course builder now supports sections and lectures on the course edit page:
