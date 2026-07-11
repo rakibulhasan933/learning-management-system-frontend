@@ -7,9 +7,13 @@
     "dev": "turbo dev",
     "lint": "turbo lint",
     "format": "turbo format",
-    "typecheck": "turbo typecheck"
+    "typecheck": "turbo typecheck",
+    "db:generate": "pnpm --filter @workspace/backend db:generate",
+    "db:migrate": "pnpm --filter @workspace/backend db:migrate",
+    "db:studio": "pnpm --filter @workspace/backend db:studio"
   },
   "devDependencies": {
+    "@workspace/config": "workspace:*",
     "@workspace/eslint-config": "workspace:*",
     "@workspace/typescript-config": "workspace:*",
     "prettier": "^3.8.3",
