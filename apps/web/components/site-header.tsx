@@ -21,25 +21,34 @@ export async function SiteHeader() {
   ).toUpperCase()
 
   return (
-    <header className="border-b border-border bg-background/95">
+    <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-4">
-        <Link className="flex items-center gap-3" href="/">
-          <span className="h-8 w-8 border border-primary bg-card" />
-          <span className="text-sm tracking-[0.22em] text-muted-foreground">
-            lms
+        <Link className="flex items-center gap-2.5" href="/">
+          <span className="flex h-7 w-7 items-center justify-center border border-primary font-mono text-[11px] text-primary">
+            F
           </span>
+          <span className="font-display text-lg tracking-tight">Folio</span>
         </Link>
 
-        <nav className="hidden items-center gap-6 md:flex">
-          <Link className="text-sm text-foreground" href="/courses">
+        <nav className="hidden items-center gap-7 text-sm md:flex">
+          <Link
+            className="text-muted-foreground transition-colors hover:text-foreground"
+            href="/courses"
+          >
             Courses
           </Link>
           {profile ? (
             <>
-              <Link className="text-sm text-foreground" href="/dashboard/student">
+              <Link
+                className="text-muted-foreground transition-colors hover:text-foreground"
+                href="/dashboard/student"
+              >
                 Learning
               </Link>
-              <Link className="text-sm text-foreground" href="/dashboard/profile">
+              <Link
+                className="text-muted-foreground transition-colors hover:text-foreground"
+                href="/dashboard/profile"
+              >
                 Profile
               </Link>
             </>
@@ -50,16 +59,16 @@ export async function SiteHeader() {
           {profile ? (
             <>
               <Link
-                className="hidden border border-border px-4 py-2 text-sm text-foreground md:inline-flex"
+                className="hidden border border-border px-4 py-2 text-sm text-foreground transition-colors hover:border-primary/50 md:inline-flex"
                 href="/dashboard/profile"
               >
                 Profile settings
               </Link>
               <Link
-                className="inline-flex items-center gap-3 border border-primary px-3 py-2 text-sm text-primary"
+                className="inline-flex items-center gap-2.5 border border-primary/60 px-3 py-1.5 text-sm text-primary transition-colors hover:border-primary"
                 href="/dashboard/profile"
               >
-                <span className="relative h-7 w-7 overflow-hidden rounded-full border border-primary/40 bg-card">
+                <span className="relative h-7 w-7 overflow-hidden rounded-full border border-primary/50 bg-card">
                   {profile.avatarUrl ? (
                     <Image
                       alt={profile.fullName ?? profile.email}
@@ -69,7 +78,7 @@ export async function SiteHeader() {
                       src={profile.avatarUrl}
                     />
                   ) : (
-                    <span className="flex h-full items-center justify-center text-xs">
+                    <span className="flex h-full items-center justify-center font-mono text-xs text-primary">
                       {initials}
                     </span>
                   )}
@@ -80,13 +89,13 @@ export async function SiteHeader() {
           ) : (
             <>
               <Link
-                className="hidden text-sm text-foreground md:inline-flex"
+                className="hidden text-sm text-muted-foreground transition-colors hover:text-foreground md:inline-flex"
                 href="/auth/login"
               >
                 Sign in
               </Link>
               <Link
-                className="border border-primary px-4 py-2 text-sm text-primary"
+                className="border border-primary px-4 py-2 text-sm text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
                 href="/auth/signup"
               >
                 Create account
