@@ -6,14 +6,15 @@ import {
   getBackendApiUrl,
   refreshTokenCookieName,
 } from "@/lib/auth/cookies"
+import { getDashboardPath } from "@/lib/auth/dashboard"
 
 const protectedRoutes: Array<{
   prefix: string
   roles?: UserRole[]
 }> = [
   { prefix: "/learn" },
-  { prefix: "/dashboard/student", roles: ["admin", "student"] },
-  { prefix: "/dashboard/instructor", roles: ["admin", "instructor"] },
+  { prefix: "/dashboard/student", roles: ["student"] },
+  { prefix: "/dashboard/instructor", roles: ["instructor"] },
   { prefix: "/dashboard/admin", roles: ["admin"] },
 ]
 
@@ -120,7 +121,7 @@ export async function updateSession(request: NextRequest) {
   }
 
   if (route.roles && !route.roles.includes(profile.role)) {
-    return redirectTo(request, "/dashboard/student")
+    return redirectTo(request, getDashboardPath(profile.role))
   }
 
   return response

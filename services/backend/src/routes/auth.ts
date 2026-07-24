@@ -23,6 +23,10 @@ import {
   signAccessToken,
 } from "../lib/auth-tokens.js"
 import { db } from "../lib/database.js"
+import {
+  sendPasswordResetEmail,
+  sendVerificationEmail,
+} from "../lib/mailer.js"
 import { getProfileByUserId, toProfileDto } from "../lib/profiles.js"
 import { requireAuth } from "../middleware/auth.js"
 
@@ -36,10 +40,15 @@ const signupSchema = loginSchema.extend({
   fullName: z.string().trim().min(1).max(160).nullable().optional(),
   origin: z.string().url().optional(),
 })
+const profileUpdateSchema = z.object({
+  avatarUrl: z.string().trim().url().nullable().optional(),
+  fullName: z.string().trim().min(1).max(160).nullable().optional(),
+})
 const resetRequestSchema = z.object({
   email: z.string().trim().email().transform((value) => value.toLowerCase()),
   origin: z.string().url().optional(),
 })
+const resendVerificationSchema = resetRequestSchema
 const resetConfirmSchema = z.object({
   password: z.string().min(8),
   token: z.string().min(20),
@@ -82,18 +91,29 @@ function getDefaultOrigin(origin: string | undefined) {
   return origin ?? env.CORS_ORIGIN
 }
 
-async function sendVerificationEmail(email: string, token: string, origin?: string) {
+function getDashboardPath(role: "admin" | "instructor" | "student") {
+  switch (role) {
+    case "admin":
+      return "/dashboard/admin"
+    case "instructor":
+      return "/dashboard/instructor"
+    case "student":
+      return "/dashboard/student"
+  }
+}
+
+function getVerificationUrl(token: string, origin?: string) {
   const verificationUrl = new URL("/auth/verify", getDefaultOrigin(origin))
   verificationUrl.searchParams.set("token", token)
 
-  console.info(`Verification email for ${email}: ${verificationUrl.toString()}`)
+  return verificationUrl.toString()
 }
 
-async function sendPasswordResetEmail(email: string, token: string, origin?: string) {
+function getPasswordResetUrl(token: string, origin?: string) {
   const resetUrl = new URL("/auth/reset-password", getDefaultOrigin(origin))
   resetUrl.searchParams.set("token", token)
 
-  console.info(`Password reset email for ${email}: ${resetUrl.toString()}`)
+  return resetUrl.toString()
 }
 
 async function issueSession(userId: string) {
@@ -173,6 +193,7 @@ function parseGoogleState(state: string | undefined) {
 authRouter.post(
   "/signup",
   asyncHandler(async (request, response) => {
+    console.log("Signup request body:", request.body) // Log the request body for debugging
     const input = signupSchema.parse(request.body)
     const existingUser = await db.query.users.findFirst({
       where: eq(users.email, input.email),
@@ -207,7 +228,10 @@ authRouter.post(
     })
     const verificationToken = await createVerificationToken(createdUser.id)
 
-    await sendVerificationEmail(input.email, verificationToken, input.origin)
+    await sendVerificationEmail({
+      email: input.email,
+      verificationUrl: getVerificationUrl(verificationToken, input.origin),
+    })
 
     response.status(201).json({ message: "Account created. Verify your email." })
   }),
@@ -231,6 +255,10 @@ authRouter.post(
       throw new HttpError(401, "Invalid email or password.")
     }
 
+    if (!user.emailVerifiedAt) {
+      throw new HttpError(403, "Please verify your email before signing in.")
+    }
+
     const session = await issueSession(user.id)
 
     sendSession(response, session)
@@ -242,6 +270,37 @@ authRouter.get(
   requireAuth,
   asyncHandler(async (request, response) => {
     response.status(200).json(toProfileDto(request.auth!.profile))
+  }),
+)
+
+authRouter.patch(
+  "/me",
+  requireAuth,
+  asyncHandler(async (request, response) => {
+    const input = profileUpdateSchema.parse(request.body)
+
+    const [updatedProfile] = await db
+      .update(profiles)
+      .set({
+        avatarUrl:
+          input.avatarUrl === undefined ? request.auth!.profile.avatarUrl : input.avatarUrl,
+        fullName:
+          input.fullName === undefined ? request.auth!.profile.fullName : input.fullName,
+      })
+      .where(eq(profiles.userId, request.auth!.token.sub))
+      .returning()
+
+    if (!updatedProfile) {
+      throw new HttpError(404, "Profile not found.")
+    }
+
+    const refreshedProfile = await getProfileByUserId(request.auth!.token.sub)
+
+    if (!refreshedProfile) {
+      throw new HttpError(500, "Profile could not be loaded.")
+    }
+
+    response.status(200).json(toProfileDto(refreshedProfile))
   }),
 )
 
@@ -349,11 +408,37 @@ authRouter.post(
         tokenHash: hashActionToken(token),
         userId: user.id,
       })
-      await sendPasswordResetEmail(input.email, token, input.origin)
+      await sendPasswordResetEmail({
+        email: input.email,
+        resetUrl: getPasswordResetUrl(token, input.origin),
+      })
     }
 
     response.status(200).json({
       message: "If the email exists, a password reset link has been sent.",
+    })
+  }),
+)
+
+authRouter.post(
+  "/verification/resend",
+  asyncHandler(async (request, response) => {
+    const input = resendVerificationSchema.parse(request.body)
+    const user = await db.query.users.findFirst({
+      where: eq(users.email, input.email),
+    })
+
+    if (user && !user.emailVerifiedAt) {
+      const token = await createVerificationToken(user.id)
+
+      await sendVerificationEmail({
+        email: input.email,
+        verificationUrl: getVerificationUrl(token, input.origin),
+      })
+    }
+
+    response.status(200).json({
+      message: "If the email needs verification, a new link has been sent.",
     })
   }),
 )
@@ -525,11 +610,13 @@ authRouter.get(
     const session = await issueSession(user.id)
     const state = parseGoogleState(input.state)
     const origin = state.origin ?? env.CORS_ORIGIN
-    const callbackUrl = new URL("/auth/callback", origin)
-    callbackUrl.searchParams.set("access_token", session.accessToken)
-    callbackUrl.searchParams.set("refresh_token", session.refreshToken)
-    callbackUrl.searchParams.set("next", state.next ?? "/dashboard/student")
+    const next =
+      typeof state.next === "string" && state.next.trim().length > 0
+        ? state.next
+        : getDashboardPath(session.profile.role)
+    const redirectUrl = new URL(next, origin)
 
-    response.redirect(callbackUrl.toString())
+    setAuthCookies(response, session.accessToken, session.refreshToken)
+    response.redirect(redirectUrl.toString())
   }),
 )

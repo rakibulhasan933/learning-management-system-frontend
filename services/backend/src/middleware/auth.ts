@@ -10,7 +10,7 @@ import {
 import { getProfileByUserId } from "../lib/profiles.js"
 
 export interface AuthContext {
-  profile: Profile & { email: string }
+  profile: Profile & { email: string; suspendedAt?: Date | null }
   token: AccessTokenPayload
 }
 
@@ -75,7 +75,7 @@ export async function requireAuth(
     const token = verifyAccessToken(accessToken)
     const profile = await getProfileByUserId(token.sub)
 
-    if (!profile) {
+    if (!profile || profile.suspendedAt) {
       return sendUnauthorized(response)
     }
 

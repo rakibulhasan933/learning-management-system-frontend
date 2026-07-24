@@ -162,3 +162,25 @@ export async function authenticatedApiFetch<T>(
 
   return parseApiResponse<T>(response)
 }
+
+export async function optionalAuthenticatedApiFetch<T>(
+  path: string,
+  init: RequestInit = {},
+): Promise<T> {
+  let accessToken = await getAccessToken()
+
+  if (!accessToken) {
+    accessToken = await refreshAccessToken().catch(() => null)
+  }
+
+  const response = await fetch(`${getBackendApiUrl()}${path}`, {
+    ...init,
+    headers: {
+      Accept: "application/json",
+      ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+      ...init.headers,
+    },
+  })
+
+  return parseApiResponse<T>(response)
+}

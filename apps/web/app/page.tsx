@@ -1,9 +1,12 @@
 import Link from "next/link"
 
-export default function Page() {
+import { SiteHeader } from "@/components/site-header"
+
+export default async function Page() {
   return (
-    <main className="min-h-screen bg-background px-6 py-10 text-foreground">
-      <section className="mx-auto grid max-w-6xl gap-12 lg:grid-cols-[1fr_420px] lg:items-center">
+    <main className="min-h-screen bg-background text-foreground">
+      <SiteHeader />
+      <section className="mx-auto grid max-w-6xl gap-12 px-6 py-10 lg:grid-cols-[1fr_420px] lg:items-center">
         <div>
           <div className="mb-10 h-px w-32 bg-primary" />
           <p className="mb-4 font-mono text-sm text-muted-foreground">

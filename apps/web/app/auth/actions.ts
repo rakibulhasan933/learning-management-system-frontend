@@ -12,11 +12,22 @@ import {
   refreshTokenCookieName,
   setAuthCookies,
 } from "@/lib/api-client"
+import { getDashboardPath } from "@/lib/auth/dashboard"
 
 function redirectWithError(pathname: string, message: string): never {
   const separator = pathname.includes("?") ? "&" : "?"
 
   redirect(`${pathname}${separator}error=${encodeURIComponent(message)}`)
+}
+
+function isNextRedirectError(error: unknown) {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "digest" in error &&
+    typeof (error as { digest?: unknown }).digest === "string" &&
+    (error as { digest: string }).digest.startsWith("NEXT_REDIRECT")
+  )
 }
 
 function getRequiredString(formData: FormData, key: string) {
@@ -87,27 +98,69 @@ async function postAuthSession(path: string, body: unknown) {
 export async function signInWithPasswordAction(formData: FormData) {
   const email = getRequiredString(formData, "email")
   const password = getRequiredString(formData, "password")
-  const next = getRequiredString(formData, "next") ?? "/dashboard/student"
+  const next = getRequiredString(formData, "next")
 
   if (!email || !password) {
     redirectWithError("/auth/login", "Email and password are required.")
   }
 
   try {
-    await postAuthSession("/auth/login", { email, password })
+    const session = await postAuthSession("/auth/login", { email, password })
+
+    redirect(next ?? getDashboardPath(session.profile.role))
   } catch (error) {
+    if (isNextRedirectError(error)) {
+      throw error
+    }
+
+    if (
+      error instanceof ApiClientError &&
+      error.status === 403 &&
+      error.message.toLowerCase().includes("verify")
+    ) {
+      redirect(
+        `/auth/login?error=${encodeURIComponent(error.message)}&unverifiedEmail=${encodeURIComponent(email)}`,
+      )
+    }
+
     redirectWithError(
       "/auth/login",
       error instanceof Error ? error.message : "Sign in failed.",
     )
   }
+}
 
-  redirect(next)
+export async function resendVerificationEmailAction(formData: FormData) {
+  const email = getRequiredString(formData, "email")
+  const origin = await getOrigin()
+
+  if (!email) {
+    redirectWithError("/auth/login", "Email is required.")
+  }
+
+  try {
+    await publicApiFetch("/auth/verification/resend", {
+      body: JSON.stringify({ email, origin }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      method: "POST",
+    })
+  } catch (error) {
+    redirectWithError(
+      `/auth/login?unverifiedEmail=${encodeURIComponent(email)}`,
+      error instanceof Error
+        ? error.message
+        : "Verification email could not be resent.",
+    )
+  }
+
+  redirect("/auth/verify")
 }
 
 export async function signInWithGoogleAction(formData: FormData) {
   const origin = await getOrigin()
-  const next = getRequiredString(formData, "next") ?? "/dashboard/student"
+  const next = getRequiredString(formData, "next")
   const state = Buffer.from(JSON.stringify({ next, origin })).toString("base64url")
   const url = new URL("/auth/google", getBackendApiUrl())
 

@@ -1,11 +1,6 @@
 import { config } from "dotenv"
 import { defineConfig } from "drizzle-kit"
-import { dirname, resolve } from "node:path"
-import { fileURLToPath } from "node:url"
-
-const packageDirectory = dirname(fileURLToPath(import.meta.url))
-
-config({ path: resolve(packageDirectory, "../../.env") })
+config({ path: "../../.env" })
 
 const databaseUrl = process.env.DATABASE_URL
 
@@ -15,8 +10,8 @@ if (!databaseUrl) {
 
 export default defineConfig({
   dialect: "postgresql",
-  schema: resolve(packageDirectory, "src/schema.ts"),
-  out: resolve(packageDirectory, "drizzle"),
+  schema: "./src/schema.ts",
+  out: "./drizzle",
   dbCredentials: {
     url: databaseUrl,
   },

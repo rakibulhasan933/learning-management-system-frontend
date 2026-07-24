@@ -1,5 +1,7 @@
 import type { InstructorCourseDto } from "@workspace/types"
 
+import { ImageUploadControl } from "@/components/image-upload-control"
+
 interface CourseFormProps {
   action: (formData: FormData) => Promise<void>
   course?: InstructorCourseDto
@@ -90,15 +92,16 @@ export function CourseForm({ action, course, submitLabel }: CourseFormProps) {
             defaultValue={course?.currency ?? "BDT"}
           />
         </label>
-        <label className="block text-sm md:col-span-2">
-          Thumbnail URL
-          <input
-            className="mt-2 w-full border border-input bg-background px-3 py-2 text-foreground outline-none focus:border-primary"
-            name="thumbnailUrl"
-            type="url"
-            defaultValue={course?.thumbnailUrl ?? ""}
+        <div className="md:col-span-2">
+          <ImageUploadControl
+            buttonLabel="Upload thumbnail"
+            currentUrl={course?.thumbnailUrl ?? null}
+            helpText="Upload a JPG, PNG, or WEBP image up to 4 MB. The uploaded file is saved as the course thumbnail URL."
+            inputName="thumbnailUrl"
+            label="Course thumbnail"
+            purpose="course_thumbnail"
           />
-        </label>
+        </div>
         <label className="block text-sm">
           Status
           <select

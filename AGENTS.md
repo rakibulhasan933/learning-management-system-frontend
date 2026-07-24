@@ -13,8 +13,9 @@ mobile app anywhere in this project until explicitly instructed later.
 - **UI**: shadcn/ui + Tailwind CSS
 - **ORM**: Drizzle ORM
 - **DB + Storage**: Supabase (Postgres via Drizzle, Supabase Storage for
-  PDF/slides/thumbnails/certificates). Video files use **Cloudflare R2** instead —
-  see "Video Storage" section below.
+  PDF/slides/certificates/payment screenshots. Image uploads for course thumbnails
+  and user/instructor avatars use UploadThing in `apps/web`. Video files use
+  **Cloudflare R2** instead — see "Video Storage" section below.
 - **Auth**: **Fully custom, built entirely in `services/backend`. Supabase Auth is NOT
   used.** The backend owns the `users`/`profiles` table, hashes passwords itself
   (bcrypt or argon2), issues its own JWTs (short-lived access token + longer-lived
@@ -143,8 +144,9 @@ email_verification_tokens
 ### What stays on Supabase
 - **Postgres** (via Drizzle) — the actual database, including the `users`/`profiles`
   tables above.
-- **Supabase Storage** — PDFs, slides, thumbnails, certificates, payment screenshots
+- **Supabase Storage** — PDFs, slides, certificates, payment screenshots
   (unchanged from before).
+- **UploadThing** — course thumbnails and user/instructor avatars in `apps/web`.
 - Supabase Auth itself (the `auth.users` table, Supabase's auth API, Supabase session
   cookies) is **not used**. Do not create the old `auth.users` trigger/sync pattern —
   identity lives entirely in the backend's own `users` table now.
@@ -376,6 +378,25 @@ JWT_REFRESH_SECRET=
 GOOGLE_OAUTH_CLIENT_ID=
 GOOGLE_OAUTH_CLIENT_SECRET=
 GOOGLE_OAUTH_REDIRECT_URI=
+GMAIL_SMTP_USER=
+GMAIL_SMTP_APP_PASSWORD=
+SEED_ADMIN_EMAIL=            # backend-only seed script: services/backend/src/scripts/seed-admin.ts
+SEED_ADMIN_PASSWORD=         # backend-only seed script: services/backend/src/scripts/seed-admin.ts
+SEED_ADMIN_NAME=             # backend-only seed script: services/backend/src/scripts/seed-admin.ts
+
+# Manual payment
+MANUAL_PAYMENT_BKASH_NUMBER=
+MANUAL_PAYMENT_NAGAD_NUMBER=
+MANUAL_PAYMENT_ROCKET_NUMBER=
+MANUAL_PAYMENT_BANK_DETAILS=
+MANUAL_PAYMENT_COUPONS=         # format: CODE:percent:10,CODE2:amount:500
+# UploadThing dashboard -> API Keys -> V7 token. Used by apps/web image uploads.
+UPLOADTHING_TOKEN=
+SUPABASE_STORAGE_COURSE_THUMBNAILS_BUCKET=course-thumbnails
+SUPABASE_STORAGE_PROFILE_AVATARS_BUCKET=profile-avatars
+SUPABASE_STORAGE_PAYMENT_PROOFS_BUCKET=payment-proofs
+SUPABASE_STORAGE_CERTIFICATES_BUCKET=certificates
+SUPABASE_STORAGE_LECTURE_MATERIALS_BUCKET=lecture-materials
 
 # apps/web
 NEXT_PUBLIC_BACKEND_API_URL=
@@ -418,17 +439,37 @@ NEXT_PUBLIC_BACKEND_API_URL=
 - Drizzle schema and initial migration cover `profiles`, `courses`, `sections`,
   `lectures`, `orders`, `enrollments`, and `progress`, including R2-oriented video
   fields (`video_provider`, `video_ref`) and manual-payment-ready order fields.
-  **Needs update**: add `users`, `refresh_tokens`, `password_reset_tokens`,
-  `email_verification_tokens` tables per the new custom-auth data model, and drop the
-  dependency of `profiles` on `auth.users`.
-- **ARCHITECTURE CHANGE (supersedes earlier auth entries below): Supabase Auth has been
-  removed from this project. Authentication is now fully custom, owned by
-  `services/backend`** (own `users` table, bcrypt/argon2 password hashing,
-  backend-issued JWT access + refresh tokens, backend-handled Google OAuth). Any
-  previously scaffolded Supabase Auth code (login/signup/OAuth callback pages, session
-  middleware, the `auth.users` trigger) needs to be reworked to call the new backend
-  auth endpoints instead of the Supabase Auth client. See "Custom Authentication"
-  section above for the full spec.
+  Custom auth tables (`users`, `refresh_tokens`, `password_reset_tokens`,
+  `email_verification_tokens`) are now included, and `profiles.user_id` references the
+  backend-owned `users.id` instead of `auth.users`.
+- Supabase Auth has been removed from active code paths. Authentication is fully custom
+  and owned by `services/backend`: backend-owned users/profiles, bcrypt password
+  hashing, backend-issued JWT access tokens, hashed refresh-token rotation, logout
+  revocation, backend-handled Google OAuth, email verification, and password reset.
+- Custom auth hardening completed this session: password login now rejects unverified
+  email accounts with a clear error, the login UI exposes a resend-verification action,
+  Google OAuth callback sets httpOnly cookies directly from the backend and redirects
+  without `access_token`/`refresh_token` query params, and the old web callback route no
+  longer accepts tokens from URL params.
+- Role-based dashboard routing was fixed end-to-end: password login now falls back to
+  the authenticated user profile's actual role dashboard, the Google callback now
+  resolves missing `next` values to the logged-in user's role instead of `/dashboard/student`,
+  and web middleware now redirects role mismatches back to the correct dashboard for
+  `admin`, `instructor`, or `student` rather than defaulting to the student route.
+- Validation completed for this change set: `pnpm typecheck`, `pnpm lint`, and
+  `pnpm build` all pass. A live browser login replay was not completed because no
+  seeded admin credential was available in the checked-in env and the local dev ports
+  were already occupied by existing processes.
+- Real email sending is wired through `services/backend/src/lib/mailer.ts` using
+  Nodemailer + Gmail SMTP (`smtp.gmail.com`, port `465`, secure), with reusable dark
+  navy/brass templates for verification and password reset links. Gmail SMTP env vars
+  are documented as `GMAIL_SMTP_USER` and `GMAIL_SMTP_APP_PASSWORD`.
+- Custom auth E2E verification is pending local credentials: the loaded environment has
+  database/JWT/backend URL values, but Google OAuth and Gmail SMTP variables are missing
+  locally, so real signup-email delivery, verify-click-login, and Google OAuth browser
+  tests could not be completed in this session.
+- Follow-up items for custom auth: add rate limiting on login/reset endpoints and add
+  automated tests for auth flows.
 - ~~Supabase auth integration is scaffolded in the web app with login, signup, OAuth
   callback, verify/reset pages, session-aware middleware/proxy, and role-based
   dashboard routing.~~ (superseded — see architecture change above)
@@ -439,6 +480,133 @@ NEXT_PUBLIC_BACKEND_API_URL=
   handlers)
 - Public catalog and course detail pages are connected to backend REST reads; the web
   app still does not import `packages/db` or query the database directly.
+- Manual payment MVP is implemented: order/enrollment schema is in place with coupon
+  audit fields (`coupon_code`, `discount_amount`), backend payment endpoints create
+  reference-code orders, apply configured coupons, instantly enroll free/fully
+  discounted courses, accept proof submissions with optional Supabase Storage
+  screenshot upload, expose student order status, and provide admin pending-payment
+  approve/reject endpoints that activate enrollments and send mailer-based
+  notifications when email credentials are configured.
+- Manual payment web flow is implemented: course detail enrollment creates an order,
+  `/courses/[slug]/enroll` shows payment instructions and proof submission,
+  `/dashboard/student` shows pending/paid/rejected order status with resubmission for
+  rejected orders, and `/dashboard/admin/payments` provides a filterable pending
+  payments queue with approve/reject actions and screenshot links.
+- Manual payment E2E verification is pending external credentials/configuration:
+  Supabase Storage credentials/bucket are needed to verify screenshot upload,
+  Gmail SMTP credentials are needed to verify approval/rejection emails, and manual
+  payment account env vars are needed to display real bKash/Nagad/Rocket/bank details.
+  Drizzle generation also exposed an existing migration metadata limitation:
+  `_journal.json` lists post-0000 migrations but only `0000_snapshot.json` exists, so
+  `drizzle-kit generate` reaches an interactive conflict prompt in non-TTY mode; the
+  manual SQL migration `0002_manual_payment_coupons.sql` was added for this session's
+  schema change.
+- Video storage milestone is implemented: backend R2 integration uses the S3-compatible
+  AWS SDK to generate time-limited presigned PUT URLs for instructor lecture uploads
+  and time-limited presigned GET URLs through `GET /lectures/:id/video-url`. The video
+  URL resolver is provider-aware and currently supports `video_provider = 'r2'`, with
+  unsupported providers returning a clear not-implemented response for future migration.
+- UploadThing is now wired for image uploads only. The web app hosts a typed
+  `/api/uploadthing` route with a single `imageUploader` file route limited to JPG, PNG,
+  and WEBP images up to 4 MB. The instructor course builder now uses an UploadThing
+  button for course thumbnails, and the profile settings page uses the same flow for
+  user/instructor avatars. Successful uploads persist the returned URL string into the
+  existing `thumbnail_url` and `avatar_url` fields, and the web app now allows the
+  UploadThing CDN domains in `next/image` so previews render correctly. Video,
+  PDFs/slides/certificates, and payment proofs remain on their existing R2/Supabase
+  Storage paths unchanged.
+- Instructor course builder now includes an MP4 upload control that requests a backend
+  presigned upload URL, uploads directly from the browser to R2, then saves the
+  returned abstract R2 object key in `lectures.video_ref`.
+- Student learning page now loads enrolled course outlines from the backend and renders
+  a custom video player on `/learn/[courseId]` with signed video URL loading, custom
+  play/progress controls, and the mandatory dynamic low-opacity email watermark that
+  repositions every 8-12 seconds.
+- Video access control is enforced server-side: only users with an active enrollment
+  for the lecture's course can fetch a signed lecture video URL. The web player never
+  reads raw R2 URLs from the database.
+- R2 E2E verification is pending real Cloudflare credentials and bucket CORS:
+  `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET_NAME`, and a
+  bucket CORS rule allowing browser PUT uploads from the web origin are required to
+  verify actual upload/playback against R2.
+- Quiz MVP is implemented for MCQ quizzes only. The Drizzle schema now includes
+  `quizzes`, `quiz_questions`, `quiz_options`, and `quiz_attempts`, with each quiz
+  attached to exactly one section or lecture, normalized MCQ options with
+  `is_correct`, and scored attempts storing submitted answer maps, score,
+  total-question count, and completion timestamp.
+- Instructor quiz APIs are implemented under the existing course-builder backend
+  surface: instructors/admins can create or update a section quiz via
+  `PUT /instructor/courses/:id/sections/:sectionId/quiz`, create or update a lecture
+  quiz via `PUT /instructor/courses/:id/lectures/:lectureId/quiz`, and delete a quiz
+  via `DELETE /instructor/courses/:id/quizzes/:quizId`. Ownership checks reuse the
+  course/section/lecture guards already used by the course builder.
+- Student quiz APIs are implemented under `/quizzes`: enrolled students/admins can
+  fetch a published quiz by target (`GET /quizzes/target?sectionId=...` or
+  `lectureId=...`), fetch a quiz by id, and submit answers through
+  `POST /quizzes/:quizId/submit`. Submission is auto-graded immediately by exact
+  correct-option matching, supports single-answer and multi-answer MCQs, returns score
+  and percentage, and persists a `quiz_attempts` row.
+- Learning responses now include published section and lecture quizzes with latest
+  attempt summaries. The instructor course builder includes quiz builder controls for
+  section and lecture quizzes with add/remove question, add/remove option, correct
+  option marking, publish toggle, save, and delete. The student learning page renders
+  quiz-taking panels, submits selected answers to the backend, and shows the immediate
+  score/result.
+- Quiz access control is enforced server-side: only users with an active enrollment in
+  the quiz's course can fetch or submit student quiz endpoints; instructor mutation
+  endpoints still require course ownership.
+- Quiz verification completed: `pnpm --filter @workspace/db typecheck`,
+  `pnpm --filter @workspace/types typecheck`,
+  `pnpm --filter @workspace/backend typecheck`,
+  `pnpm --filter @workspace/web typecheck`, `pnpm lint`, and `pnpm build` all pass.
+  `pnpm --filter @workspace/db db:migrate` applied pending migrations and the quiz
+  tables were confirmed present in the configured database. Full HTTP E2E was
+  attempted with temporary instructor/student/course/enrollment data, but the
+  configured database is missing the backend-owned `users` table, so the setup failed
+  before exercising the quiz routes. Once the custom-auth migrations are aligned on
+  that database, rerun an HTTP E2E covering instructor quiz creation, enrolled student
+  quiz fetch, submission, score calculation, and `quiz_attempts` persistence.
+- Assignment MVP is implemented for manually graded text submissions. The Drizzle
+  schema now includes `assignments` and `assignment_submissions`, with each assignment
+  attached to exactly one section or lecture, one current submission per enrolled
+  student, optional due dates, max score, grade feedback, grader audit fields, and a
+  manual SQL migration at `packages/db/drizzle/0005_assignments.sql`.
+- Instructor assignment APIs are implemented under the existing course-builder
+  backend surface: instructors/admins can create or update a section assignment via
+  `PUT /instructor/courses/:id/sections/:sectionId/assignment`, create or update a
+  lecture assignment via `PUT /instructor/courses/:id/lectures/:lectureId/assignment`,
+  delete an assignment via `DELETE /instructor/courses/:id/assignments/:assignmentId`,
+  and grade submissions via
+  `PATCH /instructor/courses/:id/assignment-submissions/:submissionId/grade`.
+  Ownership checks reuse the course/section/lecture guards already used by the course
+  builder, and grading rejects scores above the assignment max score.
+- Student assignment submission is implemented through
+  `POST /assignments/:assignmentId/submit`. The endpoint only accepts published
+  assignments for users with an active enrollment in the assignment's course, and
+  resubmission resets any previous grade/feedback so instructors can re-grade the
+  latest work.
+- Learning responses now include published section and lecture assignments with the
+  current student's submission/grade state. The instructor course builder includes
+  assignment authoring and inline manual grading panels, and the student learning page
+  renders assignment submission/resubmission panels with grade feedback when available.
+- Assignment verification completed: `pnpm --filter @workspace/db typecheck`,
+  `pnpm --filter @workspace/types typecheck`,
+  `pnpm --filter @workspace/backend typecheck`,
+  `pnpm --filter @workspace/web typecheck`, `pnpm lint`, and `pnpm build` all pass.
+  After correcting the root `DATABASE_URL`, `pnpm --filter @workspace/db db:migrate`
+  applies successfully. Live schema verification confirms the backend-owned auth
+  tables (`users`, `refresh_tokens`, `password_reset_tokens`,
+  `email_verification_tokens`) and assignment tables (`assignments`,
+  `assignment_submissions`) exist with the expected columns, foreign keys, checks, and
+  indexes. The verification exposed migration drift from the original `profiles`
+  table: `profiles.id` lacked the UUID default expected by the current Drizzle schema,
+  so `packages/db/drizzle/0006_profiles_id_default.sql` now aligns it with
+  `DEFAULT gen_random_uuid()`. Full assignment HTTP E2E now passes against the
+  configured database through `services/backend/src/scripts/assignment-e2e.ts`:
+  instructor creates a published section assignment, enrolled student submits,
+  instructor grades it, and the student learning response shows score `23` with grade
+  feedback. Follow-up verification this session: `pnpm --filter @workspace/db
+  typecheck` and `pnpm --filter @workspace/backend typecheck` pass.
 - Instructor course CRUD is implemented with list, new, edit, update, and delete
   screens calling backend REST mutations through server actions.
 - Instructor course builder now supports sections and lectures on the course edit page:
@@ -456,3 +624,101 @@ NEXT_PUBLIC_BACKEND_API_URL=
 - Verification completed this session: `pnpm install`, backend typecheck
   (`pnpm --filter @workspace/backend typecheck`), web typecheck
   (`pnpm --filter @workspace/web typecheck`), `pnpm lint`, and `pnpm build`.
+- Progress tracking is implemented end-to-end for published lectures in enrolled
+  courses. The backend now exposes `PUT /progress/lectures/:lectureId`, which verifies
+  the logged-in student/admin has an active enrollment before upserting
+  `progress.position_seconds`, `last_watched_at`, `updated_at`, and completion fields;
+  non-complete resume saves preserve any existing completed state, while
+  `isCompleted: true` marks the lecture complete and sets `completed_at`.
+- The student learning API now includes each lecture's saved progress plus course-level
+  `completedLectureCount`, `totalLectureCount`, and `completionPercentage`, so
+  certificate eligibility can be reached through normal lecture completion rather than
+  only manual database state.
+- The `/learn/[courseId]` player now resumes from the saved lecture position, auto-saves
+  the current playback position about every 15 seconds and on pause/lecture switch,
+  provides a dark-first `Mark complete` control, automatically marks the lecture
+  complete on video end, and updates the course completion progress thread and outline
+  completion/resume labels locally after saves.
+- Progress tracking verification completed: `pnpm --filter @workspace/types
+  typecheck`, `pnpm --filter @workspace/db typecheck`, `pnpm --filter
+  @workspace/backend typecheck`, `pnpm --filter @workspace/web typecheck`,
+  `pnpm lint`, and `pnpm build` all pass.
+- Certificate generation is now verified end-to-end against the configured database and
+  Supabase Storage path. The certificate E2E script
+  `services/backend/src/scripts/certificate-e2e.ts` seeds a test instructor, student,
+  published course, published lectures, and active enrollment; marks every published
+  lecture complete through `PUT /progress/lectures/:lectureId`; calls
+  `GET /certificates`; and confirms the generated certificate appears in the student's
+  certificate list with a PDF URL and verification code. The run passed with two
+  published lectures completed and a generated certificate returned.
+- Certificate verification exposed two Supabase Storage integration issues that are now
+  fixed in `services/backend/src/lib/supabase-storage.ts`: the helper can derive the
+  HTTP project URL from a Supabase Postgres URL when `SUPABASE_URL` is configured that
+  way locally, and it creates the configured Storage bucket on demand with the
+  service-role key when Supabase reports the bucket is missing. The same helper path is
+  used for certificate PDFs and payment proof uploads.
+- Certificate verification completed: `pnpm --filter @workspace/types typecheck`,
+  `pnpm --filter @workspace/db typecheck`, `pnpm --filter @workspace/backend
+  typecheck`, `pnpm --filter @workspace/web typecheck`, `pnpm lint`, and `pnpm build`
+  all pass after the certificate E2E and Storage fixes.
+- Lecture PDF/slides upload is implemented through the backend course-builder surface:
+  instructors upload PDF/slides from the lecture editor, the web sends the selected
+  file to `POST /instructor/courses/:id/lectures/:lectureId/material`, and
+  `services/backend` validates type/size, writes the file to Supabase Storage in the
+  configured `SUPABASE_STORAGE_LECTURE_MATERIALS_BUCKET` bucket, then stores the
+  returned public material URL on `lectures.pdf_url` or `lectures.slides_url`.
+- Free-preview lecture playback now works for unauthenticated and non-enrolled users:
+  `GET /lectures/:id/video-url` allows published lectures marked `is_preview` to
+  resolve a signed R2 playback URL without enrollment, while all non-preview lectures
+  still require a valid backend-issued JWT and active enrollment. The public course
+  detail page renders a dark-first free-preview player for preview lectures, and the
+  enrolled learning player still uses the same endpoint with optional auth.
+- Course creation gap verification completed: `pnpm --filter @workspace/types
+  typecheck`, `pnpm --filter @workspace/db typecheck`, `pnpm --filter
+  @workspace/backend typecheck`, `pnpm --filter @workspace/web typecheck`,
+  `pnpm lint`, and `pnpm build` all pass.
+- Admin dashboard MVP features are implemented. A backend-owned `users.suspended_at`
+  field and manual migration `packages/db/drizzle/0008_user_suspension.sql` support
+  user activate/suspend actions, and backend auth rejects suspended accounts on
+  protected REST calls.
+- A dedicated admin REST surface is mounted at `/admin`: admins can list/filter users
+  with role/status, suspend/reactivate users, list `pending_review` courses, approve
+  courses into `published`, reject courses into `archived`, and fetch revenue metrics
+  with paid/pending revenue, order counts, course counts, user counts, enrollment
+  counts, monthly revenue, and revenue by payment method.
+- The web admin dashboard now links to real dark-first admin work surfaces:
+  `/dashboard/admin/users`, `/dashboard/admin/courses`, and
+  `/dashboard/admin/revenue`, alongside the existing manual payments queue. The revenue
+  page uses Recharts, now installed in `@workspace/web`, for the monthly paid-revenue
+  chart.
+- Admin dashboard verification completed: `pnpm --filter @workspace/types typecheck`,
+  `pnpm --filter @workspace/db typecheck`, `pnpm --filter @workspace/backend
+  typecheck`, `pnpm --filter @workspace/web typecheck`, `pnpm lint`, and
+  `pnpm build` all pass.
+- Task 2 admin dashboard surface is now confirmed end-to-end in this session:
+  user management exposes list/filter/activate/suspend actions, the course approval
+  queue handles `pending_review` courses with approve/reject actions, and the revenue
+  overview renders charted revenue data with Recharts. No additional Recharts
+  install was needed because `@workspace/web` already depended on it.
+- Instructor dashboard Task 3 is now implemented: the backend exposes instructor
+  overview analytics, per-course student rosters with completion state, and a payout
+  request surface; the web app renders an instructor dashboard home, per-course
+  student list page, and payout request/history page; and the admin dashboard now
+  includes a payout review queue with approve/reject/mark-paid actions backed by a
+  new `payout_requests` table and `payout_status` enum.
+- Instructor dashboard verification completed this session: `pnpm typecheck`,
+  `pnpm lint`, and `pnpm build` all pass after adding the instructor analytics and
+  payout workflow.
+- Admin user management now supports direct instructor creation from the backend-owned
+  user store, and `services/backend/src/scripts/seed-admin.ts` seeds or updates a
+  single verified admin account from `SEED_ADMIN_EMAIL`, `SEED_ADMIN_PASSWORD`, and
+  `SEED_ADMIN_NAME`. The backend package exposes `pnpm --filter @workspace/backend
+  seed:admin` for that script.
+- Task 1 redirect fix completed: the password login server action now preserves
+  Next.js `NEXT_REDIRECT` throws instead of swallowing them in the login `catch`
+  block, and the dashboard redirect path now resolves cleanly for admin,
+  instructor, and student sessions without showing the redirect error page.
+- Task 2 dashboard shell completed: a shared role-aware dashboard layout now renders
+  the ink-navy sidebar with brass-accent active states, sentence-case nav labels,
+  role-specific links, user name/email, logout action, and a mobile collapsible
+  drawer for admin, instructor, and student dashboards.
