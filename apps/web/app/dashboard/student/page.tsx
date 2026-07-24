@@ -1,4 +1,3 @@
-import { signOutAction } from "@/app/auth/actions"
 import { authenticatedApiFetch } from "@/lib/api-client"
 import type {
   CertificateListResponse,
@@ -33,7 +32,7 @@ export default async function StudentDashboardPage() {
           <p className="text-sm text-muted-foreground">Signed in as</p>
           <p className="mt-1 font-mono text-sm">{profile.email}</p>
         </div>
-        <div className="mt-6 border border-border bg-card p-5">
+        <div id="orders" className="mt-6 border border-border bg-card p-5">
           <p className="font-mono text-sm text-muted-foreground">
             Payment status
           </p>
@@ -80,7 +79,7 @@ export default async function StudentDashboardPage() {
             )}
           </div>
         </div>
-        <div className="mt-6 border border-border bg-card p-5">
+        <div id="certificates" className="mt-6 border border-border bg-card p-5">
           <p className="font-mono text-sm text-muted-foreground">
             Certificates
           </p>
@@ -124,14 +123,6 @@ export default async function StudentDashboardPage() {
             )}
           </div>
         </div>
-        <form action={signOutAction} className="mt-6">
-          <button
-            className="border border-border px-4 py-2 text-sm text-foreground"
-            type="submit"
-          >
-            Sign out
-          </button>
-        </form>
       </section>
     </main>
   )

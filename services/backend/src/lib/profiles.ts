@@ -5,6 +5,7 @@ import { db } from "./database.js"
 
 type ProfileWithUser = typeof profiles.$inferSelect & {
   email: string
+  suspendedAt?: Date | null
 }
 
 export function toProfileDto(profile: ProfileWithUser): ProfileDto {
@@ -26,6 +27,7 @@ export async function getProfileByUserId(userId: string) {
       fullName: profiles.fullName,
       id: profiles.id,
       role: profiles.role,
+      suspendedAt: users.suspendedAt,
       updatedAt: profiles.updatedAt,
       userId: profiles.userId,
     })

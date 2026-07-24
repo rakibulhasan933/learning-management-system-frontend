@@ -21,6 +21,7 @@ import {
   enrollmentStatuses,
   orderStatuses,
   paymentMethods,
+  payoutStatuses,
   userRoles,
   videoProviders,
 } from "@workspace/types"
@@ -36,12 +37,14 @@ export const enrollmentStatusEnum = pgEnum(
 )
 export const orderStatusEnum = pgEnum("order_status", orderStatuses)
 export const paymentMethodEnum = pgEnum("payment_method", paymentMethods)
+export const payoutStatusEnum = pgEnum("payout_status", payoutStatuses)
 
 export const users = pgTable("users", {
   id: uuid("id").defaultRandom().primaryKey(),
   email: text("email").notNull(),
   passwordHash: text("password_hash"),
   emailVerifiedAt: timestamp("email_verified_at", { withTimezone: true }),
+  suspendedAt: timestamp("suspended_at", { withTimezone: true }),
   googleId: text("google_id"),
   authProvider: authProviderEnum("auth_provider").notNull().default("password"),
   createdAt: timestamp("created_at", { withTimezone: true })
@@ -187,6 +190,8 @@ export const lectures = pgTable("lectures", {
   videoProvider: videoProviderEnum("video_provider").notNull().default("r2"),
   // This is an R2 object key today, not a public URL. The backend resolves it later.
   videoRef: text("video_ref"),
+  pdfUrl: text("pdf_url"),
+  slidesUrl: text("slides_url"),
   durationSeconds: integer("duration_seconds"),
   isPreview: boolean("is_preview").notNull().default(false),
   isPublished: boolean("is_published").notNull().default(false),
@@ -318,6 +323,75 @@ export const quizAttempts = pgTable("quiz_attempts", {
   ),
 ])
 
+export const assignments = pgTable("assignments", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  courseId: uuid("course_id")
+    .notNull()
+    .references(() => courses.id, { onDelete: "cascade" }),
+  sectionId: uuid("section_id").references(() => sections.id, {
+    onDelete: "cascade",
+  }),
+  lectureId: uuid("lecture_id").references(() => lectures.id, {
+    onDelete: "cascade",
+  }),
+  title: text("title").notNull(),
+  instructions: text("instructions").notNull(),
+  maxScore: integer("max_score").notNull().default(100),
+  isPublished: boolean("is_published").notNull().default(false),
+  dueAt: timestamp("due_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow()
+    .$onUpdate(() => new Date()),
+}, (table) => [
+  uniqueIndex("assignments_section_id_unique").on(table.sectionId),
+  uniqueIndex("assignments_lecture_id_unique").on(table.lectureId),
+  index("assignments_course_id_idx").on(table.courseId),
+  check("assignments_max_score_positive", sql`${table.maxScore} > 0`),
+  check(
+    "assignments_exactly_one_target",
+    sql`(${table.sectionId} is not null and ${table.lectureId} is null) or (${table.sectionId} is null and ${table.lectureId} is not null)`,
+  ),
+])
+
+export const assignmentSubmissions = pgTable("assignment_submissions", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  assignmentId: uuid("assignment_id")
+    .notNull()
+    .references(() => assignments.id, { onDelete: "cascade" }),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => profiles.id, { onDelete: "cascade" }),
+  submissionText: text("submission_text").notNull(),
+  submittedAt: timestamp("submitted_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  gradeScore: integer("grade_score"),
+  gradeFeedback: text("grade_feedback"),
+  gradedBy: uuid("graded_by").references(() => profiles.id, {
+    onDelete: "set null",
+  }),
+  gradedAt: timestamp("graded_at", { withTimezone: true }),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow()
+    .$onUpdate(() => new Date()),
+}, (table) => [
+  uniqueIndex("assignment_submissions_assignment_user_unique").on(
+    table.assignmentId,
+    table.userId,
+  ),
+  index("assignment_submissions_assignment_id_idx").on(table.assignmentId),
+  index("assignment_submissions_user_id_idx").on(table.userId),
+  check(
+    "assignment_submissions_grade_score_non_negative",
+    sql`${table.gradeScore} is null or ${table.gradeScore} >= 0`,
+  ),
+])
+
 export const orders = pgTable("orders", {
   id: uuid("id").defaultRandom().primaryKey(),
   userId: uuid("user_id")
@@ -359,6 +433,36 @@ export const orders = pgTable("orders", {
   index("orders_status_created_at_idx").on(table.status, table.createdAt),
   check("orders_amount_non_negative", sql`${table.amount} >= 0`),
   check("orders_discount_amount_non_negative", sql`${table.discountAmount} >= 0`),
+])
+
+export const payoutRequests = pgTable("payout_requests", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  instructorId: uuid("instructor_id")
+    .notNull()
+    .references(() => profiles.id, { onDelete: "restrict" }),
+  amount: numeric("amount", { precision: 12, scale: 2 }).notNull(),
+  currency: varchar("currency", { length: 3 }).notNull().default("BDT"),
+  referenceCode: varchar("reference_code", { length: 64 }).notNull(),
+  status: payoutStatusEnum("status").notNull().default("pending"),
+  note: text("note"),
+  reviewedBy: uuid("reviewed_by").references(() => profiles.id, {
+    onDelete: "set null",
+  }),
+  reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
+  paidAt: timestamp("paid_at", { withTimezone: true }),
+  rejectionReason: text("rejection_reason"),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow()
+    .$onUpdate(() => new Date()),
+}, (table) => [
+  uniqueIndex("payout_requests_reference_code_unique").on(table.referenceCode),
+  index("payout_requests_instructor_id_idx").on(table.instructorId),
+  index("payout_requests_status_created_at_idx").on(table.status, table.createdAt),
+  check("payout_requests_amount_non_negative", sql`${table.amount} >= 0`),
 ])
 
 export const enrollments = pgTable("enrollments", {
@@ -442,6 +546,12 @@ export const profilesRelations = relations(profiles, ({ one, many }) => ({
   courses: many(courses, { relationName: "course_instructor" }),
   enrollments: many(enrollments),
   quizAttempts: many(quizAttempts),
+  assignmentSubmissions: many(assignmentSubmissions, {
+    relationName: "assignment_submission_student",
+  }),
+  gradedAssignmentSubmissions: many(assignmentSubmissions, {
+    relationName: "assignment_submission_grader",
+  }),
   studentOrders: many(orders, { relationName: "order_student" }),
   reviewedOrders: many(orders, { relationName: "order_reviewer" }),
   progress: many(progress),
@@ -458,6 +568,7 @@ export const coursesRelations = relations(courses, ({ one, many }) => ({
   enrollments: many(enrollments),
   orders: many(orders),
   quizzes: many(quizzes),
+  assignments: many(assignments),
   certificates: many(certificates),
 }))
 
@@ -468,6 +579,7 @@ export const sectionsRelations = relations(sections, ({ one, many }) => ({
   }),
   lectures: many(lectures),
   quizzes: many(quizzes),
+  assignments: many(assignments),
 }))
 
 export const lecturesRelations = relations(lectures, ({ one, many }) => ({
@@ -477,6 +589,7 @@ export const lecturesRelations = relations(lectures, ({ one, many }) => ({
   }),
   progress: many(progress),
   quizzes: many(quizzes),
+  assignments: many(assignments),
 }))
 
 export const quizzesRelations = relations(quizzes, ({ one, many }) => ({
@@ -522,6 +635,42 @@ export const quizAttemptsRelations = relations(quizAttempts, ({ one }) => ({
   }),
 }))
 
+export const assignmentsRelations = relations(assignments, ({ one, many }) => ({
+  course: one(courses, {
+    fields: [assignments.courseId],
+    references: [courses.id],
+  }),
+  section: one(sections, {
+    fields: [assignments.sectionId],
+    references: [sections.id],
+  }),
+  lecture: one(lectures, {
+    fields: [assignments.lectureId],
+    references: [lectures.id],
+  }),
+  submissions: many(assignmentSubmissions),
+}))
+
+export const assignmentSubmissionsRelations = relations(
+  assignmentSubmissions,
+  ({ one }) => ({
+    assignment: one(assignments, {
+      fields: [assignmentSubmissions.assignmentId],
+      references: [assignments.id],
+    }),
+    student: one(profiles, {
+      fields: [assignmentSubmissions.userId],
+      references: [profiles.id],
+      relationName: "assignment_submission_student",
+    }),
+    grader: one(profiles, {
+      fields: [assignmentSubmissions.gradedBy],
+      references: [profiles.id],
+      relationName: "assignment_submission_grader",
+    }),
+  }),
+)
+
 export const ordersRelations = relations(orders, ({ one }) => ({
   student: one(profiles, {
     fields: [orders.userId],
@@ -538,6 +687,19 @@ export const ordersRelations = relations(orders, ({ one }) => ({
     relationName: "order_reviewer",
   }),
   enrollment: one(enrollments),
+}))
+
+export const payoutRequestsRelations = relations(payoutRequests, ({ one }) => ({
+  instructor: one(profiles, {
+    fields: [payoutRequests.instructorId],
+    references: [profiles.id],
+    relationName: "payout_request_instructor",
+  }),
+  reviewer: one(profiles, {
+    fields: [payoutRequests.reviewedBy],
+    references: [profiles.id],
+    relationName: "payout_request_reviewer",
+  }),
 }))
 
 export const enrollmentsRelations = relations(enrollments, ({ one }) => ({
@@ -601,8 +763,14 @@ export type QuizOption = typeof quizOptions.$inferSelect
 export type NewQuizOption = typeof quizOptions.$inferInsert
 export type QuizAttempt = typeof quizAttempts.$inferSelect
 export type NewQuizAttempt = typeof quizAttempts.$inferInsert
+export type Assignment = typeof assignments.$inferSelect
+export type NewAssignment = typeof assignments.$inferInsert
+export type AssignmentSubmission = typeof assignmentSubmissions.$inferSelect
+export type NewAssignmentSubmission = typeof assignmentSubmissions.$inferInsert
 export type Order = typeof orders.$inferSelect
 export type NewOrder = typeof orders.$inferInsert
+export type PayoutRequest = typeof payoutRequests.$inferSelect
+export type NewPayoutRequest = typeof payoutRequests.$inferInsert
 export type Enrollment = typeof enrollments.$inferSelect
 export type NewEnrollment = typeof enrollments.$inferInsert
 export type Progress = typeof progress.$inferSelect

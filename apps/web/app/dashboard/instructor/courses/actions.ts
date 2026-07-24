@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 import type {
   InstructorCourseDto,
+  InstructorAssignmentDto,
+  InstructorLectureMaterialUploadResponse,
   InstructorLectureDto,
   InstructorQuizDto,
   InstructorSectionDto,
@@ -259,6 +261,36 @@ export async function saveLectureVideoRefAction(input: {
   revalidatePath(`/dashboard/instructor/courses/${input.courseId}/edit`)
 }
 
+export async function uploadLectureMaterialAction(input: {
+  base64: string
+  contentType: string
+  courseId: string
+  fileName: string
+  kind: "pdf" | "slides"
+  lectureId: string
+}) {
+  const response =
+    await authenticatedApiFetch<InstructorLectureMaterialUploadResponse>(
+      `/instructor/courses/${input.courseId}/lectures/${input.lectureId}/material`,
+      {
+        body: JSON.stringify({
+          base64: input.base64,
+          contentType: input.contentType,
+          fileName: input.fileName,
+          kind: input.kind,
+        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        method: "POST",
+      },
+    )
+
+  revalidatePath(`/dashboard/instructor/courses/${input.courseId}/edit`)
+
+  return response
+}
+
 export async function saveInstructorQuizAction(input: {
   courseId: string
   isPublished: boolean
@@ -303,6 +335,75 @@ export async function deleteInstructorQuizAction(input: {
     `/instructor/courses/${input.courseId}/quizzes/${input.quizId}`,
     {
       method: "DELETE",
+    },
+  )
+
+  revalidatePath(`/dashboard/instructor/courses/${input.courseId}/edit`)
+}
+
+export async function saveInstructorAssignmentAction(input: {
+  courseId: string
+  dueAt: string | null
+  instructions: string
+  isPublished: boolean
+  maxScore: number
+  targetId: string
+  targetType: "lecture" | "section"
+  title: string
+}) {
+  const path =
+    input.targetType === "section"
+      ? `/instructor/courses/${input.courseId}/sections/${input.targetId}/assignment`
+      : `/instructor/courses/${input.courseId}/lectures/${input.targetId}/assignment`
+
+  await authenticatedApiFetch<InstructorAssignmentDto>(path, {
+    body: JSON.stringify({
+      dueAt: input.dueAt,
+      instructions: input.instructions,
+      isPublished: input.isPublished,
+      maxScore: input.maxScore,
+      title: input.title,
+    }),
+    headers: {
+      "Content-Type": "application/json",
+    },
+    method: "PUT",
+  })
+
+  revalidatePath(`/dashboard/instructor/courses/${input.courseId}/edit`)
+}
+
+export async function deleteInstructorAssignmentAction(input: {
+  assignmentId: string
+  courseId: string
+}) {
+  await authenticatedApiFetch<void>(
+    `/instructor/courses/${input.courseId}/assignments/${input.assignmentId}`,
+    {
+      method: "DELETE",
+    },
+  )
+
+  revalidatePath(`/dashboard/instructor/courses/${input.courseId}/edit`)
+}
+
+export async function gradeAssignmentSubmissionAction(input: {
+  courseId: string
+  gradeFeedback: string | null
+  gradeScore: number
+  submissionId: string
+}) {
+  await authenticatedApiFetch<void>(
+    `/instructor/courses/${input.courseId}/assignment-submissions/${input.submissionId}/grade`,
+    {
+      body: JSON.stringify({
+        gradeFeedback: input.gradeFeedback,
+        gradeScore: input.gradeScore,
+      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      method: "PATCH",
     },
   )
 

@@ -1,8 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server"
 
 export async function GET(request: NextRequest) {
-  const requestUrl = new URL(request.url)
-  const next = requestUrl.searchParams.get("next") ?? "/dashboard/student"
+  const next = new URL(request.url).searchParams.get("next")
 
-  return NextResponse.redirect(new URL(next, request.url))
+  return NextResponse.redirect(new URL(next ?? "/auth/login", request.url))
 }

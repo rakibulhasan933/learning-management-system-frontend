@@ -1,13 +1,41 @@
 "use server"
 
-import type { LectureVideoUrlResponse, QuizSubmissionResultDto } from "@workspace/types"
+import type {
+  LectureProgressMutationResponse,
+  LectureVideoUrlResponse,
+  QuizSubmissionResultDto,
+  StudentAssignmentSubmissionDto,
+} from "@workspace/types"
 
-import { authenticatedApiFetch } from "@/lib/api-client"
+import {
+  authenticatedApiFetch,
+  optionalAuthenticatedApiFetch,
+} from "@/lib/api-client"
 
 export async function getLectureVideoUrlAction(lectureId: string) {
-  return authenticatedApiFetch<LectureVideoUrlResponse>(
+  return optionalAuthenticatedApiFetch<LectureVideoUrlResponse>(
     `/lectures/${lectureId}/video-url`,
     { cache: "no-store" },
+  )
+}
+
+export async function saveLectureProgressAction(input: {
+  isCompleted?: boolean
+  lectureId: string
+  positionSeconds: number
+}) {
+  return authenticatedApiFetch<LectureProgressMutationResponse>(
+    `/progress/lectures/${input.lectureId}`,
+    {
+      body: JSON.stringify({
+        isCompleted: input.isCompleted,
+        positionSeconds: input.positionSeconds,
+      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      method: "PUT",
+    },
   )
 }
 
@@ -19,6 +47,22 @@ export async function submitQuizAction(input: {
     `/quizzes/${input.quizId}/submit`,
     {
       body: JSON.stringify({ answers: input.answers }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      method: "POST",
+    },
+  )
+}
+
+export async function submitAssignmentAction(input: {
+  assignmentId: string
+  submissionText: string
+}) {
+  return authenticatedApiFetch<StudentAssignmentSubmissionDto>(
+    `/assignments/${input.assignmentId}/submit`,
+    {
+      body: JSON.stringify({ submissionText: input.submissionText }),
       headers: {
         "Content-Type": "application/json",
       },

@@ -36,6 +36,41 @@
       "when": 1783777200000,
       "tag": "0004_certificates",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1783780800000,
+      "tag": "0005_assignments",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1783784400000,
+      "tag": "0006_profiles_id_default",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1783788000000,
+      "tag": "0007_lecture_materials",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1783791600000,
+      "tag": "0008_user_suspension",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1783795200000,
+      "tag": "0009_instructor_payout_requests",
+      "breakpoints": true
     }
   ]
 }

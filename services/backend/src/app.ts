@@ -5,14 +5,19 @@ import type { ApiHealthResponse } from "@workspace/types"
 
 import { env } from "./config/env.js"
 import { errorHandler, notFoundHandler } from "./http/errors.js"
+import { assignmentsRouter } from "./routes/assignments.js"
+import { adminRouter } from "./routes/admin.js"
 import { authRouter } from "./routes/auth.js"
 import { certificatesRouter } from "./routes/certificates.js"
 import { coursesRouter } from "./routes/courses.js"
 import { instructorCoursesRouter } from "./routes/instructor-courses.js"
+import { instructorDashboardRouter } from "./routes/instructor-dashboard.js"
 import { learningRouter } from "./routes/learning.js"
 import { lecturesRouter } from "./routes/lectures.js"
 import { paymentsRouter } from "./routes/payments.js"
+import { progressRouter } from "./routes/progress.js"
 import { quizzesRouter } from "./routes/quizzes.js"
+import { uploadsRouter } from "./routes/uploads.js"
 
 export const app: Express = express()
 
@@ -31,13 +36,18 @@ app.get("/health", (_request, response) => {
   response.status(200).json(payload)
 })
 
+app.use("/admin", adminRouter)
+app.use("/assignments", assignmentsRouter)
 app.use("/auth", authRouter)
 app.use("/certificates", certificatesRouter)
 app.use("/courses", coursesRouter)
 app.use("/instructor/courses", instructorCoursesRouter)
+app.use("/instructor", instructorDashboardRouter)
 app.use("/learning", learningRouter)
 app.use("/lectures", lecturesRouter)
 app.use("/payments", paymentsRouter)
+app.use("/progress", progressRouter)
 app.use("/quizzes", quizzesRouter)
+app.use("/uploads", uploadsRouter)
 app.use(notFoundHandler)
 app.use(errorHandler)

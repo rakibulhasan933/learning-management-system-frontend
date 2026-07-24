@@ -4,7 +4,9 @@ import type {
   InstructorCourseDto,
   InstructorCourseListResponse,
   InstructorCourseOutlineResponse,
+  InstructorAssignmentDto,
   InstructorLectureDto,
+  InstructorLectureMaterialUploadResponse,
   InstructorQuizDto,
   InstructorSectionDto,
   InstructorVideoUploadUrlResponse,
@@ -13,6 +15,7 @@ import { courseLevels, courseStatuses, videoProviders } from "@workspace/types"
 import {
   and,
   asc,
+  assignments,
   courses,
   desc,
   eq,
@@ -26,10 +29,16 @@ import {
 import { asyncHandler, HttpError } from "../http/errors.js"
 import { db } from "../lib/database.js"
 import {
+  getInstructorAssignmentDtosForCourse,
+  gradeAssignmentSubmission,
+  saveAssignmentForTarget,
+} from "../lib/assignments.js"
+import {
   getInstructorQuizDtosForCourse,
   toInstructorQuizDto,
 } from "../lib/quizzes.js"
 import { createLectureVideoKey, createR2UploadUrl } from "../lib/r2.js"
+import { uploadLectureMaterial } from "../lib/supabase-storage.js"
 import { requireAuth, requireRole } from "../middleware/auth.js"
 
 export const instructorCoursesRouter: ExpressRouter = Router()
@@ -80,6 +89,12 @@ const videoUploadUrlSchema = z.object({
   contentType: z.literal("video/mp4"),
   fileName: z.string().trim().min(1).max(255),
 })
+const lectureMaterialUploadSchema = z.object({
+  base64: z.string().min(1),
+  contentType: z.string().trim().min(1).max(180),
+  fileName: z.string().trim().min(1).max(255),
+  kind: z.enum(["pdf", "slides"]),
+})
 const quizOptionMutationSchema = z.object({
   isCorrect: z.coerce.boolean().default(false),
   optionText: z.string().trim().min(1).max(1000),
@@ -102,6 +117,23 @@ const quizMutationSchema = z.object({
 })
 const quizIdParamsSchema = courseIdParamsSchema.extend({
   quizId: z.string().uuid(),
+})
+const assignmentIdParamsSchema = courseIdParamsSchema.extend({
+  assignmentId: z.string().uuid(),
+})
+const assignmentSubmissionParamsSchema = courseIdParamsSchema.extend({
+  submissionId: z.string().uuid(),
+})
+const assignmentMutationSchema = z.object({
+  dueAt: z.coerce.date().nullable().optional(),
+  instructions: z.string().trim().min(1).max(20_000),
+  isPublished: z.coerce.boolean().default(false),
+  maxScore: z.coerce.number().int().positive().default(100),
+  title: z.string().trim().min(1).max(255),
+})
+const assignmentGradeSchema = z.object({
+  gradeFeedback: z.string().trim().nullable().optional(),
+  gradeScore: z.coerce.number().int().nonnegative(),
 })
 
 function serializeDate(value: Date | null) {
@@ -130,8 +162,10 @@ function toInstructorCourseDto(course: typeof courses.$inferSelect): InstructorC
 function toInstructorLectureDto(
   lecture: typeof lectures.$inferSelect,
   quiz: InstructorQuizDto | null = null,
+  assignment: InstructorAssignmentDto | null = null,
 ): InstructorLectureDto {
   return {
+    assignment,
     availableAt: serializeDate(lecture.availableAt),
     createdAt: lecture.createdAt.toISOString(),
     description: lecture.description,
@@ -139,8 +173,10 @@ function toInstructorLectureDto(
     id: lecture.id,
     isPreview: lecture.isPreview,
     isPublished: lecture.isPublished,
+    pdfUrl: lecture.pdfUrl,
     position: lecture.position,
     sectionId: lecture.sectionId,
+    slidesUrl: lecture.slidesUrl,
     title: lecture.title,
     updatedAt: lecture.updatedAt.toISOString(),
     videoProvider: lecture.videoProvider,
@@ -154,8 +190,11 @@ function toInstructorSectionDto(
   sectionLectures: Array<typeof lectures.$inferSelect>,
   quiz: InstructorQuizDto | null = null,
   lectureQuizzes: InstructorQuizDto[] = [],
+  assignment: InstructorAssignmentDto | null = null,
+  lectureAssignments: InstructorAssignmentDto[] = [],
 ): InstructorSectionDto {
   return {
+    assignment,
     courseId: section.courseId,
     createdAt: section.createdAt.toISOString(),
     description: section.description,
@@ -166,6 +205,9 @@ function toInstructorSectionDto(
         lecture,
         lectureQuizzes.find((lectureQuiz) => lectureQuiz.lectureId === lecture.id) ??
           null,
+        lectureAssignments.find(
+          (lectureAssignment) => lectureAssignment.lectureId === lecture.id,
+        ) ?? null,
       ),
     ),
     position: section.position,
@@ -392,6 +434,7 @@ instructorCoursesRouter.get(
       .where(eq(sections.courseId, params.id))
       .orderBy(asc(sections.position), asc(lectures.position))
     const quizDtos = await getInstructorQuizDtosForCourse(params.id)
+    const assignmentDtos = await getInstructorAssignmentDtosForCourse(params.id)
 
     const sectionEntities = sectionRows.map((section) =>
       toInstructorSectionDto(
@@ -401,6 +444,9 @@ instructorCoursesRouter.get(
           .map((row) => row.lectures),
         quizDtos.find((quiz) => quiz.sectionId === section.id) ?? null,
         quizDtos.filter((quiz) => Boolean(quiz.lectureId)),
+        assignmentDtos.find((assignment) => assignment.sectionId === section.id) ??
+          null,
+        assignmentDtos.filter((assignment) => Boolean(assignment.lectureId)),
       ),
     )
     const payload: InstructorCourseOutlineResponse = {
@@ -479,6 +525,26 @@ instructorCoursesRouter.put(
   }),
 )
 
+instructorCoursesRouter.put(
+  "/:id/sections/:sectionId/assignment",
+  asyncHandler(async (request, response) => {
+    const params = sectionIdParamsSchema.parse(request.params)
+    const input = assignmentMutationSchema.parse(request.body)
+    const instructorId = request.auth!.profile!.id
+
+    await assertInstructorOwnsCourse(params.id, instructorId)
+    await assertSectionBelongsToCourse(params.sectionId, params.id)
+
+    const assignment = await saveAssignmentForTarget({
+      courseId: params.id,
+      input,
+      sectionId: params.sectionId,
+    })
+
+    response.status(200).json(assignment)
+  }),
+)
+
 instructorCoursesRouter.delete(
   "/:id/sections/:sectionId",
   asyncHandler(async (request, response) => {
@@ -547,6 +613,26 @@ instructorCoursesRouter.put(
   }),
 )
 
+instructorCoursesRouter.put(
+  "/:id/lectures/:lectureId/assignment",
+  asyncHandler(async (request, response) => {
+    const params = lectureIdParamsSchema.parse(request.params)
+    const input = assignmentMutationSchema.parse(request.body)
+    const instructorId = request.auth!.profile!.id
+
+    await assertInstructorOwnsCourse(params.id, instructorId)
+    await assertLectureBelongsToCourse(params.lectureId, params.id)
+
+    const assignment = await saveAssignmentForTarget({
+      courseId: params.id,
+      input,
+      lectureId: params.lectureId,
+    })
+
+    response.status(200).json(assignment)
+  }),
+)
+
 instructorCoursesRouter.delete(
   "/:id/quizzes/:quizId",
   asyncHandler(async (request, response) => {
@@ -563,6 +649,53 @@ instructorCoursesRouter.delete(
     if (!deleted) {
       throw new HttpError(404, "Quiz not found.")
     }
+
+    response.status(204).send()
+  }),
+)
+
+instructorCoursesRouter.delete(
+  "/:id/assignments/:assignmentId",
+  asyncHandler(async (request, response) => {
+    const params = assignmentIdParamsSchema.parse(request.params)
+    const instructorId = request.auth!.profile!.id
+
+    await assertInstructorOwnsCourse(params.id, instructorId)
+
+    const [deleted] = await db
+      .delete(assignments)
+      .where(
+        and(
+          eq(assignments.id, params.assignmentId),
+          eq(assignments.courseId, params.id),
+        ),
+      )
+      .returning({ id: assignments.id })
+
+    if (!deleted) {
+      throw new HttpError(404, "Assignment not found.")
+    }
+
+    response.status(204).send()
+  }),
+)
+
+instructorCoursesRouter.patch(
+  "/:id/assignment-submissions/:submissionId/grade",
+  asyncHandler(async (request, response) => {
+    const params = assignmentSubmissionParamsSchema.parse(request.params)
+    const input = assignmentGradeSchema.parse(request.body)
+    const instructorId = request.auth!.profile!.id
+
+    await assertInstructorOwnsCourse(params.id, instructorId)
+
+    await gradeAssignmentSubmission({
+      courseId: params.id,
+      gradeFeedback: input.gradeFeedback ?? null,
+      gradeScore: input.gradeScore,
+      graderProfileId: instructorId,
+      submissionId: params.submissionId,
+    })
 
     response.status(204).send()
   }),
@@ -628,6 +761,41 @@ instructorCoursesRouter.post(
     }
 
     response.status(201).json(payload)
+  }),
+)
+
+instructorCoursesRouter.post(
+  "/:id/lectures/:lectureId/material",
+  asyncHandler(async (request, response) => {
+    const params = lectureIdParamsSchema.parse(request.params)
+    const input = lectureMaterialUploadSchema.parse(request.body)
+    const instructorId = request.auth!.profile!.id
+
+    await assertInstructorOwnsCourse(params.id, instructorId)
+    await assertLectureBelongsToCourse(params.lectureId, params.id)
+
+    const url = await uploadLectureMaterial({
+      base64: input.base64,
+      contentType: input.contentType,
+      courseId: params.id,
+      fileName: input.fileName,
+      kind: input.kind,
+      lectureId: params.lectureId,
+    })
+    const [updated] = await db
+      .update(lectures)
+      .set(input.kind === "pdf" ? { pdfUrl: url } : { slidesUrl: url })
+      .where(eq(lectures.id, params.lectureId))
+      .returning()
+
+    if (!updated) {
+      throw new HttpError(404, "Lecture not found.")
+    }
+
+    response.status(201).json({
+      lecture: toInstructorLectureDto(updated),
+      url,
+    } satisfies InstructorLectureMaterialUploadResponse)
   }),
 )
 

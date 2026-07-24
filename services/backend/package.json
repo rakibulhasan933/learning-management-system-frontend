@@ -10,6 +10,7 @@
     "lint": "eslint src tsup.config.ts",
     "format": "prettier --write \"{src/**/*.ts,tsup.config.ts}\"",
     "typecheck": "tsc --noEmit",
+    "seed:admin": "tsx src/scripts/seed-admin.ts",
     "db:generate": "pnpm --filter @workspace/db db:generate",
     "db:migrate": "pnpm --filter @workspace/db db:migrate",
     "db:studio": "pnpm --filter @workspace/db db:studio"

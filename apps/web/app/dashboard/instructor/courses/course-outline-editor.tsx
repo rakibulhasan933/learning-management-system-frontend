@@ -1,5 +1,7 @@
+import { Fragment } from "react"
 import type { InstructorCourseOutlineResponse } from "@workspace/types"
 
+import { AssignmentBuilder } from "./assignment-builder"
 import {
   createInstructorLectureAction,
   createInstructorSectionAction,
@@ -8,6 +10,7 @@ import {
   updateInstructorLectureAction,
   updateInstructorSectionAction,
 } from "./actions"
+import { MaterialUploadControl } from "./material-upload-control"
 import { QuizBuilder } from "./quiz-builder"
 import { VideoUploadControl } from "./video-upload-control"
 
@@ -184,136 +187,178 @@ export function CourseOutlineEditor({
                   />
                 </div>
 
+                <div className="grid gap-3">
+                  <h3 className="text-lg tracking-tight">Section assignment</h3>
+                  <AssignmentBuilder
+                    assignment={section.assignment}
+                    courseId={courseId}
+                    targetId={section.id}
+                    targetLabel={section.title}
+                    targetType="section"
+                  />
+                </div>
+
                 <div className="border-l border-primary pl-4">
                   <h3 className="text-lg tracking-tight">Lectures</h3>
                   <div className="mt-4 grid gap-4">
                     {section.lectures.map((lecture) => (
-                      <form
-                        action={updateInstructorLectureAction}
-                        className="grid gap-4 border border-border bg-background p-4 md:grid-cols-4"
-                        key={lecture.id}
-                      >
-                        <input name="courseId" type="hidden" value={courseId} />
-                        <input name="lectureId" type="hidden" value={lecture.id} />
-                        <label className="block text-sm md:col-span-2">
-                          Lecture title
+                      <Fragment key={lecture.id}>
+                        <form
+                          action={updateInstructorLectureAction}
+                          className="grid gap-4 border border-border bg-background p-4 md:grid-cols-4"
+                        >
+                          <input name="courseId" type="hidden" value={courseId} />
                           <input
-                            className={inputClass}
-                            defaultValue={lecture.title}
-                            name="title"
-                            required
+                            name="lectureId"
+                            type="hidden"
+                            value={lecture.id}
                           />
-                        </label>
-                        <label className="block text-sm">
-                          Position
-                          <input
-                            className={compactInputClass}
-                            defaultValue={lecture.position}
-                            min="0"
-                            name="position"
-                            required
-                            type="number"
-                          />
-                        </label>
-                        <label className="block text-sm">
-                          Duration
-                          <input
-                            className={compactInputClass}
-                            defaultValue={lecture.durationSeconds ?? ""}
-                            min="0"
-                            name="durationSeconds"
-                            placeholder="seconds"
-                            type="number"
-                          />
-                        </label>
-                        <label className="block text-sm md:col-span-2">
-                          Video reference
-                          <input
-                            className={compactInputClass}
-                            defaultValue={lecture.videoRef ?? ""}
-                            name="videoRef"
-                            placeholder="r2/object-key.mp4"
-                          />
-                        </label>
-                        <VideoUploadControl
-                          courseId={courseId}
-                          lectureId={lecture.id}
-                        />
-                        <div className="md:col-span-4">
-                          <QuizBuilder
+                          <label className="block text-sm md:col-span-2">
+                            Lecture title
+                            <input
+                              className={inputClass}
+                              defaultValue={lecture.title}
+                              name="title"
+                              required
+                            />
+                          </label>
+                          <label className="block text-sm">
+                            Position
+                            <input
+                              className={compactInputClass}
+                              defaultValue={lecture.position}
+                              min="0"
+                              name="position"
+                              required
+                              type="number"
+                            />
+                          </label>
+                          <label className="block text-sm">
+                            Duration
+                            <input
+                              className={compactInputClass}
+                              defaultValue={lecture.durationSeconds ?? ""}
+                              min="0"
+                              name="durationSeconds"
+                              placeholder="seconds"
+                              type="number"
+                            />
+                          </label>
+                          <label className="block text-sm md:col-span-2">
+                            Video reference
+                            <input
+                              className={compactInputClass}
+                              defaultValue={lecture.videoRef ?? ""}
+                              name="videoRef"
+                              placeholder="r2/object-key.mp4"
+                            />
+                          </label>
+                          <VideoUploadControl
                             courseId={courseId}
-                            quiz={lecture.quiz}
+                            lectureId={lecture.id}
+                          />
+                          <div className="grid gap-4 md:col-span-4 md:grid-cols-2">
+                            <MaterialUploadControl
+                              courseId={courseId}
+                              kind="pdf"
+                              lectureId={lecture.id}
+                              url={lecture.pdfUrl}
+                            />
+                            <MaterialUploadControl
+                              courseId={courseId}
+                              kind="slides"
+                              lectureId={lecture.id}
+                              url={lecture.slidesUrl}
+                            />
+                          </div>
+                          <div className="md:col-span-4">
+                            <QuizBuilder
+                              courseId={courseId}
+                              quiz={lecture.quiz}
+                              targetId={lecture.id}
+                              targetLabel={lecture.title}
+                              targetType="lecture"
+                            />
+                          </div>
+                          <label className="block text-sm">
+                            Provider
+                            <select
+                              className={inputClass}
+                              defaultValue={lecture.videoProvider}
+                              name="videoProvider"
+                            >
+                              <option value="r2">R2</option>
+                              <option value="bunny">Bunny</option>
+                              <option value="cloudflare_stream">
+                                Cloudflare Stream
+                              </option>
+                              <option value="mux">Mux</option>
+                            </select>
+                          </label>
+                          <label className="block text-sm">
+                            Available at
+                            <input
+                              className={compactInputClass}
+                              defaultValue={toDateTimeLocal(lecture.availableAt)}
+                              name="availableAt"
+                              type="datetime-local"
+                            />
+                          </label>
+                          <label className="block text-sm md:col-span-4">
+                            Description
+                            <textarea
+                              className="mt-2 min-h-20 w-full border border-input bg-card px-3 py-2 text-foreground outline-none focus:border-primary"
+                              defaultValue={lecture.description ?? ""}
+                              name="description"
+                            />
+                          </label>
+                          <div className="flex flex-wrap gap-5 text-sm md:col-span-3">
+                            <label className="flex items-center gap-2">
+                              <input
+                                defaultChecked={lecture.isPreview}
+                                name="isPreview"
+                                type="checkbox"
+                              />
+                              Free preview
+                            </label>
+                            <label className="flex items-center gap-2">
+                              <input
+                                defaultChecked={lecture.isPublished}
+                                name="isPublished"
+                                type="checkbox"
+                              />
+                              Published
+                            </label>
+                          </div>
+                          <div className="flex gap-3">
+                            <button
+                              className="bg-secondary px-4 py-2 text-sm text-secondary-foreground"
+                              type="submit"
+                            >
+                              Save
+                            </button>
+                            <button
+                              className="border border-destructive px-4 py-2 text-sm text-destructive"
+                              formAction={deleteInstructorLectureAction}
+                              type="submit"
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </form>
+                        <div className="grid gap-3 border border-border bg-background p-4">
+                          <h4 className="text-base tracking-tight">
+                            Lecture assignment
+                          </h4>
+                          <AssignmentBuilder
+                            assignment={lecture.assignment}
+                            courseId={courseId}
                             targetId={lecture.id}
                             targetLabel={lecture.title}
                             targetType="lecture"
                           />
                         </div>
-                        <label className="block text-sm">
-                          Provider
-                          <select
-                            className={inputClass}
-                            defaultValue={lecture.videoProvider}
-                            name="videoProvider"
-                          >
-                            <option value="r2">R2</option>
-                            <option value="bunny">Bunny</option>
-                            <option value="cloudflare_stream">
-                              Cloudflare Stream
-                            </option>
-                            <option value="mux">Mux</option>
-                          </select>
-                        </label>
-                        <label className="block text-sm">
-                          Available at
-                          <input
-                            className={compactInputClass}
-                            defaultValue={toDateTimeLocal(lecture.availableAt)}
-                            name="availableAt"
-                            type="datetime-local"
-                          />
-                        </label>
-                        <label className="block text-sm md:col-span-4">
-                          Description
-                          <textarea
-                            className="mt-2 min-h-20 w-full border border-input bg-card px-3 py-2 text-foreground outline-none focus:border-primary"
-                            defaultValue={lecture.description ?? ""}
-                            name="description"
-                          />
-                        </label>
-                        <div className="flex flex-wrap gap-5 text-sm md:col-span-3">
-                          <label className="flex items-center gap-2">
-                            <input
-                              defaultChecked={lecture.isPreview}
-                              name="isPreview"
-                              type="checkbox"
-                            />
-                            Free preview
-                          </label>
-                          <label className="flex items-center gap-2">
-                            <input
-                              defaultChecked={lecture.isPublished}
-                              name="isPublished"
-                              type="checkbox"
-                            />
-                            Published
-                          </label>
-                        </div>
-                        <div className="flex gap-3">
-                          <button
-                            className="bg-secondary px-4 py-2 text-sm text-secondary-foreground"
-                            type="submit"
-                          >
-                            Save
-                          </button>
-                          <button
-                            className="border border-destructive px-4 py-2 text-sm text-destructive"
-                            formAction={deleteInstructorLectureAction}
-                            type="submit"
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </form>
+                      </Fragment>
                     ))}
                   </div>
 

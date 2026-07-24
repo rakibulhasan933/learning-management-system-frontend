@@ -1,10 +1,20 @@
-import { and, asc, courses, enrollments, eq, lectures, sections } from "@workspace/db"
+import {
+  and,
+  asc,
+  courses,
+  enrollments,
+  eq,
+  lectures,
+  progress,
+  sections,
+} from "@workspace/db"
 import { Router, type Router as ExpressRouter } from "express"
 import { z } from "zod"
 import type { LearningCourseResponse } from "@workspace/types"
 
 import { asyncHandler, HttpError } from "../http/errors.js"
 import { db } from "../lib/database.js"
+import { getStudentAssignmentsForCourse } from "../lib/assignments.js"
 import { getStudentQuizzesForCourse } from "../lib/quizzes.js"
 import { requireAuth, requireRole } from "../middleware/auth.js"
 
@@ -16,6 +26,18 @@ const courseParamsSchema = z.object({
 
 function serializeDate(value: Date | null) {
   return value ? value.toISOString() : null
+}
+
+function toProgressDto(row: typeof progress.$inferSelect) {
+  return {
+    completedAt: serializeDate(row.completedAt),
+    id: row.id,
+    isCompleted: row.isCompleted,
+    lastWatchedAt: row.lastWatchedAt.toISOString(),
+    lectureId: row.lectureId,
+    positionSeconds: row.positionSeconds,
+    updatedAt: row.updatedAt.toISOString(),
+  }
 }
 
 learningRouter.get(
@@ -70,8 +92,10 @@ learningRouter.get(
         durationSeconds: lectures.durationSeconds,
         id: lectures.id,
         isPreview: lectures.isPreview,
+        pdfUrl: lectures.pdfUrl,
         position: lectures.position,
         sectionId: lectures.sectionId,
+        slidesUrl: lectures.slidesUrl,
         title: lectures.title,
       })
       .from(lectures)
@@ -80,13 +104,43 @@ learningRouter.get(
         and(eq(sections.courseId, params.courseId), eq(lectures.isPublished, true)),
       )
       .orderBy(asc(sections.position), asc(lectures.position))
+    const lectureIds = lectureRows.map((lecture) => lecture.id)
+    const progressRows =
+      lectureIds.length === 0
+        ? []
+        : await db.query.progress.findMany({
+            where: (table, { and: andWhere, eq: eqWhere, inArray }) =>
+              andWhere(
+                eqWhere(table.userId, request.auth!.profile.id),
+                inArray(table.lectureId, lectureIds),
+              ),
+          })
+    const progressDtos = progressRows.map(toProgressDto)
+    const completedLectureCount = lectureRows.filter((lecture) =>
+      progressRows.some(
+        (row) => row.lectureId === lecture.id && row.isCompleted,
+      ),
+    ).length
+    const totalLectureCount = lectureRows.length
     const quizDtos = await getStudentQuizzesForCourse(
+      params.courseId,
+      request.auth!.profile.id,
+    )
+    const assignmentDtos = await getStudentAssignmentsForCourse(
       params.courseId,
       request.auth!.profile.id,
     )
 
     const payload: LearningCourseResponse = {
-      course,
+      course: {
+        ...course,
+        completedLectureCount,
+        completionPercentage:
+          totalLectureCount === 0
+            ? 0
+            : Math.round((completedLectureCount / totalLectureCount) * 100),
+        totalLectureCount,
+      },
       learner: {
         email: request.auth!.profile.email,
       },
@@ -96,16 +150,27 @@ learningRouter.get(
           .filter((lecture) => lecture.sectionId === section.id)
           .map((lecture) => ({
             availableAt: serializeDate(lecture.availableAt),
+            assignment:
+              assignmentDtos.find(
+                (assignment) => assignment.lectureId === lecture.id,
+              ) ?? null,
             durationSeconds: lecture.durationSeconds,
             id: lecture.id,
             isPreview: lecture.isPreview,
+            pdfUrl: lecture.pdfUrl,
             position: lecture.position,
+            progress:
+              progressDtos.find((item) => item.lectureId === lecture.id) ?? null,
             quiz:
               quizDtos.find((quiz) => quiz.lectureId === lecture.id) ?? null,
             sectionId: lecture.sectionId,
+            slidesUrl: lecture.slidesUrl,
             title: lecture.title,
           })),
         position: section.position,
+        assignment:
+          assignmentDtos.find((assignment) => assignment.sectionId === section.id) ??
+          null,
         quiz: quizDtos.find((quiz) => quiz.sectionId === section.id) ?? null,
         title: section.title,
       })),

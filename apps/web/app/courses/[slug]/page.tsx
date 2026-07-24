@@ -1,8 +1,15 @@
 import Link from "next/link"
+import { cookies } from "next/headers"
 import type { CourseDetailDto } from "@workspace/types"
 
 import { createEnrollmentOrderAction } from "@/app/courses/[slug]/enroll/actions"
-import { publicApiFetch } from "@/lib/api-client"
+import {
+  accessTokenCookieName,
+  getBackendApiUrl,
+  publicApiFetch,
+} from "@/lib/api-client"
+
+import { PreviewVideoPlayer } from "./preview-video-player"
 
 export const dynamic = "force-dynamic"
 
@@ -12,11 +19,38 @@ interface CourseDetailPageProps {
   }>
 }
 
+async function getOptionalViewerEmail() {
+  const cookieStore = await cookies()
+  const accessToken = cookieStore.get(accessTokenCookieName)?.value
+
+  if (!accessToken) {
+    return null
+  }
+
+  const response = await fetch(`${getBackendApiUrl()}/auth/me`, {
+    headers: {
+      Accept: "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+  }).catch(() => null)
+
+  if (!response?.ok) {
+    return null
+  }
+
+  const profile = (await response.json()) as { email?: string }
+
+  return profile.email ?? null
+}
+
 export default async function CourseDetailPage({ params }: CourseDetailPageProps) {
   const { slug } = await params
-  const course = await publicApiFetch<CourseDetailDto>(`/courses/${slug}`, {
-    cache: "no-store",
-  })
+  const [course, viewerEmail] = await Promise.all([
+    publicApiFetch<CourseDetailDto>(`/courses/${slug}`, {
+      cache: "no-store",
+    }),
+    getOptionalViewerEmail(),
+  ])
 
   return (
     <main className="min-h-screen bg-background px-6 py-10 text-foreground">
@@ -38,6 +72,10 @@ export default async function CourseDetailPage({ params }: CourseDetailPageProps
               {course.description ?? "Course details will be added soon."}
             </p>
           </div>
+          <PreviewVideoPlayer
+            learnerEmail={viewerEmail}
+            sections={course.sections}
+          />
           <div className="mt-10 space-y-4">
             <h2 className="text-2xl">Course outline</h2>
             {course.sections.map((section) => (

@@ -1,9 +1,14 @@
 "use client"
 
 import { useEffect, useMemo, useRef, useState, useTransition } from "react"
-import type { LearningCourseResponse, LearningLectureDto } from "@workspace/types"
+import type {
+  LearningCourseResponse,
+  LearningLectureDto,
+  LectureProgressDto,
+} from "@workspace/types"
 
-import { getLectureVideoUrlAction } from "./actions"
+import { AssignmentPanel } from "./assignment-panel"
+import { getLectureVideoUrlAction, saveLectureProgressAction } from "./actions"
 import { QuizPanel } from "./quiz-panel"
 
 interface LearningPlayerProps {
@@ -30,6 +35,17 @@ function formatDuration(seconds: number | null) {
   return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`
 }
 
+function getProgressPercent(
+  lecture: LearningLectureDto | undefined,
+  progress: LectureProgressDto | null | undefined,
+) {
+  if (!lecture?.durationSeconds || !progress?.positionSeconds) {
+    return 0
+  }
+
+  return Math.min(100, (progress.positionSeconds / lecture.durationSeconds) * 100)
+}
+
 export function LearningPlayer({
   course,
   learnerEmail,
@@ -46,15 +62,38 @@ export function LearningPlayer({
   const [message, setMessage] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
   const [isPlaying, setIsPlaying] = useState(false)
-  const [progress, setProgress] = useState(0)
+  const [playbackProgress, setPlaybackProgress] = useState(0)
+  const [lectureProgress, setLectureProgress] = useState<
+    Record<string, LectureProgressDto | null>
+  >(() =>
+    Object.fromEntries(
+      lectures.map((lecture) => [lecture.id, lecture.progress ?? null]),
+    ),
+  )
   const [watermarkPosition, setWatermarkPosition] = useState(
     getWatermarkPosition,
   )
   const videoRef = useRef<HTMLVideoElement>(null)
+  const lastSavedPositionRef = useRef<Record<string, number>>({})
+  const lectureProgressRef = useRef(lectureProgress)
 
   const selectedLecture = lectures.find(
     (lecture) => lecture.id === selectedLectureId,
   )
+  const selectedProgress = selectedLectureId
+    ? lectureProgress[selectedLectureId] ?? null
+    : null
+  const completedLectureCount = lectures.filter(
+    (lecture) => lectureProgress[lecture.id]?.isCompleted,
+  ).length
+  const completionPercentage =
+    course.totalLectureCount === 0
+      ? 0
+      : Math.round((completedLectureCount / course.totalLectureCount) * 100)
+
+  useEffect(() => {
+    lectureProgressRef.current = lectureProgress
+  }, [lectureProgress])
 
   useEffect(() => {
     if (!selectedLectureId) {
@@ -68,14 +107,19 @@ export function LearningPlayer({
         setVideoUrl(response.url)
         setMessage(null)
         setIsPlaying(false)
-        setProgress(0)
+        setPlaybackProgress(
+          getProgressPercent(
+            lectures.find((lecture) => lecture.id === selectedLectureId),
+            lectureProgressRef.current[selectedLectureId],
+          ),
+        )
       } catch (error) {
         setMessage(
           error instanceof Error ? error.message : "Video could not be loaded.",
         )
       }
     })
-  }, [selectedLectureId])
+  }, [lectures, selectedLectureId])
 
   useEffect(() => {
     let timeoutId: ReturnType<typeof setTimeout>
@@ -111,6 +155,46 @@ export function LearningPlayer({
     }
   }
 
+  async function saveProgress({
+    isCompleted,
+    lectureId,
+    positionSeconds,
+  }: {
+    isCompleted?: boolean
+    lectureId: string
+    positionSeconds: number
+  }) {
+    try {
+      const response = await saveLectureProgressAction({
+        isCompleted,
+        lectureId,
+        positionSeconds,
+      })
+
+      setLectureProgress((current) => ({
+        ...current,
+        [lectureId]: response.progress,
+      }))
+    } catch {
+      setMessage("Progress could not be saved.")
+    }
+  }
+
+  function getCurrentPositionSeconds() {
+    return Math.max(0, Math.floor(videoRef.current?.currentTime ?? 0))
+  }
+
+  function saveCurrentProgress() {
+    if (!selectedLectureId) {
+      return
+    }
+
+    void saveProgress({
+      lectureId: selectedLectureId,
+      positionSeconds: getCurrentPositionSeconds(),
+    })
+  }
+
   function handleTimeUpdate() {
     const video = videoRef.current
 
@@ -118,7 +202,22 @@ export function LearningPlayer({
       return
     }
 
-    setProgress((video.currentTime / video.duration) * 100)
+    setPlaybackProgress((video.currentTime / video.duration) * 100)
+
+    if (!selectedLectureId) {
+      return
+    }
+
+    const positionSeconds = Math.floor(video.currentTime)
+    const lastSavedPosition = lastSavedPositionRef.current[selectedLectureId] ?? 0
+
+    if (Math.abs(positionSeconds - lastSavedPosition) >= 15) {
+      lastSavedPositionRef.current[selectedLectureId] = positionSeconds
+      void saveProgress({
+        lectureId: selectedLectureId,
+        positionSeconds,
+      })
+    }
   }
 
   function seek(value: string) {
@@ -130,27 +229,95 @@ export function LearningPlayer({
 
     const nextProgress = Number(value)
     video.currentTime = (nextProgress / 100) * video.duration
-    setProgress(nextProgress)
+    setPlaybackProgress(nextProgress)
+  }
+
+  function resumeFromSavedPosition() {
+    const video = videoRef.current
+
+    if (!video?.duration || !selectedProgress || selectedProgress.isCompleted) {
+      return
+    }
+
+    const resumeAt = Math.min(
+      selectedProgress.positionSeconds,
+      Math.max(0, Math.floor(video.duration) - 2),
+    )
+
+    if (resumeAt > 0) {
+      video.currentTime = resumeAt
+      setPlaybackProgress((resumeAt / video.duration) * 100)
+      lastSavedPositionRef.current[selectedProgress.lectureId] = resumeAt
+    }
+  }
+
+  function markSelectedLectureComplete() {
+    if (!selectedLectureId) {
+      return
+    }
+
+    const video = videoRef.current
+    const positionSeconds = Math.max(
+      getCurrentPositionSeconds(),
+      Math.floor(video?.duration ?? selectedLecture?.durationSeconds ?? 0),
+    )
+
+    setPlaybackProgress(100)
+    void saveProgress({
+      isCompleted: true,
+      lectureId: selectedLectureId,
+      positionSeconds,
+    })
   }
 
   function selectLecture(lectureId: string) {
+    saveCurrentProgress()
     setSelectedLectureId(lectureId)
     setVideoUrl(null)
     setMessage(null)
     setIsPlaying(false)
-    setProgress(0)
+    setPlaybackProgress(
+      getProgressPercent(
+        lectures.find((lecture) => lecture.id === lectureId),
+        lectureProgress[lectureId],
+      ),
+    )
   }
 
   return (
     <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_320px]">
       <div className="border border-border bg-card">
+        <div className="grid gap-2 border-b border-border p-4">
+          <div className="flex items-center justify-between gap-4 text-sm">
+            <span className="font-mono text-muted-foreground">
+              Course completion
+            </span>
+            <span className="font-mono text-primary">
+              {completionPercentage}% ({completedLectureCount}/
+              {course.totalLectureCount})
+            </span>
+          </div>
+          <div className="h-1.5 bg-background">
+            <div
+              className="h-full bg-primary"
+              style={{ width: `${completionPercentage}%` }}
+            />
+          </div>
+        </div>
         <div className="relative aspect-video bg-background">
               {videoUrl ? (
             <video
               ref={videoRef}
               className="h-full w-full object-contain"
-              onEnded={() => setIsPlaying(false)}
-              onPause={() => setIsPlaying(false)}
+              onEnded={() => {
+                setIsPlaying(false)
+                markSelectedLectureComplete()
+              }}
+              onLoadedMetadata={resumeFromSavedPosition}
+              onPause={() => {
+                setIsPlaying(false)
+                saveCurrentProgress()
+              }}
               onPlay={() => setIsPlaying(true)}
               onTimeUpdate={handleTimeUpdate}
               playsInline
@@ -184,8 +351,18 @@ export function LearningPlayer({
             <h2 className="mt-1 text-2xl">
               {selectedLecture?.title ?? "No published lectures"}
             </h2>
+            {selectedProgress ? (
+              <p className="mt-2 font-mono text-xs text-muted-foreground">
+                {selectedProgress.isCompleted
+                  ? `Completed ${selectedProgress.completedAt ? new Date(selectedProgress.completedAt).toLocaleString() : ""}`
+                  : `Resume at ${formatDuration(selectedProgress.positionSeconds)}`}
+              </p>
+            ) : null}
           </div>
           {selectedLecture?.quiz ? <QuizPanel quiz={selectedLecture.quiz} /> : null}
+          {selectedLecture?.assignment ? (
+            <AssignmentPanel assignment={selectedLecture.assignment} />
+          ) : null}
           {message && videoUrl ? (
             <p className="text-sm text-muted-foreground">{message}</p>
           ) : null}
@@ -198,6 +375,14 @@ export function LearningPlayer({
             >
               {isPlaying ? "Pause" : "Play"}
             </button>
+            <button
+              className="border border-primary px-4 py-2 text-sm text-primary disabled:cursor-not-allowed disabled:opacity-60"
+              disabled={!selectedLectureId}
+              onClick={markSelectedLectureComplete}
+              type="button"
+            >
+              Mark complete
+            </button>
             <input
               aria-label="Video progress"
               className="w-full accent-primary"
@@ -206,7 +391,7 @@ export function LearningPlayer({
               min="0"
               onChange={(event) => seek(event.target.value)}
               type="range"
-              value={progress}
+              value={playbackProgress}
             />
           </div>
         </div>
@@ -224,6 +409,11 @@ export function LearningPlayer({
                   <QuizPanel quiz={section.quiz} />
                 </div>
               ) : null}
+              {section.assignment ? (
+                <div className="mt-3">
+                  <AssignmentPanel assignment={section.assignment} />
+                </div>
+              ) : null}
               <div className="mt-3 grid gap-2">
                 {section.lectures.map((lecture: LearningLectureDto) => (
                   <button
@@ -237,6 +427,17 @@ export function LearningPlayer({
                     type="button"
                   >
                     <span>{lecture.title}</span>
+                    {lectureProgress[lecture.id]?.isCompleted ? (
+                      <span className="mt-1 block font-mono text-xs text-primary">
+                        Complete
+                      </span>
+                    ) : lectureProgress[lecture.id]?.positionSeconds ? (
+                      <span className="mt-1 block font-mono text-xs">
+                        Resume {formatDuration(
+                          lectureProgress[lecture.id]?.positionSeconds ?? 0,
+                        )}
+                      </span>
+                    ) : null}
                     {lecture.durationSeconds ? (
                       <span className="mt-1 block font-mono text-xs">
                         {formatDuration(lecture.durationSeconds)}
