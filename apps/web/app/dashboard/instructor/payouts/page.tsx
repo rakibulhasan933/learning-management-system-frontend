@@ -3,6 +3,10 @@ import type { InstructorPayoutListResponse } from "@workspace/types"
 
 import { requestInstructorPayoutAction } from "../actions"
 import { authenticatedApiFetch } from "@/lib/api-client"
+import { Button } from "@workspace/ui/components/button"
+import { Card, CardContent } from "@workspace/ui/components/card"
+import { FloatingInput } from "@workspace/ui/components/floating-input"
+import { FloatingTextarea } from "@workspace/ui/components/floating-textarea"
 
 export const dynamic = "force-dynamic"
 
@@ -44,91 +48,89 @@ export default async function InstructorPayoutsPage() {
         </div>
 
         <div className="mt-8 grid gap-4 md:grid-cols-3">
-          <div className="border border-border bg-card p-5">
+          <Card>
+            <CardContent className="p-5">
             <p className="font-mono text-xs text-muted-foreground">
               Available balance
             </p>
             <p className="mt-3 text-2xl text-primary">
               {formatCurrency(payouts.availableBalance)}
             </p>
-          </div>
-          <div className="border border-border bg-card p-5">
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-5">
             <p className="font-mono text-xs text-muted-foreground">
               Reserved amount
             </p>
             <p className="mt-3 text-2xl">
               {formatCurrency(payouts.reservedAmount)}
             </p>
-          </div>
-          <div className="border border-border bg-card p-5">
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-5">
             <p className="font-mono text-xs text-muted-foreground">
               Total revenue
             </p>
             <p className="mt-3 text-2xl">
               {formatCurrency(payouts.totalRevenue)}
             </p>
-          </div>
+            </CardContent>
+          </Card>
         </div>
 
         <section className="mt-8 grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
-          <form
-            action={requestInstructorPayoutAction}
-            className="border border-border bg-card p-5"
-          >
-            <p className="font-mono text-sm text-muted-foreground">
-              New request
-            </p>
-            <h2 className="mt-2 text-2xl">Request payout</h2>
-            <p className="mt-3 text-sm leading-6 text-muted-foreground">
-              Keep the amount within your current available balance. Requests
-              are reviewed manually by the admin team.
-            </p>
+          <Card>
+            <CardContent className="grid gap-5 p-5">
+          <form action={requestInstructorPayoutAction} className="grid gap-5">
+            <div className="space-y-2">
+              <p className="font-mono text-sm text-muted-foreground">
+                New request
+              </p>
+              <h2 className="font-display text-2xl tracking-tight">
+                Request payout
+              </h2>
+              <p className="text-sm leading-6 text-muted-foreground">
+                Keep the amount within your current available balance. Requests
+                are reviewed manually by the admin team.
+              </p>
+            </div>
 
-            <div className="mt-6 grid gap-4">
-              <label className="grid gap-2">
-                <span className="font-mono text-xs text-muted-foreground">
-                  Amount
-                </span>
-                <input
-                  className="border border-input bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-primary"
-                  name="amount"
-                  placeholder="0.00"
-                  required
-                  step="0.01"
-                  type="number"
-                  min="0.01"
-                />
-              </label>
+            <div className="grid gap-4">
+              <FloatingInput
+                label="Amount"
+                name="amount"
+                placeholder="0.00"
+                step="0.01"
+                type="number"
+                min="0.01"
+              />
 
-              <label className="grid gap-2">
-                <span className="font-mono text-xs text-muted-foreground">
-                  Note
-                </span>
-                <textarea
-                  className="min-h-28 border border-input bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-primary"
-                  name="note"
-                  placeholder="Optional note for admin review"
-                />
-              </label>
+              <FloatingTextarea
+                label="Note"
+                name="note"
+                placeholder="Optional note for admin review"
+              />
 
               <input name="currency" type="hidden" value="BDT" />
 
-              <button
-                className="bg-primary px-4 py-2 text-sm text-primary-foreground"
-                type="submit"
-              >
-                Submit request
-              </button>
+              <Button type="submit">Submit request</Button>
             </div>
           </form>
+            </CardContent>
+          </Card>
 
-          <div className="border border-border bg-card p-5">
+          <Card>
+            <CardContent className="grid gap-5 p-5">
             <div className="flex items-end justify-between gap-4">
               <div>
                 <p className="font-mono text-sm text-muted-foreground">
                   Request history
                 </p>
-                <h2 className="mt-2 text-2xl">All payout requests</h2>
+                <h2 className="mt-2 font-display text-2xl tracking-tight">
+                  All payout requests
+                </h2>
               </div>
               <span className="font-mono text-xs text-muted-foreground">
                 {payouts.payouts.length} requests
@@ -203,7 +205,8 @@ export default async function InstructorPayoutsPage() {
                 ))
               )}
             </div>
-          </div>
+            </CardContent>
+          </Card>
         </section>
       </section>
     </main>

@@ -7,6 +7,9 @@ import {
   deleteInstructorQuizAction,
   saveInstructorQuizAction,
 } from "./actions"
+import { Button } from "@workspace/ui/components/button"
+import { Checkbox } from "@workspace/ui/components/checkbox"
+import { FloatingInput } from "@workspace/ui/components/floating-input"
 
 interface QuizBuilderProps {
   courseId: string
@@ -190,19 +193,17 @@ export function QuizBuilder({
   return (
     <div className="grid gap-4 border border-border bg-background p-4">
       <div className="flex flex-col gap-3 md:flex-row md:items-end">
-        <label className="block flex-1 text-sm">
-          Quiz title
-          <input
-            className="mt-2 w-full border border-input bg-card px-3 py-2 text-foreground outline-none focus:border-primary"
+        <div className="flex-1">
+          <FloatingInput
+            label="Quiz title"
             onChange={(event) => setTitle(event.target.value)}
             value={title}
           />
-        </label>
-        <label className="flex items-center gap-2 pb-2 text-sm">
-          <input
+        </div>
+        <label className="flex items-center gap-2 pb-2 text-sm text-muted-foreground">
+          <Checkbox
             checked={isPublished}
-            onChange={(event) => setIsPublished(event.target.checked)}
-            type="checkbox"
+            onCheckedChange={(checked) => setIsPublished(Boolean(checked))}
           />
           Published
         </label>
@@ -211,94 +212,92 @@ export function QuizBuilder({
       {questions.map((question, questionIndex) => (
         <div className="grid gap-3 border-l border-primary pl-4" key={questionIndex}>
           <div className="flex gap-3">
-            <label className="block flex-1 text-sm">
-              Question {questionIndex + 1}
-              <input
-                className="mt-2 w-full border border-input bg-card px-3 py-2 text-foreground outline-none focus:border-primary"
+            <div className="flex-1">
+              <FloatingInput
+                label={`Question ${questionIndex + 1}`}
                 onChange={(event) =>
                   updateQuestion(questionIndex, event.target.value)
                 }
                 value={question.questionText}
               />
-            </label>
-            <button
-              className="mt-7 h-fit border border-destructive px-3 py-2 text-sm text-destructive"
+            </div>
+            <Button
+              className="mt-7 h-fit"
               onClick={() => removeQuestion(questionIndex)}
               type="button"
+              variant="destructive"
             >
               Remove
-            </button>
+            </Button>
           </div>
           <div className="grid gap-2">
             {question.options.map((option, optionIndex) => (
               <div className="grid gap-2 md:grid-cols-[1fr_auto_auto]" key={optionIndex}>
-                <input
-                  className="border border-input bg-card px-3 py-2 text-sm text-foreground outline-none focus:border-primary"
+                <FloatingInput
                   onChange={(event) =>
                     updateOption(questionIndex, optionIndex, {
                       optionText: event.target.value,
                     })
                   }
-                  placeholder={`Option ${optionIndex + 1}`}
+                  label={`Option ${optionIndex + 1}`}
                   value={option.optionText}
                 />
-                <label className="flex items-center gap-2 text-sm">
-                  <input
+                <label className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Checkbox
                     checked={option.isCorrect}
-                    onChange={(event) =>
+                    onCheckedChange={(checked) =>
                       updateOption(questionIndex, optionIndex, {
-                        isCorrect: event.target.checked,
+                        isCorrect: Boolean(checked),
                       })
                     }
-                    type="checkbox"
                   />
                   Correct
                 </label>
-                <button
-                  className="border border-border px-3 py-2 text-sm text-muted-foreground"
+                <Button
+                  variant="ghost"
                   onClick={() => removeOption(questionIndex, optionIndex)}
                   type="button"
                 >
                   Remove
-                </button>
+                </Button>
               </div>
             ))}
           </div>
-          <button
-            className="w-fit border border-primary px-3 py-2 text-sm text-primary"
+          <Button
+            className="w-fit"
             onClick={() => addOption(questionIndex)}
             type="button"
+            variant="outline"
           >
             Add option
-          </button>
+          </Button>
         </div>
       ))}
 
       <div className="flex flex-wrap items-center gap-3">
-        <button
-          className="border border-primary px-4 py-2 text-sm text-primary"
+        <Button
           onClick={addQuestion}
           type="button"
+          variant="outline"
         >
           Add question
-        </button>
-        <button
-          className="bg-primary px-4 py-2 text-sm text-primary-foreground disabled:opacity-60"
+        </Button>
+        <Button
           disabled={isPending}
           onClick={saveQuiz}
           type="button"
         >
           {isPending ? "Saving..." : "Save quiz"}
-        </button>
+        </Button>
         {quiz ? (
-          <button
-            className="border border-destructive px-4 py-2 text-sm text-destructive"
+          <Button
             disabled={isPending}
             onClick={deleteQuiz}
             type="button"
+            variant="destructive"
           >
             Delete quiz
-          </button>
+          </Button>
         ) : null}
         {message ? (
           <p className="text-sm text-muted-foreground" role="status">

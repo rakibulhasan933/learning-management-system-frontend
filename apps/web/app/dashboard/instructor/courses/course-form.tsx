@@ -1,6 +1,16 @@
 import type { InstructorCourseDto } from "@workspace/types"
 
 import { ImageUploadControl } from "@/components/image-upload-control"
+import { Button } from "@workspace/ui/components/button"
+import { FloatingInput } from "@workspace/ui/components/floating-input"
+import { FloatingTextarea } from "@workspace/ui/components/floating-textarea"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@workspace/ui/components/select"
 
 interface CourseFormProps {
   action: (formData: FormData) => Promise<void>
@@ -12,86 +22,69 @@ export function CourseForm({ action, course, submitLabel }: CourseFormProps) {
   return (
     <form action={action} className="grid gap-5 border border-border bg-card p-5">
       {course ? <input name="courseId" type="hidden" value={course.id} /> : null}
-      <label className="block text-sm">
-        Title
-        <input
-          className="mt-2 w-full border border-input bg-background px-3 py-2 text-foreground outline-none focus:border-primary"
-          name="title"
-          required
-          defaultValue={course?.title}
-        />
-      </label>
-      <label className="block text-sm">
-        Slug
-        <input
-          className="mt-2 w-full border border-input bg-background px-3 py-2 font-mono text-sm text-foreground outline-none focus:border-primary"
-          name="slug"
-          pattern="[a-z0-9]+(-[a-z0-9]+)*"
-          required
-          defaultValue={course?.slug}
-        />
-      </label>
-      <label className="block text-sm">
-        Short description
-        <textarea
-          className="mt-2 min-h-24 w-full border border-input bg-background px-3 py-2 text-foreground outline-none focus:border-primary"
-          name="shortDescription"
-          defaultValue={course?.shortDescription ?? ""}
-        />
-      </label>
-      <label className="block text-sm">
-        Description
-        <textarea
-          className="mt-2 min-h-40 w-full border border-input bg-background px-3 py-2 text-foreground outline-none focus:border-primary"
-          name="description"
-          defaultValue={course?.description ?? ""}
-        />
-      </label>
+      <FloatingInput
+        defaultValue={course?.title}
+        label="Title"
+        name="title"
+        required
+      />
+      <FloatingInput
+        className="font-mono text-sm"
+        defaultValue={course?.slug}
+        label="Slug"
+        name="slug"
+        pattern="[a-z0-9]+(-[a-z0-9]+)*"
+        required
+      />
+      <FloatingTextarea
+        defaultValue={course?.shortDescription ?? ""}
+        label="Short description"
+        name="shortDescription"
+      />
+      <FloatingTextarea
+        defaultValue={course?.description ?? ""}
+        label="Description"
+        name="description"
+      />
       <div className="grid gap-4 md:grid-cols-2">
-        <label className="block text-sm">
-          Category
-          <input
-            className="mt-2 w-full border border-input bg-background px-3 py-2 text-foreground outline-none focus:border-primary"
-            name="category"
-            defaultValue={course?.category ?? ""}
-          />
-        </label>
-        <label className="block text-sm">
-          Level
-          <select
-            className="mt-2 w-full border border-input bg-background px-3 py-2 text-foreground outline-none focus:border-primary"
-            name="level"
-            defaultValue={course?.level ?? "all_levels"}
-          >
-            <option value="beginner">Beginner</option>
-            <option value="intermediate">Intermediate</option>
-            <option value="advanced">Advanced</option>
-            <option value="all_levels">All levels</option>
-          </select>
-        </label>
-        <label className="block text-sm">
-          Price
-          <input
-            className="mt-2 w-full border border-input bg-background px-3 py-2 font-mono text-foreground outline-none focus:border-primary"
-            name="price"
-            type="number"
-            min="0"
-            step="0.01"
-            required
-            defaultValue={course?.price ?? "0"}
-          />
-        </label>
-        <label className="block text-sm">
-          Currency
-          <input
-            className="mt-2 w-full border border-input bg-background px-3 py-2 font-mono text-foreground outline-none focus:border-primary"
-            name="currency"
-            maxLength={3}
-            minLength={3}
-            required
-            defaultValue={course?.currency ?? "BDT"}
-          />
-        </label>
+        <FloatingInput
+          defaultValue={course?.category ?? ""}
+          label="Category"
+          name="category"
+        />
+        <div className="grid gap-2">
+          <p className="text-sm text-muted-foreground">Level</p>
+          <Select defaultValue={course?.level ?? "all_levels"} name="level">
+            <SelectTrigger className="w-full rounded-2xl border-border bg-input/20">
+              <SelectValue placeholder="All levels" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="beginner">Beginner</SelectItem>
+              <SelectItem value="intermediate">Intermediate</SelectItem>
+              <SelectItem value="advanced">Advanced</SelectItem>
+              <SelectItem value="all_levels">All levels</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <FloatingInput
+          className="font-mono"
+          defaultValue={course?.price ?? "0"}
+          label="Price"
+          min="0"
+          name="price"
+          step="0.01"
+          type="number"
+          required
+        />
+        <FloatingInput
+          className="font-mono"
+          defaultValue={course?.currency ?? "BDT"}
+          label="Currency"
+          maxLength={3}
+          minLength={3}
+          name="currency"
+          required
+        />
         <div className="md:col-span-2">
           <ImageUploadControl
             buttonLabel="Upload thumbnail"
@@ -102,26 +95,24 @@ export function CourseForm({ action, course, submitLabel }: CourseFormProps) {
             purpose="course_thumbnail"
           />
         </div>
-        <label className="block text-sm">
-          Status
-          <select
-            className="mt-2 w-full border border-input bg-background px-3 py-2 text-foreground outline-none focus:border-primary"
-            name="status"
-            defaultValue={course?.status ?? "draft"}
-          >
-            <option value="draft">Draft</option>
-            <option value="pending_review">Pending review</option>
-            <option value="published">Published</option>
-            <option value="archived">Archived</option>
-          </select>
-        </label>
+        <div className="grid gap-2">
+          <p className="text-sm text-muted-foreground">Status</p>
+          <Select defaultValue={course?.status ?? "draft"} name="status">
+            <SelectTrigger className="w-full rounded-2xl border-border bg-input/20">
+              <SelectValue placeholder="Draft" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="draft">Draft</SelectItem>
+              <SelectItem value="pending_review">Pending review</SelectItem>
+              <SelectItem value="published">Published</SelectItem>
+              <SelectItem value="archived">Archived</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
-      <button
-        className="w-fit bg-primary px-5 py-3 text-sm text-primary-foreground"
-        type="submit"
-      >
+      <Button className="w-fit" type="submit">
         {submitLabel}
-      </button>
+      </Button>
     </form>
   )
 }

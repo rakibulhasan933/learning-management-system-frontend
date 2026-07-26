@@ -4,6 +4,10 @@ import {
   confirmPasswordResetAction,
   sendPasswordResetAction,
 } from "@/app/auth/actions"
+import { Button } from "@workspace/ui/components/button"
+import { Card, CardContent } from "@workspace/ui/components/card"
+import { Alert, AlertDescription } from "@workspace/ui/components/alert"
+import { FloatingInput } from "@workspace/ui/components/floating-input"
 
 interface ResetPasswordPageProps {
   searchParams: Promise<{
@@ -20,69 +24,61 @@ export default async function ResetPasswordPage({
 
   return (
     <main className="min-h-screen bg-background px-6 py-10 text-foreground">
-      <section className="mx-auto max-w-md border border-border bg-card p-6">
-        <div className="mb-6 h-px w-24 bg-primary" />
-        <h1 className="text-3xl">Reset your password</h1>
-        <p className="mt-3 text-sm leading-6 text-muted-foreground">
-          {token
-            ? "Choose a new password to finish the reset."
-            : "Enter your email and we will send a secure reset link."}
-        </p>
+      <section className="mx-auto flex min-h-[calc(100vh-5rem)] w-full max-w-md flex-col justify-center">
+        <Card className="border-border bg-card">
+          <CardContent className="grid gap-5 p-6">
+            <div className="space-y-2">
+              <h1 className="font-display text-3xl tracking-tight">
+                Reset your password
+              </h1>
+              <p className="text-sm leading-6 text-muted-foreground">
+                {token
+                  ? "Choose a new password to finish the reset."
+                  : "Enter your email and we will send a secure reset link."}
+              </p>
+            </div>
 
-        {params.error ? (
-          <p className="mt-4 border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
-            {params.error}
-          </p>
-        ) : null}
+            {params.error ? (
+              <Alert variant="destructive">
+                <AlertDescription>{params.error}</AlertDescription>
+              </Alert>
+            ) : null}
 
-        {token ? (
-          <form action={confirmPasswordResetAction} className="mt-6 space-y-4">
-            <input type="hidden" name="token" value={token} />
-            <label className="block text-sm">
-              New password
-              <input
-                className="mt-2 w-full border border-input bg-background px-3 py-2 text-foreground outline-none focus:border-primary"
-                name="password"
-                type="password"
-                autoComplete="new-password"
-                minLength={8}
-                required
-              />
-            </label>
-            <button
-              className="w-full bg-primary px-4 py-2 text-primary-foreground"
-              type="submit"
-            >
-              Update password
-            </button>
-          </form>
-        ) : (
-          <form action={sendPasswordResetAction} className="mt-6 space-y-4">
-            <label className="block text-sm">
-              Email
-              <input
-                className="mt-2 w-full border border-input bg-background px-3 py-2 text-foreground outline-none focus:border-primary"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-              />
-            </label>
-            <button
-              className="w-full bg-primary px-4 py-2 text-primary-foreground"
-              type="submit"
-            >
-              Send reset link
-            </button>
-          </form>
-        )}
+            {token ? (
+              <form action={confirmPasswordResetAction} className="grid gap-5">
+                <input type="hidden" name="token" value={token} />
+                <FloatingInput
+                  label="New password"
+                  name="password"
+                  type="password"
+                  autoComplete="new-password"
+                />
+                <Button className="w-full" type="submit">
+                  Update password
+                </Button>
+              </form>
+            ) : (
+              <form action={sendPasswordResetAction} className="grid gap-5">
+                <FloatingInput
+                  label="Email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                />
+                <Button className="w-full" type="submit">
+                  Send reset link
+                </Button>
+              </form>
+            )}
 
-        <p className="mt-6 text-sm text-muted-foreground">
-          Remembered it?{" "}
-          <Link className="text-foreground" href="/auth/login">
-            Sign in
-          </Link>
-        </p>
+            <p className="text-sm text-muted-foreground">
+              Remembered it?{" "}
+              <Link className="text-primary hover:underline" href="/auth/login">
+                Sign in
+              </Link>
+            </p>
+          </CardContent>
+        </Card>
       </section>
     </main>
   )

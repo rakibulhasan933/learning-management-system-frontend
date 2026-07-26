@@ -722,3 +722,16 @@ NEXT_PUBLIC_BACKEND_API_URL=
   the ink-navy sidebar with brass-accent active states, sentence-case nav labels,
   role-specific links, user name/email, logout action, and a mobile collapsible
   drawer for admin, instructor, and student dashboards.
+- Frontend UI/UX consistency pass completed: the shared floating-label field pattern
+  now lives in `packages/ui` (`FloatingInput` and `FloatingTextarea`), the app-local
+  wrapper re-exports the shared component, and the auth login/signup flows were moved
+  to RHF + Zod client forms with field-level validation, distinct server error
+  handling, resend-verification actions, and disabled loading submit states.
+- Key frontend screens were brought onto the shadcn primitives used elsewhere in the
+  design system, including the reset-password flow, profile settings, course
+  enrollment, pending payments, payout requests, instructor course forms, course
+  outline builder, assignment/quiz builders, student assignment/quiz panels, upload
+  controls, and the learning player controls.
+- Verification for this pass completed successfully: `pnpm typecheck`, `pnpm lint`,
+  and `pnpm build` all pass after moving auth form state out of the `use server`
+  module and forwarding refs from the shared input/textarea primitives.

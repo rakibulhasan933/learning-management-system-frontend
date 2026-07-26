@@ -6,6 +6,8 @@ import {
   requestLectureVideoUploadAction,
   saveLectureVideoRefAction,
 } from "./actions"
+import { Button } from "@workspace/ui/components/button"
+import { Input } from "@workspace/ui/components/input"
 
 interface VideoUploadControlProps {
   courseId: string
@@ -68,24 +70,19 @@ export function VideoUploadControl({
 
   return (
     <div className="grid gap-2 md:col-span-4">
-      <label className="block text-sm">
-        Upload MP4 to R2
-        <input
-          ref={inputRef}
-          accept="video/mp4"
-          className="mt-2 w-full border border-input bg-card px-3 py-2 text-sm text-foreground outline-none file:mr-3 file:border-0 file:bg-primary file:px-3 file:py-1 file:text-primary-foreground focus:border-primary"
-          type="file"
-        />
+      <label className="grid gap-2 text-sm text-muted-foreground">
+        <span>Upload MP4 to R2</span>
+        <Input ref={inputRef} accept="video/mp4" type="file" />
       </label>
       <div className="flex flex-wrap items-center gap-3">
-        <button
-          className="w-fit border border-primary px-4 py-2 text-sm text-primary disabled:cursor-not-allowed disabled:opacity-60"
+        <Button
           disabled={isPending}
           onClick={uploadSelectedFile}
           type="button"
+          variant="outline"
         >
           {isPending ? "Uploading..." : "Upload video"}
-        </button>
+        </Button>
         {message ? (
           <p className="text-sm text-muted-foreground" role="status">
             {message}

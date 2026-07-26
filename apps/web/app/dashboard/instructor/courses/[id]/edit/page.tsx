@@ -4,6 +4,8 @@ import type {
 } from "@workspace/types"
 
 import { authenticatedApiFetch } from "@/lib/api-client"
+import { Button } from "@workspace/ui/components/button"
+import { Card, CardContent } from "@workspace/ui/components/card"
 
 import {
   deleteInstructorCourseAction,
@@ -52,22 +54,20 @@ export default async function EditInstructorCoursePage({
         <div className="mt-10">
           <CourseOutlineEditor courseId={course.id} outline={outline} />
         </div>
-        <form
-          action={deleteInstructorCourseAction}
-          className="mt-6 border border-destructive/40 bg-destructive/10 p-5"
-        >
-          <input name="courseId" type="hidden" value={course.id} />
-          <p className="text-sm text-muted-foreground">
-            Delete this course draft and its sections. Use this only for courses
-            that should be permanently removed.
-          </p>
-          <button
-            className="mt-4 border border-destructive px-4 py-2 text-sm text-destructive"
-            type="submit"
-          >
-            Delete course
-          </button>
-        </form>
+        <Card className="mt-6 border-destructive/40 bg-card">
+          <CardContent className="grid gap-4 p-5">
+            <form action={deleteInstructorCourseAction} className="grid gap-4">
+              <input name="courseId" type="hidden" value={course.id} />
+              <p className="text-sm text-muted-foreground">
+                Delete this course draft and its sections. Use this only for
+                courses that should be permanently removed.
+              </p>
+              <Button className="w-fit" type="submit" variant="destructive">
+                Delete course
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
       </section>
     </main>
   )

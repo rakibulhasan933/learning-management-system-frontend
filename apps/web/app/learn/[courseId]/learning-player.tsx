@@ -10,6 +10,8 @@ import type {
 import { AssignmentPanel } from "./assignment-panel"
 import { getLectureVideoUrlAction, saveLectureProgressAction } from "./actions"
 import { QuizPanel } from "./quiz-panel"
+import { Button } from "@workspace/ui/components/button"
+import { Input } from "@workspace/ui/components/input"
 
 interface LearningPlayerProps {
   course: LearningCourseResponse["course"]
@@ -367,25 +369,24 @@ export function LearningPlayer({
             <p className="text-sm text-muted-foreground">{message}</p>
           ) : null}
           <div className="flex items-center gap-3">
-            <button
-              className="bg-primary px-4 py-2 text-sm text-primary-foreground disabled:cursor-not-allowed disabled:opacity-60"
+            <Button
               disabled={!videoUrl}
               onClick={togglePlayback}
               type="button"
             >
               {isPlaying ? "Pause" : "Play"}
-            </button>
-            <button
-              className="border border-primary px-4 py-2 text-sm text-primary disabled:cursor-not-allowed disabled:opacity-60"
+            </Button>
+            <Button
               disabled={!selectedLectureId}
               onClick={markSelectedLectureComplete}
               type="button"
+              variant="outline"
             >
               Mark complete
-            </button>
-            <input
+            </Button>
+            <Input
               aria-label="Video progress"
-              className="w-full accent-primary"
+              className="w-full border-0 bg-transparent p-0 accent-primary"
               disabled={!videoUrl}
               max="100"
               min="0"
@@ -415,9 +416,9 @@ export function LearningPlayer({
                 </div>
               ) : null}
               <div className="mt-3 grid gap-2">
-                {section.lectures.map((lecture: LearningLectureDto) => (
-                  <button
-                    className={`border px-3 py-2 text-left text-sm ${
+              {section.lectures.map((lecture: LearningLectureDto) => (
+                  <Button
+                    className={`h-auto justify-start border px-3 py-2 text-left text-sm ${
                       lecture.id === selectedLectureId
                         ? "border-primary text-foreground"
                         : "border-border text-muted-foreground"
@@ -425,8 +426,8 @@ export function LearningPlayer({
                     key={lecture.id}
                     onClick={() => selectLecture(lecture.id)}
                     type="button"
-                  >
-                    <span>{lecture.title}</span>
+                    >
+                      <span>{lecture.title}</span>
                     {lectureProgress[lecture.id]?.isCompleted ? (
                       <span className="mt-1 block font-mono text-xs text-primary">
                         Complete
@@ -443,7 +444,7 @@ export function LearningPlayer({
                         {formatDuration(lecture.durationSeconds)}
                       </span>
                     ) : null}
-                  </button>
+                  </Button>
                 ))}
               </div>
             </div>

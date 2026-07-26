@@ -3,6 +3,9 @@ import type { ProfileDto } from "@workspace/types"
 
 import { ImageUploadControl } from "@/components/image-upload-control"
 import { authenticatedApiFetch } from "@/lib/api-client"
+import { Button } from "@workspace/ui/components/button"
+import { Card, CardContent } from "@workspace/ui/components/card"
+import { FloatingInput } from "@workspace/ui/components/floating-input"
 
 import { updateProfileAction } from "./actions"
 
@@ -32,7 +35,8 @@ export default async function DashboardProfilePage() {
         </div>
 
         <div className="mt-8 grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
-          <div className="border border-[#2A2F3A] bg-[#1B1F29] p-5">
+          <Card className="border-[#2A2F3A] bg-[#1B1F29]">
+            <CardContent className="p-5">
             <div className="relative mx-auto aspect-square w-40 overflow-hidden border border-[#2A2F3A] bg-[#12151C]">
               {profile.avatarUrl ? (
                 <Image
@@ -57,21 +61,18 @@ export default async function DashboardProfilePage() {
                 {profile.role} workspace
               </p>
             </div>
-          </div>
+            </CardContent>
+          </Card>
 
-          <form
-            action={updateProfileAction}
-            className="grid gap-5 border border-[#2A2F3A] bg-[#1B1F29] p-5"
-          >
-            <label className="block text-sm text-[#F2EFE7]">
-              Display name
-              <input
-                className="mt-2 w-full border border-[#2A2F3A] bg-[#12151C] px-3 py-2 text-[#F2EFE7] outline-none focus:border-[#C9A15A]"
-                defaultValue={profile.fullName ?? ""}
-                name="fullName"
-                placeholder="Your name"
-              />
-            </label>
+          <Card className="border-[#2A2F3A] bg-[#1B1F29]">
+            <CardContent className="grid gap-5 p-5">
+          <form action={updateProfileAction} className="grid gap-5">
+            <FloatingInput
+              defaultValue={profile.fullName ?? ""}
+              label="Display name"
+              name="fullName"
+              placeholder="Your name"
+            />
 
             <div className="grid gap-4">
               <ImageUploadControl
@@ -85,14 +86,13 @@ export default async function DashboardProfilePage() {
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
-              <button
-                className="w-fit border border-[#C9A15A] px-4 py-3 text-sm text-[#C9A15A] transition-colors hover:bg-[#171B23]"
-                type="submit"
-              >
+              <Button className="w-fit" type="submit">
                 Save changes
-              </button>
+              </Button>
             </div>
           </form>
+            </CardContent>
+          </Card>
         </div>
       </section>
     </main>

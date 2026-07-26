@@ -13,6 +13,17 @@ import {
 import { MaterialUploadControl } from "./material-upload-control"
 import { QuizBuilder } from "./quiz-builder"
 import { VideoUploadControl } from "./video-upload-control"
+import { Button } from "@workspace/ui/components/button"
+import { Checkbox } from "@workspace/ui/components/checkbox"
+import { FloatingInput } from "@workspace/ui/components/floating-input"
+import { FloatingTextarea } from "@workspace/ui/components/floating-textarea"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@workspace/ui/components/select"
 
 interface CourseOutlineEditorProps {
   courseId: string
@@ -28,11 +39,6 @@ function getNextPosition(items: Array<{ position: number }>) {
     ? Math.max(...items.map((item) => item.position)) + 1
     : 0
 }
-
-const inputClass =
-  "mt-2 w-full border border-input bg-background px-3 py-2 text-foreground outline-none focus:border-primary"
-const compactInputClass =
-  "mt-2 w-full border border-input bg-background px-3 py-2 font-mono text-sm text-foreground outline-none focus:border-primary"
 
 export function CourseOutlineEditor({
   courseId,
@@ -56,45 +62,33 @@ export function CourseOutlineEditor({
         className="grid gap-4 border border-border bg-card p-5 md:grid-cols-[1fr_140px_160px_auto]"
       >
         <input name="courseId" type="hidden" value={courseId} />
-        <label className="block text-sm">
-          Section title
-          <input className={inputClass} name="title" required />
-        </label>
-        <label className="block text-sm">
-          Drip days
-          <input
-            className={compactInputClass}
-            defaultValue="0"
-            min="0"
-            name="dripAfterDays"
-            required
-            type="number"
-          />
-        </label>
-        <label className="block text-sm">
-          Position
-          <input
-            className={compactInputClass}
-            defaultValue={nextSectionPosition}
-            min="0"
-            name="position"
-            required
-            type="number"
-          />
-        </label>
-        <label className="block text-sm md:col-span-3">
-          Description
-          <textarea
-            className="mt-2 min-h-20 w-full border border-input bg-background px-3 py-2 text-foreground outline-none focus:border-primary"
-            name="description"
-          />
-        </label>
-        <button
-          className="h-fit self-end bg-primary px-5 py-3 text-sm text-primary-foreground"
-          type="submit"
-        >
+        <FloatingInput label="Section title" name="title" required />
+        <FloatingInput
+          className="font-mono text-sm"
+          defaultValue="0"
+          label="Drip days"
+          min="0"
+          name="dripAfterDays"
+          required
+          type="number"
+        />
+        <FloatingInput
+          className="font-mono text-sm"
+          defaultValue={nextSectionPosition}
+          label="Position"
+          min="0"
+          name="position"
+          required
+          type="number"
+        />
+        <FloatingTextarea
+          className="md:col-span-3"
+          label="Description"
+          name="description"
+        />
+        <Button className="h-fit self-end" type="submit">
           Add section
-        </button>
+        </Button>
       </form>
 
       {outline.sections.length === 0 ? (
@@ -118,61 +112,50 @@ export function CourseOutlineEditor({
                   >
                     <input name="courseId" type="hidden" value={courseId} />
                     <input name="sectionId" type="hidden" value={section.id} />
-                    <label className="block text-sm">
-                      Section title
-                      <input
-                        className={inputClass}
-                        defaultValue={section.title}
-                        name="title"
-                        required
-                      />
-                    </label>
-                    <label className="block text-sm">
-                      Drip days
-                      <input
-                        className={compactInputClass}
-                        defaultValue={section.dripAfterDays}
-                        min="0"
-                        name="dripAfterDays"
-                        required
-                        type="number"
-                      />
-                    </label>
-                    <label className="block text-sm">
-                      Position
-                      <input
-                        className={compactInputClass}
-                        defaultValue={section.position}
-                        min="0"
-                        name="position"
-                        required
-                        type="number"
-                      />
-                    </label>
-                    <label className="block text-sm md:col-span-3">
-                      Description
-                      <textarea
-                        className="mt-2 min-h-20 w-full border border-input bg-background px-3 py-2 text-foreground outline-none focus:border-primary"
-                        defaultValue={section.description ?? ""}
-                        name="description"
-                      />
-                    </label>
-                    <button
-                      className="w-fit bg-secondary px-4 py-2 text-sm text-secondary-foreground"
-                      type="submit"
-                    >
+                    <FloatingInput
+                      defaultValue={section.title}
+                      label="Section title"
+                      name="title"
+                      required
+                    />
+                    <FloatingInput
+                      className="font-mono text-sm"
+                      defaultValue={section.dripAfterDays}
+                      label="Drip days"
+                      min="0"
+                      name="dripAfterDays"
+                      required
+                      type="number"
+                    />
+                    <FloatingInput
+                      className="font-mono text-sm"
+                      defaultValue={section.position}
+                      label="Position"
+                      min="0"
+                      name="position"
+                      required
+                      type="number"
+                    />
+                    <FloatingTextarea
+                      className="md:col-span-3"
+                      defaultValue={section.description ?? ""}
+                      label="Description"
+                      name="description"
+                    />
+                    <Button className="w-fit" type="submit" variant="secondary">
                       Save section
-                    </button>
+                    </Button>
                   </form>
                   <form action={deleteInstructorSectionAction}>
                     <input name="courseId" type="hidden" value={courseId} />
                     <input name="sectionId" type="hidden" value={section.id} />
-                    <button
-                      className="mt-7 border border-destructive px-4 py-2 text-sm text-destructive"
+                    <Button
+                      className="mt-7"
                       type="submit"
+                      variant="destructive"
                     >
                       Delete
-                    </button>
+                    </Button>
                   </form>
                 </div>
 
@@ -213,46 +196,38 @@ export function CourseOutlineEditor({
                             type="hidden"
                             value={lecture.id}
                           />
-                          <label className="block text-sm md:col-span-2">
-                            Lecture title
-                            <input
-                              className={inputClass}
-                              defaultValue={lecture.title}
-                              name="title"
-                              required
-                            />
-                          </label>
-                          <label className="block text-sm">
-                            Position
-                            <input
-                              className={compactInputClass}
-                              defaultValue={lecture.position}
-                              min="0"
-                              name="position"
-                              required
-                              type="number"
-                            />
-                          </label>
-                          <label className="block text-sm">
-                            Duration
-                            <input
-                              className={compactInputClass}
-                              defaultValue={lecture.durationSeconds ?? ""}
-                              min="0"
-                              name="durationSeconds"
-                              placeholder="seconds"
-                              type="number"
-                            />
-                          </label>
-                          <label className="block text-sm md:col-span-2">
-                            Video reference
-                            <input
-                              className={compactInputClass}
-                              defaultValue={lecture.videoRef ?? ""}
-                              name="videoRef"
-                              placeholder="r2/object-key.mp4"
-                            />
-                          </label>
+                          <FloatingInput
+                            className="md:col-span-2"
+                            defaultValue={lecture.title}
+                            label="Lecture title"
+                            name="title"
+                            required
+                          />
+                          <FloatingInput
+                            className="font-mono text-sm"
+                            defaultValue={lecture.position}
+                            label="Position"
+                            min="0"
+                            name="position"
+                            required
+                            type="number"
+                          />
+                          <FloatingInput
+                            className="font-mono text-sm"
+                            defaultValue={lecture.durationSeconds ?? ""}
+                            label="Duration"
+                            min="0"
+                            name="durationSeconds"
+                            placeholder="seconds"
+                            type="number"
+                          />
+                          <FloatingInput
+                            className="md:col-span-2 font-mono text-sm"
+                            defaultValue={lecture.videoRef ?? ""}
+                            label="Video reference"
+                            name="videoRef"
+                            placeholder="r2/object-key.mp4"
+                          />
                           <VideoUploadControl
                             courseId={courseId}
                             lectureId={lecture.id}
@@ -280,70 +255,65 @@ export function CourseOutlineEditor({
                               targetType="lecture"
                             />
                           </div>
-                          <label className="block text-sm">
-                            Provider
-                            <select
-                              className={inputClass}
+                          <div className="grid gap-2">
+                            <p className="text-sm text-muted-foreground">
+                              Provider
+                            </p>
+                            <Select
                               defaultValue={lecture.videoProvider}
                               name="videoProvider"
                             >
-                              <option value="r2">R2</option>
-                              <option value="bunny">Bunny</option>
-                              <option value="cloudflare_stream">
-                                Cloudflare Stream
-                              </option>
-                              <option value="mux">Mux</option>
-                            </select>
-                          </label>
-                          <label className="block text-sm">
-                            Available at
-                            <input
-                              className={compactInputClass}
-                              defaultValue={toDateTimeLocal(lecture.availableAt)}
-                              name="availableAt"
-                              type="datetime-local"
-                            />
-                          </label>
-                          <label className="block text-sm md:col-span-4">
-                            Description
-                            <textarea
-                              className="mt-2 min-h-20 w-full border border-input bg-card px-3 py-2 text-foreground outline-none focus:border-primary"
-                              defaultValue={lecture.description ?? ""}
-                              name="description"
-                            />
-                          </label>
+                              <SelectTrigger className="w-full rounded-2xl border-border bg-input/20">
+                                <SelectValue placeholder="R2" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="r2">R2</SelectItem>
+                                <SelectItem value="bunny">Bunny</SelectItem>
+                                <SelectItem value="cloudflare_stream">
+                                  Cloudflare Stream
+                                </SelectItem>
+                                <SelectItem value="mux">Mux</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <FloatingInput
+                            className="font-mono text-sm"
+                            defaultValue={toDateTimeLocal(lecture.availableAt)}
+                            label="Available at"
+                            name="availableAt"
+                            type="datetime-local"
+                          />
+                          <FloatingTextarea
+                            className="md:col-span-4"
+                            defaultValue={lecture.description ?? ""}
+                            label="Description"
+                            name="description"
+                          />
                           <div className="flex flex-wrap gap-5 text-sm md:col-span-3">
-                            <label className="flex items-center gap-2">
-                              <input
+                            <label className="flex items-center gap-2 text-muted-foreground">
+                              <Checkbox
                                 defaultChecked={lecture.isPreview}
                                 name="isPreview"
-                                type="checkbox"
                               />
                               Free preview
                             </label>
-                            <label className="flex items-center gap-2">
-                              <input
+                            <label className="flex items-center gap-2 text-muted-foreground">
+                              <Checkbox
                                 defaultChecked={lecture.isPublished}
                                 name="isPublished"
-                                type="checkbox"
                               />
                               Published
                             </label>
                           </div>
                           <div className="flex gap-3">
-                            <button
-                              className="bg-secondary px-4 py-2 text-sm text-secondary-foreground"
-                              type="submit"
-                            >
-                              Save
-                            </button>
-                            <button
-                              className="border border-destructive px-4 py-2 text-sm text-destructive"
+                            <Button type="submit">Save</Button>
+                            <Button
                               formAction={deleteInstructorLectureAction}
                               type="submit"
+                              variant="destructive"
                             >
                               Delete
-                            </button>
+                            </Button>
                           </div>
                         </form>
                         <div className="grid gap-3 border border-border bg-background p-4">
@@ -368,85 +338,75 @@ export function CourseOutlineEditor({
                   >
                     <input name="courseId" type="hidden" value={courseId} />
                     <input name="sectionId" type="hidden" value={section.id} />
-                    <label className="block text-sm md:col-span-2">
-                      New lecture
-                      <input className={inputClass} name="title" required />
-                    </label>
-                    <label className="block text-sm">
-                      Position
-                      <input
-                        className={compactInputClass}
-                        defaultValue={nextLecturePosition}
-                        min="0"
-                        name="position"
-                        required
-                        type="number"
-                      />
-                    </label>
-                    <label className="block text-sm">
-                      Duration
-                      <input
-                        className={compactInputClass}
-                        min="0"
-                        name="durationSeconds"
-                        placeholder="seconds"
-                        type="number"
-                      />
-                    </label>
-                    <label className="block text-sm md:col-span-2">
-                      Video reference
-                      <input
-                        className={compactInputClass}
-                        name="videoRef"
-                        placeholder="r2/object-key.mp4"
-                      />
-                    </label>
-                    <label className="block text-sm">
-                      Provider
-                      <select
-                        className={inputClass}
-                        defaultValue="r2"
-                        name="videoProvider"
-                      >
-                        <option value="r2">R2</option>
-                        <option value="bunny">Bunny</option>
-                        <option value="cloudflare_stream">
-                          Cloudflare Stream
-                        </option>
-                        <option value="mux">Mux</option>
-                      </select>
-                    </label>
-                    <label className="block text-sm">
-                      Available at
-                      <input
-                        className={compactInputClass}
-                        name="availableAt"
-                        type="datetime-local"
-                      />
-                    </label>
-                    <label className="block text-sm md:col-span-4">
-                      Description
-                      <textarea
-                        className="mt-2 min-h-20 w-full border border-input bg-background px-3 py-2 text-foreground outline-none focus:border-primary"
-                        name="description"
-                      />
-                    </label>
+                    <FloatingInput
+                      className="md:col-span-2"
+                      label="New lecture"
+                      name="title"
+                      required
+                    />
+                    <FloatingInput
+                      className="font-mono text-sm"
+                      defaultValue={nextLecturePosition}
+                      label="Position"
+                      min="0"
+                      name="position"
+                      required
+                      type="number"
+                    />
+                    <FloatingInput
+                      className="font-mono text-sm"
+                      label="Duration"
+                      min="0"
+                      name="durationSeconds"
+                      placeholder="seconds"
+                      type="number"
+                    />
+                    <FloatingInput
+                      className="md:col-span-2 font-mono text-sm"
+                      label="Video reference"
+                      name="videoRef"
+                      placeholder="r2/object-key.mp4"
+                    />
+                    <div className="grid gap-2">
+                      <p className="text-sm text-muted-foreground">Provider</p>
+                      <Select defaultValue="r2" name="videoProvider">
+                        <SelectTrigger className="w-full rounded-2xl border-border bg-input/20">
+                          <SelectValue placeholder="R2" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="r2">R2</SelectItem>
+                          <SelectItem value="bunny">Bunny</SelectItem>
+                          <SelectItem value="cloudflare_stream">
+                            Cloudflare Stream
+                          </SelectItem>
+                          <SelectItem value="mux">Mux</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <FloatingInput
+                      className="font-mono text-sm"
+                      label="Available at"
+                      name="availableAt"
+                      type="datetime-local"
+                    />
+                    <FloatingTextarea
+                      className="md:col-span-4"
+                      label="Description"
+                      name="description"
+                    />
                     <div className="flex flex-wrap gap-5 text-sm md:col-span-3">
-                      <label className="flex items-center gap-2">
-                        <input name="isPreview" type="checkbox" />
+                      <label className="flex items-center gap-2 text-muted-foreground">
+                        <Checkbox name="isPreview" />
                         Free preview
                       </label>
-                      <label className="flex items-center gap-2">
-                        <input name="isPublished" type="checkbox" />
+                      <label className="flex items-center gap-2 text-muted-foreground">
+                        <Checkbox name="isPublished" />
                         Published
                       </label>
                     </div>
-                    <button
-                      className="w-fit bg-primary px-4 py-2 text-sm text-primary-foreground"
-                      type="submit"
-                    >
+                    <Button className="w-fit" type="submit">
                       Add lecture
-                    </button>
+                    </Button>
                   </form>
                 </div>
               </article>

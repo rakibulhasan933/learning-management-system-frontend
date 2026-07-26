@@ -6,6 +6,17 @@ import {
   rejectPaymentAction,
 } from "@/app/dashboard/admin/payments/actions"
 import { authenticatedApiFetch } from "@/lib/api-client"
+import { Button } from "@workspace/ui/components/button"
+import { Card, CardContent } from "@workspace/ui/components/card"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@workspace/ui/components/select"
+import { FloatingInput } from "@workspace/ui/components/floating-input"
+import { FloatingTextarea } from "@workspace/ui/components/floating-textarea"
 
 export const dynamic = "force-dynamic"
 
@@ -71,49 +82,53 @@ export default async function AdminPaymentsPage({
         </div>
 
         <form className="mt-8 grid gap-3 border border-border bg-card p-4 md:grid-cols-[1fr_180px_160px_auto]">
-          <input
-            className="border border-input bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-primary"
+          <FloatingInput
             defaultValue={query.q ?? ""}
+            label="Search reference or student email"
             name="q"
-            placeholder="Search reference or student email"
           />
-          <select
-            className="border border-input bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-primary"
-            defaultValue={query.paymentMethod ?? ""}
-            name="paymentMethod"
-          >
-            <option value="">All methods</option>
-            {Object.entries(methodLabels).map(([value, label]) => (
-              <option key={value} value={value}>
-                {label}
-              </option>
-            ))}
-          </select>
-          <select
-            className="border border-input bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-primary"
-            defaultValue={query.sort ?? "created_desc"}
-            name="sort"
-          >
-            <option value="created_desc">Newest first</option>
-            <option value="created_asc">Oldest first</option>
-          </select>
-          <button
-            className="bg-primary px-4 py-2 text-sm text-primary-foreground"
-            type="submit"
-          >
-            Filter
-          </button>
+          <div className="grid gap-2">
+            <p className="text-sm text-muted-foreground">Payment method</p>
+            <Select defaultValue={query.paymentMethod ?? ""} name="paymentMethod">
+              <SelectTrigger className="w-full rounded-2xl border-border bg-input/20">
+                <SelectValue placeholder="All methods" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">All methods</SelectItem>
+                {Object.entries(methodLabels).map(([value, label]) => (
+                  <SelectItem key={value} value={value}>
+                    {label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="grid gap-2">
+            <p className="text-sm text-muted-foreground">Sort</p>
+            <Select defaultValue={query.sort ?? "created_desc"} name="sort">
+              <SelectTrigger className="w-full rounded-2xl border-border bg-input/20">
+                <SelectValue placeholder="Newest first" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="created_desc">Newest first</SelectItem>
+                <SelectItem value="created_asc">Oldest first</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <Button type="submit">Filter</Button>
         </form>
 
         <div className="mt-6 space-y-4">
           {response.orders.length === 0 ? (
-            <div className="border border-border bg-card p-5 text-sm text-muted-foreground">
-              No pending payments match the current filters.
-            </div>
+            <Card className="border-border bg-card">
+              <CardContent className="p-5 text-sm text-muted-foreground">
+                No pending payments match the current filters.
+              </CardContent>
+            </Card>
           ) : (
             response.orders.map((order) => (
-              <article className="border border-border bg-card p-5" key={order.id}>
-                <div className="grid gap-5 lg:grid-cols-[1fr_260px]">
+              <Card key={order.id}>
+                <CardContent className="grid gap-5 p-5 lg:grid-cols-[1fr_260px]">
                   <div>
                     <div className="flex flex-wrap items-center gap-3">
                       <h2 className="text-2xl">{order.courseTitle}</h2>
@@ -155,7 +170,7 @@ export default async function AdminPaymentsPage({
                     </dl>
                     {order.proofScreenshotUrl ? (
                       <a
-                        className="mt-4 inline-block text-sm text-primary hover:text-foreground"
+                        className="mt-4 inline-block text-sm text-primary hover:underline"
                         href={order.proofScreenshotUrl}
                         rel="noreferrer"
                         target="_blank"
@@ -168,31 +183,24 @@ export default async function AdminPaymentsPage({
                   <div className="space-y-3">
                     <form action={approvePaymentAction}>
                       <input name="orderId" type="hidden" value={order.id} />
-                      <button
-                        className="w-full bg-primary px-4 py-2 text-sm text-primary-foreground"
-                        type="submit"
-                      >
+                      <Button className="w-full" type="submit">
                         Approve
-                      </button>
+                      </Button>
                     </form>
                     <form action={rejectPaymentAction} className="space-y-2">
                       <input name="orderId" type="hidden" value={order.id} />
-                      <textarea
-                        className="min-h-24 w-full border border-input bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-primary"
+                      <FloatingTextarea
+                        label="Rejection reason"
                         name="reason"
-                        placeholder="Rejection reason"
                         required
                       />
-                      <button
-                        className="w-full border border-destructive/50 px-4 py-2 text-sm text-destructive"
-                        type="submit"
-                      >
+                      <Button className="w-full" variant="destructive" type="submit">
                         Reject
-                      </button>
+                      </Button>
                     </form>
                   </div>
-                </div>
-              </article>
+                </CardContent>
+              </Card>
             ))
           )}
         </div>

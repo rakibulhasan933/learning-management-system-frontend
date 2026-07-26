@@ -3,6 +3,8 @@
 import { useRef, useState, useTransition } from "react"
 
 import { uploadLectureMaterialAction } from "./actions"
+import { Button } from "@workspace/ui/components/button"
+import { Input } from "@workspace/ui/components/input"
 
 interface MaterialUploadControlProps {
   courseId: string
@@ -82,27 +84,22 @@ export function MaterialUploadControl({
 
   return (
     <div className="grid gap-2">
-      <label className="block text-sm">
-        {label.title}
-        <input
-          ref={inputRef}
-          accept={label.accept}
-          className="mt-2 w-full border border-input bg-card px-3 py-2 text-sm text-foreground outline-none file:mr-3 file:border-0 file:bg-secondary file:px-3 file:py-1 file:text-secondary-foreground focus:border-primary"
-          type="file"
-        />
+      <label className="grid gap-2 text-sm text-muted-foreground">
+        <span>{label.title}</span>
+        <Input ref={inputRef} accept={label.accept} type="file" />
       </label>
       <div className="flex flex-wrap items-center gap-3">
-        <button
-          className="w-fit border border-primary px-4 py-2 text-sm text-primary disabled:cursor-not-allowed disabled:opacity-60"
+        <Button
           disabled={isPending}
           onClick={uploadSelectedFile}
           type="button"
+          variant="outline"
         >
           {isPending ? "Uploading..." : label.button}
-        </button>
+        </Button>
         {materialUrl ? (
           <a
-            className="text-sm text-primary hover:text-foreground"
+            className="text-sm text-primary hover:underline"
             href={materialUrl}
             rel="noreferrer"
             target="_blank"

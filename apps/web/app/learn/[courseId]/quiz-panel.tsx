@@ -8,6 +8,12 @@ import type {
 } from "@workspace/types"
 
 import { submitQuizAction } from "./actions"
+import { Button } from "@workspace/ui/components/button"
+import { Checkbox } from "@workspace/ui/components/checkbox"
+import {
+  RadioGroup,
+  RadioGroupItem,
+} from "@workspace/ui/components/radio-group"
 
 interface QuizPanelProps {
   quiz: StudentQuizDto
@@ -74,41 +80,58 @@ export function QuizPanel({ quiz }: QuizPanelProps) {
 
       {quiz.questions.map((question) => (
         <fieldset className="grid gap-3" key={question.id}>
-          <legend className="text-sm text-foreground">{question.questionText}</legend>
-          {question.options.map((option) => {
-            const checked = (answers[question.id] ?? []).includes(option.id)
+          <legend className="text-sm text-foreground">
+            {question.questionText}
+          </legend>
+          {question.allowMultiple ? (
+            <div className="grid gap-2">
+              {question.options.map((option) => {
+                const checked = (answers[question.id] ?? []).includes(option.id)
 
-            return (
-              <label
-                className="flex items-center gap-2 border border-border px-3 py-2 text-sm text-muted-foreground"
-                key={option.id}
-              >
-                <input
-                  checked={checked}
-                  name={question.id}
-                  onChange={() =>
-                    question.allowMultiple
-                      ? toggleMultiAnswer(question.id, option.id)
-                      : setSingleAnswer(question.id, option.id)
-                  }
-                  type={question.allowMultiple ? "checkbox" : "radio"}
-                />
-                {option.optionText}
-              </label>
-            )
-          })}
+                return (
+                  <label
+                    className="flex items-center gap-2 border border-border px-3 py-2 text-sm text-muted-foreground"
+                    key={option.id}
+                  >
+                    <Checkbox
+                      checked={checked}
+                      onCheckedChange={() =>
+                        toggleMultiAnswer(question.id, option.id)
+                      }
+                    />
+                    {option.optionText}
+                  </label>
+                )
+              })}
+            </div>
+          ) : (
+            <RadioGroup
+              className="grid gap-2"
+              onValueChange={(value) => setSingleAnswer(question.id, value)}
+              value={answers[question.id]?.[0] ?? ""}
+            >
+              {question.options.map((option) => (
+                <label
+                  className="flex items-center gap-2 border border-border px-3 py-2 text-sm text-muted-foreground"
+                  key={option.id}
+                >
+                  <RadioGroupItem value={option.id} />
+                  {option.optionText}
+                </label>
+              ))}
+            </RadioGroup>
+          )}
         </fieldset>
       ))}
 
       <div className="flex flex-wrap items-center gap-3">
-        <button
-          className="bg-primary px-4 py-2 text-sm text-primary-foreground disabled:opacity-60"
+        <Button
           disabled={isPending}
           onClick={submitQuiz}
           type="button"
         >
           {isPending ? "Submitting..." : "Submit quiz"}
-        </button>
+        </Button>
         {message ? (
           <p className="text-sm text-destructive" role="status">
             {message}

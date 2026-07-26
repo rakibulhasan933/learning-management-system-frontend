@@ -8,6 +8,10 @@ import {
   gradeAssignmentSubmissionAction,
   saveInstructorAssignmentAction,
 } from "./actions"
+import { Button } from "@workspace/ui/components/button"
+import { Checkbox } from "@workspace/ui/components/checkbox"
+import { FloatingInput } from "@workspace/ui/components/floating-input"
+import { FloatingTextarea } from "@workspace/ui/components/floating-textarea"
 
 interface AssignmentBuilderProps {
   assignment: InstructorAssignmentDto | null
@@ -132,70 +136,58 @@ export function AssignmentBuilder({
   return (
     <div className="grid gap-4 border border-border bg-background p-4">
       <div className="grid gap-3 md:grid-cols-[1fr_140px_180px_auto] md:items-end">
-        <label className="block text-sm">
-          Assignment title
-          <input
-            className="mt-2 w-full border border-input bg-card px-3 py-2 text-foreground outline-none focus:border-primary"
-            onChange={(event) => setTitle(event.target.value)}
-            value={title}
-          />
-        </label>
-        <label className="block text-sm">
-          Max score
-          <input
-            className="mt-2 w-full border border-input bg-card px-3 py-2 font-mono text-sm text-foreground outline-none focus:border-primary"
-            min="1"
-            onChange={(event) => setMaxScore(Number(event.target.value))}
-            type="number"
-            value={maxScore}
-          />
-        </label>
-        <label className="block text-sm">
-          Due at
-          <input
-            className="mt-2 w-full border border-input bg-card px-3 py-2 font-mono text-sm text-foreground outline-none focus:border-primary"
-            onChange={(event) => setDueAt(event.target.value)}
-            type="datetime-local"
-            value={dueAt}
-          />
-        </label>
-        <label className="flex items-center gap-2 pb-2 text-sm">
-          <input
+        <FloatingInput
+          label="Assignment title"
+          onChange={(event) => setTitle(event.target.value)}
+          value={title}
+        />
+        <FloatingInput
+          className="font-mono text-sm"
+          label="Max score"
+          min="1"
+          onChange={(event) => setMaxScore(Number(event.target.value))}
+          type="number"
+          value={maxScore}
+        />
+        <FloatingInput
+          className="font-mono text-sm"
+          label="Due at"
+          onChange={(event) => setDueAt(event.target.value)}
+          type="datetime-local"
+          value={dueAt}
+        />
+        <label className="flex items-center gap-2 pb-2 text-sm text-muted-foreground">
+          <Checkbox
             checked={isPublished}
-            onChange={(event) => setIsPublished(event.target.checked)}
-            type="checkbox"
+            onCheckedChange={(checked) => setIsPublished(Boolean(checked))}
           />
           Published
         </label>
       </div>
 
-      <label className="block text-sm">
-        Instructions
-        <textarea
-          className="mt-2 min-h-28 w-full border border-input bg-card px-3 py-2 text-foreground outline-none focus:border-primary"
-          onChange={(event) => setInstructions(event.target.value)}
-          value={instructions}
-        />
-      </label>
+      <FloatingTextarea
+        label="Instructions"
+        onChange={(event) => setInstructions(event.target.value)}
+        value={instructions}
+      />
 
       <div className="flex flex-wrap items-center gap-3">
-        <button
-          className="bg-primary px-4 py-2 text-sm text-primary-foreground disabled:opacity-60"
+        <Button
           disabled={isPending}
           onClick={saveAssignment}
           type="button"
         >
           {isPending ? "Saving..." : "Save assignment"}
-        </button>
+        </Button>
         {assignment ? (
-          <button
-            className="border border-destructive px-4 py-2 text-sm text-destructive"
+          <Button
             disabled={isPending}
             onClick={deleteAssignment}
             type="button"
+            variant="destructive"
           >
             Delete assignment
-          </button>
+          </Button>
         ) : null}
         {message ? (
           <p className="text-sm text-muted-foreground" role="status">
@@ -236,33 +228,28 @@ export function AssignmentBuilder({
                 {submission.submissionText}
               </p>
               <div className="grid gap-3 md:grid-cols-[120px_1fr_auto]">
-                <label className="block">
-                  Score
-                  <input
-                    className="mt-2 w-full border border-input bg-background px-3 py-2 font-mono text-sm text-foreground outline-none focus:border-primary"
-                    defaultValue={submission.gradeScore ?? ""}
-                    max={assignment.maxScore}
-                    min="0"
-                    name="gradeScore"
-                    required
-                    type="number"
-                  />
-                </label>
-                <label className="block">
-                  Feedback
-                  <input
-                    className="mt-2 w-full border border-input bg-background px-3 py-2 text-foreground outline-none focus:border-primary"
-                    defaultValue={submission.gradeFeedback ?? ""}
-                    name="gradeFeedback"
-                  />
-                </label>
-                <button
-                  className="h-fit self-end border border-primary px-4 py-2 text-sm text-primary disabled:opacity-60"
+                <FloatingInput
+                  defaultValue={submission.gradeScore ?? ""}
+                  label="Score"
+                  max={assignment.maxScore}
+                  min="0"
+                  name="gradeScore"
+                  required
+                  type="number"
+                />
+                <FloatingInput
+                  defaultValue={submission.gradeFeedback ?? ""}
+                  label="Feedback"
+                  name="gradeFeedback"
+                />
+                <Button
+                  className="h-fit self-end"
                   disabled={isPending}
                   type="submit"
+                  variant="outline"
                 >
                   Save grade
-                </button>
+                </Button>
               </div>
               {submission.gradedAt ? (
                 <p className="font-mono text-xs text-muted-foreground">

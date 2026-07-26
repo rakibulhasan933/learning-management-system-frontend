@@ -7,6 +7,8 @@ import type {
 } from "@workspace/types"
 
 import { submitAssignmentAction } from "./actions"
+import { Button } from "@workspace/ui/components/button"
+import { FloatingTextarea } from "@workspace/ui/components/floating-textarea"
 
 interface AssignmentPanelProps {
   assignment: StudentAssignmentDto
@@ -78,18 +80,14 @@ export function AssignmentPanel({ assignment }: AssignmentPanelProps) {
         </p>
       ) : null}
 
-      <label className="block text-sm">
-        Submission
-        <textarea
-          className="mt-2 min-h-32 w-full border border-input bg-card px-3 py-2 text-foreground outline-none focus:border-primary"
-          onChange={(event) => setSubmissionText(event.target.value)}
-          value={submissionText}
-        />
-      </label>
+      <FloatingTextarea
+        label="Submission"
+        onChange={(event) => setSubmissionText(event.target.value)}
+        value={submissionText}
+      />
 
       <div className="flex flex-wrap items-center gap-3">
-        <button
-          className="bg-primary px-4 py-2 text-sm text-primary-foreground disabled:opacity-60"
+        <Button
           disabled={isPending}
           onClick={submitAssignment}
           type="button"
@@ -99,7 +97,7 @@ export function AssignmentPanel({ assignment }: AssignmentPanelProps) {
             : activeSubmission
               ? "Resubmit assignment"
               : "Submit assignment"}
-        </button>
+        </Button>
         {message ? (
           <p className="text-sm text-muted-foreground" role="status">
             {message}

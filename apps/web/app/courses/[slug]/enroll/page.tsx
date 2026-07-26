@@ -4,6 +4,10 @@ import type { PaymentInstructionsResponse } from "@workspace/types"
 
 import { submitPaymentProofAction } from "@/app/courses/[slug]/enroll/actions"
 import { ApiClientError, authenticatedApiFetch } from "@/lib/api-client"
+import { Button } from "@workspace/ui/components/button"
+import { Card, CardContent } from "@workspace/ui/components/card"
+import { FloatingInput } from "@workspace/ui/components/floating-input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@workspace/ui/components/select"
 
 export const dynamic = "force-dynamic"
 
@@ -52,6 +56,7 @@ export default async function EnrollPage({
 
   const { instructions, order } = payload
   const isPaid = order.status === "paid"
+  const paymentMethodOptions = Object.entries(paymentMethodLabels)
 
   return (
     <main className="min-h-screen bg-background px-6 py-10 text-foreground">
@@ -73,8 +78,11 @@ export default async function EnrollPage({
         ) : null}
 
         <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_380px]">
-          <div className="border border-border bg-card p-5">
-            <h2 className="text-2xl">Payment instructions</h2>
+          <Card className="border-border bg-card">
+            <CardContent className="grid gap-5 p-5">
+            <h2 className="font-display text-2xl tracking-tight">
+              Payment instructions
+            </h2>
             <dl className="mt-5 grid gap-4 text-sm">
               <div className="flex justify-between gap-4 border-b border-border pb-3">
                 <dt className="text-muted-foreground">Amount</dt>
@@ -121,10 +129,12 @@ export default async function EnrollPage({
                 </div>
               ) : null}
             </dl>
-          </div>
+            </CardContent>
+          </Card>
 
-          <div className="border border-border bg-card p-5">
-            <h2 className="text-2xl">
+          <Card className="border-border bg-card">
+            <CardContent className="grid gap-5 p-5">
+            <h2 className="font-display text-2xl tracking-tight">
               {isPaid ? "Enrollment active" : "Submit proof"}
             </h2>
             {isPaid ? (
@@ -133,7 +143,7 @@ export default async function EnrollPage({
                   This order is paid. Your course enrollment is active.
                 </p>
                 <Link
-                  className="block bg-primary px-4 py-3 text-center text-sm text-primary-foreground"
+                  className="block rounded-2xl bg-primary px-4 py-3 text-center text-sm text-primary-foreground"
                   href="/dashboard/student"
                 >
                   Open dashboard
@@ -142,58 +152,43 @@ export default async function EnrollPage({
             ) : (
               <form
                 action={submitPaymentProofAction}
-                className="mt-5 space-y-4"
+                className="mt-5 grid gap-5"
               >
                 <input name="orderId" type="hidden" value={order.id} />
                 <input name="slug" type="hidden" value={slug} />
-                <label className="block text-sm">
-                  Payment method
-                  <select
-                    className="mt-2 w-full border border-input bg-background px-3 py-2 text-foreground outline-none focus:border-primary"
-                    name="paymentMethod"
-                    required
-                  >
-                    {Object.entries(paymentMethodLabels).map(([value, label]) => (
-                      <option key={value} value={value}>
-                        {label}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <label className="block text-sm">
-                  Transaction ID
-                  <input
-                    className="mt-2 w-full border border-input bg-background px-3 py-2 text-foreground outline-none focus:border-primary"
-                    name="transactionId"
-                    required
-                  />
-                </label>
-                <label className="block text-sm">
-                  Sender number
-                  <input
-                    className="mt-2 w-full border border-input bg-background px-3 py-2 text-foreground outline-none focus:border-primary"
-                    name="senderNumber"
-                    required
-                  />
-                </label>
-                <label className="block text-sm">
-                  Screenshot
+                <div className="grid gap-2">
+                  <p className="text-sm text-muted-foreground">Payment method</p>
+                  <Select defaultValue="bkash" name="paymentMethod">
+                    <SelectTrigger className="w-full rounded-2xl border-border bg-input/20">
+                      <SelectValue placeholder="Payment method" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {paymentMethodOptions.map(([value, label]) => (
+                        <SelectItem key={value} value={value}>
+                          {label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <FloatingInput label="Transaction ID" name="transactionId" />
+                <FloatingInput label="Sender number" name="senderNumber" />
+                <label className="grid gap-2 text-sm text-muted-foreground">
+                  <span>Screenshot</span>
                   <input
                     accept="image/*"
-                    className="mt-2 w-full border border-input bg-background px-3 py-2 text-foreground outline-none file:mr-3 file:border-0 file:bg-primary file:px-3 file:py-1 file:text-primary-foreground focus:border-primary"
+                    className="w-full rounded-2xl border border-border bg-input/20 px-3 py-2 text-sm text-foreground file:mr-3 file:border-0 file:bg-primary file:px-3 file:py-1 file:text-primary-foreground"
                     name="proofScreenshot"
                     type="file"
                   />
                 </label>
-                <button
-                  className="w-full bg-primary px-4 py-3 text-sm text-primary-foreground"
-                  type="submit"
-                >
+                <Button className="w-full" type="submit">
                   Submit proof
-                </button>
+                </Button>
               </form>
             )}
-          </div>
+            </CardContent>
+          </Card>
         </div>
       </section>
     </main>
