@@ -7,7 +7,42 @@ import { cn } from "@workspace/ui/lib/utils"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { UnfoldMoreIcon, Tick02Icon, ArrowUp01Icon, ArrowDown01Icon } from "@hugeicons/core-free-icons"
 
-const Select = SelectPrimitive.Root
+type SelectRootProps = Omit<
+  React.ComponentProps<typeof SelectPrimitive.Root>,
+  "defaultValue" | "onValueChange" | "value"
+> & {
+  defaultValue?: string
+  onValueChange?: (value: string) => void
+  value?: string
+}
+
+function Select({
+  value,
+  defaultValue,
+  onValueChange,
+  ...props
+}: SelectRootProps) {
+  const isControlled = value !== undefined
+  const [internalValue, setInternalValue] = React.useState(
+    value ?? defaultValue ?? "",
+  )
+
+  return (
+    <SelectPrimitive.Root
+      value={isControlled ? value : internalValue}
+      onValueChange={(nextValue) => {
+        const resolvedValue = String(nextValue)
+
+        if (!isControlled) {
+          setInternalValue(resolvedValue)
+        }
+
+        onValueChange?.(resolvedValue)
+      }}
+      {...props}
+    />
+  )
+}
 
 function SelectGroup({ className, ...props }: SelectPrimitive.Group.Props) {
   return (

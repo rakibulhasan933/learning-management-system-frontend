@@ -261,6 +261,59 @@ export async function saveLectureVideoRefAction(input: {
   revalidatePath(`/dashboard/instructor/courses/${input.courseId}/edit`)
 }
 
+export interface LectureVideoUploadState {
+  message: string | null
+}
+
+export async function uploadLectureVideoAction(
+  _previousState: LectureVideoUploadState,
+  formData: FormData,
+): Promise<LectureVideoUploadState> {
+  const courseId = getRequiredString(formData, "courseId")
+  const lectureId = getRequiredString(formData, "lectureId")
+  const file = formData.get("videoFile")
+
+  if (!(file instanceof File) || file.size === 0) {
+    return { message: "Choose an MP4 file first." }
+  }
+
+  if (file.type !== "video/mp4") {
+    return { message: "Only MP4 videos are supported." }
+  }
+
+  try {
+    const presign = await requestLectureVideoUploadAction({
+      contentType: file.type,
+      courseId,
+      fileName: file.name,
+      lectureId,
+    })
+
+    const uploadResponse = await fetch(presign.uploadUrl, {
+      body: Buffer.from(await file.arrayBuffer()),
+      headers: presign.headers,
+      method: "PUT",
+    })
+
+    if (!uploadResponse.ok) {
+      throw new Error("R2 upload failed.")
+    }
+
+    await saveLectureVideoRefAction({
+      courseId,
+      lectureId,
+      videoRef: presign.videoRef,
+    })
+
+    return { message: "Video uploaded and saved." }
+  } catch (error) {
+    return {
+      message:
+        error instanceof Error ? error.message : "Video upload failed.",
+    }
+  }
+}
+
 export async function uploadLectureMaterialAction(input: {
   base64: string
   contentType: string

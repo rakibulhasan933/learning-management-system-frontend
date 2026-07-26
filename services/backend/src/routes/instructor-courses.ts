@@ -1,4 +1,4 @@
-import { Router, type Router as ExpressRouter } from "express"
+import { raw, Router, type Router as ExpressRouter } from "express"
 import { z } from "zod"
 import type {
   InstructorCourseDto,
@@ -37,7 +37,11 @@ import {
   getInstructorQuizDtosForCourse,
   toInstructorQuizDto,
 } from "../lib/quizzes.js"
-import { createLectureVideoKey, createR2UploadUrl } from "../lib/r2.js"
+import {
+  createLectureVideoKey,
+  createR2UploadUrl,
+  uploadLectureVideoToR2,
+} from "../lib/r2.js"
 import { uploadLectureMaterial } from "../lib/supabase-storage.js"
 import { requireAuth, requireRole } from "../middleware/auth.js"
 
@@ -87,6 +91,9 @@ const lectureMutationSchema = z.object({
 const lecturePatchSchema = lectureMutationSchema.partial()
 const videoUploadUrlSchema = z.object({
   contentType: z.literal("video/mp4"),
+  fileName: z.string().trim().min(1).max(255),
+})
+const videoUploadQuerySchema = z.object({
   fileName: z.string().trim().min(1).max(255),
 })
 const lectureMaterialUploadSchema = z.object({
@@ -728,6 +735,53 @@ instructorCoursesRouter.patch(
     }
 
     response.status(200).json(toInstructorLectureDto(updated))
+  }),
+)
+
+instructorCoursesRouter.post(
+  "/:id/lectures/:lectureId/video-upload",
+  requireAuth,
+  raw({ limit: "1024mb", type: "video/mp4" }),
+  asyncHandler(async (request, response) => {
+    const params = lectureIdParamsSchema.parse(request.params)
+    const query = videoUploadQuerySchema.parse(request.query)
+    const instructorId = request.auth!.profile!.id
+
+    await assertInstructorOwnsCourse(params.id, instructorId)
+    await assertLectureBelongsToCourse(params.lectureId, params.id)
+
+    if (!Buffer.isBuffer(request.body) || request.body.length === 0) {
+      throw new HttpError(400, "Video file is required.")
+    }
+
+    const videoRef = createLectureVideoKey({
+      courseId: params.id,
+      fileName: query.fileName,
+      lectureId: params.lectureId,
+    })
+
+    await uploadLectureVideoToR2({
+      body: request.body,
+      contentType: "video/mp4",
+      key: videoRef,
+    })
+
+    const [updated] = await db
+      .update(lectures)
+      .set({
+        videoProvider: "r2",
+        videoRef,
+      })
+      .where(eq(lectures.id, params.lectureId))
+      .returning()
+
+    if (!updated) {
+      throw new HttpError(404, "Lecture not found.")
+    }
+
+    response.status(201).json({
+      message: "Video uploaded and saved.",
+    })
   }),
 )
 

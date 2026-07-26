@@ -86,3 +86,22 @@ export async function createR2PlaybackUrl(key: string) {
 
   return getSignedUrl(getR2Client(), command, { expiresIn: playbackUrlTtlSeconds })
 }
+
+export async function uploadLectureVideoToR2({
+  body,
+  contentType,
+  key,
+}: {
+  body: Buffer
+  contentType: "video/mp4"
+  key: string
+}) {
+  const command = new PutObjectCommand({
+    Body: body,
+    Bucket: getBucketName(),
+    ContentType: contentType,
+    Key: key,
+  })
+
+  await getR2Client().send(command)
+}

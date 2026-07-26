@@ -506,6 +506,13 @@ NEXT_PUBLIC_BACKEND_API_URL=
   and time-limited presigned GET URLs through `GET /lectures/:id/video-url`. The video
   URL resolver is provider-aware and currently supports `video_provider = 'r2'`, with
   unsupported providers returning a clear not-implemented response for future migration.
+- Video upload flow was hardened after the initial R2 rollout: the instructor upload
+  control now dispatches the upload action inside `startTransition`, the shared input
+  wrapper leaves `type="file"` uncontrolled so browser file inputs can reset cleanly,
+  and the leftover upload debug logs were removed. The upload path now avoids the
+  browser-to-R2 CORS failure mode while preserving the server-side R2 upload flow.
+- Validation completed for the upload-control fix: `pnpm typecheck`, `pnpm lint`, and
+  `pnpm build` all pass after the file-input and transition cleanup.
 - UploadThing is now wired for image uploads only. The web app hosts a typed
   `/api/uploadthing` route with a single `imageUploader` file route limited to JPG, PNG,
   and WEBP images up to 4 MB. The instructor course builder now uses an UploadThing
@@ -529,6 +536,12 @@ NEXT_PUBLIC_BACKEND_API_URL=
   `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET_NAME`, and a
   bucket CORS rule allowing browser PUT uploads from the web origin are required to
   verify actual upload/playback against R2.
+- Instructor video uploads now use a browser-to-backend XHR flow so the UI can show
+  live MB progress and support pause/abort during upload while the backend writes the
+  bytes to R2 and saves the lecture ref server-side. The shared file input wrapper now
+  leaves `type="file"` uncontrolled so uploads reset cleanly after completion.
+- Validation completed for the upload-progress change set: `pnpm typecheck`,
+  `pnpm lint`, and `pnpm build` all pass after the XHR progress/pause rollout.
 - Quiz MVP is implemented for MCQ quizzes only. The Drizzle schema now includes
   `quizzes`, `quiz_questions`, `quiz_options`, and `quiz_attempts`, with each quiz
   attached to exactly one section or lecture, normalized MCQ options with
