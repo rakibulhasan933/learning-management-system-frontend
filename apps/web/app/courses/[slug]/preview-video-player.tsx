@@ -116,8 +116,8 @@ export function PreviewVideoPlayer({
   return (
     <section className="mt-10 border border-border bg-card">
       <div className="grid gap-2 border-b border-border p-4">
-        <p className="font-mono text-sm text-muted-foreground">Free preview</p>
-        <h2 className="text-2xl">{selectedLecture?.title}</h2>
+        <p className="font-mono text-xs text-muted-foreground sm:text-sm">Free preview</p>
+        <h2 className="text-xl sm:text-2xl">{selectedLecture?.title}</h2>
       </div>
       <div className="relative aspect-video bg-background">
         {videoUrl ? (
@@ -137,7 +137,7 @@ export function PreviewVideoPlayer({
           </div>
         )}
         <div
-          className="pointer-events-none absolute font-mono text-sm text-foreground opacity-20"
+          className="pointer-events-none absolute max-w-[72%] break-words font-mono text-[11px] text-foreground opacity-20 sm:text-sm"
           style={{
             left: watermarkPosition.left,
             top: watermarkPosition.top,
@@ -149,7 +149,7 @@ export function PreviewVideoPlayer({
       </div>
       <div className="grid gap-3 border-t border-border p-4">
         <button
-          className="w-fit bg-primary px-4 py-2 text-sm text-primary-foreground disabled:cursor-not-allowed disabled:opacity-60"
+          className="w-full bg-primary px-4 py-2 text-sm text-primary-foreground disabled:cursor-not-allowed disabled:opacity-60 sm:w-fit"
           disabled={!videoUrl}
           onClick={togglePlayback}
           type="button"

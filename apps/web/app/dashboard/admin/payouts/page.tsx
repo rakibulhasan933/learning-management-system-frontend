@@ -35,7 +35,7 @@ export default async function AdminPayoutsPage() {
   ).length
 
   return (
-    <main className="min-h-screen bg-background px-6 py-10 text-foreground">
+    <main className="min-h-screen bg-background px-4 py-8 text-foreground sm:px-6 sm:py-10">
       <section className="mx-auto max-w-6xl">
         <div className="mb-8 h-px w-28 bg-primary" />
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
@@ -43,7 +43,9 @@ export default async function AdminPayoutsPage() {
             <p className="font-mono text-sm text-muted-foreground">
               Admin dashboard
             </p>
-            <h1 className="mt-3 text-4xl tracking-tight">Instructor payouts</h1>
+            <h1 className="mt-3 text-3xl tracking-tight sm:text-4xl">
+              Instructor payouts
+            </h1>
             <p className="mt-4 max-w-2xl text-sm leading-6 text-muted-foreground">
               Review instructor payout requests, approve or reject pending
               requests, and mark approved payouts as paid.

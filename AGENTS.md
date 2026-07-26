@@ -709,6 +709,16 @@ NEXT_PUBLIC_BACKEND_API_URL=
 - Instructor dashboard verification completed this session: `pnpm typecheck`,
   `pnpm lint`, and `pnpm build` all pass after adding the instructor analytics and
   payout workflow.
+- Responsive web pass completed across the main LMS surfaces: the dashboard shell now
+  uses a mobile drawer/sidebar pattern, public and auth pages use smaller responsive
+  paddings and text scales, course detail and enrollment layouts stack cleanly on
+  narrow screens, admin user and instructor student rosters switch to mobile card
+  layouts, and the learning/preview video players keep controls and watermark text
+  usable at phone widths. A few dense analytics and builder areas still rely on
+  intentional card/scroll patterns for long data sets, but the pages no longer depend
+  on fixed desktop-only widths.
+- Responsive verification completed: `pnpm typecheck`, `pnpm lint`, and `pnpm build`
+  all pass after the layout updates.
 - Admin user management now supports direct instructor creation from the backend-owned
   user store, and `services/backend/src/scripts/seed-admin.ts` seeds or updates a
   single verified admin account from `SEED_ADMIN_EMAIL`, `SEED_ADMIN_PASSWORD`, and

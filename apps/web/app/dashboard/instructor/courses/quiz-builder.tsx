@@ -192,7 +192,7 @@ export function QuizBuilder({
 
   return (
     <div className="grid gap-4 border border-border bg-background p-4">
-      <div className="flex flex-col gap-3 md:flex-row md:items-end">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
         <div className="flex-1">
           <FloatingInput
             label="Quiz title"
@@ -211,7 +211,7 @@ export function QuizBuilder({
 
       {questions.map((question, questionIndex) => (
         <div className="grid gap-3 border-l border-primary pl-4" key={questionIndex}>
-          <div className="flex gap-3">
+          <div className="flex flex-col gap-3 sm:flex-row">
             <div className="flex-1">
               <FloatingInput
                 label={`Question ${questionIndex + 1}`}
@@ -222,7 +222,7 @@ export function QuizBuilder({
               />
             </div>
             <Button
-              className="mt-7 h-fit"
+              className="h-fit sm:mt-7"
               onClick={() => removeQuestion(questionIndex)}
               type="button"
               variant="destructive"
@@ -232,7 +232,7 @@ export function QuizBuilder({
           </div>
           <div className="grid gap-2">
             {question.options.map((option, optionIndex) => (
-              <div className="grid gap-2 md:grid-cols-[1fr_auto_auto]" key={optionIndex}>
+              <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto_auto]" key={optionIndex}>
                 <FloatingInput
                   onChange={(event) =>
                     updateOption(questionIndex, optionIndex, {
@@ -264,7 +264,7 @@ export function QuizBuilder({
             ))}
           </div>
           <Button
-            className="w-fit"
+            className="w-full sm:w-fit"
             onClick={() => addOption(questionIndex)}
             type="button"
             variant="outline"
@@ -274,8 +274,9 @@ export function QuizBuilder({
         </div>
       ))}
 
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:flex-wrap sm:items-center">
         <Button
+          className="w-full sm:w-auto"
           onClick={addQuestion}
           type="button"
           variant="outline"
@@ -283,6 +284,7 @@ export function QuizBuilder({
           Add question
         </Button>
         <Button
+          className="w-full sm:w-auto"
           disabled={isPending}
           onClick={saveQuiz}
           type="button"
@@ -291,6 +293,7 @@ export function QuizBuilder({
         </Button>
         {quiz ? (
           <Button
+            className="w-full sm:w-auto"
             disabled={isPending}
             onClick={deleteQuiz}
             type="button"

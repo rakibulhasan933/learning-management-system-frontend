@@ -287,8 +287,8 @@ export function LearningPlayer({
   }
 
   return (
-    <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_320px]">
-      <div className="border border-border bg-card">
+    <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+      <div className="min-w-0 border border-border bg-card">
         <div className="grid gap-2 border-b border-border p-4">
           <div className="flex items-center justify-between gap-4 text-sm">
             <span className="font-mono text-muted-foreground">
@@ -307,7 +307,7 @@ export function LearningPlayer({
           </div>
         </div>
         <div className="relative aspect-video bg-background">
-              {videoUrl ? (
+          {videoUrl ? (
             <video
               ref={videoRef}
               className="h-full w-full object-contain"
@@ -334,7 +334,7 @@ export function LearningPlayer({
             </div>
           )}
           <div
-            className="pointer-events-none absolute font-mono text-sm text-foreground opacity-20"
+            className="pointer-events-none absolute max-w-[72%] break-words font-mono text-[11px] text-foreground opacity-20 sm:text-sm"
             style={{
               left: watermarkPosition.left,
               top: watermarkPosition.top,
@@ -350,7 +350,7 @@ export function LearningPlayer({
             <p className="font-mono text-xs text-muted-foreground">
               {course.title}
             </p>
-            <h2 className="mt-1 text-2xl">
+            <h2 className="mt-1 text-xl sm:text-2xl">
               {selectedLecture?.title ?? "No published lectures"}
             </h2>
             {selectedProgress ? (
@@ -368,8 +368,9 @@ export function LearningPlayer({
           {message && videoUrl ? (
             <p className="text-sm text-muted-foreground">{message}</p>
           ) : null}
-          <div className="flex items-center gap-3">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
             <Button
+              className="w-full sm:w-auto"
               disabled={!videoUrl}
               onClick={togglePlayback}
               type="button"
@@ -377,6 +378,7 @@ export function LearningPlayer({
               {isPlaying ? "Pause" : "Play"}
             </Button>
             <Button
+              className="w-full sm:w-auto"
               disabled={!selectedLectureId}
               onClick={markSelectedLectureComplete}
               type="button"
@@ -386,7 +388,7 @@ export function LearningPlayer({
             </Button>
             <Input
               aria-label="Video progress"
-              className="w-full border-0 bg-transparent p-0 accent-primary"
+              className="w-full min-w-0 border-0 bg-transparent p-0 accent-primary"
               disabled={!videoUrl}
               max="100"
               min="0"
@@ -398,13 +400,13 @@ export function LearningPlayer({
         </div>
       </div>
 
-      <aside className="border border-border bg-card p-5">
+      <aside className="border border-border bg-card p-4 sm:p-5">
         <p className="font-mono text-sm text-muted-foreground">Course outline</p>
         <div className="mt-4 h-px w-full bg-primary" />
         <div className="mt-5 grid gap-5">
           {sections.map((section) => (
             <div key={section.id}>
-              <h3 className="text-lg">{section.title}</h3>
+              <h3 className="text-base sm:text-lg">{section.title}</h3>
               {section.quiz ? (
                 <div className="mt-3">
                   <QuizPanel quiz={section.quiz} />
@@ -416,9 +418,9 @@ export function LearningPlayer({
                 </div>
               ) : null}
               <div className="mt-3 grid gap-2">
-              {section.lectures.map((lecture: LearningLectureDto) => (
+                {section.lectures.map((lecture: LearningLectureDto) => (
                   <Button
-                    className={`h-auto justify-start border px-3 py-2 text-left text-sm ${
+                    className={`h-auto w-full justify-start border px-3 py-2 text-left text-sm ${
                       lecture.id === selectedLectureId
                         ? "border-primary text-foreground"
                         : "border-border text-muted-foreground"
@@ -426,8 +428,8 @@ export function LearningPlayer({
                     key={lecture.id}
                     onClick={() => selectLecture(lecture.id)}
                     type="button"
-                    >
-                      <span>{lecture.title}</span>
+                  >
+                    <span className="min-w-0 break-words">{lecture.title}</span>
                     {lectureProgress[lecture.id]?.isCompleted ? (
                       <span className="mt-1 block font-mono text-xs text-primary">
                         Complete

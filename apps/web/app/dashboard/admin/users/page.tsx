@@ -45,7 +45,7 @@ export default async function AdminUsersPage({
   )
 
   return (
-    <main className="min-h-screen bg-background px-6 py-10 text-foreground">
+    <main className="min-h-screen bg-background px-4 py-8 text-foreground sm:px-6 sm:py-10">
       <section className="mx-auto max-w-6xl">
         <div className="mb-8 h-px w-28 bg-primary" />
         <p className="font-mono text-sm text-muted-foreground">
@@ -53,7 +53,7 @@ export default async function AdminUsersPage({
         </p>
         <div className="mt-3 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
-            <h1 className="text-4xl tracking-tight">User management</h1>
+            <h1 className="text-3xl tracking-tight sm:text-4xl">User management</h1>
             <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">
               Review account roles and suspend or reactivate access from the
               backend-owned user store.
@@ -144,7 +144,72 @@ export default async function AdminUsersPage({
           </form>
         </div>
 
-        <div className="mt-6 overflow-x-auto border border-border bg-card">
+        <div className="mt-6 border border-border bg-card md:hidden">
+          <div className="grid gap-3 p-4">
+            {response.users.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                No users match the current filters.
+              </p>
+            ) : (
+              response.users.map((user) => (
+                <article className="grid gap-3 border border-border bg-background p-4" key={user.id}>
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="font-mono text-sm">{user.email}</p>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        {user.fullName ?? "No name"}
+                      </p>
+                    </div>
+                    <span className="border border-primary px-2 py-1 font-mono text-[11px] text-primary">
+                      {user.role}
+                    </span>
+                  </div>
+                  <dl className="grid gap-2 text-sm text-muted-foreground">
+                    <div className="flex justify-between gap-4">
+                      <dt>Provider</dt>
+                      <dd className="font-mono text-foreground">{user.authProvider}</dd>
+                    </div>
+                    <div className="flex justify-between gap-4">
+                      <dt>Email</dt>
+                      <dd className="font-mono text-foreground">
+                        {user.emailVerifiedAt ? "Verified" : "Unverified"}
+                      </dd>
+                    </div>
+                    <div className="flex justify-between gap-4">
+                      <dt>Status</dt>
+                      <dd className="font-mono text-foreground">
+                        {user.suspendedAt ? "Suspended" : "Active"}
+                      </dd>
+                    </div>
+                    <div className="flex justify-between gap-4">
+                      <dt>Joined</dt>
+                      <dd className="font-mono text-foreground">
+                        {new Date(user.createdAt).toLocaleDateString()}
+                      </dd>
+                    </div>
+                  </dl>
+                  <form
+                    action={user.suspendedAt ? activateUserAction : suspendUserAction}
+                  >
+                    <input name="userId" type="hidden" value={user.id} />
+                    <button
+                      className={
+                        user.suspendedAt
+                          ? "w-full border border-primary px-3 py-2 text-primary"
+                          : "w-full border border-destructive/50 px-3 py-2 text-destructive"
+                      }
+                      type="submit"
+                    >
+                      {user.suspendedAt ? "Activate" : "Suspend"}
+                    </button>
+                  </form>
+                </article>
+              ))
+            )}
+          </div>
+        </div>
+
+        <div className="mt-6 hidden overflow-x-auto border border-border bg-card md:block">
           <table className="w-full min-w-[860px] border-collapse text-sm">
             <thead>
               <tr className="border-b border-border text-left text-muted-foreground">

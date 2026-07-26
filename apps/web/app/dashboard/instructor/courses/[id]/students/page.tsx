@@ -29,7 +29,7 @@ export default async function InstructorCourseStudentsPage({
   )
 
   return (
-    <main className="min-h-screen bg-background px-6 py-10 text-foreground">
+    <main className="min-h-screen bg-background px-4 py-8 text-foreground sm:px-6 sm:py-10">
       <section className="mx-auto max-w-6xl">
         <div className="mb-8 h-px w-28 bg-primary" />
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
@@ -37,7 +37,7 @@ export default async function InstructorCourseStudentsPage({
             <p className="font-mono text-sm text-muted-foreground">
               Instructor dashboard
             </p>
-            <h1 className="mt-3 text-4xl tracking-tight">{response.course.title}</h1>
+            <h1 className="mt-3 text-3xl tracking-tight sm:text-4xl">{response.course.title}</h1>
             <p className="mt-4 max-w-2xl text-sm leading-6 text-muted-foreground">
               Student roster, enrollment status, and completion progress for this
               course.
@@ -113,7 +113,55 @@ export default async function InstructorCourseStudentsPage({
             </span>
           </div>
 
-          <div className="mt-5 overflow-x-auto">
+          <div className="mt-5 space-y-3 md:hidden">
+            {response.students.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No enrolled students yet.</p>
+            ) : (
+              response.students.map((student) => (
+                <article className="grid gap-3 border border-border bg-background p-4" key={student.enrollmentId}>
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="font-mono text-sm">{student.email}</p>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        {student.fullName ?? "No name"}
+                      </p>
+                    </div>
+                    <span className="border border-primary px-2 py-1 font-mono text-[11px] text-primary">
+                      {statusLabel(student.enrollmentStatus)}
+                    </span>
+                  </div>
+                  <dl className="grid gap-2 text-sm">
+                    <div className="flex justify-between gap-4">
+                      <dt className="text-muted-foreground">Progress</dt>
+                      <dd className="font-mono">{student.completedLectureCount}/{student.totalLectureCount}</dd>
+                    </div>
+                    <div className="flex justify-between gap-4">
+                      <dt className="text-muted-foreground">Completion</dt>
+                      <dd className="font-mono">{student.completionRate}%</dd>
+                    </div>
+                    <div className="flex justify-between gap-4">
+                      <dt className="text-muted-foreground">Last watched</dt>
+                      <dd className="text-right">
+                        {student.lastWatchedAt ? new Date(student.lastWatchedAt).toLocaleString() : "No progress yet"}
+                      </dd>
+                    </div>
+                    <div className="flex justify-between gap-4">
+                      <dt className="text-muted-foreground">Completed at</dt>
+                      <dd className="text-right">
+                        {student.completedAt ? new Date(student.completedAt).toLocaleString() : "Not completed"}
+                      </dd>
+                    </div>
+                    <div className="flex justify-between gap-4">
+                      <dt className="text-muted-foreground">Enrolled</dt>
+                      <dd className="text-right">{new Date(student.enrolledAt).toLocaleString()}</dd>
+                    </div>
+                  </dl>
+                </article>
+              ))
+            )}
+          </div>
+
+          <div className="mt-5 hidden overflow-x-auto md:block">
             <table className="w-full min-w-[1080px] border-collapse text-sm">
               <thead>
                 <tr className="border-b border-border text-left text-muted-foreground">

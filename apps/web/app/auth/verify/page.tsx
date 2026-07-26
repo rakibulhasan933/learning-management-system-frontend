@@ -29,13 +29,13 @@ export default async function VerifyPage({ searchParams }: VerifyPageProps) {
   }
 
   return (
-    <main className="min-h-screen bg-background px-6 py-10 text-foreground">
-      <section className="mx-auto max-w-md border border-border bg-card p-6">
+    <main className="min-h-screen bg-background px-4 py-8 text-foreground sm:px-6 sm:py-10">
+      <section className="mx-auto w-full max-w-md border border-border bg-card p-5 sm:p-6">
         <div className="mb-6 h-px w-24 bg-primary" />
         <p className="font-mono text-sm text-muted-foreground">
           Check your inbox
         </p>
-        <h1 className="mt-3 text-3xl">
+        <h1 className="mt-3 text-3xl sm:text-4xl">
           {verified
             ? "Email verified."
             : isReset
@@ -54,10 +54,7 @@ export default async function VerifyPage({ searchParams }: VerifyPageProps) {
             {error}
           </p>
         ) : null}
-        <Link
-          className="mt-6 inline-block bg-primary px-4 py-2 text-primary-foreground"
-          href="/auth/login"
-        >
+        <Link className="mt-6 inline-flex bg-primary px-4 py-2 text-primary-foreground" href="/auth/login">
           Back to sign in
         </Link>
       </section>

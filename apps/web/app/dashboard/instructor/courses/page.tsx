@@ -12,7 +12,7 @@ export default async function InstructorCoursesPage() {
   )
 
   return (
-    <main className="min-h-screen bg-background px-6 py-10 text-foreground">
+    <main className="min-h-screen bg-background px-4 py-8 text-foreground sm:px-6 sm:py-10">
       <section className="mx-auto max-w-6xl">
         <div className="mb-8 h-px w-28 bg-primary" />
         <div className="flex flex-wrap items-end justify-between gap-4">
@@ -20,14 +20,16 @@ export default async function InstructorCoursesPage() {
             <p className="font-mono text-sm text-muted-foreground">
               Instructor courses
             </p>
-            <h1 className="mt-3 text-4xl tracking-tight">Manage your courses</h1>
+            <h1 className="mt-3 text-3xl tracking-tight sm:text-4xl">
+              Manage your courses
+            </h1>
           </div>
-          <Link
-            className="bg-primary px-4 py-2 text-sm text-primary-foreground"
-            href="/dashboard/instructor/courses/new"
-          >
-            Create course
-          </Link>
+            <Link
+              className="bg-primary px-4 py-2 text-sm text-primary-foreground"
+              href="/dashboard/instructor/courses/new"
+            >
+              Create course
+            </Link>
         </div>
 
         <div className="mt-8 grid gap-4">

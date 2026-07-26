@@ -135,7 +135,7 @@ export function AssignmentBuilder({
 
   return (
     <div className="grid gap-4 border border-border bg-background p-4">
-      <div className="grid gap-3 md:grid-cols-[1fr_140px_180px_auto] md:items-end">
+      <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_140px_180px_auto] sm:items-end">
         <FloatingInput
           label="Assignment title"
           onChange={(event) => setTitle(event.target.value)}
@@ -171,8 +171,9 @@ export function AssignmentBuilder({
         value={instructions}
       />
 
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:flex-wrap sm:items-center">
         <Button
+          className="w-full sm:w-auto"
           disabled={isPending}
           onClick={saveAssignment}
           type="button"
@@ -181,6 +182,7 @@ export function AssignmentBuilder({
         </Button>
         {assignment ? (
           <Button
+            className="w-full sm:w-auto"
             disabled={isPending}
             onClick={deleteAssignment}
             type="button"
@@ -227,7 +229,7 @@ export function AssignmentBuilder({
               <p className="whitespace-pre-wrap border border-border bg-background p-3 text-muted-foreground">
                 {submission.submissionText}
               </p>
-              <div className="grid gap-3 md:grid-cols-[120px_1fr_auto]">
+              <div className="grid gap-3 sm:grid-cols-[120px_minmax(0,1fr)_auto]">
                 <FloatingInput
                   defaultValue={submission.gradeScore ?? ""}
                   label="Score"
@@ -243,7 +245,7 @@ export function AssignmentBuilder({
                   name="gradeFeedback"
                 />
                 <Button
-                  className="h-fit self-end"
+                  className="w-full h-fit self-end sm:w-auto"
                   disabled={isPending}
                   type="submit"
                   variant="outline"

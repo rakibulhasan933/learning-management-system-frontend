@@ -23,12 +23,12 @@ export default async function ResetPasswordPage({
   const token = params.token
 
   return (
-    <main className="min-h-screen bg-background px-6 py-10 text-foreground">
-      <section className="mx-auto flex min-h-[calc(100vh-5rem)] w-full max-w-md flex-col justify-center">
+    <main className="min-h-screen bg-background px-4 py-8 text-foreground sm:px-6 sm:py-10">
+      <section className="mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-md flex-col justify-center sm:min-h-[calc(100vh-5rem)]">
         <Card className="border-border bg-card">
-          <CardContent className="grid gap-5 p-6">
+          <CardContent className="grid gap-5 p-5 sm:p-6">
             <div className="space-y-2">
-              <h1 className="font-display text-3xl tracking-tight">
+              <h1 className="font-display text-3xl tracking-tight sm:text-4xl">
                 Reset your password
               </h1>
               <p className="text-sm leading-6 text-muted-foreground">

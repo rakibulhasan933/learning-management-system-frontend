@@ -53,14 +53,14 @@ export default async function CourseDetailPage({ params }: CourseDetailPageProps
   ])
 
   return (
-    <main className="min-h-screen bg-background px-6 py-10 text-foreground">
-      <section className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[1fr_360px]">
+    <main className="min-h-screen bg-background px-4 py-8 text-foreground sm:px-6 sm:py-10">
+      <section className="mx-auto grid max-w-6xl gap-8 lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-10">
         <div>
           <div className="mb-8 h-px w-28 bg-primary" />
           <p className="font-mono text-sm text-muted-foreground">
             {course.category ?? "General"} · {course.level.replace("_", " ")}
           </p>
-          <h1 className="mt-4 max-w-3xl text-5xl tracking-tight">
+          <h1 className="mt-4 max-w-3xl text-4xl tracking-tight sm:text-5xl">
             {course.title}
           </h1>
           <p className="mt-5 max-w-2xl text-base leading-7 text-muted-foreground">
@@ -79,7 +79,7 @@ export default async function CourseDetailPage({ params }: CourseDetailPageProps
           <div className="mt-10 space-y-4">
             <h2 className="text-2xl">Course outline</h2>
             {course.sections.map((section) => (
-              <div className="border border-border bg-card p-5" key={section.id}>
+              <div className="border border-border bg-card p-4 sm:p-5" key={section.id}>
                 <p className="font-mono text-xs text-muted-foreground">
                   Section {section.position + 1}
                 </p>
@@ -100,7 +100,7 @@ export default async function CourseDetailPage({ params }: CourseDetailPageProps
           </div>
         </div>
 
-        <aside className="h-fit border border-border bg-card p-6">
+        <aside className="h-fit border border-border bg-card p-5 sm:p-6">
           <p className="font-mono text-sm text-muted-foreground">Enrollment</p>
           <p className="mt-4 text-3xl">
             {Number(course.price) === 0

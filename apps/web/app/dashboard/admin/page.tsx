@@ -44,11 +44,13 @@ export default async function AdminDashboardPage() {
   ]
 
   return (
-    <main className="min-h-screen bg-background px-6 py-10 text-foreground">
+    <main className="min-h-screen bg-background px-4 py-8 text-foreground sm:px-6 sm:py-10">
       <section className="mx-auto max-w-6xl">
         <div className="mb-8 h-px w-28 bg-primary" />
         <p className="font-mono text-sm text-muted-foreground">Admin dashboard</p>
-        <h1 className="mt-3 text-4xl tracking-tight">Platform control center</h1>
+        <h1 className="mt-3 text-3xl tracking-tight sm:text-4xl">
+          Platform control center
+        </h1>
         <p className="mt-4 max-w-2xl text-sm leading-6 text-muted-foreground">
           Manage users, review submitted courses, monitor revenue, and process
           manual payments from the backend-owned control surface.

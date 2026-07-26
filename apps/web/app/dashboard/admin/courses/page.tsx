@@ -17,7 +17,7 @@ export default async function AdminCoursesPage() {
     )
 
   return (
-    <main className="min-h-screen bg-background px-6 py-10 text-foreground">
+    <main className="min-h-screen bg-background px-4 py-8 text-foreground sm:px-6 sm:py-10">
       <section className="mx-auto max-w-6xl">
         <div className="mb-8 h-px w-28 bg-primary" />
         <p className="font-mono text-sm text-muted-foreground">
@@ -25,7 +25,7 @@ export default async function AdminCoursesPage() {
         </p>
         <div className="mt-3 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
-            <h1 className="text-4xl tracking-tight">Course approval</h1>
+            <h1 className="text-3xl tracking-tight sm:text-4xl">Course approval</h1>
             <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">
               Review courses submitted by instructors before they appear in the
               public catalog.

@@ -51,7 +51,7 @@ export default async function InstructorDashboardPage() {
   ]
 
   return (
-    <main className="min-h-screen bg-background px-6 py-10 text-foreground">
+    <main className="min-h-screen bg-background px-4 py-8 text-foreground sm:px-6 sm:py-10">
       <section className="mx-auto max-w-6xl">
         <div className="mb-8 h-px w-28 bg-primary" />
         <div
@@ -62,7 +62,9 @@ export default async function InstructorDashboardPage() {
             <p className="font-mono text-sm text-muted-foreground">
               Instructor dashboard
             </p>
-            <h1 className="mt-3 text-4xl tracking-tight">Course operations</h1>
+            <h1 className="mt-3 text-3xl tracking-tight sm:text-4xl">
+              Course operations
+            </h1>
             <p className="mt-4 max-w-2xl text-sm leading-6 text-muted-foreground">
               Track course performance, review enrolled students, and manage
               payout requests from one dark-first control surface.

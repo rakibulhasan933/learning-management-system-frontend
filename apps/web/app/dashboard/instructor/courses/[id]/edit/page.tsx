@@ -37,13 +37,13 @@ export default async function EditInstructorCoursePage({
   ])
 
   return (
-    <main className="min-h-screen bg-background px-6 py-10 text-foreground">
+    <main className="min-h-screen bg-background px-4 py-8 text-foreground sm:px-6 sm:py-10">
       <section className="mx-auto max-w-4xl">
         <div className="mb-8 h-px w-28 bg-primary" />
         <p className="font-mono text-sm text-muted-foreground">
           Editing {course.slug}
         </p>
-        <h1 className="mt-3 text-4xl tracking-tight">{course.title}</h1>
+        <h1 className="mt-3 text-3xl tracking-tight sm:text-4xl">{course.title}</h1>
         <div className="mt-8">
           <CourseForm
             action={updateInstructorCourseAction}
@@ -62,7 +62,7 @@ export default async function EditInstructorCoursePage({
                 Delete this course draft and its sections. Use this only for
                 courses that should be permanently removed.
               </p>
-              <Button className="w-fit" type="submit" variant="destructive">
+              <Button className="w-full sm:w-fit" type="submit" variant="destructive">
                 Delete course
               </Button>
             </form>

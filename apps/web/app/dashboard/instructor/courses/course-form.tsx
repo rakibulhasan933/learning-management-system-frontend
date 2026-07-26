@@ -110,7 +110,7 @@ export function CourseForm({ action, course, submitLabel }: CourseFormProps) {
           </Select>
         </div>
       </div>
-      <Button className="w-fit" type="submit">
+      <Button className="w-full sm:w-fit" type="submit">
         {submitLabel}
       </Button>
     </form>

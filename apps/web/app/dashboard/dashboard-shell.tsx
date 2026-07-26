@@ -5,10 +5,18 @@ import { useEffect, useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
+import { Menu } from "lucide-react"
 import type { ProfileDto, UserRole } from "@workspace/types"
 
 import { signOutAction } from "@/app/auth/actions"
 import { cn } from "@workspace/ui/lib/utils"
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@workspace/ui/components/sheet"
+import { Button } from "@workspace/ui/components/button"
 
 type DashboardNavItem = {
   href: string
@@ -115,31 +123,16 @@ export function DashboardShell({ children, profile }: DashboardShellProps) {
 
   return (
     <div className="min-h-screen bg-[#12151C] text-[#F2EFE7] lg:flex">
-      <button
-        aria-label="Close navigation"
-        className={cn(
-          "fixed inset-0 z-30 bg-black/60 transition-opacity lg:hidden",
-          mobileOpen ? "opacity-100" : "pointer-events-none opacity-0",
-        )}
-        onClick={() => setMobileOpen(false)}
-        type="button"
-      />
-
-      <aside
-        className={cn(
-          "fixed inset-y-0 left-0 z-40 w-80 border-r border-[#2A2F3A] bg-[#12151C] transition-transform duration-200 lg:static lg:z-auto lg:flex lg:min-h-screen lg:flex-col lg:translate-x-0",
-          mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
-        )}
-      >
+      <aside className="hidden min-h-screen w-80 border-r border-[#2A2F3A] bg-[#12151C] lg:flex lg:flex-col">
         <div className="flex h-full flex-col px-5 py-6">
           <div className="space-y-4">
             <div className="h-px w-24 bg-[#C9A15A]" />
-            <div>
+            <div className="space-y-4">
               <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-[#8B8D98]">
                 {profile.role} workspace
               </p>
-              <h2 className="mt-3 text-2xl font-normal tracking-tight"></h2>
-                <div className="relative h-12 w-12 overflow-hidden rounded-full border border-[#2A2F3A] bg-[#1B1F29]">
+              <div className="flex items-center gap-3">
+                <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full border border-[#2A2F3A] bg-[#1B1F29]">
                   {profile.avatarUrl ? (
                     <Image
                       alt={name}
@@ -156,8 +149,11 @@ export function DashboardShell({ children, profile }: DashboardShellProps) {
                 </div>
                 <div className="min-w-0">
                   <h2 className="text-2xl font-normal tracking-tight">{name}</h2>
-                  <p className="mt-2 text-sm text-[#8B8D98]">{profile.email}</p>
+                  <p className="mt-1 break-words text-sm text-[#8B8D98]">
+                    {profile.email}
+                  </p>
                 </div>
+              </div>
             </div>
           </div>
 
@@ -199,14 +195,70 @@ export function DashboardShell({ children, profile }: DashboardShellProps) {
         </div>
       </aside>
 
+      <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+        <SheetContent
+          className="w-[min(88vw,20rem)] border-r border-[#2A2F3A] bg-[#12151C] text-[#F2EFE7]"
+          side="left"
+          showCloseButton
+        >
+          <SheetHeader className="border-b border-[#2A2F3A] px-5 py-6">
+            <SheetTitle className="text-left font-normal">
+              <span className="font-mono text-[11px] uppercase tracking-[0.24em] text-[#8B8D98]">
+                {profile.role} workspace
+              </span>
+              <span className="mt-3 block text-2xl tracking-tight">{name}</span>
+            </SheetTitle>
+            <p className="break-words text-sm text-[#8B8D98]">{profile.email}</p>
+          </SheetHeader>
+
+          <div className="flex h-full flex-col px-5 py-6">
+            <nav className="space-y-2">
+              <DashboardNavLink
+                currentHash={currentHash}
+                currentPathname={pathname}
+                href="/dashboard/profile"
+                label="Profile settings"
+                onNavigate={() => setMobileOpen(false)}
+              />
+              {navigation.map((item) => (
+                <DashboardNavLink
+                  currentHash={currentHash}
+                  currentPathname={pathname}
+                  href={item.href}
+                  key={item.href}
+                  label={item.label}
+                  onNavigate={() => setMobileOpen(false)}
+                />
+              ))}
+            </nav>
+
+            <div className="mt-auto pt-8">
+              <div className="border-t border-[#2A2F3A] pt-5">
+                <p className="break-words text-sm text-[#8B8D98]">
+                  {profile.email}
+                </p>
+                <form action={signOutAction} className="mt-4">
+                  <button
+                    className="w-full border border-[#C9A15A] px-4 py-3 text-sm text-[#C9A15A] transition-colors hover:bg-[#1B1F29]"
+                    type="submit"
+                  >
+                    Sign out
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </SheetContent>
+      </Sheet>
+
       <div className="flex min-h-screen flex-1 flex-col">
-        <header className="flex items-center justify-between border-b border-[#2A2F3A] px-5 py-4 lg:hidden">
+        <header className="flex items-center justify-between gap-4 border-b border-[#2A2F3A] px-4 py-4 sm:px-5 lg:hidden">
           <div>
             <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-[#8B8D98]">
               {profile.role} workspace
             </p>
-            <div className="mt-2 flex items-center gap-3">
-              <div className="relative h-9 w-9 overflow-hidden rounded-full border border-[#2A2F3A] bg-[#1B1F29]">
+            <div className="mt-2 flex min-w-0 items-center gap-3">
+              <div className="relative h-9 w-9 shrink-0 overflow-hidden rounded-full border border-[#2A2F3A] bg-[#1B1F29]">
                 {profile.avatarUrl ? (
                   <Image
                     alt={name}
@@ -221,28 +273,27 @@ export function DashboardShell({ children, profile }: DashboardShellProps) {
                   </div>
                 )}
               </div>
-              <Link
-                className="text-sm text-[#F2EFE7]"
-                href="/dashboard/profile"
-              >
+              <Link className="min-w-0 truncate text-sm text-[#F2EFE7]" href="/dashboard/profile">
                 {name}
               </Link>
             </div>
           </div>
           <div className="flex items-center gap-2">
             <Link
-              className="border border-[#2A2F3A] px-3 py-2 text-sm text-[#F2EFE7]"
+              className="hidden border border-[#2A2F3A] px-3 py-2 text-sm text-[#F2EFE7] sm:inline-flex"
               href="/dashboard/profile"
             >
               Profile
             </Link>
-            <button
-              className="border border-[#C9A15A] px-3 py-2 text-sm text-[#C9A15A]"
+            <Button
+              className="border border-[#C9A15A] bg-transparent px-3 py-2 text-sm text-[#C9A15A] hover:bg-[#1B1F29]"
               onClick={() => setMobileOpen(true)}
               type="button"
+              variant="ghost"
             >
-              Menu
-            </button>
+              <Menu className="h-4 w-4" />
+              <span className="sr-only">Open navigation</span>
+            </Button>
           </div>
         </header>
 
