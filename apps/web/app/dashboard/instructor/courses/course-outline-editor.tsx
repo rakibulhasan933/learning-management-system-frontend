@@ -59,7 +59,7 @@ export function CourseOutlineEditor({
 
       <form
         action={createInstructorSectionAction}
-        className="grid gap-4 border border-border bg-card p-5 md:grid-cols-[1fr_140px_160px_auto]"
+        className="grid gap-4 border border-border bg-card p-5 md:grid-cols-[1fr_140px_160px]"
       >
         <input name="courseId" type="hidden" value={courseId} />
         <FloatingInput label="Section title" name="title" required />
@@ -86,7 +86,7 @@ export function CourseOutlineEditor({
           label="Description"
           name="description"
         />
-        <Button className="h-fit self-end" type="submit">
+        <Button className="w-fit md:col-span-3" type="submit">
           Add section
         </Button>
       </form>
