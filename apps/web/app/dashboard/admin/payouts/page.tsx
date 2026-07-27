@@ -1,4 +1,12 @@
 import Link from "next/link"
+import {
+  ArrowLeft,
+  CheckCircle2,
+  Clock3,
+  Landmark,
+  ShieldCheck,
+  XCircle,
+} from "lucide-react"
 import type { AdminPayoutListResponse } from "@workspace/types"
 
 import {
@@ -15,7 +23,47 @@ function statusLabel(status: string) {
 }
 
 function formatCurrency(currency: string, amount: string) {
-  return `${currency} ${amount}`
+  const numeric = Number(amount)
+  const formatted = Number.isFinite(numeric)
+    ? new Intl.NumberFormat("en-US", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }).format(numeric)
+    : amount
+  return `${currency} ${formatted}`
+}
+
+function formatDateTime(iso: string) {
+  return new Date(iso).toLocaleString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  })
+}
+
+const STATUS_STYLE: Record<
+  string,
+  { dot: string; text: string; icon: typeof Clock3 }
+> = {
+  pending: { dot: "bg-[#D9A441]", text: "text-[#D9A441]", icon: Clock3 },
+  approved: { dot: "bg-[#6C9BFF]", text: "text-[#6C9BFF]", icon: ShieldCheck },
+  paid: { dot: "bg-[#4FAE7C]", text: "text-[#4FAE7C]", icon: CheckCircle2 },
+  rejected: { dot: "bg-[#E5484D]", text: "text-[#E5484D]", icon: XCircle },
+}
+
+function StatusBadge({ status }: { status: string }) {
+  const style = STATUS_STYLE[status] ?? STATUS_STYLE["pending"]
+  // style is guaranteed via fallback above; assert non-null for TypeScript
+  return (
+    <span
+      className={`inline-flex items-center gap-1.5 border border-[#22262B] px-2 py-1 font-mono text-[11px] uppercase tracking-wide ${style!.text}`}
+    >
+      <span className={`h-1.5 w-1.5 rounded-full ${style!.dot}`} />
+      {statusLabel(status)}
+    </span>
+  )
 }
 
 export default async function AdminPayoutsPage() {
@@ -34,102 +82,135 @@ export default async function AdminPayoutsPage() {
     (payout) => payout.status === "paid",
   ).length
 
+  const stats = [
+    { label: "Total", value: response.payouts.length, tone: "default" as const },
+    { label: "Pending", value: pendingCount, tone: "warn" as const },
+    { label: "Approved", value: approvedCount, tone: "blue" as const },
+    { label: "Paid", value: paidCount, tone: "green" as const },
+  ]
+
   return (
-    <main className="min-h-screen bg-background px-4 py-8 text-foreground sm:px-6 sm:py-10">
+    <main className="min-h-screen bg-[#0B0D0F] px-4 py-10 text-[#EDEEF0] sm:px-6 lg:px-10">
       <section className="mx-auto max-w-6xl">
-        <div className="mb-8 h-px w-28 bg-primary" />
-        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+        {/* Masthead */}
+        <div className="flex flex-col gap-6 border-b border-[#22262B] pb-8 md:flex-row md:items-end md:justify-between">
           <div>
-            <p className="font-mono text-sm text-muted-foreground">
-              Admin dashboard
+            <p className="font-mono text-xs uppercase tracking-[0.25em] text-[#C9A24B]">
+              Admin dashboard · Ledger
             </p>
-            <h1 className="mt-3 text-3xl tracking-tight sm:text-4xl">
+            <h1 className="mt-3 text-3xl font-medium tracking-tight text-[#EDEEF0] sm:text-4xl">
               Instructor payouts
             </h1>
-            <p className="mt-4 max-w-2xl text-sm leading-6 text-muted-foreground">
-              Review instructor payout requests, approve or reject pending
-              requests, and mark approved payouts as paid.
+            <p className="mt-3 max-w-xl text-sm leading-6 text-[#8B929B]">
+                  Review payout requests, approve or reject what&apos;s pending, and
+              mark approved requests paid once the transfer is sent.
             </p>
           </div>
           <Link
-            className="border border-border px-4 py-2 text-sm text-foreground"
+            className="inline-flex w-fit items-center gap-2 border border-[#22262B] px-4 py-2 text-sm text-[#EDEEF0] transition-colors hover:border-[#C9A24B]/60 hover:text-[#C9A24B]"
             href="/dashboard/admin"
           >
-            Back to dashboard
+            <ArrowLeft className="h-3.5 w-3.5" />
+            Dashboard
           </Link>
         </div>
 
-        <div className="mt-8 grid gap-4 md:grid-cols-4">
-          <div className="border border-border bg-card p-5">
-            <p className="font-mono text-xs text-muted-foreground">Total</p>
-            <p className="mt-3 text-2xl">{response.payouts.length}</p>
-          </div>
-          <div className="border border-border bg-card p-5">
-            <p className="font-mono text-xs text-muted-foreground">Pending</p>
-            <p className="mt-3 text-2xl text-primary">{pendingCount}</p>
-          </div>
-          <div className="border border-border bg-card p-5">
-            <p className="font-mono text-xs text-muted-foreground">Approved</p>
-            <p className="mt-3 text-2xl">{approvedCount}</p>
-          </div>
-          <div className="border border-border bg-card p-5">
-            <p className="font-mono text-xs text-muted-foreground">Paid</p>
-            <p className="mt-3 text-2xl">{paidCount}</p>
-          </div>
-        </div>
+        {/* Stat strip */}
+        <dl className="mt-6 grid grid-cols-2 gap-px overflow-hidden border border-[#22262B] bg-[#22262B] sm:grid-cols-4">
+          {stats.map(({ label, value, tone }) => (
+            <div className="bg-[#0E1013] px-5 py-4" key={label}>
+              <dt className="text-xs uppercase tracking-wide text-[#8B929B]">
+                {label}
+              </dt>
+              <dd
+                className={`mt-1.5 font-mono text-2xl ${
+                  tone === "warn"
+                    ? "text-[#D9A441]"
+                    : tone === "blue"
+                      ? "text-[#6C9BFF]"
+                      : tone === "green"
+                        ? "text-[#4FAE7C]"
+                        : "text-[#EDEEF0]"
+                }`}
+              >
+                {String(value).padStart(2, "0")}
+              </dd>
+            </div>
+          ))}
+        </dl>
 
-        <div className="mt-8 space-y-4">
+        {/* Queue */}
+        <div className="mt-6 divide-y divide-[#22262B] border border-[#22262B] bg-[#131619]">
           {response.payouts.length === 0 ? (
-            <div className="border border-border bg-card p-5 text-sm text-muted-foreground">
-              No payout requests are waiting for review.
+            <div className="flex flex-col items-center gap-2 px-4 py-14 text-center">
+              <Landmark className="h-5 w-5 text-[#8B929B]" />
+              <p className="text-sm text-[#EDEEF0]">
+                No payout requests are waiting for review.
+              </p>
             </div>
           ) : (
-            response.payouts.map((payout) => (
-              <article className="border border-border bg-card p-5" key={payout.id}>
-                <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+            response.payouts.map((payout, index) => (
+              <article
+                className="group relative border-l-2 border-transparent px-5 py-6 transition-colors hover:border-[#C9A24B] hover:bg-[#0E1013] sm:px-6"
+                key={payout.id}
+              >
+                <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
                   <div className="max-w-3xl">
                     <div className="flex flex-wrap items-center gap-3">
-                      <h2 className="text-2xl">{payout.instructorName ?? payout.instructorEmail}</h2>
-                      <span className="border border-primary px-2 py-1 font-mono text-[11px] text-primary">
-                        {statusLabel(payout.status)}
+                      <span className="font-mono text-xs text-[#8B929B]">
+                        {String(index + 1).padStart(2, "0")}
                       </span>
+                      <h2 className="text-xl text-[#EDEEF0] sm:text-2xl">
+                        {payout.instructorName ?? payout.instructorEmail}
+                      </h2>
+                      <StatusBadge status={payout.status} />
                     </div>
-                    <p className="mt-2 font-mono text-sm text-muted-foreground">
+                    <p className="mt-2 font-mono text-xs text-[#8B929B]">
                       {payout.referenceCode}
                     </p>
 
                     <dl className="mt-4 grid gap-3 text-sm md:grid-cols-2 xl:grid-cols-4">
                       <div>
-                        <dt className="text-muted-foreground">Amount</dt>
-                        <dd className="font-mono">
+                        <dt className="text-xs uppercase tracking-wide text-[#8B929B]">
+                          Amount
+                        </dt>
+                        <dd className="mt-0.5 font-mono text-[#C9A24B]">
                           {formatCurrency(payout.currency, payout.amount)}
                         </dd>
                       </div>
                       <div>
-                        <dt className="text-muted-foreground">Submitted</dt>
-                        <dd>{new Date(payout.createdAt).toLocaleString()}</dd>
+                        <dt className="text-xs uppercase tracking-wide text-[#8B929B]">
+                          Submitted
+                        </dt>
+                        <dd className="mt-0.5 font-mono text-[#EDEEF0]">
+                          {formatDateTime(payout.createdAt)}
+                        </dd>
                       </div>
                       <div>
-                        <dt className="text-muted-foreground">Reviewed by</dt>
-                        <dd className="font-mono">
+                        <dt className="text-xs uppercase tracking-wide text-[#8B929B]">
+                          Reviewed by
+                        </dt>
+                        <dd className="mt-0.5 font-mono text-[#EDEEF0]">
                           {payout.reviewedByEmail ?? "Pending"}
                         </dd>
                       </div>
                       <div>
-                        <dt className="text-muted-foreground">Paid at</dt>
-                        <dd>
+                        <dt className="text-xs uppercase tracking-wide text-[#8B929B]">
+                          Paid at
+                        </dt>
+                        <dd className="mt-0.5 font-mono text-[#EDEEF0]">
                           {payout.paidAt
-                            ? new Date(payout.paidAt).toLocaleString()
+                            ? formatDateTime(payout.paidAt)
                             : "Pending"}
                         </dd>
                       </div>
                     </dl>
 
-                    <p className="mt-4 text-sm leading-6 text-muted-foreground">
+                    <p className="mt-4 text-sm leading-6 text-[#8B929B]">
                       {payout.note ?? "No note provided."}
                     </p>
                     {payout.rejectionReason ? (
-                      <p className="mt-4 border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                      <p className="mt-4 border border-[#E5484D]/40 bg-[#E5484D]/10 px-3 py-2 text-sm text-[#E5484D]">
                         {payout.rejectionReason}
                       </p>
                     ) : null}
@@ -139,31 +220,41 @@ export default async function AdminPayoutsPage() {
                     {payout.status === "pending" ? (
                       <>
                         <form action={approvePayoutAction}>
-                          <input name="payoutId" type="hidden" value={payout.id} />
+                          <input
+                            name="payoutId"
+                            type="hidden"
+                            value={payout.id}
+                          />
                           <button
-                            className="w-full bg-primary px-4 py-2 text-sm text-primary-foreground"
+                            className="flex w-full items-center justify-center gap-2 bg-[#C9A24B] px-4 py-2 text-sm font-medium text-[#14110A] transition-opacity hover:opacity-90"
                             type="submit"
                           >
+                            <CheckCircle2 className="h-3.5 w-3.5" />
                             Approve
                           </button>
                         </form>
                         <form className="grid gap-3" action={rejectPayoutAction}>
-                          <input name="payoutId" type="hidden" value={payout.id} />
+                          <input
+                            name="payoutId"
+                            type="hidden"
+                            value={payout.id}
+                          />
                           <label className="grid gap-2">
-                            <span className="font-mono text-xs text-muted-foreground">
+                            <span className="text-xs uppercase tracking-wide text-[#8B929B]">
                               Rejection reason
                             </span>
                             <textarea
-                              className="min-h-24 border border-input bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-primary"
+                              className="min-h-24 border border-[#22262B] bg-[#0E1013] px-3 py-2 text-sm text-[#EDEEF0] outline-none placeholder:text-[#8B929B] focus:border-[#C9A24B]/60"
                               name="rejectionReason"
                               placeholder="Explain why the request was rejected"
                               required
                             />
                           </label>
                           <button
-                            className="w-full border border-destructive/50 px-4 py-2 text-sm text-destructive"
+                            className="flex w-full items-center justify-center gap-2 border border-[#E5484D]/50 px-4 py-2 text-sm text-[#E5484D] transition-colors hover:bg-[#E5484D]/10"
                             type="submit"
                           >
+                            <XCircle className="h-3.5 w-3.5" />
                             Reject
                           </button>
                         </form>
@@ -174,9 +265,10 @@ export default async function AdminPayoutsPage() {
                       <form action={markPayoutPaidAction}>
                         <input name="payoutId" type="hidden" value={payout.id} />
                         <button
-                          className="w-full border border-primary px-4 py-2 text-sm text-primary"
+                          className="flex w-full items-center justify-center gap-2 border border-[#4FAE7C]/60 px-4 py-2 text-sm text-[#4FAE7C] transition-colors hover:bg-[#4FAE7C]/10"
                           type="submit"
                         >
+                          <Landmark className="h-3.5 w-3.5" />
                           Mark paid
                         </button>
                       </form>
