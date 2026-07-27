@@ -108,6 +108,50 @@ function StatusChip({
   )
 }
 
+function ConfirmDeleteButton({
+  label = "Delete",
+  confirmLabel = "Confirm delete",
+  size = "sm",
+}: {
+  label?: string
+  confirmLabel?: string
+  size?: "sm" | "default"
+}) {
+  const [confirming, setConfirming] = useState(false)
+
+  if (confirming) {
+    return (
+      <div className="flex items-center gap-2">
+        <Button size={size} type="submit" variant="destructive">
+          {confirmLabel}
+        </Button>
+        <Button
+          onClick={() => setConfirming(false)}
+          size={size}
+          type="button"
+          variant="outline"
+        >
+          Cancel
+        </Button>
+      </div>
+    )
+  }
+
+  return (
+    <Button
+      onClick={(event) => {
+        event.preventDefault()
+        setConfirming(true)
+      }}
+      size={size}
+      type="submit"
+      variant="destructive"
+    >
+      {label}
+    </Button>
+  )
+}
+
 function LectureAccordionItem({
   courseId,
   lecture,
@@ -156,9 +200,7 @@ function LectureAccordionItem({
           <form action={deleteInstructorLectureAction}>
             <input name="courseId" type="hidden" value={courseId} />
             <input name="lectureId" type="hidden" value={lecture.id} />
-            <Button size="sm" type="submit" variant="destructive">
-              Delete
-            </Button>
+            <ConfirmDeleteButton />
           </form>
         </div>
       </div>
@@ -394,9 +436,7 @@ function SectionAccordionItem({
           <form action={deleteInstructorSectionAction}>
             <input name="courseId" type="hidden" value={courseId} />
             <input name="sectionId" type="hidden" value={section.id} />
-            <Button size="sm" type="submit" variant="destructive">
-              Delete
-            </Button>
+            <ConfirmDeleteButton />
           </form>
         </div>
       </div>
@@ -639,7 +679,9 @@ export function CourseOutlineEditor({
     <section className="grid gap-4">
       <div>
         <div className="h-px w-20 bg-primary" />
-        <h2 className="mt-4 text-2xl tracking-tight">Course outline</h2>
+        <h2 className="mt-4 font-heading text-2xl tracking-tight">
+          Course outline
+        </h2>
         <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
           Build the course structure students will move through: sections,
           lecture order, preview access, publication state, and drip scheduling.
@@ -688,7 +730,7 @@ export function CourseOutlineEditor({
       </form>
 
       {outline.sections.length === 0 ? (
-        <div className="border border-dashed border-border p-6 text-sm text-muted-foreground">
+        <div className="rounded-2xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
           No sections yet. Add the first section to start building lectures.
         </div>
       ) : (

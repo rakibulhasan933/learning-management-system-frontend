@@ -1,3 +1,4 @@
+import { BookOpen, DollarSign, ImageIcon, Rocket } from "lucide-react"
 import type { InstructorCourseDto } from "@workspace/types"
 
 import { ImageUploadControl } from "@/components/image-upload-control"
@@ -36,11 +37,14 @@ export function CourseForm({ action, course, submitLabel }: CourseFormProps) {
       <Accordion
         defaultValue={["basics"]}
         multiple
-        className="border-border/60 bg-background/40"
+        className="rounded-xl border-border/60 bg-background/40"
       >
         <AccordionItem value="basics">
           <AccordionTrigger className="px-3 py-2.5 text-sm">
-            Basics
+            <span className="flex items-center gap-2">
+              <BookOpen className="h-3.5 w-3.5 text-primary" />
+              Basics
+            </span>
           </AccordionTrigger>
           <AccordionContent keepMounted className="px-3 pb-3">
             <div className="grid gap-3 pt-3">
@@ -51,14 +55,20 @@ export function CourseForm({ action, course, submitLabel }: CourseFormProps) {
                 name="title"
                 required
               />
-              <FloatingInput
-                className="h-10 rounded-xl px-3 font-mono text-sm"
-                defaultValue={course?.slug}
-                label="Slug"
-                name="slug"
-                pattern="[a-z0-9]+(-[a-z0-9]+)*"
-                required
-              />
+              <div>
+                <FloatingInput
+                  className="h-10 rounded-xl px-3 font-mono text-sm"
+                  defaultValue={course?.slug}
+                  label="Slug"
+                  name="slug"
+                  pattern="[a-z0-9]+(-[a-z0-9]+)*"
+                  required
+                />
+                <p className="mt-1.5 pl-1 text-xs text-muted-foreground">
+                  Lowercase letters, numbers, and hyphens only — e.g.{" "}
+                  <span className="font-mono">intro-to-react</span>
+                </p>
+              </div>
               <FloatingTextarea
                 className="min-h-20 rounded-xl px-3 pb-2 pt-4 text-sm"
                 defaultValue={course?.shortDescription ?? ""}
@@ -78,7 +88,10 @@ export function CourseForm({ action, course, submitLabel }: CourseFormProps) {
 
         <AccordionItem value="classification">
           <AccordionTrigger className="px-3 py-2.5 text-sm">
-            Classification & pricing
+            <span className="flex items-center gap-2">
+              <DollarSign className="h-3.5 w-3.5 text-primary" />
+              Classification & pricing
+            </span>
           </AccordionTrigger>
           <AccordionContent keepMounted className="px-3 pb-3">
             <div className="grid gap-3 pt-3 md:grid-cols-2">
@@ -113,7 +126,7 @@ export function CourseForm({ action, course, submitLabel }: CourseFormProps) {
                 required
               />
               <FloatingInput
-                className="h-10 rounded-xl px-3 font-mono text-sm"
+                className="h-10 rounded-xl px-3 font-mono text-sm uppercase"
                 defaultValue={course?.currency ?? "BDT"}
                 label="Currency"
                 maxLength={3}
@@ -127,7 +140,10 @@ export function CourseForm({ action, course, submitLabel }: CourseFormProps) {
 
         <AccordionItem value="media">
           <AccordionTrigger className="px-3 py-2.5 text-sm">
-            Media
+            <span className="flex items-center gap-2">
+              <ImageIcon className="h-3.5 w-3.5 text-primary" />
+              Media
+            </span>
           </AccordionTrigger>
           <AccordionContent keepMounted className="px-3 pb-3">
             <div className="grid gap-3 pt-3">
@@ -145,7 +161,10 @@ export function CourseForm({ action, course, submitLabel }: CourseFormProps) {
 
         <AccordionItem value="publishing">
           <AccordionTrigger className="px-3 py-2.5 text-sm">
-            Publishing
+            <span className="flex items-center gap-2">
+              <Rocket className="h-3.5 w-3.5 text-primary" />
+              Publishing
+            </span>
           </AccordionTrigger>
           <AccordionContent keepMounted className="px-3 pb-3">
             <div className="grid gap-3 pt-3 md:max-w-xs">
@@ -166,7 +185,7 @@ export function CourseForm({ action, course, submitLabel }: CourseFormProps) {
         </AccordionItem>
       </Accordion>
 
-      <Button className="w-full sm:w-fit" size="sm" type="submit">
+      <Button className="w-full sm:w-fit sm:px-8" size="sm" type="submit">
         {submitLabel}
       </Button>
     </form>

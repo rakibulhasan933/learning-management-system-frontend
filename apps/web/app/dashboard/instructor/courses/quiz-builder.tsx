@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useTransition } from "react"
+import { AlertCircle, CheckCircle2 } from "lucide-react"
 import type { InstructorQuizDto } from "@workspace/types"
 
 import {
@@ -37,6 +38,8 @@ interface QuestionState {
   options: OptionState[]
   questionText: string
 }
+
+type StatusMessage = { text: string; type: "success" | "error" } | null
 
 function createId() {
   return globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`
@@ -83,6 +86,30 @@ function summarizeOption(option: OptionState, index: number) {
     : `Option ${index + 1}`
 }
 
+function StatusMessageText({ message }: { message: StatusMessage }) {
+  if (!message) {
+    return null
+  }
+
+  const isError = message.type === "error"
+
+  return (
+    <p
+      className={`flex items-center gap-1.5 text-sm ${
+        isError ? "text-destructive" : "text-secondary-foreground"
+      }`}
+      role="status"
+    >
+      {isError ? (
+        <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+      ) : (
+        <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
+      )}
+      {message.text}
+    </p>
+  )
+}
+
 export function QuizBuilder({
   courseId,
   quiz,
@@ -93,12 +120,11 @@ export function QuizBuilder({
   const [title, setTitle] = useState(quiz?.title ?? `${targetLabel} quiz`)
   const [isPublished, setIsPublished] = useState(quiz?.isPublished ?? false)
   const [questions, setQuestions] = useState(() => getInitialQuestions(quiz))
-  const [message, setMessage] = useState<string | null>(null)
+  const [message, setMessage] = useState<StatusMessage>(null)
+  const [confirmingDelete, setConfirmingDelete] = useState(false)
   const [isPending, startTransition] = useTransition()
   const [openQuestions, setOpenQuestions] = useState<string[]>([])
-  const [openOptionsByQuestion, setOpenOptionsByQuestion] = useState<
-    Record<string, string[]>
-  >({})
+  const [openOptionsByQuestion, setOpenOptionsByQuestion] = useState<Record<string, string[]>>({})
 
   function updateQuestion(questionId: string, questionText: string) {
     setQuestions((current) =>
@@ -207,9 +233,12 @@ export function QuizBuilder({
           targetType,
           title,
         })
-        setMessage("Quiz saved.")
+        setMessage({ text: "Quiz saved.", type: "success" })
       } catch (error) {
-        setMessage(error instanceof Error ? error.message : "Quiz could not be saved.")
+        setMessage({
+          text: error instanceof Error ? error.message : "Quiz could not be saved.",
+          type: "error",
+        })
       }
     })
   }
@@ -223,11 +252,14 @@ export function QuizBuilder({
     startTransition(async () => {
       try {
         await deleteInstructorQuizAction({ courseId, quizId: quiz.id })
-        setMessage("Quiz deleted.")
+        setMessage({ text: "Quiz deleted.", type: "success" })
+        setConfirmingDelete(false)
       } catch (error) {
-        setMessage(
-          error instanceof Error ? error.message : "Quiz could not be deleted.",
-        )
+        setMessage({
+          text:
+            error instanceof Error ? error.message : "Quiz could not be deleted.",
+          type: "error",
+        })
       }
     })
   }
@@ -405,22 +437,43 @@ export function QuizBuilder({
           {isPending ? "Saving..." : "Save quiz"}
         </Button>
         {quiz ? (
-          <Button
-            className="w-full sm:w-auto"
-            disabled={isPending}
-            onClick={deleteQuiz}
-            size="sm"
-            type="button"
-            variant="destructive"
-          >
-            Delete quiz
-          </Button>
+          confirmingDelete ? (
+            <div className="flex w-full items-center gap-2 sm:w-auto">
+              <Button
+                className="w-full sm:w-auto"
+                disabled={isPending}
+                onClick={deleteQuiz}
+                size="sm"
+                type="button"
+                variant="destructive"
+              >
+                {isPending ? "Deleting..." : "Confirm delete"}
+              </Button>
+              <Button
+                className="w-full sm:w-auto"
+                disabled={isPending}
+                onClick={() => setConfirmingDelete(false)}
+                size="sm"
+                type="button"
+                variant="outline"
+              >
+                Cancel
+              </Button>
+            </div>
+          ) : (
+            <Button
+              className="w-full sm:w-auto"
+              disabled={isPending}
+              onClick={() => setConfirmingDelete(true)}
+              size="sm"
+              type="button"
+              variant="destructive"
+            >
+              Delete quiz
+            </Button>
+          )
         ) : null}
-        {message ? (
-          <p className="text-sm text-muted-foreground" role="status">
-            {message}
-          </p>
-        ) : null}
+        <StatusMessageText message={message} />
       </div>
     </div>
   )

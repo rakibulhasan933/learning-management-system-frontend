@@ -1,6 +1,7 @@
 "use client"
 
 import { type FormEvent, useState, useTransition } from "react"
+import { AlertCircle, CheckCircle2 } from "lucide-react"
 import type { InstructorAssignmentDto } from "@workspace/types"
 
 import {
@@ -27,6 +28,8 @@ interface AssignmentBuilderProps {
   targetType: "lecture" | "section"
 }
 
+type StatusMessage = { text: string; type: "success" | "error" } | null
+
 function toDateTimeLocal(value: string | null) {
   return value ? value.slice(0, 16) : ""
 }
@@ -41,6 +44,30 @@ function getOptionalString(formData: FormData, key: string) {
   const trimmed = value.trim()
 
   return trimmed.length > 0 ? trimmed : null
+}
+
+function StatusMessage({ message }: { message: StatusMessage }) {
+  if (!message) {
+    return null
+  }
+
+  const isError = message.type === "error"
+
+  return (
+    <p
+      className={`flex items-center gap-1.5 text-sm ${
+        isError ? "text-destructive" : "text-secondary-foreground"
+      }`}
+      role="status"
+    >
+      {isError ? (
+        <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+      ) : (
+        <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
+      )}
+      {message.text}
+    </p>
+  )
 }
 
 export function AssignmentBuilder({
@@ -61,7 +88,8 @@ export function AssignmentBuilder({
   const [isPublished, setIsPublished] = useState(
     assignment?.isPublished ?? false,
   )
-  const [message, setMessage] = useState<string | null>(null)
+  const [message, setMessage] = useState<StatusMessage>(null)
+  const [confirmingDelete, setConfirmingDelete] = useState(false)
   const [isPending, startTransition] = useTransition()
 
   function saveAssignment() {
@@ -78,13 +106,15 @@ export function AssignmentBuilder({
           targetType,
           title,
         })
-        setMessage("Assignment saved.")
+        setMessage({ text: "Assignment saved.", type: "success" })
       } catch (error) {
-        setMessage(
-          error instanceof Error
-            ? error.message
-            : "Assignment could not be saved.",
-        )
+        setMessage({
+          text:
+            error instanceof Error
+              ? error.message
+              : "Assignment could not be saved.",
+          type: "error",
+        })
       }
     })
   }
@@ -101,13 +131,16 @@ export function AssignmentBuilder({
           assignmentId: assignment.id,
           courseId,
         })
-        setMessage("Assignment deleted.")
+        setMessage({ text: "Assignment deleted.", type: "success" })
+        setConfirmingDelete(false)
       } catch (error) {
-        setMessage(
-          error instanceof Error
-            ? error.message
-            : "Assignment could not be deleted.",
-        )
+        setMessage({
+          text:
+            error instanceof Error
+              ? error.message
+              : "Assignment could not be deleted.",
+          type: "error",
+        })
       }
     })
   }
@@ -130,11 +163,13 @@ export function AssignmentBuilder({
           gradeScore: Number(formData.get("gradeScore")),
           submissionId,
         })
-        setMessage("Grade saved.")
+        setMessage({ text: "Grade saved.", type: "success" })
       } catch (error) {
-        setMessage(
-          error instanceof Error ? error.message : "Grade could not be saved.",
-        )
+        setMessage({
+          text:
+            error instanceof Error ? error.message : "Grade could not be saved.",
+          type: "error",
+        })
       }
     })
   }
@@ -190,22 +225,43 @@ export function AssignmentBuilder({
           {isPending ? "Saving..." : "Save assignment"}
         </Button>
         {assignment ? (
-          <Button
-            className="w-full sm:w-auto"
-            disabled={isPending}
-            onClick={deleteAssignment}
-            size="sm"
-            type="button"
-            variant="destructive"
-          >
-            Delete assignment
-          </Button>
+          confirmingDelete ? (
+            <div className="flex w-full items-center gap-2 sm:w-auto">
+              <Button
+                className="w-full sm:w-auto"
+                disabled={isPending}
+                onClick={deleteAssignment}
+                size="sm"
+                type="button"
+                variant="destructive"
+              >
+                {isPending ? "Deleting..." : "Confirm delete"}
+              </Button>
+              <Button
+                className="w-full sm:w-auto"
+                disabled={isPending}
+                onClick={() => setConfirmingDelete(false)}
+                size="sm"
+                type="button"
+                variant="outline"
+              >
+                Cancel
+              </Button>
+            </div>
+          ) : (
+            <Button
+              className="w-full sm:w-auto"
+              disabled={isPending}
+              onClick={() => setConfirmingDelete(true)}
+              size="sm"
+              type="button"
+              variant="destructive"
+            >
+              Delete assignment
+            </Button>
+          )
         ) : null}
-        {message ? (
-          <p className="text-sm text-muted-foreground" role="status">
-            {message}
-          </p>
-        ) : null}
+        <StatusMessage message={message} />
       </div>
 
       {assignment ? (
@@ -251,7 +307,7 @@ export function AssignmentBuilder({
                             type="hidden"
                             value={submission.id}
                           />
-                          <p className="whitespace-pre-wrap border border-border bg-background p-3 text-muted-foreground">
+                          <p className="whitespace-pre-wrap rounded-xl border border-border bg-background p-3 text-muted-foreground">
                             {submission.submissionText}
                           </p>
                           <div className="grid gap-3 sm:grid-cols-[120px_minmax(0,1fr)_auto]">

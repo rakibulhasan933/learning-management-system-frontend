@@ -1,3 +1,5 @@
+import Link from "next/link"
+import { AlertTriangle, ArrowLeft } from "lucide-react"
 import type {
   InstructorCourseDto,
   InstructorCourseOutlineResponse,
@@ -41,10 +43,19 @@ export default async function EditInstructorCoursePage({
       <section className="mx-auto grid max-w-5xl gap-5">
         <div className="space-y-3">
           <div className="h-px w-28 bg-primary" />
+          <Link
+            className="inline-flex items-center gap-1.5 text-xs text-muted-foreground transition-colors hover:text-primary"
+            href="/dashboard/instructor/courses"
+          >
+            <ArrowLeft className="h-3 w-3" />
+            Back to courses
+          </Link>
           <p className="font-mono text-sm text-muted-foreground">
             Editing {course.slug}
           </p>
-          <h1 className="text-3xl tracking-tight sm:text-4xl">{course.title}</h1>
+          <h1 className="font-heading text-3xl tracking-tight sm:text-4xl">
+            {course.title}
+          </h1>
         </div>
 
         <div className="overflow-hidden rounded-3xl border border-border bg-card ring-1 ring-foreground/10">
@@ -60,13 +71,20 @@ export default async function EditInstructorCoursePage({
               <CourseOutlineEditor courseId={course.id} outline={outline} />
             </div>
             <div className="p-4 sm:p-5">
-              <Card className="border-destructive/40 bg-background/40">
+              <Card className="border-destructive/40 bg-destructive/5">
                 <CardContent className="grid gap-3 p-4 sm:p-5">
+                  <div className="flex items-center gap-2">
+                    <AlertTriangle className="h-4 w-4 text-destructive" />
+                    <h3 className="font-heading text-sm font-medium text-destructive">
+                      Danger zone
+                    </h3>
+                  </div>
                   <form action={deleteInstructorCourseAction} className="grid gap-3">
                     <input name="courseId" type="hidden" value={course.id} />
                     <p className="text-sm text-muted-foreground">
                       Delete this course draft and its sections. Use this only for
-                      courses that should be permanently removed.
+                      courses that should be permanently removed. This action
+                      cannot be undone.
                     </p>
                     <Button
                       className="w-full sm:w-fit"
