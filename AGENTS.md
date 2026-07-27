@@ -430,6 +430,14 @@ NEXT_PUBLIC_BACKEND_API_URL=
 10. Remaining features per "Phase 2 / Advanced Features" above
 
 ## Progress Log
+- Markdown editing and rendering are now wired into the course builder: `@uiw/react-md-editor`
+  is installed for the web workspace, `packages/ui` exposes a reusable `MarkdownEditor`
+  wrapper with dark theme overrides for the ink-navy/brass system, the course form and
+  outline editor now use markdown inputs for course/section/lecture descriptions, and
+  the public course detail page renders course descriptions through a sanitized
+  markdown viewer instead of raw text.
+- Validation completed for the markdown pass: `pnpm typecheck`, `pnpm lint`, and
+  `pnpm build` all pass after the editor, renderer, and styling updates.
 - Monorepo scaffold is in place with pnpm workspaces, Turborepo, shared TypeScript,
   ESLint, Tailwind/config packages, `apps/web`, `services/backend`, `packages/ui`,
   `packages/db`, and `packages/types`.
@@ -529,6 +537,9 @@ NEXT_PUBLIC_BACKEND_API_URL=
   a custom video player on `/learn/[courseId]` with signed video URL loading, custom
   play/progress controls, and the mandatory dynamic low-opacity email watermark that
   repositions every 8-12 seconds.
+- Dashboard shell navigation now defaults open on desktop and can be collapsed into a
+  compact left rail with icon-only navigation, while the mobile sheet navigation keeps
+  the full menu layout unchanged.
 - Video access control is enforced server-side: only users with an active enrollment
   for the lecture's course can fetch a signed lecture video URL. The web player never
   reads raw R2 URLs from the database.

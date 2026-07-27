@@ -1,11 +1,12 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import type { ChangeEvent } from "react"
+import type { ChangeEvent, DragEvent } from "react"
+import { CheckCircle2, FileVideo, Loader2, Pause, Play, X } from "lucide-react"
 
 import { getBackendApiUrl } from "@/lib/auth/cookies"
 import { Button } from "@workspace/ui/components/button"
-import { Input } from "@workspace/ui/components/input"
+import { cn } from "@workspace/ui/lib/utils"
 
 interface VideoUploadControlProps {
   courseId: string
@@ -43,6 +44,7 @@ export function VideoUploadControl({
   const [message, setMessage] = useState<string | null>(null)
   const [uploadedBytes, setUploadedBytes] = useState(0)
   const [totalBytes, setTotalBytes] = useState(0)
+  const [isDragging, setIsDragging] = useState(false)
 
   useEffect(
     () => () => {
@@ -57,28 +59,33 @@ export function VideoUploadControl({
     }
   }, [phase])
 
-  function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
-    const nextFile = event.currentTarget.files?.[0] ?? null
-
+  function acceptFile(nextFile: File | null) {
     if (nextFile && nextFile.type !== "video/mp4") {
       setFile(null)
       setPhase("error")
       setMessage("Only MP4 videos are supported.")
       setUploadedBytes(0)
       setTotalBytes(0)
-      event.currentTarget.value = ""
       return
     }
 
     setFile(nextFile)
     setPhase("idle")
-    setMessage(
-      nextFile
-        ? `Ready to upload ${formatMegabytes(nextFile.size)} MB.`
-        : null,
-    )
+    setMessage(null)
     setUploadedBytes(0)
     setTotalBytes(0)
+  }
+
+  function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
+    acceptFile(event.currentTarget.files?.[0] ?? null)
+    event.currentTarget.value = ""
+  }
+
+  function handleDrop(event: DragEvent<HTMLDivElement>) {
+    event.preventDefault()
+    setIsDragging(false)
+    if (phase === "uploading") return
+    acceptFile(event.dataTransfer.files?.[0] ?? null)
   }
 
   function abortUpload() {
@@ -105,7 +112,7 @@ export function VideoUploadControl({
     }
 
     setPhase("uploading")
-    setMessage("Uploading...")
+    setMessage(null)
     setUploadedBytes(0)
     setTotalBytes(file.size)
 
@@ -132,7 +139,6 @@ export function VideoUploadControl({
 
         setPhase("success")
         setMessage(successMessage)
-        setFile(null)
         setUploadedBytes(progressRef.current.totalBytes)
         setTotalBytes(progressRef.current.totalBytes)
 
@@ -152,9 +158,7 @@ export function VideoUploadControl({
     xhr.onabort = () => {
       xhrRef.current = null
       setPhase("paused")
-      setMessage(
-        `Upload paused at ${formatMegabytes(progressRef.current.uploadedBytes)} MB.`,
-      )
+      setMessage(null)
     }
 
     xhr.send(file)
@@ -169,56 +173,166 @@ export function VideoUploadControl({
     startUpload()
   }
 
-  const primaryLabel =
-    phase === "uploading"
-      ? "Pause upload"
-      : phase === "paused"
-        ? "Resume upload"
-        : "Upload video"
+  function clearFile() {
+    if (phase === "uploading") abortUpload()
+    setFile(null)
+    setPhase("idle")
+    setMessage(null)
+    setUploadedBytes(0)
+    setTotalBytes(0)
+  }
 
-  const progressLabel =
-    totalBytes > 0
-      ? `${formatMegabytes(uploadedBytes)} MB of ${formatMegabytes(totalBytes)} MB uploaded`
-      : uploadedBytes > 0
-        ? `${formatMegabytes(uploadedBytes)} MB uploaded`
-        : null
+  const percent =
+    totalBytes > 0 ? Math.min(100, Math.round((uploadedBytes / totalBytes) * 100)) : 0
+
+  const primaryLabel =
+    phase === "uploading" ? "Pause" : phase === "paused" ? "Resume" : "Start upload"
 
   return (
-    <div className="grid gap-2 md:col-span-4">
-      <label className="grid gap-2 text-sm text-muted-foreground">
-        <span>Upload MP4 through backend</span>
-        <Input
-          ref={inputRef}
-          accept="video/mp4"
-          name="videoFile"
-          onChange={handleFileChange}
-          disabled={phase === "uploading"}
-          type="file"
-        />
-      </label>
-      <p className="text-xs text-muted-foreground">
-        Uploads are routed through the backend, then written to R2 server-side.
-      </p>
-      {progressLabel ? (
-        <p className="text-xs text-muted-foreground" role="status">
-          {progressLabel}
+    <div className="grid gap-3 md:col-span-4">
+      <div className="flex items-baseline justify-between gap-4">
+        <p className="text-sm font-medium text-foreground">Lecture video</p>
+        <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+          MP4 only
         </p>
-      ) : null}
-      <div className="flex flex-wrap items-center gap-3">
-        <Button
-          disabled={!file && phase !== "uploading"}
-          onClick={handlePrimaryAction}
-          type="button"
-          variant="outline"
-        >
-          {primaryLabel}
-        </Button>
-        {message ? (
-          <p className="text-sm text-muted-foreground" role="status">
-            {message}
-          </p>
-        ) : null}
       </div>
+
+      {!file ? (
+        <div
+          onDragOver={(event) => {
+            event.preventDefault()
+            setIsDragging(true)
+          }}
+          onDragLeave={() => setIsDragging(false)}
+          onDrop={handleDrop}
+          onClick={() => inputRef.current?.click()}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(event) => {
+            if (event.key === "Enter" || event.key === " ") {
+              inputRef.current?.click()
+            }
+          }}
+          className={cn(
+            "flex cursor-pointer flex-col items-center justify-center gap-2 border border-dashed border-border bg-background px-6 py-10 text-center transition-colors",
+            "hover:border-primary/50",
+            isDragging && "border-primary bg-primary/5",
+          )}
+        >
+          <FileVideo className="h-6 w-6 text-muted-foreground" />
+          <p className="text-sm text-foreground">
+            Drag and drop an MP4, or{" "}
+            <span className="text-primary underline underline-offset-2">
+              browse
+            </span>
+          </p>
+          <p className="text-xs text-muted-foreground">
+            Routed through the backend, then written to R2 server-side.
+          </p>
+        </div>
+      ) : (
+        <div className="border border-border bg-background p-4">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex min-w-0 items-center gap-3">
+              <span
+                className={cn(
+                  "flex h-9 w-9 shrink-0 items-center justify-center border",
+                  phase === "success"
+                    ? "border-secondary text-secondary"
+                    : phase === "error"
+                      ? "border-destructive text-destructive"
+                      : "border-primary/50 text-primary",
+                )}
+              >
+                {phase === "success" ? (
+                  <CheckCircle2 className="h-4 w-4" />
+                ) : phase === "uploading" ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <FileVideo className="h-4 w-4" />
+                )}
+              </span>
+              <div className="min-w-0">
+                <p className="truncate text-sm text-foreground">{file.name}</p>
+                <p className="font-mono text-xs text-muted-foreground">
+                  {formatMegabytes(file.size)} MB
+                </p>
+              </div>
+            </div>
+
+            {phase !== "uploading" && phase !== "success" ? (
+              <button
+                type="button"
+                onClick={clearFile}
+                aria-label="Remove file"
+                className="text-muted-foreground transition-colors hover:text-destructive"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            ) : null}
+          </div>
+
+          {(phase === "uploading" || phase === "paused" || phase === "success") && (
+            <div className="mt-4">
+              <div className="h-1.5 w-full overflow-hidden bg-border">
+                <div
+                  className={cn(
+                    "h-full transition-all duration-200",
+                    phase === "success" ? "bg-secondary" : "bg-primary",
+                  )}
+                  style={{ width: `${phase === "success" ? 100 : percent}%` }}
+                />
+              </div>
+              <div className="mt-1.5 flex items-center justify-between font-mono text-[11px] text-muted-foreground">
+                <span>
+                  {formatMegabytes(uploadedBytes)} MB / {formatMegabytes(totalBytes)} MB
+                </span>
+                <span>{phase === "success" ? 100 : percent}%</span>
+              </div>
+            </div>
+          )}
+
+          {message ? (
+            <p
+              className={cn(
+                "mt-3 text-xs",
+                phase === "error" ? "text-destructive" : "text-muted-foreground",
+              )}
+              role="status"
+            >
+              {message}
+            </p>
+          ) : null}
+
+          {phase !== "success" ? (
+            <div className="mt-4 flex gap-2">
+              <Button
+                onClick={handlePrimaryAction}
+                size="sm"
+                type="button"
+                variant="outline"
+                className="gap-2"
+              >
+                {phase === "uploading" ? (
+                  <Pause className="h-3.5 w-3.5" />
+                ) : (
+                  <Play className="h-3.5 w-3.5" />
+                )}
+                {primaryLabel}
+              </Button>
+            </div>
+          ) : null}
+        </div>
+      )}
+
+      <input
+        ref={inputRef}
+        accept="video/mp4"
+        className="hidden"
+        name="videoFile"
+        onChange={handleFileChange}
+        type="file"
+      />
     </div>
   )
 }

@@ -37,37 +37,50 @@ export default async function EditInstructorCoursePage({
   ])
 
   return (
-    <main className="min-h-screen bg-background px-4 py-8 text-foreground sm:px-6 sm:py-10">
-      <section className="mx-auto max-w-4xl">
-        <div className="mb-8 h-px w-28 bg-primary" />
-        <p className="font-mono text-sm text-muted-foreground">
-          Editing {course.slug}
-        </p>
-        <h1 className="mt-3 text-3xl tracking-tight sm:text-4xl">{course.title}</h1>
-        <div className="mt-8">
-          <CourseForm
-            action={updateInstructorCourseAction}
-            course={course}
-            submitLabel="Save changes"
-          />
+    <main className="min-h-screen bg-background px-4 py-6 text-foreground sm:px-6 sm:py-8">
+      <section className="mx-auto grid max-w-5xl gap-5">
+        <div className="space-y-3">
+          <div className="h-px w-28 bg-primary" />
+          <p className="font-mono text-sm text-muted-foreground">
+            Editing {course.slug}
+          </p>
+          <h1 className="text-3xl tracking-tight sm:text-4xl">{course.title}</h1>
         </div>
-        <div className="mt-10">
-          <CourseOutlineEditor courseId={course.id} outline={outline} />
+
+        <div className="overflow-hidden rounded-3xl border border-border bg-card ring-1 ring-foreground/10">
+          <div className="divide-y divide-border/60">
+            <div className="p-4 sm:p-5">
+              <CourseForm
+                action={updateInstructorCourseAction}
+                course={course}
+                submitLabel="Save changes"
+              />
+            </div>
+            <div className="p-4 sm:p-5">
+              <CourseOutlineEditor courseId={course.id} outline={outline} />
+            </div>
+            <div className="p-4 sm:p-5">
+              <Card className="border-destructive/40 bg-background/40">
+                <CardContent className="grid gap-3 p-4 sm:p-5">
+                  <form action={deleteInstructorCourseAction} className="grid gap-3">
+                    <input name="courseId" type="hidden" value={course.id} />
+                    <p className="text-sm text-muted-foreground">
+                      Delete this course draft and its sections. Use this only for
+                      courses that should be permanently removed.
+                    </p>
+                    <Button
+                      className="w-full sm:w-fit"
+                      type="submit"
+                      variant="destructive"
+                    >
+                      Delete course
+                    </Button>
+                  </form>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
         </div>
-        <Card className="mt-6 border-destructive/40 bg-card">
-          <CardContent className="grid gap-4 p-5">
-            <form action={deleteInstructorCourseAction} className="grid gap-4">
-              <input name="courseId" type="hidden" value={course.id} />
-              <p className="text-sm text-muted-foreground">
-                Delete this course draft and its sections. Use this only for
-                courses that should be permanently removed.
-              </p>
-              <Button className="w-full sm:w-fit" type="submit" variant="destructive">
-                Delete course
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
       </section>
     </main>
   )

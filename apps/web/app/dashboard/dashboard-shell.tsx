@@ -5,7 +5,20 @@ import { useEffect, useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
-import { Menu } from "lucide-react"
+import {
+  BadgeDollarSign,
+  BookOpen,
+  ChartColumn,
+  GraduationCap,
+  LibraryBig,
+  Menu,
+  PanelLeftClose,
+  PanelLeftOpen,
+  ScrollText,
+  UserRound,
+  Users,
+  WalletCards,
+} from "lucide-react"
 import type { ProfileDto, UserRole } from "@workspace/types"
 
 import { signOutAction } from "@/app/auth/actions"
@@ -19,6 +32,7 @@ import {
 import { Button } from "@workspace/ui/components/button"
 
 type DashboardNavItem = {
+  icon: typeof BookOpen
   href: string
   label: string
 }
@@ -30,23 +44,23 @@ type DashboardShellProps = {
 
 const navigationByRole: Record<UserRole, DashboardNavItem[]> = {
   admin: [
-    { href: "/dashboard/admin/users", label: "User management" },
-    { href: "/dashboard/admin/courses", label: "Course approval" },
-    { href: "/dashboard/admin/revenue", label: "Revenue overview" },
-    { href: "/dashboard/admin/payments", label: "Pending payments" },
+    { href: "/dashboard/admin/users", icon: Users, label: "User management" },
+    { href: "/dashboard/admin/courses", icon: LibraryBig, label: "Course approval" },
+    { href: "/dashboard/admin/revenue", icon: ChartColumn, label: "Revenue overview" },
+    { href: "/dashboard/admin/payments", icon: BadgeDollarSign, label: "Pending payments" },
   ],
   instructor: [
-    { href: "/dashboard/instructor/courses", label: "My courses" },
-    { href: "/dashboard/instructor/courses/new", label: "Course builder" },
-    { href: "/dashboard/instructor#students", label: "Students" },
-    { href: "/dashboard/instructor#analytics", label: "Analytics" },
-    { href: "/dashboard/instructor#payouts", label: "Payout requests" },
+    { href: "/dashboard/instructor/courses", icon: BookOpen, label: "My courses" },
+    { href: "/dashboard/instructor/courses/new", icon: GraduationCap, label: "Course builder" },
+    { href: "/dashboard/instructor#students", icon: Users, label: "Students" },
+    { href: "/dashboard/instructor#analytics", icon: ChartColumn, label: "Analytics" },
+    { href: "/dashboard/instructor#payouts", icon: WalletCards, label: "Payout requests" },
   ],
   student: [
-    { href: "/dashboard/student", label: "My learning" },
-    { href: "/courses", label: "Browse courses" },
-    { href: "/dashboard/student#certificates", label: "Certificates" },
-    { href: "/dashboard/student#orders", label: "Order/payment status" },
+    { href: "/dashboard/student", icon: BookOpen, label: "My learning" },
+    { href: "/courses", icon: LibraryBig, label: "Browse courses" },
+    { href: "/dashboard/student#certificates", icon: ScrollText, label: "Certificates" },
+    { href: "/dashboard/student#orders", icon: BadgeDollarSign, label: "Order/payment status" },
   ],
 }
 
@@ -73,11 +87,14 @@ function DashboardNavLink({
   currentHash,
   currentPathname,
   href,
+  icon: Icon,
   label,
+  collapsed = false,
   onNavigate,
 }: DashboardNavItem & {
   currentHash: string
   currentPathname: string
+  collapsed?: boolean
   onNavigate?: () => void
 }) {
   const active = isActiveNavItem(currentPathname, currentHash, href)
@@ -85,8 +102,11 @@ function DashboardNavLink({
   return (
     <Link
       aria-current={active ? "page" : undefined}
+      aria-label={label}
+      title={label}
       className={cn(
-        "flex items-center justify-between border border-transparent px-4 py-3 text-sm transition-colors",
+        "flex items-center gap-3 border border-transparent text-sm transition-colors",
+        collapsed ? "justify-center px-0 py-3 lg:rounded-2xl" : "justify-between px-4 py-3",
         active
           ? "border-[#C9A15A] bg-[#1B1F29] text-[#F2EFE7]"
           : "text-[#8B8D98] hover:border-[#2A2F3A] hover:bg-[#171B23] hover:text-[#F2EFE7]",
@@ -94,7 +114,8 @@ function DashboardNavLink({
       href={href}
       onClick={onNavigate}
     >
-      <span>{label}</span>
+      <Icon className="h-4 w-4 shrink-0 text-inherit" />
+      <span className={cn("min-w-0 truncate", collapsed && "lg:hidden")}>{label}</span>
       {active ? <span className="h-2 w-2 rounded-full bg-[#C9A15A]" /> : null}
     </Link>
   )
@@ -104,6 +125,13 @@ export function DashboardShell({ children, profile }: DashboardShellProps) {
   const pathname = usePathname()
   const [currentHash, setCurrentHash] = useState("")
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    if (typeof window === "undefined") {
+      return false
+    }
+
+    return window.localStorage.getItem("dashboard-sidebar-collapsed") === "true"
+  })
   const navigation = navigationByRole[profile.role]
   const name = profile.fullName?.trim() || profile.email
   const initials = (profile.fullName?.trim()?.[0] ?? profile.email[0] ?? "U").toUpperCase()
@@ -121,17 +149,31 @@ export function DashboardShell({ children, profile }: DashboardShellProps) {
     }
   }, [])
 
+  useEffect(() => {
+    window.localStorage.setItem(
+      "dashboard-sidebar-collapsed",
+      String(sidebarCollapsed),
+    )
+  }, [sidebarCollapsed])
+
   return (
     <div className="min-h-screen bg-[#12151C] text-[#F2EFE7] lg:flex">
-      <aside className="hidden min-h-screen w-80 border-r border-[#2A2F3A] bg-[#12151C] lg:flex lg:flex-col">
-        <div className="flex h-full flex-col px-5 py-6">
+      <aside
+        className={cn(
+          "hidden min-h-screen border-r border-[#2A2F3A] bg-[#12151C] transition-all duration-200 lg:flex lg:flex-col",
+          sidebarCollapsed ? "lg:w-24" : "lg:w-80",
+        )}
+      >
+        <div
+          className={cn(
+            "flex h-full flex-col py-6 transition-all duration-200",
+            sidebarCollapsed ? "px-3" : "px-5",
+          )}
+        >
           <div className="space-y-4">
-            <div className="h-px w-24 bg-[#C9A15A]" />
-            <div className="space-y-4">
-              <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-[#8B8D98]">
-                {profile.role} workspace
-              </p>
-              <div className="flex items-center gap-3">
+            <div className={cn("h-px bg-[#C9A15A]", sidebarCollapsed ? "mx-auto w-10" : "w-24")} />
+            <div className={cn("space-y-4", sidebarCollapsed && "lg:space-y-3")}>
+              <div className={cn("flex items-center gap-3", sidebarCollapsed && "lg:flex-col lg:gap-3")}>
                 <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full border border-[#2A2F3A] bg-[#1B1F29]">
                   {profile.avatarUrl ? (
                     <Image
@@ -147,33 +189,59 @@ export function DashboardShell({ children, profile }: DashboardShellProps) {
                     </div>
                   )}
                 </div>
-                <div className="min-w-0">
-                  <h2 className="text-2xl font-normal tracking-tight">{name}</h2>
+                <div className={cn("min-w-0", sidebarCollapsed && "lg:hidden")}>
+                  <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-[#8B8D98]">
+                    {profile.role} workspace
+                  </p>
+                  <h2 className="mt-2 text-2xl font-normal tracking-tight">{name}</h2>
                   <p className="mt-1 break-words text-sm text-[#8B8D98]">
                     {profile.email}
                   </p>
                 </div>
               </div>
             </div>
+            <div className={cn("flex justify-end", sidebarCollapsed && "lg:justify-center")}>
+              <Button
+                aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+                className="border border-[#2A2F3A] bg-transparent text-[#F2EFE7] hover:bg-[#171B23]"
+                onClick={() => setSidebarCollapsed((current) => !current)}
+                type="button"
+                variant="ghost"
+                size="sm"
+              >
+                {sidebarCollapsed ? (
+                  <PanelLeftOpen className="h-4 w-4" />
+                ) : (
+                  <PanelLeftClose className="h-4 w-4" />
+                )}
+                <span className={cn("ml-2", sidebarCollapsed && "lg:hidden")}>
+                  {sidebarCollapsed ? "Expand" : "Collapse"}
+                </span>
+              </Button>
+            </div>
           </div>
 
-          <nav className="mt-8 space-y-2">
+          <nav className={cn("mt-8 space-y-2", sidebarCollapsed && "lg:space-y-3")}>
             <DashboardNavLink
               currentHash={currentHash}
               currentPathname={pathname}
               href="/dashboard/profile"
+              icon={UserRound}
               label="Profile settings"
+              collapsed={sidebarCollapsed}
             />
           </nav>
 
-          <nav className="mt-8 space-y-2">
+          <nav className={cn("mt-8 space-y-2", sidebarCollapsed && "lg:space-y-3")}>
             {navigation.map((item) => (
               <DashboardNavLink
                 currentHash={currentHash}
                 currentPathname={pathname}
                 href={item.href}
+                icon={item.icon}
                 key={item.href}
                 label={item.label}
+                collapsed={sidebarCollapsed}
                 onNavigate={() => setMobileOpen(false)}
               />
             ))}
@@ -217,6 +285,7 @@ export function DashboardShell({ children, profile }: DashboardShellProps) {
                 currentHash={currentHash}
                 currentPathname={pathname}
                 href="/dashboard/profile"
+                icon={UserRound}
                 label="Profile settings"
                 onNavigate={() => setMobileOpen(false)}
               />
@@ -225,6 +294,7 @@ export function DashboardShell({ children, profile }: DashboardShellProps) {
                   currentHash={currentHash}
                   currentPathname={pathname}
                   href={item.href}
+                  icon={item.icon}
                   key={item.href}
                   label={item.label}
                   onNavigate={() => setMobileOpen(false)}

@@ -1,11 +1,17 @@
 import type { InstructorCourseDto } from "@workspace/types"
 
 import { ImageUploadControl } from "@/components/image-upload-control"
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@workspace/ui/components/accordion"
 import { Button } from "@workspace/ui/components/button"
 import { FloatingInput } from "@workspace/ui/components/floating-input"
 import { FloatingTextarea } from "@workspace/ui/components/floating-textarea"
 import { Label } from "@workspace/ui/components/label"
-import { Separator } from "@workspace/ui/components/separator"
+import { MarkdownEditor } from "@workspace/ui/components/markdown-editor"
 import {
   Select,
   SelectContent,
@@ -22,135 +28,145 @@ interface CourseFormProps {
 
 export function CourseForm({ action, course, submitLabel }: CourseFormProps) {
   return (
-    <form
-      action={action}
-      className="grid gap-8 border border-border bg-card p-5 sm:p-6"
-    >
+    <form action={action} className="grid gap-4">
       {course ? (
         <input name="courseId" type="hidden" value={course.id} />
       ) : null}
 
-      {/* Basics */}
-      <div className="grid gap-4">
-        <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-          Basics
-        </p>
-        <FloatingInput
-          defaultValue={course?.title}
-          label="Title"
-          name="title"
-          required
-        />
-        <FloatingInput
-          className="font-mono text-sm"
-          defaultValue={course?.slug}
-          label="Slug"
-          name="slug"
-          pattern="[a-z0-9]+(-[a-z0-9]+)*"
-          required
-        />
-        <FloatingTextarea
-          defaultValue={course?.shortDescription ?? ""}
-          label="Short description"
-          name="shortDescription"
-        />
-        <FloatingTextarea
-          defaultValue={course?.description ?? ""}
-          label="Description"
-          name="description"
-        />
-      </div>
+      <Accordion
+        defaultValue={["basics"]}
+        multiple
+        className="border-border/60 bg-background/40"
+      >
+        <AccordionItem value="basics">
+          <AccordionTrigger className="px-3 py-2.5 text-sm">
+            Basics
+          </AccordionTrigger>
+          <AccordionContent keepMounted className="px-3 pb-3">
+            <div className="grid gap-3 pt-3">
+              <FloatingInput
+                className="h-10 rounded-xl px-3 text-sm"
+                defaultValue={course?.title}
+                label="Title"
+                name="title"
+                required
+              />
+              <FloatingInput
+                className="h-10 rounded-xl px-3 font-mono text-sm"
+                defaultValue={course?.slug}
+                label="Slug"
+                name="slug"
+                pattern="[a-z0-9]+(-[a-z0-9]+)*"
+                required
+              />
+              <FloatingTextarea
+                className="min-h-20 rounded-xl px-3 pb-2 pt-4 text-sm"
+                defaultValue={course?.shortDescription ?? ""}
+                label="Short description"
+                name="shortDescription"
+              />
+              <MarkdownEditor
+                defaultValue={course?.description ?? ""}
+                helperText="Write the long-form course description in markdown."
+                label="Description"
+                name="description"
+                height={220}
+              />
+            </div>
+          </AccordionContent>
+        </AccordionItem>
 
-      <Separator />
+        <AccordionItem value="classification">
+          <AccordionTrigger className="px-3 py-2.5 text-sm">
+            Classification & pricing
+          </AccordionTrigger>
+          <AccordionContent keepMounted className="px-3 pb-3">
+            <div className="grid gap-3 pt-3 md:grid-cols-2">
+              <FloatingInput
+                className="h-10 rounded-xl px-3 text-sm"
+                defaultValue={course?.category ?? ""}
+                label="Category"
+                name="category"
+              />
+              <div className="grid gap-2">
+                <Label className="text-sm text-muted-foreground">Level</Label>
+                <Select defaultValue={course?.level ?? "all_levels"} name="level">
+                  <SelectTrigger className="h-9 w-full rounded-xl border-border bg-input/20 text-sm" size="sm">
+                    <SelectValue placeholder="All levels" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="beginner">Beginner</SelectItem>
+                    <SelectItem value="intermediate">Intermediate</SelectItem>
+                    <SelectItem value="advanced">Advanced</SelectItem>
+                    <SelectItem value="all_levels">All levels</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <FloatingInput
+                className="h-10 rounded-xl px-3 font-mono text-sm"
+                defaultValue={course?.price ?? "0"}
+                label="Price"
+                min="0"
+                name="price"
+                step="0.01"
+                type="number"
+                required
+              />
+              <FloatingInput
+                className="h-10 rounded-xl px-3 font-mono text-sm"
+                defaultValue={course?.currency ?? "BDT"}
+                label="Currency"
+                maxLength={3}
+                minLength={3}
+                name="currency"
+                required
+              />
+            </div>
+          </AccordionContent>
+        </AccordionItem>
 
-      {/* Classification & pricing */}
-      <div className="grid gap-4">
-        <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-          Classification & pricing
-        </p>
-        <div className="grid gap-4 md:grid-cols-2">
-          <FloatingInput
-            defaultValue={course?.category ?? ""}
-            label="Category"
-            name="category"
-          />
-          <div className="grid gap-2">
-            <Label className="text-sm text-muted-foreground">Level</Label>
-            <Select defaultValue={course?.level ?? "all_levels"} name="level">
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="All levels" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="beginner">Beginner</SelectItem>
-                <SelectItem value="intermediate">Intermediate</SelectItem>
-                <SelectItem value="advanced">Advanced</SelectItem>
-                <SelectItem value="all_levels">All levels</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <FloatingInput
-            className="font-mono"
-            defaultValue={course?.price ?? "0"}
-            label="Price"
-            min="0"
-            name="price"
-            step="0.01"
-            type="number"
-            required
-          />
-          <FloatingInput
-            className="font-mono"
-            defaultValue={course?.currency ?? "BDT"}
-            label="Currency"
-            maxLength={3}
-            minLength={3}
-            name="currency"
-            required
-          />
-        </div>
-      </div>
+        <AccordionItem value="media">
+          <AccordionTrigger className="px-3 py-2.5 text-sm">
+            Media
+          </AccordionTrigger>
+          <AccordionContent keepMounted className="px-3 pb-3">
+            <div className="grid gap-3 pt-3">
+              <ImageUploadControl
+                buttonLabel="Upload thumbnail"
+                currentUrl={course?.thumbnailUrl ?? null}
+                helpText="Shown on the course card and detail page. Landscape images crop best."
+                inputName="thumbnailUrl"
+                label="Course thumbnail"
+                purpose="course_thumbnail"
+              />
+            </div>
+          </AccordionContent>
+        </AccordionItem>
 
-      <Separator />
+        <AccordionItem value="publishing">
+          <AccordionTrigger className="px-3 py-2.5 text-sm">
+            Publishing
+          </AccordionTrigger>
+          <AccordionContent keepMounted className="px-3 pb-3">
+            <div className="grid gap-3 pt-3 md:max-w-xs">
+              <Label className="text-sm text-muted-foreground">Status</Label>
+              <Select defaultValue={course?.status ?? "draft"} name="status">
+                <SelectTrigger className="h-9 w-full rounded-xl border-border bg-input/20 text-sm" size="sm">
+                  <SelectValue placeholder="Draft" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="draft">Draft</SelectItem>
+                  <SelectItem value="pending_review">Pending review</SelectItem>
+                  <SelectItem value="published">Published</SelectItem>
+                  <SelectItem value="archived">Archived</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
 
-      {/* Media */}
-      <div className="grid gap-4">
-        <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-          Media
-        </p>
-        <ImageUploadControl
-          buttonLabel="Upload thumbnail"
-          currentUrl={course?.thumbnailUrl ?? null}
-          helpText="Shown on the course card and detail page. Landscape images crop best."
-          inputName="thumbnailUrl"
-          label="Course thumbnail"
-          purpose="course_thumbnail"
-        />
-      </div>
-
-      <Separator />
-
-      {/* Publishing */}
-      <div className="grid gap-4">
-        <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-          Publishing
-        </p>
-        <div className="grid gap-2 md:max-w-xs">
-          <Label className="text-sm text-muted-foreground">Status</Label>
-          <Select defaultValue={course?.status ?? "draft"} name="status">
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Draft" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="draft">Draft</SelectItem>
-              <SelectItem value="pending_review">Pending review</SelectItem>
-              <SelectItem value="published">Published</SelectItem>
-              <SelectItem value="archived">Archived</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
-      <Button className="w-full sm:w-fit" type="submit">
+      <Button className="w-full sm:w-fit" size="sm" type="submit">
         {submitLabel}
       </Button>
     </form>

@@ -8,6 +8,7 @@ import {
   getBackendApiUrl,
   publicApiFetch,
 } from "@/lib/api-client"
+import { MarkdownContent } from "@/components/markdown-content"
 
 import { PreviewVideoPlayer } from "./preview-video-player"
 
@@ -68,9 +69,9 @@ export default async function CourseDetailPage({ params }: CourseDetailPageProps
           </p>
           <div className="mt-10 space-y-5">
             <h2 className="text-2xl">What you will learn</h2>
-            <p className="whitespace-pre-line leading-7 text-muted-foreground">
-              {course.description ?? "Course details will be added soon."}
-            </p>
+            <MarkdownContent className="max-w-2xl" fallback="Course details will be added soon.">
+              {course.description}
+            </MarkdownContent>
           </div>
           <PreviewVideoPlayer
             learnerEmail={viewerEmail}

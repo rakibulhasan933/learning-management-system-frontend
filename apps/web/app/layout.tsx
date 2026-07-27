@@ -1,25 +1,10 @@
 import type { Metadata } from "next"
-import { Fraunces, Inter, IBM_Plex_Mono } from "next/font/google"
+import { Figtree } from "next/font/google"
 
 import "@uploadthing/react/styles.css"
 import "@workspace/ui/globals.css"
 
-const fraunces = Fraunces({
-  subsets: ["latin"],
-  variable: "--font-display",
-  axes: ["opsz", "WONK"],
-})
-
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-sans",
-})
-
-const plexMono = IBM_Plex_Mono({
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
-  variable: "--font-mono",
-})
+const figtree = Figtree({subsets:['latin'],variable:'--font-sans'});
 
 export const metadata: Metadata = {
   title: "Folio — Learning management, verified",
@@ -35,10 +20,12 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`dark ${fraunces.variable} ${inter.variable} ${plexMono.variable}`}
+      className={`dark ${figtree.variable}`}
       suppressHydrationWarning
     >
-      <body className="font-sans antialiased">{children}</body>
+      <body className="font-sans antialiased">
+        <main>{children}</main>
+      </body>
     </html>
   )
 }

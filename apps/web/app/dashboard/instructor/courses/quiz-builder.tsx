@@ -4,12 +4,19 @@ import { useState, useTransition } from "react"
 import type { InstructorQuizDto } from "@workspace/types"
 
 import {
-  deleteInstructorQuizAction,
-  saveInstructorQuizAction,
-} from "./actions"
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@workspace/ui/components/accordion"
 import { Button } from "@workspace/ui/components/button"
 import { Checkbox } from "@workspace/ui/components/checkbox"
 import { FloatingInput } from "@workspace/ui/components/floating-input"
+
+import {
+  deleteInstructorQuizAction,
+  saveInstructorQuizAction,
+} from "./actions"
 
 interface QuizBuilderProps {
   courseId: string
@@ -20,35 +27,60 @@ interface QuizBuilderProps {
 }
 
 interface OptionState {
+  id: string
   isCorrect: boolean
   optionText: string
 }
 
 interface QuestionState {
+  id: string
   options: OptionState[]
   questionText: string
 }
 
+function createId() {
+  return globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`
+}
+
+function createOptionState(optionText = "", isCorrect = false): OptionState {
+  return {
+    id: createId(),
+    isCorrect,
+    optionText,
+  }
+}
+
+function createQuestionState(
+  questionText = "",
+  options = [createOptionState("", true), createOptionState("", false)],
+): QuestionState {
+  return {
+    id: createId(),
+    options,
+    questionText,
+  }
+}
+
 function getInitialQuestions(quiz: InstructorQuizDto | null): QuestionState[] {
   if (!quiz) {
-    return [
-      {
-        options: [
-          { isCorrect: true, optionText: "" },
-          { isCorrect: false, optionText: "" },
-        ],
-        questionText: "",
-      },
-    ]
+    return [createQuestionState()]
   }
 
   return quiz.questions.map((question) => ({
+    id: createId(),
     options: question.options.map((option) => ({
+      id: createId(),
       isCorrect: option.isCorrect,
       optionText: option.optionText,
     })),
     questionText: question.questionText,
   }))
+}
+
+function summarizeOption(option: OptionState, index: number) {
+  return option.optionText.trim().length > 0
+    ? option.optionText
+    : `Option ${index + 1}`
 }
 
 export function QuizBuilder({
@@ -63,29 +95,31 @@ export function QuizBuilder({
   const [questions, setQuestions] = useState(() => getInitialQuestions(quiz))
   const [message, setMessage] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
+  const [openQuestions, setOpenQuestions] = useState<string[]>([])
+  const [openOptionsByQuestion, setOpenOptionsByQuestion] = useState<
+    Record<string, string[]>
+  >({})
 
-  function updateQuestion(index: number, questionText: string) {
+  function updateQuestion(questionId: string, questionText: string) {
     setQuestions((current) =>
-      current.map((question, questionIndex) =>
-        questionIndex === index ? { ...question, questionText } : question,
+      current.map((question) =>
+        question.id === questionId ? { ...question, questionText } : question,
       ),
     )
   }
 
   function updateOption(
-    questionIndex: number,
-    optionIndex: number,
-    patch: Partial<OptionState>,
+    questionId: string,
+    optionId: string,
+    patch: Partial<Omit<OptionState, "id">>,
   ) {
     setQuestions((current) =>
-      current.map((question, currentQuestionIndex) =>
-        currentQuestionIndex === questionIndex
+      current.map((question) =>
+        question.id === questionId
           ? {
               ...question,
-              options: question.options.map((option, currentOptionIndex) =>
-                currentOptionIndex === optionIndex
-                  ? { ...option, ...patch }
-                  : option,
+              options: question.options.map((option) =>
+                option.id === optionId ? { ...option, ...patch } : option,
               ),
             }
           : question,
@@ -94,55 +128,63 @@ export function QuizBuilder({
   }
 
   function addQuestion() {
-    setQuestions((current) => [
-      ...current,
-      {
-        options: [
-          { isCorrect: true, optionText: "" },
-          { isCorrect: false, optionText: "" },
-        ],
-        questionText: "",
-      },
-    ])
-  }
+    const nextQuestion = createQuestionState()
 
-  function removeQuestion(index: number) {
-    setQuestions((current) =>
-      current.length === 1
-        ? current
-        : current.filter((_, questionIndex) => questionIndex !== index),
+    setQuestions((current) => [...current, nextQuestion])
+    setOpenQuestions((current) =>
+      current.includes(nextQuestion.id) ? current : [...current, nextQuestion.id],
     )
   }
 
-  function addOption(questionIndex: number) {
+  function removeQuestion(questionId: string) {
+    setQuestions((current) => current.filter((question) => question.id !== questionId))
+    setOpenQuestions((current) => current.filter((id) => id !== questionId))
+    setOpenOptionsByQuestion((current) => {
+      const next = { ...current }
+
+      delete next[questionId]
+
+      return next
+    })
+  }
+
+  function addOption(questionId: string) {
+    const nextOption = createOptionState()
+
     setQuestions((current) =>
-      current.map((question, currentQuestionIndex) =>
-        currentQuestionIndex === questionIndex
-          ? {
-              ...question,
-              options: [...question.options, { isCorrect: false, optionText: "" }],
-            }
+      current.map((question) =>
+        question.id === questionId
+          ? { ...question, options: [...question.options, nextOption] }
           : question,
       ),
     )
+
+    setOpenOptionsByQuestion((current) => ({
+      ...current,
+      [questionId]: current[questionId]?.includes(nextOption.id)
+        ? current[questionId]
+        : [...(current[questionId] ?? []), nextOption.id],
+    }))
   }
 
-  function removeOption(questionIndex: number, optionIndex: number) {
+  function removeOption(questionId: string, optionId: string) {
     setQuestions((current) =>
-      current.map((question, currentQuestionIndex) =>
-        currentQuestionIndex === questionIndex
+      current.map((question) =>
+        question.id === questionId
           ? {
               ...question,
               options:
                 question.options.length <= 2
                   ? question.options
-                  : question.options.filter(
-                      (_, currentOptionIndex) => currentOptionIndex !== optionIndex,
-                    ),
+                  : question.options.filter((option) => option.id !== optionId),
             }
           : question,
       ),
     )
+    setOpenOptionsByQuestion((current) => ({
+      ...current,
+      [questionId]: (current[questionId] ?? []).filter((id) => id !== optionId),
+    }))
   }
 
   function saveQuiz() {
@@ -191,16 +233,15 @@ export function QuizBuilder({
   }
 
   return (
-    <div className="grid gap-4 border border-border bg-background p-4">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
-        <div className="flex-1">
-          <FloatingInput
-            label="Quiz title"
-            onChange={(event) => setTitle(event.target.value)}
-            value={title}
-          />
-        </div>
-        <label className="flex items-center gap-2 pb-2 text-sm text-muted-foreground">
+    <div className="grid gap-3 rounded-2xl border border-border/60 bg-background/40 p-3">
+      <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
+        <FloatingInput
+          className="h-10 rounded-xl px-3 text-sm"
+          label="Quiz title"
+          onChange={(event) => setTitle(event.target.value)}
+          value={title}
+        />
+        <label className="flex items-center gap-2 text-sm text-muted-foreground md:pb-2">
           <Checkbox
             checked={isPublished}
             onCheckedChange={(checked) => setIsPublished(Boolean(checked))}
@@ -209,75 +250,146 @@ export function QuizBuilder({
         </label>
       </div>
 
-      {questions.map((question, questionIndex) => (
-        <div className="grid gap-3 border-l border-primary pl-4" key={questionIndex}>
-          <div className="flex flex-col gap-3 sm:flex-row">
-            <div className="flex-1">
-              <FloatingInput
-                label={`Question ${questionIndex + 1}`}
-                onChange={(event) =>
-                  updateQuestion(questionIndex, event.target.value)
-                }
-                value={question.questionText}
-              />
-            </div>
-            <Button
-              className="h-fit sm:mt-7"
-              onClick={() => removeQuestion(questionIndex)}
-              type="button"
-              variant="destructive"
-            >
-              Remove
-            </Button>
-          </div>
-          <div className="grid gap-2">
-            {question.options.map((option, optionIndex) => (
-              <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto_auto]" key={optionIndex}>
-                <FloatingInput
-                  onChange={(event) =>
-                    updateOption(questionIndex, optionIndex, {
-                      optionText: event.target.value,
-                    })
-                  }
-                  label={`Option ${optionIndex + 1}`}
-                  value={option.optionText}
-                />
-                <label className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Checkbox
-                    checked={option.isCorrect}
-                    onCheckedChange={(checked) =>
-                      updateOption(questionIndex, optionIndex, {
-                        isCorrect: Boolean(checked),
-                      })
-                    }
-                  />
-                  Correct
-                </label>
-                <Button
-                  variant="ghost"
-                  onClick={() => removeOption(questionIndex, optionIndex)}
-                  type="button"
-                >
-                  Remove
-                </Button>
-              </div>
-            ))}
-          </div>
-          <Button
-            className="w-full sm:w-fit"
-            onClick={() => addOption(questionIndex)}
-            type="button"
-            variant="outline"
-          >
-            Add option
-          </Button>
-        </div>
-      ))}
+      <Accordion
+        className="border-border/60 bg-card/80"
+        multiple
+        value={openQuestions}
+        onValueChange={setOpenQuestions}
+      >
+        {questions.map((question, questionIndex) => {
+          const openOptionIds = openOptionsByQuestion[question.id] ?? []
 
-      <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+          return (
+            <AccordionItem key={question.id} value={question.id}>
+              <div className="grid gap-2 border-b border-border/70 px-3 py-2.5">
+                <AccordionTrigger className="min-w-0 w-full justify-start rounded-none p-0 text-left hover:bg-transparent">
+                  <div className="grid min-w-0 gap-1.5">
+                    <div className="flex min-w-0 flex-wrap items-center gap-2">
+                      <h4 className="min-w-0 truncate font-heading text-sm font-medium tracking-tight md:text-base">
+                        {question.questionText.trim().length > 0
+                          ? question.questionText
+                          : `Question ${questionIndex + 1}`}
+                      </h4>
+                      <span className="font-mono text-xs text-muted-foreground">
+                        {question.options.length} option
+                        {question.options.length === 1 ? "" : "s"}
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Click to edit question text and options
+                    </p>
+                  </div>
+                </AccordionTrigger>
+              </div>
+
+              <AccordionContent keepMounted className="px-3 pb-3">
+                <div className="grid gap-3 pt-3">
+                  <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
+                    <FloatingInput
+                      className="h-10 rounded-xl px-3 text-sm"
+                      label={`Question ${questionIndex + 1}`}
+                      onChange={(event) =>
+                        updateQuestion(question.id, event.target.value)
+                      }
+                      value={question.questionText}
+                    />
+                    <Button
+                      className="w-full md:w-auto"
+                      onClick={() => removeQuestion(question.id)}
+                      type="button"
+                      variant="destructive"
+                    >
+                      Remove question
+                    </Button>
+                  </div>
+
+                  <Accordion
+                    className="border-border/60 bg-background/40"
+                    multiple
+                    value={openOptionIds}
+                    onValueChange={(nextValue) =>
+                      setOpenOptionsByQuestion((current) => ({
+                        ...current,
+                        [question.id]: nextValue,
+                      }))
+                    }
+                  >
+                    {question.options.map((option, optionIndex) => (
+                      <AccordionItem key={option.id} value={option.id}>
+                        <div className="grid gap-2 border-b border-border/70 px-3 py-2">
+                          <AccordionTrigger className="min-w-0 w-full justify-start rounded-none p-0 text-left hover:bg-transparent">
+                            <div className="flex min-w-0 flex-wrap items-center gap-2">
+                              <span className="min-w-0 truncate font-medium text-foreground">
+                                {summarizeOption(option, optionIndex)}
+                              </span>
+                              {option.isCorrect ? (
+                                <span className="inline-flex items-center rounded-full border border-primary/40 bg-primary/10 px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.18em] text-primary">
+                                  correct
+                                </span>
+                              ) : null}
+                            </div>
+                          </AccordionTrigger>
+                        </div>
+
+                        <AccordionContent keepMounted className="px-3 pb-3">
+                          <div className="grid gap-3 pt-3 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
+                            <FloatingInput
+                              className="h-10 rounded-xl px-3 text-sm"
+                              onChange={(event) =>
+                                updateOption(question.id, option.id, {
+                                  optionText: event.target.value,
+                                })
+                              }
+                              label={`Option ${optionIndex + 1}`}
+                              value={option.optionText}
+                            />
+                            <label className="flex items-center gap-2 text-sm text-muted-foreground md:pb-2">
+                              <Checkbox
+                                checked={option.isCorrect}
+                                onCheckedChange={(checked) =>
+                                  updateOption(question.id, option.id, {
+                                    isCorrect: Boolean(checked),
+                                  })
+                                }
+                              />
+                              Correct
+                            </label>
+                            <div className="md:col-span-2">
+                              <Button
+                                onClick={() => removeOption(question.id, option.id)}
+                                type="button"
+                                variant="ghost"
+                              >
+                                Remove option
+                              </Button>
+                            </div>
+                          </div>
+                        </AccordionContent>
+                      </AccordionItem>
+                    ))}
+                  </Accordion>
+
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      onClick={() => addOption(question.id)}
+                      type="button"
+                      variant="outline"
+                    >
+                      Add option
+                    </Button>
+                  </div>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          )
+        })}
+      </Accordion>
+
+      <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:flex-wrap sm:items-center">
         <Button
           className="w-full sm:w-auto"
           onClick={addQuestion}
+          size="sm"
           type="button"
           variant="outline"
         >
@@ -287,6 +399,7 @@ export function QuizBuilder({
           className="w-full sm:w-auto"
           disabled={isPending}
           onClick={saveQuiz}
+          size="sm"
           type="button"
         >
           {isPending ? "Saving..." : "Save quiz"}
@@ -296,6 +409,7 @@ export function QuizBuilder({
             className="w-full sm:w-auto"
             disabled={isPending}
             onClick={deleteQuiz}
+            size="sm"
             type="button"
             variant="destructive"
           >
