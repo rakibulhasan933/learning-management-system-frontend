@@ -4,8 +4,9 @@ import "@uploadthing/react/styles.css"
 import "@workspace/ui/globals.css"
 
 export const metadata: Metadata = {
-  title: "LMS",
-  description: "Learning management system",
+  title: { default: "LMS — A new chapter in learning", template: "%s | LMS" },
+  description:
+    "Explore thoughtful courses, build practical skills, and make progress at your own pace. Your next chapter starts with LMS.",
 }
 
 export default function RootLayout({

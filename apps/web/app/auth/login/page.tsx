@@ -1,5 +1,9 @@
 import Link from "next/link"
 
+import { SiteHeader } from "@/components/site-header"
+
+export const metadata = { title: "Welcome back" }
+
 import {
   resendVerificationEmailAction,
   signInWithGoogleAction,
@@ -18,26 +22,30 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   const params = await searchParams
 
   return (
-    <main className="min-h-screen bg-background px-6 py-10 text-foreground">
-      <section className="mx-auto grid max-w-5xl gap-10 lg:grid-cols-[1fr_420px] lg:items-center">
+    <main className="auth-page">
+      <SiteHeader />
+      <section className="page-container grid gap-12 lg:grid-cols-[1fr_440px] lg:items-center lg:gap-24">
         <div>
-          <div className="mb-8 h-px w-28 bg-primary" />
-          <p className="mb-3 font-mono text-sm text-muted-foreground">
-            Continue learning
-          </p>
+          <p className="eyebrow mb-6">Continue learning</p>
           <h1 className="max-w-2xl text-4xl tracking-tight md:text-6xl">
-            Sign in to your LMS workspace.
+            Your next chapter
+            <br />
+            is waiting for you.
           </h1>
-          <p className="mt-6 max-w-xl text-base leading-7 text-muted-foreground">
-            Access your dashboard, course builder, payment status, and learning
-            progress from one protected session.
+          <p className="mt-6 max-w-md text-sm leading-7 text-muted-foreground">
+            Good to see you again. Pick up where you left off, discover
+            something new, and keep moving toward your goals.
           </p>
+          <div className="mt-10 flex items-center gap-4 border-t border-border pt-6 text-xs text-muted-foreground">
+            <span className="text-primary">01 —</span> A little progress, every
+            day.
+          </div>
         </div>
 
-        <div className="border border-border bg-card p-6">
-          <h2 className="text-2xl">Sign in</h2>
+        <div className="auth-panel">
+          <h2>Welcome back.</h2>
           <p className="mt-2 text-sm text-muted-foreground">
-            Use your email password or Google account.
+            Sign in to make space for what’s next.
           </p>
 
           {params.error ? (
@@ -68,6 +76,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
               Email
               <input
                 className="mt-2 w-full border border-input bg-background px-3 py-2 text-foreground outline-none focus:border-primary"
+                placeholder="you@example.com"
                 name="email"
                 type="email"
                 autoComplete="email"
@@ -78,16 +87,14 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
               Password
               <input
                 className="mt-2 w-full border border-input bg-background px-3 py-2 text-foreground outline-none focus:border-primary"
+                placeholder="Enter your password"
                 name="password"
                 type="password"
                 autoComplete="current-password"
                 required
               />
             </label>
-            <button
-              className="w-full bg-primary px-4 py-2 text-primary-foreground"
-              type="submit"
-            >
+            <button className="button-primary w-full" type="submit">
               Sign in
             </button>
           </form>
