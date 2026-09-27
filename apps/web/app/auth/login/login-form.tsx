@@ -5,7 +5,7 @@ import { useRef, useActionState, type FormEvent } from "react"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
-import { ArrowRight, Loader2, Mail, Lock } from "lucide-react"
+import { Mail, Lock } from "lucide-react"
 import { useWatch } from "react-hook-form"
 
 import {
@@ -16,11 +16,11 @@ import {
 } from "@/app/auth/actions"
 import { initialAuthFormState } from "@/app/auth/form-state"
 import { GoogleIcon } from "@/components/google-icon"
-import { Button } from "@workspace/ui/components/button"
 import { Alert, AlertDescription } from "@workspace/ui/components/alert"
 import { Card, CardContent } from "@workspace/ui/components/card"
 import { Separator } from "@workspace/ui/components/separator"
 import { FloatingInput } from "@workspace/ui/components/floating-input"
+import { SubmitButton } from "@/components/submit-button"
 
 const loginSchema = z.object({
   email: z
@@ -48,7 +48,7 @@ function getErrorMessage(
 export function LoginForm({ next }: LoginFormProps) {
   const formRef = useRef<HTMLFormElement>(null)
   const validationBypassRef = useRef(false)
-  const [serverState, formAction, isPending] = useActionState(
+  const [serverState, formAction] = useActionState(
     signInWithPasswordFormAction,
     initialAuthFormState,
   )
@@ -107,10 +107,13 @@ export function LoginForm({ next }: LoginFormProps) {
               </Alert>
               <form action={resendVerificationEmailAction}>
                 <input name="email" type="hidden" value={activeEmail} />
-                <Button className="gap-2" type="submit" variant="outline">
+                <SubmitButton
+                  className="gap-2"
+                  pendingLabel="Resending..."
+                  variant="outline"
+                >
                   Resend verification email
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
+                </SubmitButton>
               </form>
             </div>
           ) : null}
@@ -145,24 +148,21 @@ export function LoginForm({ next }: LoginFormProps) {
 
           <div className="flex items-center justify-between gap-4">
             <Link
-              className="text-xs text-muted-foreground transition-colors hover:text-primary"
+              className="interactive-link text-xs text-muted-foreground"
               href="/auth/reset-password"
             >
               Forgot password?
             </Link>
           </div>
 
-          <Button className="w-full gap-2" disabled={isPending} type="submit">
-            {isPending ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : null}
-            {isPending ? "Signing in..." : "Sign in"}
-          </Button>
+          <SubmitButton className="w-full gap-2" pendingLabel="Signing in...">
+            Sign in
+          </SubmitButton>
         </form>
 
         <div className="flex items-center gap-3">
           <Separator className="flex-1" />
-          <span className="text-[10px] tracking-[0.24em] text-muted-foreground">
+          <span className="text-[10px] tracking-wide text-muted-foreground">
             or
           </span>
           <Separator className="flex-1" />
@@ -170,10 +170,10 @@ export function LoginForm({ next }: LoginFormProps) {
 
         <form action={signInWithGoogleAction} className="grid">
           <input name="next" type="hidden" value={next ?? ""} />
-          <Button className="gap-3" variant="outline">
+          <SubmitButton className="gap-3" variant="outline">
             <GoogleIcon className="h-4 w-4" />
             Continue with Google
-          </Button>
+          </SubmitButton>
         </form>
       </CardContent>
     </Card>

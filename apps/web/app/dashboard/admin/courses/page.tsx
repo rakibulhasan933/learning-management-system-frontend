@@ -3,201 +3,171 @@ import {
   ArrowLeft,
   CheckCircle2,
   Clock,
-  Layers,
+  Coins,
   Mail,
   Tag,
   XCircle,
 } from "lucide-react"
 import type { AdminCourseApprovalQueueResponse } from "@workspace/types"
+import type { AdminCategoryListResponse } from "@workspace/types"
 
 import {
   approveCourseAction,
   rejectCourseAction,
+  assignCourseCategoryAction,
 } from "@/app/dashboard/admin/actions"
 import { authenticatedApiFetch } from "@/lib/api-client"
+import { Button } from "@workspace/ui/components/button"
+import { EmptyState } from "@workspace/ui/components/empty-state"
+import { PageHeader } from "@workspace/ui/components/page-header"
+import { StatTile } from "@workspace/ui/components/stat-tile"
+import { SubmitButton } from "@/components/submit-button"
+import { CourseStatusPill } from "@/components/status-pill"
+import { formatDateTime, formatPrice } from "@/lib/format"
 
 export const dynamic = "force-dynamic"
 
-function formatSubmitted(iso: string) {
-  return new Date(iso).toLocaleString("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  })
-}
-
-function formatPrice(currency: string, price: string | number) {
-  let numeric = typeof price === "number" ? price : parseFloat(price as string)
-  if (Number.isNaN(numeric)) numeric = 0
-
-  try {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency,
-    }).format(numeric)
-  } catch {
-    return `${currency} ${numeric}`
-  }
-}
-
 export default async function AdminCoursesPage() {
-  const response =
-    await authenticatedApiFetch<AdminCourseApprovalQueueResponse>(
-      "/admin/courses/pending",
-      { cache: "no-store" },
-    )
+  const [response, categoryResponse] = await Promise.all([
+    authenticatedApiFetch<AdminCourseApprovalQueueResponse>("/admin/courses/pending", { cache: "no-store" }),
+    authenticatedApiFetch<AdminCategoryListResponse>("/admin/categories", { cache: "no-store" }),
+  ])
 
   const total = response.courses.length
 
   return (
-    <main className="min-h-screen bg-[#0B0D0F] px-4 py-10 text-[#EDEEF0] sm:px-6 lg:px-10">
-      <section className="mx-auto max-w-6xl">
-        {/* Masthead */}
-        <div className="flex flex-col gap-6 border-b border-[#22262B] pb-8 md:flex-row md:items-end md:justify-between">
-          <div>
-            <p className="font-mono text-xs uppercase tracking-[0.25em] text-[#C9A24B]">
-              Admin dashboard · Approval queue
-            </p>
-            <h1 className="mt-3 text-3xl font-medium tracking-tight text-[#EDEEF0] sm:text-4xl">
-              Course approval
-            </h1>
-            <p className="mt-3 max-w-xl text-sm leading-6 text-[#8B929B]">
-              Review what instructors have submitted before it reaches the
-              public catalog. Approve to publish, reject to send it back.
-            </p>
-          </div>
-          <Link
-            className="inline-flex w-fit items-center gap-2 border border-[#22262B] px-4 py-2 text-sm text-[#EDEEF0] transition-colors hover:border-[#C9A24B]/60 hover:text-[#C9A24B]"
-            href="/dashboard/admin"
-          >
-            <ArrowLeft className="h-3.5 w-3.5" />
-            Dashboard
-          </Link>
-        </div>
+    <>
+      <PageHeader
+        action={
+          <Button  variant="outline" asChild>
+            <Link href="/dashboard/admin">
+              <ArrowLeft className="size-3.5" />
+              Dashboard
+            </Link>
+          </Button>
+        }
+        eyebrow="Admin dashboard · Approval queue"
+        lede="Review what instructors have submitted before it reaches the public catalog. Approve to publish, reject to send it back."
+        title="Course approval"
+      />
 
-        {/* Queue stat */}
-        <div className="mt-6 flex items-center gap-3 border border-[#22262B] bg-[#0E1013] px-5 py-4">
-          <Clock className="h-4 w-4 text-[#C9A24B]" />
-          <p className="text-sm text-[#8B929B]">
-            <span className="font-mono text-lg text-[#EDEEF0]">
-              {String(total).padStart(2, "0")}
-            </span>{" "}
-            {total === 1 ? "course" : "courses"} waiting on review
-          </p>
-        </div>
+      <div className="mt-12 grid gap-4 sm:max-w-xs">
+        <StatTile
+          hint={total === 1 ? "course waiting on review" : "courses waiting on review"}
+          icon={<Clock />}
+          label="In the queue"
+          tone={total > 0 ? "primary" : "default"}
+          value={total}
+        />
+      </div>
 
-        {/* Queue */}
-        <div className="mt-6 divide-y divide-[#22262B] border border-[#22262B] bg-[#131619]">
-          {response.courses.length === 0 ? (
-            <div className="flex flex-col items-center gap-2 px-4 py-14 text-center">
-              <CheckCircle2 className="h-5 w-5 text-[#8B929B]" />
-              <p className="text-sm text-[#EDEEF0]">Queue is clear.</p>
-              <p className="text-xs text-[#8B929B]">
-                No courses are waiting for approval right now.
-              </p>
-            </div>
-          ) : (
-            response.courses.map((course, index) => (
-              <article
-                className="group relative border-l-2 border-transparent px-5 py-6 transition-colors hover:border-[#C9A24B] hover:bg-[#0E1013] sm:px-6"
-                key={course.id}
-              >
-                <div className="grid gap-6 lg:grid-cols-[auto_1fr_200px]">
-                  <span className="hidden font-mono text-xs text-[#8B929B] lg:block">
-                    {String(index + 1).padStart(2, "0")}
-                  </span>
+      <div className="mt-5 space-y-3">
+        {response.courses.length === 0 ? (
+          <EmptyState
+            description="No courses are waiting for approval right now."
+            icon={<CheckCircle2 />}
+            title="Queue is clear"
+          />
+        ) : (
+          response.courses.map((course, index) => (
+            <article
+              className="group relative rounded-2xl bg-card p-5 ring-1 ring-foreground/10 transition-shadow duration-300 hover:ring-primary/40 sm:p-6"
+              key={course.id}
+            >
+              <div className="grid gap-6 lg:grid-cols-[auto_1fr_200px]">
+                <span className="hidden font-mono text-xs text-muted-foreground tabular-nums lg:block">
+                  {index + 1}
+                </span>
 
-                  <div>
-                    <div className="flex flex-wrap items-center gap-3">
-                      <h2 className="text-xl text-[#EDEEF0] sm:text-2xl">
-                        {course.title}
-                      </h2>
-                      <span className="inline-flex items-center gap-1.5 border border-[#C9A24B]/60 px-2 py-1 font-mono text-[11px] uppercase tracking-wide text-[#C9A24B]">
-                        <Layers className="h-3 w-3" />
-                        {course.status.replace("_", " ")}
-                      </span>
+                <div>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <h2 className="font-heading text-xl tracking-tight sm:text-2xl">
+                      {course.title}
+                    </h2>
+                    <CourseStatusPill status={course.status} />
+                  </div>
+
+                  <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
+                    <div className="flex items-start gap-2">
+                      <Mail className="mt-0.5 size-3.5 shrink-0 text-muted-foreground" />
+                      <div>
+                        <dt className="text-xs tracking-wide text-muted-foreground">
+                          Instructor
+                        </dt>
+                        <dd className="font-mono text-foreground">
+                          {course.instructorEmail}
+                        </dd>
+                      </div>
                     </div>
-
-                    <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
-                      <div className="flex items-start gap-2">
-                        <Mail className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#8B929B]" />
-                        <div>
-                          <dt className="text-xs uppercase tracking-wide text-[#8B929B]">
-                            Instructor
-                          </dt>
-                          <dd className="font-mono text-[#EDEEF0]">
-                            {course.instructorEmail}
-                          </dd>
-                        </div>
+                    <div className="flex items-start gap-2">
+                      <Tag className="mt-0.5 size-3.5 shrink-0 text-muted-foreground" />
+                      <div>
+                        <dt className="text-xs tracking-wide text-muted-foreground">
+                          Slug
+                        </dt>
+                        <dd className="font-mono text-foreground">
+                          {course.slug}
+                        </dd>
                       </div>
-                      <div className="flex items-start gap-2">
-                        <Tag className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#8B929B]" />
-                        <div>
-                          <dt className="text-xs uppercase tracking-wide text-[#8B929B]">
-                            Slug
-                          </dt>
-                          <dd className="font-mono text-[#EDEEF0]">
-                            {course.slug}
-                          </dd>
-                        </div>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <Coins className="mt-0.5 size-3.5 shrink-0 text-muted-foreground" />
+                      <div>
+                        <dt className="text-xs tracking-wide text-muted-foreground">
+                          Price
+                        </dt>
+                        <dd className="font-mono text-foreground">
+                          {formatPrice(course.price, course.currency)}
+                        </dd>
                       </div>
-                      <div className="flex items-start gap-2">
-                        <span className="mt-0.5 flex h-3.5 w-3.5 shrink-0 items-center justify-center text-[10px] text-[#8B929B]">
-                          $
-                        </span>
-                        <div>
-                          <dt className="text-xs uppercase tracking-wide text-[#8B929B]">
-                            Price
-                          </dt>
-                          <dd className="font-mono text-[#EDEEF0]">
-                            {formatPrice(course.currency, course.price)}
-                          </dd>
-                        </div>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <Clock className="mt-0.5 size-3.5 shrink-0 text-muted-foreground" />
+                      <div>
+                        <dt className="text-xs tracking-wide text-muted-foreground">
+                          Submitted
+                        </dt>
+                        <dd className="font-mono text-foreground">
+                          {formatDateTime(course.submittedAt)}
+                        </dd>
                       </div>
-                      <div className="flex items-start gap-2">
-                        <Clock className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#8B929B]" />
-                        <div>
-                          <dt className="text-xs uppercase tracking-wide text-[#8B929B]">
-                            Submitted
-                          </dt>
-                          <dd className="font-mono text-[#EDEEF0]">
-                            {formatSubmitted(course.submittedAt)}
-                          </dd>
-                        </div>
-                      </div>
-                    </dl>
-                  </div>
-
-                  <div className="flex flex-col gap-2 lg:justify-center">
-                    <form action={approveCourseAction}>
-                      <input name="courseId" type="hidden" value={course.id} />
-                      <button
-                        className="flex w-full items-center justify-center gap-2 bg-[#C9A24B] px-4 py-2 text-sm font-medium text-[#14110A] transition-opacity hover:opacity-90"
-                        type="submit"
-                      >
-                        <CheckCircle2 className="h-3.5 w-3.5" />
-                        Approve
-                      </button>
-                    </form>
-                    <form action={rejectCourseAction}>
-                      <input name="courseId" type="hidden" value={course.id} />
-                      <button
-                        className="flex w-full items-center justify-center gap-2 border border-[#E5484D]/50 px-4 py-2 text-sm text-[#E5484D] transition-colors hover:bg-[#E5484D]/10"
-                        type="submit"
-                      >
-                        <XCircle className="h-3.5 w-3.5" />
-                        Reject
-                      </button>
-                    </form>
-                  </div>
+                    </div>
+                  </dl>
                 </div>
-              </article>
-            ))
-          )}
-        </div>
-      </section>
-    </main>
+
+                <div className="flex flex-col gap-2 lg:justify-center">
+                  <form action={approveCourseAction}>
+                    <input name="courseId" type="hidden" value={course.id} />
+                    <SubmitButton className="w-full" pendingLabel="Approving...">
+                      <CheckCircle2 className="size-3.5" />
+                      Approve
+                    </SubmitButton>
+                  </form>
+                  <form action={assignCourseCategoryAction} className="flex gap-2">
+                    <input name="courseId" type="hidden" value={course.id} />
+                    <select className="h-10 min-w-0 flex-1 rounded-xl border border-input bg-input/30 px-2 text-xs" defaultValue={course.category ?? ""} name="category">
+                      <option value="">No category</option>
+                      {categoryResponse.categories.map((category) => <option key={category.id} value={category.slug}>{category.name}</option>)}
+                    </select>
+                    <SubmitButton pendingLabel="..." variant="outline">Save</SubmitButton>
+                  </form>
+                  <form action={rejectCourseAction}>
+                    <input name="courseId" type="hidden" value={course.id} />
+                    <SubmitButton
+                      className="w-full"
+                      pendingLabel="Rejecting..."
+                      variant="destructive"
+                    >
+                      <XCircle className="size-3.5" />
+                      Reject
+                    </SubmitButton>
+                  </form>
+                </div>
+              </div>
+            </article>
+          ))
+        )}
+      </div>
+    </>
   )
 }

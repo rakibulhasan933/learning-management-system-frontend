@@ -37,6 +37,7 @@ export async function createEnrollmentOrderAction(formData: FormData) {
   const slug = getRequiredString(formData, "slug")
   const couponCode = getOptionalString(formData, "couponCode")
   let orderId: string
+  let orderStatus: PaymentOrderDto["status"]
 
   try {
     const response = await authenticatedApiFetch<PaymentInstructionsResponse>(
@@ -52,6 +53,7 @@ export async function createEnrollmentOrderAction(formData: FormData) {
 
     revalidatePath("/dashboard/student")
     orderId = response.order.id
+    orderStatus = response.order.status
   } catch (error) {
     if (error instanceof ApiClientError && error.status === 401) {
       redirectToLogin(slug)
@@ -62,35 +64,46 @@ export async function createEnrollmentOrderAction(formData: FormData) {
     )
   }
 
-  redirect(`/courses/${slug}/enroll?orderId=${orderId}`)
+  if (orderStatus === "paid") {
+    redirect("/dashboard/student")
+  }
+
+  redirect(`/checkout/bkash?order_id=${encodeURIComponent(orderId)}`)
+}
+
+export async function previewCouponAction(courseId: string, couponCode: string) {
+  return authenticatedApiFetch<{
+    amount: string
+    couponCode: string | null
+    currency: string
+    discountAmount: string
+    originalAmount: string
+  }>("/payments/coupons/preview", {
+    body: JSON.stringify({ courseId, couponCode }),
+    headers: { "Content-Type": "application/json" },
+    method: "POST",
+  })
 }
 
 export async function submitPaymentProofAction(formData: FormData) {
   const orderId = getRequiredString(formData, "orderId")
   const slug = getRequiredString(formData, "slug")
-  const paymentMethod = getRequiredString(formData, "paymentMethod")
+  const gateway = getOptionalString(formData, "gateway") ?? "bkash"
   const transactionId = getRequiredString(formData, "transactionId")
   const senderNumber = getRequiredString(formData, "senderNumber")
-  const screenshot = formData.get("proofScreenshot")
-  let proofScreenshot:
-    | { base64: string; contentType: string; fileName: string }
-    | undefined
+  const checkoutPath = `/checkout/${gateway}?order_id=${encodeURIComponent(orderId)}`
+  let paidOrder: PaymentOrderDto
 
-  if (screenshot instanceof File && screenshot.size > 0) {
-    const bytes = Buffer.from(await screenshot.arrayBuffer())
-
-    proofScreenshot = {
-      base64: bytes.toString("base64"),
-      contentType: screenshot.type || "application/octet-stream",
-      fileName: screenshot.name || "payment-proof.jpg",
-    }
-  }
+  console.info("[payment][web] Submitting payment proof", {
+    gateway,
+    orderId,
+    senderNumber: senderNumber.length > 4 ? `${senderNumber.slice(0, 2)}****${senderNumber.slice(-2)}` : "****",
+    transactionId: transactionId.length > 4 ? `${transactionId.slice(0, 2)}****${transactionId.slice(-2)}` : "****",
+  })
 
   try {
-    await authenticatedApiFetch<PaymentOrderDto>(`/payments/orders/${orderId}/proof`, {
+    paidOrder = await authenticatedApiFetch<PaymentOrderDto>(`/payments/orders/${orderId}/proof`, {
       body: JSON.stringify({
-        paymentMethod,
-        proofScreenshot,
         senderNumber,
         transactionId,
       }),
@@ -100,15 +113,21 @@ export async function submitPaymentProofAction(formData: FormData) {
       method: "POST",
     })
   } catch (error) {
+    console.error("[payment][web] Payment verification failed", {
+      error: error instanceof Error ? error.message : String(error),
+      orderId,
+      status: error instanceof ApiClientError ? error.status : null,
+    })
     if (error instanceof ApiClientError && error.status === 401) {
       redirectToLogin(slug)
     }
 
     redirect(
-      `/courses/${slug}/enroll?orderId=${orderId}&error=${encodeURIComponent(error instanceof Error ? error.message : "Payment proof could not be submitted.")}`,
+      `${checkoutPath}&error=${encodeURIComponent(error instanceof Error ? error.message : "Payment could not be verified.")}`,
     )
   }
 
   revalidatePath("/dashboard/student")
+  revalidatePath(`/learn/${paidOrder.courseId}`)
   redirect("/dashboard/student")
 }

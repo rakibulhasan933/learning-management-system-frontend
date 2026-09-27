@@ -1,6 +1,7 @@
 "use client"
 
 import { type FormEvent, useState, useTransition } from "react"
+import { Loader2 } from "lucide-react"
 import { AlertCircle, CheckCircle2 } from "lucide-react"
 import type { InstructorAssignmentDto } from "@workspace/types"
 
@@ -25,7 +26,7 @@ interface AssignmentBuilderProps {
   courseId: string
   targetId: string
   targetLabel: string
-  targetType: "lecture" | "section"
+  targetType: "lecture" | "section" | "module"
 }
 
 type StatusMessage = { text: string; type: "success" | "error" } | null
@@ -222,6 +223,7 @@ export function AssignmentBuilder({
           size="sm"
           type="button"
         >
+          {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
           {isPending ? "Saving..." : "Save assignment"}
         </Button>
         {assignment ? (
@@ -235,6 +237,7 @@ export function AssignmentBuilder({
                 type="button"
                 variant="destructive"
               >
+                {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
                 {isPending ? "Deleting..." : "Confirm delete"}
               </Button>
               <Button
@@ -328,13 +331,16 @@ export function AssignmentBuilder({
                               name="gradeFeedback"
                             />
                             <Button
-                              className="w-full h-fit self-end sm:w-auto"
+                              className="h-fit w-full gap-2 self-end sm:w-auto"
                               disabled={isPending}
                               size="sm"
                               type="submit"
                               variant="outline"
                             >
-                              Save grade
+                              {isPending ? (
+                                <Loader2 className="size-3.5 animate-spin" />
+                              ) : null}
+                              {isPending ? "Saving grade..." : "Save grade"}
                             </Button>
                           </div>
                           {submission.gradedAt ? (

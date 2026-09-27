@@ -1,6 +1,8 @@
 "use client"
 
 import { useEffect, useMemo, useRef, useState, useTransition } from "react"
+import { Button } from "@workspace/ui/components/button"
+import { Loader2, Pause, Play } from "lucide-react"
 import type { CourseDetailDto } from "@workspace/types"
 
 import { getLectureVideoUrlAction } from "@/app/learn/[courseId]/actions"
@@ -46,9 +48,10 @@ export function PreviewVideoPlayer({
   const [message, setMessage] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
   const [isPlaying, setIsPlaying] = useState(false)
-  const [watermarkPosition, setWatermarkPosition] = useState(
-    getWatermarkPosition,
-  )
+  const [watermarkPosition, setWatermarkPosition] = useState({
+    left: "50%",
+    top: "50%",
+  })
   const videoRef = useRef<HTMLVideoElement>(null)
   const selectedLecture = previewLectures.find(
     (lecture) => lecture.id === selectedLectureId,
@@ -88,7 +91,10 @@ export function PreviewVideoPlayer({
       )
     }
 
-    scheduleMove()
+    timeoutId = setTimeout(() => {
+      setWatermarkPosition(getWatermarkPosition())
+      scheduleMove()
+    }, 0)
 
     return () => clearTimeout(timeoutId)
   }, [])
@@ -114,10 +120,14 @@ export function PreviewVideoPlayer({
   }
 
   return (
-    <section className="mt-10 border border-border bg-card">
+    <section className="mt-10 overflow-hidden rounded-xl border border-border bg-card">
       <div className="grid gap-2 border-b border-border p-4">
-        <p className="font-mono text-xs text-muted-foreground sm:text-sm">Free preview</p>
-        <h2 className="text-xl sm:text-2xl">{selectedLecture?.title}</h2>
+        <p className="font-mono text-xs text-muted-foreground sm:text-sm">
+          Free preview
+        </p>
+        <h2 className="font-heading text-xl sm:text-2xl">
+          {selectedLecture?.title}
+        </h2>
       </div>
       <div className="relative aspect-video bg-background">
         {videoUrl ? (
@@ -132,8 +142,15 @@ export function PreviewVideoPlayer({
             src={videoUrl}
           />
         ) : (
-          <div className="flex h-full items-center justify-center px-6 text-center text-sm text-muted-foreground">
-            {isPending ? "Preparing preview..." : message}
+          <div className="flex h-full flex-col items-center justify-center gap-2 px-6 text-center text-sm text-muted-foreground">
+            {isPending ? (
+              <>
+                <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                Preparing preview...
+              </>
+            ) : (
+              message
+            )}
           </div>
         )}
         <div
@@ -148,22 +165,38 @@ export function PreviewVideoPlayer({
         </div>
       </div>
       <div className="grid gap-3 border-t border-border p-4">
-        <button
-          className="w-full bg-primary px-4 py-2 text-sm text-primary-foreground disabled:cursor-not-allowed disabled:opacity-60 sm:w-fit"
-          disabled={!videoUrl}
+        <Button
+          className="w-full sm:w-fit"
+          disabled={!videoUrl || isPending}
           onClick={togglePlayback}
           type="button"
         >
-          {isPlaying ? "Pause" : "Play"}
-        </button>
+          {isPending ? (
+            <>
+              <Loader2 className="size-3.5 animate-spin" />
+              Preparing...
+            </>
+          ) : isPlaying ? (
+            <>
+              <Pause className="size-3.5" />
+              Pause
+            </>
+          ) : (
+            <>
+              <Play className="size-3.5" />
+              Play
+            </>
+          )}
+        </Button>
         <div className="grid gap-2">
           {previewLectures.map((lecture) => (
-            <button
-              className={`border px-3 py-2 text-left text-sm ${
+            <Button
+              className={`h-auto w-full justify-start rounded-xl border px-3 py-2 text-left text-sm ${
                 lecture.id === selectedLectureId
-                  ? "border-primary text-foreground"
-                  : "border-border text-muted-foreground"
+                  ? "border-primary bg-primary/10 text-foreground"
+                  : "border-border text-muted-foreground hover:bg-background"
               }`}
+              disabled={isPending}
               key={lecture.id}
               onClick={() => {
                 setSelectedLectureId(lecture.id)
@@ -172,14 +205,17 @@ export function PreviewVideoPlayer({
                 setIsPlaying(false)
               }}
               type="button"
+              variant="ghost"
             >
-              <span>{lecture.title}</span>
-              {lecture.durationSeconds ? (
-                <span className="mt-1 block font-mono text-xs">
-                  {formatDuration(lecture.durationSeconds)}
-                </span>
-              ) : null}
-            </button>
+              <span className="grid gap-1">
+                <span className="truncate">{lecture.title}</span>
+                {lecture.durationSeconds ? (
+                  <span className="font-mono text-xs">
+                    {formatDuration(lecture.durationSeconds)}
+                  </span>
+                ) : null}
+              </span>
+            </Button>
           ))}
         </div>
       </div>

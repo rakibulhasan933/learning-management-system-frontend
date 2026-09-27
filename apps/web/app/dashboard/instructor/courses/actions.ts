@@ -74,6 +74,14 @@ function getSectionPayload(formData: FormData) {
   }
 }
 
+function getSectionCreatePayload(formData: FormData) {
+  return {
+    description: getOptionalString(formData, "description"),
+    dripAfterDays: getRequiredNumber(formData, "dripAfterDays"),
+    title: getRequiredString(formData, "title"),
+  }
+}
+
 function getLecturePayload(formData: FormData) {
   return {
     availableAt: getOptionalString(formData, "availableAt"),
@@ -139,7 +147,7 @@ export async function createInstructorSectionAction(formData: FormData) {
   await authenticatedApiFetch<InstructorSectionDto>(
     `/instructor/courses/${courseId}/sections`,
     {
-      body: JSON.stringify(getSectionPayload(formData)),
+      body: JSON.stringify(getSectionCreatePayload(formData)),
       headers: {
         "Content-Type": "application/json",
       },
@@ -197,6 +205,99 @@ export async function createInstructorLectureAction(formData: FormData) {
     },
   )
 
+  revalidatePath(`/dashboard/instructor/courses/${courseId}/edit`)
+}
+
+export async function createInstructorModuleAction(formData: FormData) {
+  const courseId = getRequiredString(formData, "courseId")
+  const milestoneId = getRequiredString(formData, "milestoneId")
+  const contentTypes = formData.getAll("contentTypes").filter((value): value is string => typeof value === "string")
+  await authenticatedApiFetch(`/instructor/courses/${courseId}/milestones/${milestoneId}/modules`, {
+    body: JSON.stringify({
+      contentTypes,
+      description: getOptionalString(formData, "description"),
+      title: getRequiredString(formData, "title"),
+    }),
+    headers: { "Content-Type": "application/json" },
+    method: "POST",
+  })
+  revalidatePath(`/dashboard/instructor/courses/${courseId}/edit`)
+}
+
+export async function addInstructorModuleContentAction(formData: FormData) {
+  const courseId = getRequiredString(formData, "courseId")
+  const moduleId = getRequiredString(formData, "moduleId")
+  const contentTypes = formData.getAll("contentTypes").filter((value): value is "video" | "pdf" | "quiz" | "assignment" =>
+    value === "video" || value === "pdf" || value === "quiz" || value === "assignment",
+  )
+  const contentType = getRequiredString(formData, "contentType")
+  if (contentType === "video" || contentType === "pdf" || contentType === "quiz" || contentType === "assignment") {
+    if (contentType === "video" || !contentTypes.includes(contentType)) contentTypes.push(contentType)
+  }
+  await authenticatedApiFetch(`/instructor/courses/${courseId}/modules/${moduleId}`, {
+    body: JSON.stringify({ contentTypes }),
+    headers: { "Content-Type": "application/json" },
+    method: "PATCH",
+  })
+  revalidatePath(`/dashboard/instructor/courses/${courseId}/edit`)
+}
+
+export async function createInstructorVideoAction(formData: FormData) {
+  const courseId = getRequiredString(formData, "courseId")
+  const moduleId = getRequiredString(formData, "moduleId")
+  await authenticatedApiFetch(`/instructor/courses/${courseId}/modules/${moduleId}/videos`, {
+    body: JSON.stringify({
+      description: getOptionalString(formData, "description"),
+      durationSeconds: getOptionalNumber(formData, "durationSeconds"),
+      isPreview: getCheckboxValue(formData, "isPreview"),
+      isPublished: getCheckboxValue(formData, "isPublished"),
+      position: getRequiredNumber(formData, "position"),
+      title: getRequiredString(formData, "title"),
+      videoProvider: getOptionalString(formData, "videoProvider") ?? "r2",
+      videoRef: getOptionalString(formData, "videoRef"),
+    }),
+    headers: { "Content-Type": "application/json" },
+    method: "POST",
+  })
+  revalidatePath(`/dashboard/instructor/courses/${courseId}/edit`)
+}
+
+export async function updateInstructorModuleAction(formData: FormData) {
+  const courseId = getRequiredString(formData, "courseId")
+  const moduleId = getRequiredString(formData, "moduleId")
+  await authenticatedApiFetch(`/instructor/courses/${courseId}/modules/${moduleId}`, {
+    body: JSON.stringify({
+      description: getOptionalString(formData, "description") ?? null,
+      title: getRequiredString(formData, "title"),
+    }),
+    headers: { "Content-Type": "application/json" },
+    method: "PATCH",
+  })
+  revalidatePath(`/dashboard/instructor/courses/${courseId}/edit`)
+}
+
+export async function deleteInstructorModuleAction(formData: FormData) {
+  const courseId = getRequiredString(formData, "courseId")
+  const moduleId = getRequiredString(formData, "moduleId")
+  await authenticatedApiFetch(`/instructor/courses/${courseId}/modules/${moduleId}`, { method: "DELETE" })
+  revalidatePath(`/dashboard/instructor/courses/${courseId}/edit`)
+}
+
+export async function deleteInstructorVideoAction(formData: FormData) {
+  const courseId = getRequiredString(formData, "courseId")
+  const videoId = getRequiredString(formData, "videoId")
+  await authenticatedApiFetch(`/instructor/courses/${courseId}/videos/${videoId}`, { method: "DELETE" })
+  revalidatePath(`/dashboard/instructor/courses/${courseId}/edit`)
+}
+
+export async function publishInstructorVideoAction(formData: FormData) {
+  const courseId = getRequiredString(formData, "courseId")
+  const videoId = getRequiredString(formData, "videoId")
+  await authenticatedApiFetch(`/instructor/courses/${courseId}/videos/${videoId}`, {
+    body: JSON.stringify({ isPublished: true }),
+    headers: { "Content-Type": "application/json" },
+    method: "PATCH",
+  })
   revalidatePath(`/dashboard/instructor/courses/${courseId}/edit`)
 }
 
@@ -344,6 +445,42 @@ export async function uploadLectureMaterialAction(input: {
   return response
 }
 
+export async function uploadVideoMaterialAction(input: {
+  base64: string
+  contentType: string
+  courseId: string
+  fileName: string
+  kind: "pdf" | "slides"
+  videoId: string
+}) {
+  return authenticatedApiFetch<{ url: string }>(
+    `/instructor/courses/${input.courseId}/videos/${input.videoId}/material`,
+    {
+      body: JSON.stringify(input),
+      headers: { "Content-Type": "application/json" },
+      method: "POST",
+    },
+  )
+}
+
+export async function uploadModuleMaterialAction(input: {
+  base64: string
+  contentType: string
+  courseId: string
+  fileName: string
+  kind: "pdf" | "slides"
+  moduleId: string
+}) {
+  return authenticatedApiFetch<{ url: string }>(
+    `/instructor/courses/${input.courseId}/modules/${input.moduleId}/material`,
+    {
+      body: JSON.stringify(input),
+      headers: { "Content-Type": "application/json" },
+      method: "POST",
+    },
+  )
+}
+
 export async function saveInstructorQuizAction(input: {
   courseId: string
   isPublished: boolean
@@ -357,12 +494,13 @@ export async function saveInstructorQuizAction(input: {
     questionText: string
   }>
   targetId: string
-  targetType: "lecture" | "section"
+  targetType: "lecture" | "section" | "module"
   title: string
 }) {
-  const path =
-    input.targetType === "lecture"
-      ? `/instructor/courses/${input.courseId}/lectures/${input.targetId}/quiz`
+  const path = input.targetType === "lecture"
+    ? `/instructor/courses/${input.courseId}/lectures/${input.targetId}/quiz`
+    : input.targetType === "module"
+      ? `/instructor/courses/${input.courseId}/modules/${input.targetId}/quiz`
       : `/instructor/courses/${input.courseId}/sections/${input.targetId}/quiz`
 
   await authenticatedApiFetch<InstructorQuizDto>(path, {
@@ -401,12 +539,13 @@ export async function saveInstructorAssignmentAction(input: {
   isPublished: boolean
   maxScore: number
   targetId: string
-  targetType: "lecture" | "section"
+  targetType: "lecture" | "section" | "module"
   title: string
 }) {
-  const path =
-    input.targetType === "section"
-      ? `/instructor/courses/${input.courseId}/sections/${input.targetId}/assignment`
+  const path = input.targetType === "section"
+    ? `/instructor/courses/${input.courseId}/sections/${input.targetId}/assignment`
+    : input.targetType === "module"
+      ? `/instructor/courses/${input.courseId}/modules/${input.targetId}/assignment`
       : `/instructor/courses/${input.courseId}/lectures/${input.targetId}/assignment`
 
   await authenticatedApiFetch<InstructorAssignmentDto>(path, {

@@ -8,6 +8,9 @@ import {
 } from "@/lib/auth/cookies"
 import { getDashboardPath } from "@/lib/auth/dashboard"
 
+const accessTokenMaxAgeSeconds = 15 * 60
+const refreshTokenMaxAgeSeconds = 30 * 24 * 60 * 60
+
 const protectedRoutes: Array<{
   prefix: string
   roles?: UserRole[]
@@ -17,6 +20,8 @@ const protectedRoutes: Array<{
   { prefix: "/dashboard/instructor", roles: ["instructor"] },
   { prefix: "/dashboard/admin", roles: ["admin"] },
 ]
+
+type RefreshedSession = AuthSessionDto & { refreshToken: string }
 
 function getMatchedProtectedRoute(pathname: string) {
   return protectedRoutes.find(
@@ -47,16 +52,18 @@ async function getProfile(accessToken: string) {
   return (await response.json()) as ProfileDto
 }
 
-async function refreshSession(refreshToken: string) {
+async function refreshSession(
+  refreshToken: string,
+): Promise<RefreshedSession | null> {
   const response = await fetch(`${getBackendApiUrl()}/auth/refresh`, {
     headers: {
       Accept: "application/json",
       Cookie: `${refreshTokenCookieName}=${encodeURIComponent(refreshToken)}`,
     },
     method: "POST",
-  })
+  }).catch(() => null)
 
-  if (!response.ok) {
+  if (!response?.ok) {
     return null
   }
 
@@ -78,39 +85,79 @@ async function refreshSession(refreshToken: string) {
   return { ...session, refreshToken: rotatedRefreshToken ?? refreshToken }
 }
 
+/**
+ * Persists a rotated token pair. The backend revokes the presented refresh
+ * token, so the new pair has to land in the response or the session is lost.
+ */
+function applySession(request: NextRequest, session: RefreshedSession) {
+  const secure = process.env.NODE_ENV === "production"
+
+  request.cookies.set(accessTokenCookieName, session.accessToken)
+
+  const response = NextResponse.next({ request })
+
+  response.cookies.set(accessTokenCookieName, session.accessToken, {
+    httpOnly: true,
+    maxAge: accessTokenMaxAgeSeconds,
+    path: "/",
+    sameSite: "lax",
+    secure,
+  })
+  response.cookies.set(refreshTokenCookieName, session.refreshToken, {
+    httpOnly: true,
+    maxAge: refreshTokenMaxAgeSeconds,
+    path: "/",
+    sameSite: "lax",
+    secure,
+  })
+
+  return response
+}
+
+function clearSession(request: NextRequest) {
+  request.cookies.delete(accessTokenCookieName)
+  request.cookies.delete(refreshTokenCookieName)
+
+  const response = NextResponse.next({ request })
+
+  response.cookies.delete(accessTokenCookieName)
+  response.cookies.delete(refreshTokenCookieName)
+
+  return response
+}
+
 export async function updateSession(request: NextRequest) {
   const route = getMatchedProtectedRoute(request.nextUrl.pathname)
-  let response = NextResponse.next({ request })
+  const accessToken = request.cookies.get(accessTokenCookieName)?.value
+  const refreshToken = request.cookies.get(refreshTokenCookieName)?.value
 
+  // Public pages still read the session (a course page needs to know the viewer
+  // is already enrolled). Server components can read cookies but cannot write
+  // them, so the short-lived access token has to be renewed here or those pages
+  // silently degrade the signed-in viewer to an anonymous visitor.
   if (!route) {
-    return response
+    if (accessToken || !refreshToken) {
+      return NextResponse.next({ request })
+    }
+
+    const session = await refreshSession(refreshToken)
+
+    return session ? applySession(request, session) : clearSession(request)
   }
 
-  const accessToken = request.cookies.get(accessTokenCookieName)?.value
-  let profile = accessToken ? await getProfile(accessToken) : null
+  const profile = accessToken ? await getProfile(accessToken) : null
 
-  if (!profile) {
-    const refreshToken = request.cookies.get(refreshTokenCookieName)?.value
-    const session = refreshToken ? await refreshSession(refreshToken) : null
+  if (!profile && refreshToken) {
+    const session = await refreshSession(refreshToken)
 
     if (session) {
-      request.cookies.set(accessTokenCookieName, session.accessToken)
-      response = NextResponse.next({ request })
-      response.cookies.set(accessTokenCookieName, session.accessToken, {
-        httpOnly: true,
-        maxAge: 15 * 60,
-        path: "/",
-        sameSite: "lax",
-        secure: process.env.NODE_ENV === "production",
-      })
-      response.cookies.set(refreshTokenCookieName, session.refreshToken, {
-        httpOnly: true,
-        maxAge: 30 * 24 * 60 * 60,
-        path: "/",
-        sameSite: "lax",
-        secure: process.env.NODE_ENV === "production",
-      })
-      profile = session.profile
+      const response = applySession(request, session)
+
+      if (route.roles && !route.roles.includes(session.profile.role)) {
+        return redirectTo(request, getDashboardPath(session.profile.role))
+      }
+
+      return response
     }
   }
 
@@ -124,5 +171,5 @@ export async function updateSession(request: NextRequest) {
     return redirectTo(request, getDashboardPath(profile.role))
   }
 
-  return response
+  return NextResponse.next({ request })
 }

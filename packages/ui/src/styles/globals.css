@@ -129,6 +129,145 @@
   body {
     @apply bg-background text-foreground;
     }
+
+  /*
+   * Tailwind v4's preflight sets `cursor: default` on <button>, so every button
+   * in the app read as unclickable. Restore the pointer for anything a user can
+   * actually activate, and mark unavailable controls `not-allowed` so enabled vs.
+   * disabled is legible on hover without clicking.
+   */
+  button,
+  summary,
+  select,
+  label[for],
+  a[href],
+  [role="button"],
+  [role="link"],
+  [role="menuitem"],
+  [role="menuitemcheckbox"],
+  [role="menuitemradio"],
+  [role="option"],
+  [role="tab"],
+  [role="switch"],
+  [role="checkbox"],
+  [role="radio"],
+  input:is(
+    [type="button"],
+    [type="checkbox"],
+    [type="color"],
+    [type="file"],
+    [type="radio"],
+    [type="range"],
+    [type="reset"],
+    [type="submit"]
+  ) {
+    cursor: pointer;
+  }
+
+  /*
+   * A label that wraps its control is clickable too, but has no `for` attribute
+   * to match on. `:has()` catches those without touching layout labels that just
+   * sit above an input.
+   */
+  label:has(
+    > input:is([type="checkbox"], [type="radio"]),
+    > button[role="checkbox"],
+    > button[role="radio"],
+    > button[role="switch"],
+    > [data-slot="checkbox"],
+    > [data-slot="radio-group-item"],
+    > [data-slot="switch"]
+  ) {
+    cursor: pointer;
+  }
+
+  /* Disabled beats clickable — keep this after the rule above. */
+  button:disabled,
+  select:disabled,
+  input:disabled,
+  fieldset:disabled :is(button, select, input),
+  [aria-disabled="true"],
+  [data-disabled]:not([data-disabled="false"]) {
+    cursor: not-allowed;
+  }
+
+  /*
+   * A disabled <button> is inert for free — the browser suppresses its click.
+   * An anchor is not: `disabled` means nothing on <a>, so a link-styled button
+   * marked aria-disabled would still navigate. Block activation on those, and
+   * on anything using Radix's data-disabled, since the cursor alone is not a
+   * guarantee. Buttons deliberately keep pointer events so `not-allowed` shows.
+   */
+  a[aria-disabled="true"],
+  a[data-disabled]:not([data-disabled="false"]),
+  [role="link"][aria-disabled="true"] {
+    pointer-events: none;
+  }
+}
+
+@layer components {
+  /*
+   * Shared hover affordances. Flat only — no gradients, glow, lift or scale, per
+   * the design system. Surfaces shift background + border; links and nav items
+   * pick up the brass accent, which stays reserved for links and CTAs.
+   *
+   * Each selector excludes disabled state so a disabled control never animates.
+   */
+  .interactive-surface {
+    cursor: pointer;
+    transition:
+      background-color 150ms ease,
+      border-color 150ms ease,
+      color 150ms ease;
+  }
+
+  .interactive-surface:not(:disabled, [aria-disabled="true"], [data-disabled]):hover {
+    background-color: color-mix(in srgb, var(--foreground) 5%, transparent);
+    color: var(--foreground);
+  }
+
+  /* Cards/divs that act as a single link. Reuses the card's existing ring so the
+     border turns brass rather than stacking a second outline. */
+  .interactive-card {
+    cursor: pointer;
+    transition:
+      background-color 150ms ease,
+      box-shadow 150ms ease;
+  }
+
+  .interactive-card:not([aria-disabled="true"], [data-disabled]):hover {
+    background-color: color-mix(in srgb, var(--foreground) 3%, var(--card));
+    --tw-ring-color: color-mix(in srgb, var(--primary) 40%, transparent);
+  }
+
+  /* Text links and nav items. */
+  .interactive-link {
+    cursor: pointer;
+    text-underline-offset: 0.25em;
+    transition:
+      color 150ms ease,
+      text-decoration-color 150ms ease;
+  }
+
+  .interactive-link:not([aria-disabled="true"], [data-disabled]):hover {
+    color: var(--primary);
+    text-decoration-line: underline;
+    text-decoration-color: color-mix(in srgb, var(--primary) 60%, transparent);
+  }
+
+  .interactive-surface:is(:disabled, [aria-disabled="true"], [data-disabled]),
+  .interactive-card:is([aria-disabled="true"], [data-disabled]),
+  .interactive-link:is([aria-disabled="true"], [data-disabled]) {
+    cursor: not-allowed;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .interactive-surface,
+    .interactive-card,
+    .interactive-link {
+      transition-duration: 0.01ms;
+    }
+  }
 }
 
 @layer components {

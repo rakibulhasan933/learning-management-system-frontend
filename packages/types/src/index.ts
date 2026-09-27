@@ -100,11 +100,21 @@ export interface CourseLectureSummaryDto {
   isPreview: boolean
 }
 
+export interface CourseModuleSummaryDto {
+  id: string
+  title: string
+  position: number
+  contentTypes: Array<"video" | "pdf" | "quiz" | "assignment">
+  videoCount: number
+  durationSeconds: number
+}
+
 export interface CourseSectionSummaryDto {
   id: string
   title: string
   position: number
   lectures: CourseLectureSummaryDto[]
+  modules: CourseModuleSummaryDto[]
 }
 
 export interface CourseDetailDto extends CourseSummaryDto {
@@ -120,6 +130,24 @@ export interface CourseListResponse {
     total: number
     totalPages: number
   }
+}
+
+export interface CourseEnrollmentOrderSummaryDto {
+  id: string
+  status: OrderStatus
+  rejectionReason: string | null
+}
+
+export interface CourseEnrollmentStatusResponse {
+  courseId: string
+  isAuthenticated: boolean
+  isEnrolled: boolean
+  enrollmentStatus: EnrollmentStatus | null
+  /**
+   * Most relevant open order for the viewer, used to show "payment under
+   * review" / "resubmit payment proof" when there is no active enrollment yet.
+   */
+  latestOrder: CourseEnrollmentOrderSummaryDto | null
 }
 
 export interface InstructorCourseDto {
@@ -181,6 +209,52 @@ export interface InstructorCourseOutlineResponse {
   sections: InstructorSectionDto[]
 }
 
+export interface InstructorVideoDto {
+  id: string
+  moduleId: string
+  title: string
+  description: string | null
+  position: number
+  videoProvider: VideoProvider
+  videoRef: string | null
+  pdfUrl: string | null
+  slidesUrl: string | null
+  durationSeconds: number | null
+  isPreview: boolean
+  isPublished: boolean
+  availableAt: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export interface InstructorModuleDto {
+  id: string
+  milestoneId: string
+  contentTypes: Array<"video" | "pdf" | "quiz" | "assignment">
+  title: string
+  description: string | null
+  pdfUrl: string | null
+  slidesUrl: string | null
+  position: number
+  videos: InstructorVideoDto[]
+  quiz: InstructorQuizDto | null
+  assignment: InstructorAssignmentDto | null
+}
+
+export interface InstructorMilestoneDto {
+  id: string
+  courseId: string
+  title: string
+  description: string | null
+  position: number
+  dripAfterDays: number
+  modules: InstructorModuleDto[]
+}
+
+export interface InstructorCourseStructureResponse {
+  milestones: InstructorMilestoneDto[]
+}
+
 export interface InstructorQuizOptionDto {
   id: string
   optionText: string
@@ -200,6 +274,7 @@ export interface InstructorQuizDto {
   courseId: string
   sectionId: string | null
   lectureId: string | null
+  moduleId: string | null
   title: string
   isPublished: boolean
   createdAt: string
@@ -235,12 +310,21 @@ export interface StudentQuizDto {
   courseId: string
   sectionId: string | null
   lectureId: string | null
+  moduleId: string | null
   title: string
   questions: StudentQuizQuestionDto[]
   latestAttempt: StudentQuizAttemptDto | null
+  review: StudentQuizReviewDto | null
+}
+
+export interface StudentQuizReviewDto {
+  answers: Record<string, string[]>
+  correctOptionIds: Record<string, string[]>
+  correctQuestionIds: string[]
 }
 
 export interface QuizSubmissionResultDto extends StudentQuizAttemptDto {
+  correctOptionIds: Record<string, string[]>
   correctQuestionIds: string[]
 }
 
@@ -264,6 +348,7 @@ export interface InstructorAssignmentDto {
   courseId: string
   sectionId: string | null
   lectureId: string | null
+  moduleId: string | null
   title: string
   instructions: string
   maxScore: number
@@ -290,6 +375,7 @@ export interface StudentAssignmentDto {
   courseId: string
   sectionId: string | null
   lectureId: string | null
+  moduleId: string | null
   title: string
   instructions: string
   maxScore: number
@@ -337,7 +423,12 @@ export interface LectureProgressMutationResponse {
 export interface LearningLectureDto {
   id: string
   sectionId: string
+  moduleId: string
+  moduleTitle: string
+  modulePdfUrl: string | null
+  moduleSlidesUrl: string | null
   title: string
+  description: string | null
   position: number
   durationSeconds: number | null
   isPreview: boolean
@@ -349,11 +440,24 @@ export interface LearningLectureDto {
   progress: LectureProgressDto | null
 }
 
+export interface LearningModuleDto {
+  id: string
+  title: string
+  position: number
+  contentTypes: Array<"video" | "pdf" | "quiz" | "assignment">
+  pdfUrl: string | null
+  slidesUrl: string | null
+  videos: LearningLectureDto[]
+  quiz: StudentQuizDto | null
+  assignment: StudentAssignmentDto | null
+}
+
 export interface LearningSectionDto {
   id: string
   title: string
   position: number
   lectures: LearningLectureDto[]
+  modules: LearningModuleDto[]
   quiz: StudentQuizDto | null
   assignment: StudentAssignmentDto | null
 }
@@ -385,6 +489,7 @@ export interface PaymentOrderDto {
   courseId: string
   courseSlug: string
   courseTitle: string
+  thumbnailUrl: string | null
   studentEmail: string
   studentName: string | null
   amount: string
@@ -432,6 +537,48 @@ export interface CertificateListResponse {
   certificates: CertificateDto[]
 }
 
+export interface StudentAnalyticsCourseDto {
+  courseId: string
+  courseTitle: string
+  totalLectures: number
+  completedLectures: number
+  completionPercentage: number
+  lastActivityAt: string | null
+}
+
+export interface StudentWeeklyActivityDto {
+  date: string
+  label: string
+  minutes: number
+  lecturesCompleted: number
+}
+
+export interface StudentQuizPerformanceDto {
+  quizTitle: string
+  percentage: number
+  score: number
+  totalQuestions: number
+}
+
+export interface StudentAnalyticsResponse {
+  activeCourses: number
+  totalLectures: number
+  completedLectures: number
+  completionPercentage: number
+  watchTimeSeconds: number
+  quizAttempts: number
+  quizAveragePercentage: number
+  assignmentsSubmitted: number
+  assignmentsPending: number
+  assignmentsGraded: number
+  assignmentAveragePercentage: number
+  learningStreakDays: number
+  lastActivityAt: string | null
+  weeklyActivity: StudentWeeklyActivityDto[]
+  quizPerformance: StudentQuizPerformanceDto[]
+  courses: StudentAnalyticsCourseDto[]
+}
+
 export interface CertificateDownloadResponse {
   downloadUrl: string
 }
@@ -463,6 +610,7 @@ export interface AdminCreateInstructorResponse {
 }
 
 export interface AdminCourseReviewDto {
+  category: string | null
   id: string
   title: string
   slug: string
@@ -499,6 +647,75 @@ export interface AdminRevenueOverviewResponse {
   }
   byMonth: AdminRevenuePointDto[]
   byMethod: AdminRevenuePointDto[]
+}
+
+export interface AdminCategoryDto {
+  id: string
+  name: string
+  slug: string
+  description: string | null
+  isActive: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+export interface AdminCategoryListResponse {
+  categories: AdminCategoryDto[]
+}
+
+export interface AdminSiteSettingsResponse {
+  settings: Record<string, string>
+}
+
+export interface AdminAuditLogDto {
+  id: string
+  actorEmail: string | null
+  action: string
+  entityType: string
+  entityId: string | null
+  metadata: Record<string, unknown>
+  createdAt: string
+}
+
+export interface AdminAuditLogListResponse {
+  logs: AdminAuditLogDto[]
+}
+
+export type RefundStatus = "requested" | "approved" | "rejected" | "processed"
+
+export interface AdminRefundDto {
+  id: string
+  orderId: string
+  studentEmail: string
+  courseTitle: string
+  amount: string
+  currency: string
+  reason: string
+  status: RefundStatus
+  reviewedByEmail: string | null
+  reviewedAt: string | null
+  processedAt: string | null
+  createdAt: string
+}
+
+export interface AdminRefundListResponse {
+  refunds: AdminRefundDto[]
+}
+
+export interface AdminEnrollmentDto {
+  id: string
+  studentEmail: string
+  studentName: string | null
+  courseId: string
+  courseTitle: string
+  orderId: string | null
+  status: EnrollmentStatus
+  enrolledAt: string
+  revokedAt: string | null
+}
+
+export interface AdminEnrollmentListResponse {
+  enrollments: AdminEnrollmentDto[]
 }
 
 export interface InstructorCourseAnalyticsDto {
@@ -590,4 +807,67 @@ export interface InstructorPayoutListResponse {
 
 export interface AdminPayoutListResponse {
   payouts: PayoutRequestDto[]
+}
+
+export interface DiscussionPostDto {
+  id: string
+  courseId: string
+  lectureId: string | null
+  parentId: string | null
+  body: string
+  authorId: string
+  authorName: string | null
+  authorRole: UserRole
+  createdAt: string
+}
+
+export interface DiscussionListResponse {
+  posts: DiscussionPostDto[]
+}
+
+export interface NotificationDto {
+  id: string
+  type: string
+  title: string
+  body: string
+  href: string | null
+  readAt: string | null
+  createdAt: string
+}
+
+export interface NotificationListResponse {
+  notifications: NotificationDto[]
+  unreadCount: number
+}
+
+export interface QuizResultDto {
+  attemptId: string
+  quizId: string
+  quizTitle: string
+  courseId: string
+  courseTitle: string
+  studentId: string
+  studentName: string | null
+  studentEmail: string
+  score: number
+  totalQuestions: number
+  percentage: number
+  completedAt: string
+}
+
+export interface InstructorQuizResultsResponse {
+  results: QuizResultDto[]
+}
+
+export interface AnnouncementDto {
+  id: string
+  courseId: string
+  courseTitle: string
+  title: string
+  body: string
+  createdAt: string
+}
+
+export interface AnnouncementListResponse {
+  announcements: AnnouncementDto[]
 }

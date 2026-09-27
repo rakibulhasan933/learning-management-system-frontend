@@ -215,6 +215,51 @@ export const lectures = pgTable("lectures", {
   ),
 ])
 
+/** New course hierarchy: a milestone contains modules. */
+export const modules = pgTable("modules", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  milestoneId: uuid("milestone_id")
+    .notNull()
+    .references(() => sections.id, { onDelete: "cascade" }),
+  contentTypes: text("content_types").array().notNull().default(sql`ARRAY[]::text[]`),
+  title: text("title").notNull(),
+  description: text("description"),
+  pdfUrl: text("pdf_url"),
+  slidesUrl: text("slides_url"),
+  position: integer("position").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
+}, (table) => [
+  uniqueIndex("modules_milestone_position_unique").on(table.milestoneId, table.position),
+  index("modules_milestone_id_idx").on(table.milestoneId),
+  check("modules_position_non_negative", sql`${table.position} >= 0`),
+])
+
+export const videos = pgTable("videos", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  moduleId: uuid("module_id")
+    .notNull()
+    .references(() => modules.id, { onDelete: "cascade" }),
+  title: text("title").notNull(),
+  description: text("description"),
+  position: integer("position").notNull(),
+  videoProvider: videoProviderEnum("video_provider").notNull().default("r2"),
+  videoRef: text("video_ref"),
+  pdfUrl: text("pdf_url"),
+  slidesUrl: text("slides_url"),
+  durationSeconds: integer("duration_seconds"),
+  isPreview: boolean("is_preview").notNull().default(false),
+  isPublished: boolean("is_published").notNull().default(false),
+  availableAt: timestamp("available_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
+}, (table) => [
+  uniqueIndex("videos_module_position_unique").on(table.moduleId, table.position),
+  index("videos_module_id_idx").on(table.moduleId),
+  check("videos_position_non_negative", sql`${table.position} >= 0`),
+  check("videos_duration_seconds_non_negative", sql`${table.durationSeconds} is null or ${table.durationSeconds} >= 0`),
+])
+
 export const quizzes = pgTable("quizzes", {
   id: uuid("id").defaultRandom().primaryKey(),
   courseId: uuid("course_id")
@@ -224,6 +269,9 @@ export const quizzes = pgTable("quizzes", {
     onDelete: "cascade",
   }),
   lectureId: uuid("lecture_id").references(() => lectures.id, {
+    onDelete: "cascade",
+  }),
+  moduleId: uuid("module_id").references(() => modules.id, {
     onDelete: "cascade",
   }),
   title: text("title").notNull(),
@@ -238,10 +286,15 @@ export const quizzes = pgTable("quizzes", {
 }, (table) => [
   uniqueIndex("quizzes_section_id_unique").on(table.sectionId),
   uniqueIndex("quizzes_lecture_id_unique").on(table.lectureId),
+  uniqueIndex("quizzes_module_id_unique").on(table.moduleId),
   index("quizzes_course_id_idx").on(table.courseId),
   check(
     "quizzes_exactly_one_target",
-    sql`(${table.sectionId} is not null and ${table.lectureId} is null) or (${table.sectionId} is null and ${table.lectureId} is not null)`,
+    sql`(
+      (${table.sectionId} is not null and ${table.lectureId} is null and ${table.moduleId} is null) or
+      (${table.sectionId} is null and ${table.lectureId} is not null and ${table.moduleId} is null) or
+      (${table.sectionId} is null and ${table.lectureId} is null and ${table.moduleId} is not null)
+    )`,
   ),
 ])
 
@@ -312,6 +365,7 @@ export const quizAttempts = pgTable("quiz_attempts", {
 }, (table) => [
   index("quiz_attempts_quiz_id_idx").on(table.quizId),
   index("quiz_attempts_user_id_idx").on(table.userId),
+  uniqueIndex("quiz_attempts_quiz_user_unique").on(table.quizId, table.userId),
   check("quiz_attempts_score_non_negative", sql`${table.score} >= 0`),
   check(
     "quiz_attempts_total_questions_non_negative",
@@ -334,6 +388,9 @@ export const assignments = pgTable("assignments", {
   lectureId: uuid("lecture_id").references(() => lectures.id, {
     onDelete: "cascade",
   }),
+  moduleId: uuid("module_id").references(() => modules.id, {
+    onDelete: "cascade",
+  }),
   title: text("title").notNull(),
   instructions: text("instructions").notNull(),
   maxScore: integer("max_score").notNull().default(100),
@@ -349,11 +406,16 @@ export const assignments = pgTable("assignments", {
 }, (table) => [
   uniqueIndex("assignments_section_id_unique").on(table.sectionId),
   uniqueIndex("assignments_lecture_id_unique").on(table.lectureId),
+  uniqueIndex("assignments_module_id_unique").on(table.moduleId),
   index("assignments_course_id_idx").on(table.courseId),
   check("assignments_max_score_positive", sql`${table.maxScore} > 0`),
   check(
     "assignments_exactly_one_target",
-    sql`(${table.sectionId} is not null and ${table.lectureId} is null) or (${table.sectionId} is null and ${table.lectureId} is not null)`,
+    sql`(
+      (${table.sectionId} is not null and ${table.lectureId} is null and ${table.moduleId} is null) or
+      (${table.sectionId} is null and ${table.lectureId} is not null and ${table.moduleId} is null) or
+      (${table.sectionId} is null and ${table.lectureId} is null and ${table.moduleId} is not null)
+    )`,
   ),
 ])
 
@@ -390,6 +452,93 @@ export const assignmentSubmissions = pgTable("assignment_submissions", {
     "assignment_submissions_grade_score_non_negative",
     sql`${table.gradeScore} is null or ${table.gradeScore} >= 0`,
   ),
+])
+
+export const discussionPosts = pgTable("discussion_posts", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  courseId: uuid("course_id").notNull().references(() => courses.id, { onDelete: "cascade" }),
+  lectureId: uuid("lecture_id").references(() => lectures.id, { onDelete: "cascade" }),
+  authorId: uuid("author_id").notNull().references(() => profiles.id, { onDelete: "cascade" }),
+  parentId: uuid("parent_id"),
+  body: text("body").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
+}, (table) => [
+  index("discussion_posts_course_id_idx").on(table.courseId, table.createdAt),
+  index("discussion_posts_lecture_id_idx").on(table.lectureId),
+])
+
+export const notifications = pgTable("notifications", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  profileId: uuid("profile_id").notNull().references(() => profiles.id, { onDelete: "cascade" }),
+  type: varchar("type", { length: 64 }).notNull(),
+  title: text("title").notNull(),
+  body: text("body").notNull(),
+  href: text("href"),
+  readAt: timestamp("read_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, (table) => [index("notifications_profile_created_idx").on(table.profileId, table.createdAt)])
+
+export const announcements = pgTable("announcements", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  courseId: uuid("course_id").notNull().references(() => courses.id, { onDelete: "cascade" }),
+  instructorId: uuid("instructor_id").notNull().references(() => profiles.id, { onDelete: "cascade" }),
+  title: text("title").notNull(),
+  body: text("body").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, (table) => [index("announcements_course_created_idx").on(table.courseId, table.createdAt)])
+
+export const categories = pgTable("categories", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  name: varchar("name", { length: 120 }).notNull(),
+  slug: varchar("slug", { length: 140 }).notNull(),
+  description: text("description"),
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
+}, (table) => [
+  uniqueIndex("categories_slug_unique").on(table.slug),
+  index("categories_active_idx").on(table.isActive),
+])
+
+export const siteSettings = pgTable("site_settings", {
+  key: varchar("key", { length: 120 }).primaryKey(),
+  value: text("value").notNull().default(""),
+  updatedBy: uuid("updated_by").references(() => profiles.id, { onDelete: "set null" }),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
+})
+
+export const auditLogs = pgTable("audit_logs", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  actorId: uuid("actor_id").references(() => profiles.id, { onDelete: "set null" }),
+  action: varchar("action", { length: 100 }).notNull(),
+  entityType: varchar("entity_type", { length: 80 }).notNull(),
+  entityId: uuid("entity_id"),
+  metadata: jsonb("metadata").$type<Record<string, unknown>>().notNull().default({}),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, (table) => [
+  index("audit_logs_created_idx").on(table.createdAt),
+  index("audit_logs_entity_idx").on(table.entityType, table.entityId),
+])
+
+export const refundStatuses = ["requested", "approved", "rejected", "processed"] as const
+export const refundStatusEnum = pgEnum("refund_status", refundStatuses)
+
+export const refunds = pgTable("refunds", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  orderId: uuid("order_id").notNull().references(() => orders.id, { onDelete: "restrict" }),
+  amount: numeric("amount", { precision: 12, scale: 2 }).notNull(),
+  currency: varchar("currency", { length: 3 }).notNull().default("BDT"),
+  reason: text("reason").notNull(),
+  status: refundStatusEnum("status").notNull().default("requested"),
+  requestedBy: uuid("requested_by").references(() => profiles.id, { onDelete: "set null" }),
+  reviewedBy: uuid("reviewed_by").references(() => profiles.id, { onDelete: "set null" }),
+  reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
+  processedAt: timestamp("processed_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, (table) => [
+  uniqueIndex("refunds_order_unique").on(table.orderId),
+  index("refunds_status_created_idx").on(table.status, table.createdAt),
 ])
 
 export const orders = pgTable("orders", {
@@ -511,6 +660,20 @@ export const progress = pgTable("progress", {
   check("progress_position_seconds_non_negative", sql`${table.positionSeconds} >= 0`),
 ])
 
+export const videoProgress = pgTable("video_progress", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id").notNull().references(() => profiles.id, { onDelete: "cascade" }),
+  videoId: uuid("video_id").notNull().references(() => videos.id, { onDelete: "cascade" }),
+  positionSeconds: integer("position_seconds").notNull().default(0),
+  isCompleted: boolean("is_completed").notNull().default(false),
+  completedAt: timestamp("completed_at", { withTimezone: true }),
+  lastWatchedAt: timestamp("last_watched_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
+}, (table) => [
+  uniqueIndex("video_progress_user_video_unique").on(table.userId, table.videoId),
+  index("video_progress_video_id_idx").on(table.videoId),
+])
+
 export const certificates = pgTable("certificates", {
   id: uuid("id").defaultRandom().primaryKey(),
   userId: uuid("user_id")
@@ -555,6 +718,7 @@ export const profilesRelations = relations(profiles, ({ one, many }) => ({
   studentOrders: many(orders, { relationName: "order_student" }),
   reviewedOrders: many(orders, { relationName: "order_reviewer" }),
   progress: many(progress),
+  videoProgress: many(videoProgress),
   certificates: many(certificates),
 }))
 
@@ -578,8 +742,27 @@ export const sectionsRelations = relations(sections, ({ one, many }) => ({
     references: [courses.id],
   }),
   lectures: many(lectures),
+  modules: many(modules),
   quizzes: many(quizzes),
   assignments: many(assignments),
+}))
+
+export const modulesRelations = relations(modules, ({ one, many }) => ({
+  milestone: one(sections, {
+    fields: [modules.milestoneId],
+    references: [sections.id],
+  }),
+  videos: many(videos),
+  quizzes: many(quizzes),
+  assignments: many(assignments),
+}))
+
+export const videosRelations = relations(videos, ({ one, many }) => ({
+  module: one(modules, {
+    fields: [videos.moduleId],
+    references: [modules.id],
+  }),
+  progress: many(videoProgress),
 }))
 
 export const lecturesRelations = relations(lectures, ({ one, many }) => ({
@@ -604,6 +787,10 @@ export const quizzesRelations = relations(quizzes, ({ one, many }) => ({
   lecture: one(lectures, {
     fields: [quizzes.lectureId],
     references: [lectures.id],
+  }),
+  module: one(modules, {
+    fields: [quizzes.moduleId],
+    references: [modules.id],
   }),
   questions: many(quizQuestions),
   attempts: many(quizAttempts),
@@ -647,6 +834,10 @@ export const assignmentsRelations = relations(assignments, ({ one, many }) => ({
   lecture: one(lectures, {
     fields: [assignments.lectureId],
     references: [lectures.id],
+  }),
+  module: one(modules, {
+    fields: [assignments.moduleId],
+    references: [modules.id],
   }),
   submissions: many(assignmentSubmissions),
 }))
@@ -728,6 +919,11 @@ export const progressRelations = relations(progress, ({ one }) => ({
   }),
 }))
 
+export const videoProgressRelations = relations(videoProgress, ({ one }) => ({
+  student: one(profiles, { fields: [videoProgress.userId], references: [profiles.id] }),
+  video: one(videos, { fields: [videoProgress.videoId], references: [videos.id] }),
+}))
+
 export const certificatesRelations = relations(certificates, ({ one }) => ({
   student: one(profiles, {
     fields: [certificates.userId],
@@ -777,3 +973,17 @@ export type Progress = typeof progress.$inferSelect
 export type NewProgress = typeof progress.$inferInsert
 export type Certificate = typeof certificates.$inferSelect
 export type NewCertificate = typeof certificates.$inferInsert
+export type DiscussionPost = typeof discussionPosts.$inferSelect
+export type NewDiscussionPost = typeof discussionPosts.$inferInsert
+export type Notification = typeof notifications.$inferSelect
+export type NewNotification = typeof notifications.$inferInsert
+export type Announcement = typeof announcements.$inferSelect
+export type NewAnnouncement = typeof announcements.$inferInsert
+export type Category = typeof categories.$inferSelect
+export type NewCategory = typeof categories.$inferInsert
+export type SiteSetting = typeof siteSettings.$inferSelect
+export type NewSiteSetting = typeof siteSettings.$inferInsert
+export type AuditLog = typeof auditLogs.$inferSelect
+export type NewAuditLog = typeof auditLogs.$inferInsert
+export type Refund = typeof refunds.$inferSelect
+export type NewRefund = typeof refunds.$inferInsert

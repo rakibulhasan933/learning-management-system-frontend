@@ -49,7 +49,7 @@ export function MarkdownEditor({
         {...props}
         className="md-editor-shell"
         data-color-mode="dark"
-        height={props.height ?? 220}
+        height={props.height ?? 300}
         onChange={(nextValue: string | undefined) => {
           const next = nextValue ?? ""
 
@@ -59,7 +59,11 @@ export function MarkdownEditor({
 
           onValueChange?.(next)
         }}
-        preview="edit"
+        preview="live"
+        visibleDragbar={false}
+        previewOptions={{
+          disallowedElements: ["script", "iframe"],
+        }}
         textareaProps={{
           id,
           name,

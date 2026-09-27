@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useTransition } from "react"
+import { Loader2 } from "lucide-react"
 import type {
   StudentAssignmentDto,
   StudentAssignmentSubmissionDto,
@@ -46,10 +47,14 @@ export function AssignmentPanel({ assignment }: AssignmentPanelProps) {
   }
 
   return (
-    <div className="grid gap-4 border border-border bg-background p-4">
+    <div className="grid gap-4 rounded-2xl bg-background p-4 ring-1 ring-foreground/10">
       <div>
-        <p className="font-mono text-xs text-muted-foreground">Assignment</p>
-        <h3 className="mt-1 text-xl">{assignment.title}</h3>
+        <p className="font-mono text-xs tracking-wide text-muted-foreground">
+          Assignment
+        </p>
+        <h3 className="mt-1 font-heading text-xl tracking-tight">
+          {assignment.title}
+        </h3>
         <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-muted-foreground">
           {assignment.instructions}
         </p>
@@ -63,7 +68,7 @@ export function AssignmentPanel({ assignment }: AssignmentPanelProps) {
 
       {activeSubmission?.gradeScore !== null &&
       activeSubmission?.gradeScore !== undefined ? (
-        <div className="border border-primary p-3 text-sm">
+        <div className="rounded-xl border border-secondary/30 bg-secondary/5 p-3 text-sm">
           <p className="font-mono text-primary">
             Score {activeSubmission.gradeScore}/{assignment.maxScore}
           </p>
@@ -74,7 +79,7 @@ export function AssignmentPanel({ assignment }: AssignmentPanelProps) {
           ) : null}
         </div>
       ) : activeSubmission ? (
-        <p className="border border-border p-3 font-mono text-xs text-muted-foreground">
+        <p className="rounded-xl p-3 font-mono text-xs text-muted-foreground ring-1 ring-foreground/10">
           Submitted {new Date(activeSubmission.submittedAt).toLocaleString()} -
           waiting for grading
         </p>
@@ -92,6 +97,7 @@ export function AssignmentPanel({ assignment }: AssignmentPanelProps) {
           onClick={submitAssignment}
           type="button"
         >
+          {isPending ? <Loader2 className="size-4 animate-spin" /> : null}
           {isPending
             ? "Submitting..."
             : activeSubmission

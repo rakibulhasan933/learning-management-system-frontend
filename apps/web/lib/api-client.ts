@@ -167,11 +167,11 @@ export async function optionalAuthenticatedApiFetch<T>(
   path: string,
   init: RequestInit = {},
 ): Promise<T> {
-  let accessToken = await getAccessToken()
-
-  if (!accessToken) {
-    accessToken = await refreshAccessToken().catch(() => null)
-  }
+  // No refresh fallback on purpose: this runs in server components, which can
+  // read cookies but not write them, so a rotated token pair could not be
+  // persisted and refreshing here would revoke the session. The proxy renews
+  // the access token at the edge before the request reaches this point.
+  const accessToken = await getAccessToken()
 
   const response = await fetch(`${getBackendApiUrl()}${path}`, {
     ...init,

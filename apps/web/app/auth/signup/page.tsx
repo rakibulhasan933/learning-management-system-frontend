@@ -1,8 +1,20 @@
 import Link from "next/link"
+import { redirect } from "next/navigation"
+import type { ProfileDto } from "@workspace/types"
 
+import { authenticatedApiFetch } from "@/lib/api-client"
+import { getDashboardPath } from "@/lib/auth/dashboard"
 import { SignupForm } from "./signup-form"
 
-export default function SignupPage() {
+export default async function SignupPage() {
+  let profile: ProfileDto | null = null
+  try {
+    profile = await authenticatedApiFetch<ProfileDto>("/auth/me", { cache: "no-store" })
+  } catch {
+    // Anonymous visitors should see the signup form.
+  }
+  if (profile) redirect(getDashboardPath(profile.role))
+
   return (
     <main className="relative min-h-screen overflow-hidden bg-background px-4 py-8 text-foreground sm:px-6 sm:py-12">
       <div
@@ -13,13 +25,13 @@ export default function SignupPage() {
       <section className="mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-md flex-col justify-center sm:min-h-[calc(100vh-6rem)]">
         <div className="mb-8 space-y-4 text-center">
           <Link href="/" className="inline-flex items-center gap-3">
-            <span className="flex h-9 w-9 items-center justify-center border border-primary font-mono text-xs text-primary">
+            <span className="flex size-9 items-center justify-center rounded-lg font-mono text-xs text-primary ring-1 ring-primary/60">
               F
             </span>
-            <span className="font-display text-lg tracking-tight">Folio</span>
+            <span className="font-heading text-lg tracking-tight">Folio</span>
           </Link>
           <div className="space-y-2">
-            <h1 className="font-display text-3xl tracking-tight sm:text-4xl">
+            <h1 className="font-heading text-3xl tracking-tight sm:text-4xl">
               Create your account
             </h1>
             <p className="text-sm leading-6 text-muted-foreground">
@@ -33,7 +45,7 @@ export default function SignupPage() {
 
         <p className="mt-6 text-center text-sm text-muted-foreground">
           Already have an account?{" "}
-          <Link className="text-primary hover:underline" href="/auth/login">
+          <Link className="interactive-link text-primary" href="/auth/login">
             Sign in
           </Link>
         </p>

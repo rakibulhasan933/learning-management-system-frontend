@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useTransition } from "react"
+import { Loader2 } from "lucide-react"
 import { AlertCircle, CheckCircle2 } from "lucide-react"
 import type { InstructorQuizDto } from "@workspace/types"
 
@@ -24,7 +25,7 @@ interface QuizBuilderProps {
   quiz: InstructorQuizDto | null
   targetId: string
   targetLabel: string
-  targetType: "lecture" | "section"
+  targetType: "lecture" | "section" | "module"
 }
 
 interface OptionState {
@@ -80,12 +81,6 @@ function getInitialQuestions(quiz: InstructorQuizDto | null): QuestionState[] {
   }))
 }
 
-function summarizeOption(option: OptionState, index: number) {
-  return option.optionText.trim().length > 0
-    ? option.optionText
-    : `Option ${index + 1}`
-}
-
 function StatusMessageText({ message }: { message: StatusMessage }) {
   if (!message) {
     return null
@@ -118,13 +113,12 @@ export function QuizBuilder({
   targetType,
 }: QuizBuilderProps) {
   const [title, setTitle] = useState(quiz?.title ?? `${targetLabel} quiz`)
-  const [isPublished, setIsPublished] = useState(quiz?.isPublished ?? false)
+  const [isPublished, setIsPublished] = useState(quiz?.isPublished ?? true)
   const [questions, setQuestions] = useState(() => getInitialQuestions(quiz))
   const [message, setMessage] = useState<StatusMessage>(null)
   const [confirmingDelete, setConfirmingDelete] = useState(false)
   const [isPending, startTransition] = useTransition()
   const [openQuestions, setOpenQuestions] = useState<string[]>([])
-  const [openOptionsByQuestion, setOpenOptionsByQuestion] = useState<Record<string, string[]>>({})
 
   function updateQuestion(questionId: string, questionText: string) {
     setQuestions((current) =>
@@ -165,13 +159,6 @@ export function QuizBuilder({
   function removeQuestion(questionId: string) {
     setQuestions((current) => current.filter((question) => question.id !== questionId))
     setOpenQuestions((current) => current.filter((id) => id !== questionId))
-    setOpenOptionsByQuestion((current) => {
-      const next = { ...current }
-
-      delete next[questionId]
-
-      return next
-    })
   }
 
   function addOption(questionId: string) {
@@ -181,16 +168,9 @@ export function QuizBuilder({
       current.map((question) =>
         question.id === questionId
           ? { ...question, options: [...question.options, nextOption] }
-          : question,
+        : question,
       ),
     )
-
-    setOpenOptionsByQuestion((current) => ({
-      ...current,
-      [questionId]: current[questionId]?.includes(nextOption.id)
-        ? current[questionId]
-        : [...(current[questionId] ?? []), nextOption.id],
-    }))
   }
 
   function removeOption(questionId: string, optionId: string) {
@@ -207,10 +187,6 @@ export function QuizBuilder({
           : question,
       ),
     )
-    setOpenOptionsByQuestion((current) => ({
-      ...current,
-      [questionId]: (current[questionId] ?? []).filter((id) => id !== optionId),
-    }))
   }
 
   function saveQuiz() {
@@ -289,8 +265,6 @@ export function QuizBuilder({
         onValueChange={setOpenQuestions}
       >
         {questions.map((question, questionIndex) => {
-          const openOptionIds = openOptionsByQuestion[question.id] ?? []
-
           return (
             <AccordionItem key={question.id} value={question.id}>
               <div className="grid gap-2 border-b border-border/70 px-3 py-2.5">
@@ -335,71 +309,41 @@ export function QuizBuilder({
                     </Button>
                   </div>
 
-                  <Accordion
-                    className="border-border/60 bg-background/40"
-                    multiple
-                    value={openOptionIds}
-                    onValueChange={(nextValue) =>
-                      setOpenOptionsByQuestion((current) => ({
-                        ...current,
-                        [question.id]: nextValue,
-                      }))
-                    }
-                  >
+                  <div className="grid gap-2 rounded-xl border border-border/60 bg-background/40 p-2">
+                    <div className="flex items-center justify-between gap-3 px-1 py-1">
+                      <div>
+                        <p className="text-sm font-medium text-foreground">Options</p>
+                        <p className="text-xs text-muted-foreground">Select the correct answer.</p>
+                      </div>
+                      <span className="font-mono text-[10px] text-muted-foreground">{question.options.length} total</span>
+                    </div>
                     {question.options.map((option, optionIndex) => (
-                      <AccordionItem key={option.id} value={option.id}>
-                        <div className="grid gap-2 border-b border-border/70 px-3 py-2">
-                          <AccordionTrigger className="min-w-0 w-full justify-start rounded-none p-0 text-left hover:bg-transparent">
-                            <div className="flex min-w-0 flex-wrap items-center gap-2">
-                              <span className="min-w-0 truncate font-medium text-foreground">
-                                {summarizeOption(option, optionIndex)}
-                              </span>
-                              {option.isCorrect ? (
-                                <span className="inline-flex items-center rounded-full border border-primary/40 bg-primary/10 px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.18em] text-primary">
-                                  correct
-                                </span>
-                              ) : null}
-                            </div>
-                          </AccordionTrigger>
-                        </div>
-
-                        <AccordionContent keepMounted className="px-3 pb-3">
-                          <div className="grid gap-3 pt-3 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
-                            <FloatingInput
-                              className="h-10 rounded-xl px-3 text-sm"
-                              onChange={(event) =>
-                                updateOption(question.id, option.id, {
-                                  optionText: event.target.value,
-                                })
-                              }
-                              label={`Option ${optionIndex + 1}`}
-                              value={option.optionText}
-                            />
-                            <label className="flex items-center gap-2 text-sm text-muted-foreground md:pb-2">
-                              <Checkbox
-                                checked={option.isCorrect}
-                                onCheckedChange={(checked) =>
-                                  updateOption(question.id, option.id, {
-                                    isCorrect: Boolean(checked),
-                                  })
-                                }
-                              />
-                              Correct
-                            </label>
-                            <div className="md:col-span-2">
-                              <Button
-                                onClick={() => removeOption(question.id, option.id)}
-                                type="button"
-                                variant="ghost"
-                              >
-                                Remove option
-                              </Button>
-                            </div>
-                          </div>
-                        </AccordionContent>
-                      </AccordionItem>
+                      <div className="grid gap-2 rounded-lg border border-border bg-card p-2.5 sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:items-center" key={option.id}>
+                        <FloatingInput
+                          className="h-10 rounded-xl px-3 text-sm"
+                          onChange={(event) => updateOption(question.id, option.id, { optionText: event.target.value })}
+                          label={`Option ${optionIndex + 1}`}
+                          value={option.optionText}
+                        />
+                        <label className="flex items-center gap-2 px-1 text-sm text-muted-foreground">
+                          <Checkbox
+                            checked={option.isCorrect}
+                            onCheckedChange={(checked) => updateOption(question.id, option.id, { isCorrect: Boolean(checked) })}
+                          />
+                          Correct
+                        </label>
+                        <Button
+                          className="w-full sm:w-auto"
+                          disabled={question.options.length <= 2}
+                          onClick={() => removeOption(question.id, option.id)}
+                          type="button"
+                          variant="ghost"
+                        >
+                          Remove
+                        </Button>
+                      </div>
                     ))}
-                  </Accordion>
+                  </div>
 
                   <div className="flex flex-wrap gap-2">
                     <Button
@@ -434,6 +378,7 @@ export function QuizBuilder({
           size="sm"
           type="button"
         >
+          {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
           {isPending ? "Saving..." : "Save quiz"}
         </Button>
         {quiz ? (
@@ -447,6 +392,7 @@ export function QuizBuilder({
                 type="button"
                 variant="destructive"
               >
+                {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
                 {isPending ? "Deleting..." : "Confirm delete"}
               </Button>
               <Button

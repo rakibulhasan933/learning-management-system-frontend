@@ -4,17 +4,17 @@ import { useRef, useActionState, type FormEvent } from "react"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
-import { Loader2, Mail, Lock, User } from "lucide-react"
+import { Mail, Lock, User } from "lucide-react"
 
 import {
   signUpWithPasswordFormAction,
   type AuthFormState,
 } from "@/app/auth/actions"
 import { initialAuthFormState } from "@/app/auth/form-state"
-import { Button } from "@workspace/ui/components/button"
 import { Alert, AlertDescription } from "@workspace/ui/components/alert"
 import { Card, CardContent } from "@workspace/ui/components/card"
 import { FloatingInput } from "@workspace/ui/components/floating-input"
+import { SubmitButton } from "@/components/submit-button"
 
 const signupSchema = z.object({
   fullName: z
@@ -50,7 +50,7 @@ function getErrorMessage(
 export function SignupForm() {
   const formRef = useRef<HTMLFormElement>(null)
   const validationBypassRef = useRef(false)
-  const [serverState, formAction, isPending] = useActionState(
+  const [serverState, formAction] = useActionState(
     signUpWithPasswordFormAction,
     initialAuthFormState,
   )
@@ -127,10 +127,9 @@ export function SignupForm() {
             type="password"
           />
 
-          <Button className="w-full gap-2" disabled={isPending} type="submit">
-            {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-            {isPending ? "Creating account..." : "Create account"}
-          </Button>
+          <SubmitButton className="w-full gap-2" pendingLabel="Creating account...">
+            Create account
+          </SubmitButton>
         </form>
       </CardContent>
     </Card>

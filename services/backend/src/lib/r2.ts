@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto"
-import { PutObjectCommand, GetObjectCommand, S3Client } from "@aws-sdk/client-s3"
+import { PutObjectCommand, GetObjectCommand, ListObjectsV2Command, S3Client } from "@aws-sdk/client-s3"
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
 
 import { env } from "../config/env.js"
@@ -104,4 +104,23 @@ export async function uploadLectureVideoToR2({
   })
 
   await getR2Client().send(command)
+}
+
+export async function getR2StorageUsage() {
+  try {
+    const client = getR2Client()
+    const bucket = getBucketName()
+    let continuationToken: string | undefined
+    let objects = 0
+    let bytes = 0
+    do {
+      const result = await client.send(new ListObjectsV2Command({ Bucket: bucket, ContinuationToken: continuationToken }))
+      objects += result.KeyCount ?? result.Contents?.length ?? 0
+      bytes += (result.Contents ?? []).reduce((total, object) => total + Number(object.Size ?? 0), 0)
+      continuationToken = result.NextContinuationToken
+    } while (continuationToken)
+    return { objects, bytes }
+  } catch {
+    return null
+  }
 }

@@ -11,6 +11,7 @@ import { cn } from "@workspace/ui/lib/utils"
 interface VideoUploadControlProps {
   courseId: string
   lectureId: string
+  videoId?: string
 }
 
 type UploadPhase = "idle" | "uploading" | "paused" | "success" | "error"
@@ -19,10 +20,30 @@ function formatMegabytes(bytes: number) {
   return (bytes / (1024 * 1024)).toFixed(1)
 }
 
+function readVideoMetadata(file: File) {
+  return new Promise<{ durationSeconds: number | null; title: string }>((resolve) => {
+    const title = file.name || "Video"
+    const objectUrl = URL.createObjectURL(file)
+    const element = document.createElement("video")
+    element.preload = "metadata"
+    element.onloadedmetadata = () => {
+      URL.revokeObjectURL(objectUrl)
+      resolve({
+        durationSeconds: Number.isFinite(element.duration) ? Math.max(0, Math.round(element.duration)) : null,
+        title,
+      })
+    }
+    element.onerror = () => {
+      URL.revokeObjectURL(objectUrl)
+      resolve({ durationSeconds: null, title })
+    }
+    element.src = objectUrl
+  })
+}
+
 function readUploadMessage(xhr: XMLHttpRequest) {
   try {
     const payload = JSON.parse(xhr.responseText) as { message?: string } | null
-
     return payload?.message ?? null
   } catch {
     return null
@@ -32,6 +53,7 @@ function readUploadMessage(xhr: XMLHttpRequest) {
 export function VideoUploadControl({
   courseId,
   lectureId,
+  videoId,
 }: VideoUploadControlProps) {
   const inputRef = useRef<HTMLInputElement>(null)
   const xhrRef = useRef<XMLHttpRequest | null>(null)
@@ -100,67 +122,63 @@ export function VideoUploadControl({
     }
 
     const uploadUrl = new URL(
-      `${getBackendApiUrl()}/instructor/courses/${courseId}/lectures/${lectureId}/video-upload`,
+      `${getBackendApiUrl()}/instructor/courses/${courseId}/${videoId ? `videos/${videoId}` : `lectures/${lectureId}`}/video-upload`,
     )
     uploadUrl.searchParams.set("fileName", file.name)
-
     const xhr = new XMLHttpRequest()
     xhrRef.current = xhr
-    progressRef.current = {
-      totalBytes: file.size,
-      uploadedBytes: 0,
-    }
 
     setPhase("uploading")
     setMessage(null)
     setUploadedBytes(0)
     setTotalBytes(file.size)
+    progressRef.current = { totalBytes: file.size, uploadedBytes: 0 }
 
     xhr.open("POST", uploadUrl.toString())
     xhr.withCredentials = true
     xhr.setRequestHeader("Content-Type", "video/mp4")
-
     xhr.upload.onprogress = (event) => {
       if (event.lengthComputable) {
-        progressRef.current = {
-          totalBytes: event.total,
-          uploadedBytes: event.loaded,
-        }
+        progressRef.current = { totalBytes: event.total, uploadedBytes: event.loaded }
         setUploadedBytes(event.loaded)
         setTotalBytes(event.total)
       }
     }
-
-    xhr.onload = () => {
+    xhr.onload = async () => {
       xhrRef.current = null
-
       if (xhr.status >= 200 && xhr.status < 300) {
-        const successMessage = readUploadMessage(xhr) ?? "Video uploaded and saved."
-
+        if (videoId) {
+          const metadata = await readVideoMetadata(file)
+          try {
+            await fetch(`${getBackendApiUrl()}/instructor/courses/${courseId}/videos/${videoId}`, {
+              body: JSON.stringify(metadata),
+              credentials: "include",
+              headers: { "Content-Type": "application/json" },
+              method: "PATCH",
+            })
+          } catch {
+            // The upload is already complete; metadata can be edited later if detection fails.
+          }
+        }
         setPhase("success")
-        setMessage(successMessage)
-        setUploadedBytes(progressRef.current.totalBytes)
-        setTotalBytes(progressRef.current.totalBytes)
-
-        return
+        setMessage(readUploadMessage(xhr) ?? "Video uploaded and saved.")
+        setUploadedBytes(file.size)
+        setTotalBytes(file.size)
+      } else {
+        setPhase("error")
+        setMessage(readUploadMessage(xhr) ?? `Video upload failed (${xhr.status}).`)
       }
-
-      setPhase("error")
-      setMessage(readUploadMessage(xhr) ?? "Video upload failed.")
     }
-
     xhr.onerror = () => {
       xhrRef.current = null
       setPhase("error")
-      setMessage("Video upload failed.")
+      setMessage("Video upload failed. Check backend/R2 configuration.")
     }
-
     xhr.onabort = () => {
       xhrRef.current = null
       setPhase("paused")
       setMessage(null)
     }
-
     xhr.send(file)
   }
 
@@ -191,8 +209,8 @@ export function VideoUploadControl({
   return (
     <div className="grid gap-3 md:col-span-4">
       <div className="flex items-baseline justify-between gap-4">
-        <p className="text-sm font-medium text-foreground">Lecture video</p>
-        <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+        <p className="text-sm font-medium text-foreground">Module video</p>
+        <p className="font-mono text-[10px] tracking-wide text-muted-foreground">
           MP4 only
         </p>
       </div>
@@ -261,14 +279,16 @@ export function VideoUploadControl({
             </div>
 
             {phase !== "uploading" && phase !== "success" ? (
-              <button
-                type="button"
-                onClick={clearFile}
+              <Button
                 aria-label="Remove file"
-                className="text-muted-foreground transition-colors hover:text-destructive"
+                className="text-muted-foreground hover:text-destructive"
+                onClick={clearFile}
+                size="icon-sm"
+                type="button"
+                variant="ghost"
               >
-                <X className="h-4 w-4" />
-              </button>
+                <X className="size-4" />
+              </Button>
             ) : null}
           </div>
 

@@ -1,6 +1,7 @@
 import Link from "next/link"
 
 import { VerifiedSeal } from "@/components/verified-seal"
+import { ProgressThread } from "@workspace/ui/components/progress-thread"
 
 const stats = [
   { value: "12,400", label: "Verified enrollments" },
@@ -28,18 +29,18 @@ export function LedgerPanel() {
             "radial-gradient(circle, var(--primary) 0%, transparent 70%)",
         }}
       />
-      <VerifiedSeal className="pointer-events-none absolute -bottom-16 -left-16 h-96 w-96 -rotate-12 opacity-[0.07]" />
+      <VerifiedSeal className="pointer-events-none absolute -bottom-16 -left-16 size-96 -rotate-12 opacity-[0.07]" />
 
       <Link href="/" className="relative flex items-center gap-2.5">
-        <span className="flex h-8 w-8 items-center justify-center border border-primary font-mono text-xs text-primary">
+        <span className="flex size-8 items-center justify-center rounded-lg font-mono text-xs text-primary ring-1 ring-primary/60">
           F
         </span>
-        <span className="font-display text-xl tracking-tight">Folio</span>
+        <span className="font-heading text-xl tracking-tight">Folio</span>
       </Link>
 
       <div className="relative max-w-md">
-        <div className="mb-7 h-px w-16 bg-primary" />
-        <h1 className="font-display text-4xl font-light leading-[1.15] tracking-tight">
+        <ProgressThread className="mb-7 w-16" />
+        <h1 className="font-heading text-4xl font-light leading-[1.15] tracking-tight">
           Every enrollment,{" "}
           <span className="italic text-primary">verified</span> before it
           counts.

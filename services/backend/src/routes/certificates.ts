@@ -5,12 +5,13 @@ import {
   courses,
   enrollments,
   eq,
-  lectures,
+  modules,
   profiles,
-  progress,
+  videoProgress,
   sections,
   sql,
   users,
+  videos,
 } from "@workspace/db"
 import { Router, type Router as ExpressRouter } from "express"
 import { z } from "zod"
@@ -62,26 +63,27 @@ function toCertificateDto(row: CertificateRow): CertificateDto {
 async function getCompletedCourseIds(profileId: string) {
   const rows = await db
     .select({
-      completedLectures: sql<number>`count(${progress.id}) filter (where ${progress.isCompleted} = true)`,
+      completedLectures: sql<number>`count(${videoProgress.id}) filter (where ${videoProgress.isCompleted} = true)`,
       courseId: courses.id,
-      totalLectures: sql<number>`count(${lectures.id})`,
+      totalLectures: sql<number>`count(${videos.id})`,
     })
     .from(enrollments)
     .innerJoin(courses, eq(enrollments.courseId, courses.id))
     .innerJoin(sections, eq(sections.courseId, courses.id))
-    .innerJoin(lectures, eq(lectures.sectionId, sections.id))
+    .innerJoin(modules, eq(modules.milestoneId, sections.id))
+    .innerJoin(videos, eq(videos.moduleId, modules.id))
     .leftJoin(
-      progress,
+      videoProgress,
       and(
-        eq(progress.lectureId, lectures.id),
-        eq(progress.userId, enrollments.userId),
+        eq(videoProgress.videoId, videos.id),
+        eq(videoProgress.userId, enrollments.userId),
       ),
     )
     .where(
       and(
         eq(enrollments.userId, profileId),
         eq(enrollments.status, "active"),
-        eq(lectures.isPublished, true),
+        eq(videos.isPublished, true),
       ),
     )
     .groupBy(courses.id)

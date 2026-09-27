@@ -430,6 +430,55 @@ NEXT_PUBLIC_BACKEND_API_URL=
 10. Remaining features per "Phase 2 / Advanced Features" above
 
 ## Progress Log
+- Enrolled students no longer see the enroll/payment flow on a course they already own.
+  `GET /courses/:slug/enrollment-status` (`services/backend/src/routes/courses.ts`) returns
+  `isEnrolled`, `enrollmentStatus`, and the order that still needs the student's attention
+  (preferring `pending_verification`, then `rejected`, then most recent). The course detail
+  page branches on it: active enrollment renders "Continue learning" → `/learn/[courseId]`,
+  a pending order renders "Payment under review", and a rejected order renders the
+  resubmit-proof path. The open order is forced to `null` when enrolled so a stale order
+  can never mask the enrolled state.
+- Fixed the root cause behind that bug: on a *public* page an expired 15-minute access token
+  fell through to `optionalAuthenticatedApiFetch` → `refreshAccessToken()` → `cookies().set()`,
+  which throws in a Server Component. Because the backend revokes the presented refresh token
+  *before* the cookie write fails, this silently destroyed the session and degraded a signed-in
+  viewer to anonymous. `updateSession` (`apps/web/lib/auth/middleware.ts`, reached via
+  `apps/web/proxy.ts` — Next.js 16 renamed `middleware.ts` → `proxy.ts`) now renews the access
+  token at the edge for public routes too, and the refresh fallback was removed from
+  `optionalAuthenticatedApiFetch`.
+- Duplicate-submission risk closed app-wide. `apps/web/components/submit-button.tsx` wraps
+  `useFormStatus` and accepts the full `Button` prop surface plus a `pendingLabel`, rendering a
+  disabled button with a `Loader2` spinner while its form submits. Applied to enroll, payment
+  proof, quiz and assignment submit, admin approve/reject payment and payout, course create and
+  delete, instructor create, user suspend/reinstate, uploads, login/signup, and sign-out. Native
+  GET filter forms cannot use `useFormStatus`, so `apps/web/app/courses/course-filter-form.tsx`
+  drives the catalog filters through `useTransition` + `router.push` to get a real pending state.
+- Design system pass. The three specified fonts are now actually loaded in `app/layout.tsx`
+  (Fraunces, Inter, IBM Plex Mono) — previously only Figtree was wired, so `font-heading` and
+  `font-mono` silently fell back. `font-display` was found to be a dead class that Tailwind never
+  generated (the theme defines the utility as `font-heading`), meaning ~19 headings across 8 files
+  had never rendered in Fraunces; all were corrected. 353 hardcoded hex classes across the six
+  admin pages were replaced with design tokens, `uppercase`/`tracking-[…]` were removed per the
+  sentence-case rule, the landing page was rebuilt (nested `<a>` inside `<button>` → `Button
+  render={<Link/>}`, ALL-CAPS copy → sentence case, `rounded-none` dropped, progress-thread motif
+  added), and admin raw inputs/selects/textareas and hand-rolled link-buttons were replaced with
+  shadcn components. `apps/web/app` and `apps/web/components` now contain zero hex literals, zero
+  `shadow-`/`bg-gradient`/`drop-shadow`, and zero raw `<button>` elements.
+- The learning video player was rebuilt as `apps/web/app/learn/[courseId]/lecture-player.tsx`:
+  play/pause, ±10s skip, a scrub bar rendered as the progress-thread motif (thin brass line that
+  thickens on hover, buffered range behind the played range, pointer capture for drag-scrub),
+  volume, a playback-speed menu, fullscreen, mono time display, keyboard shortcuts
+  (space/k, arrows, m, f), hover-reveal with idle auto-hide, a buffering spinner, and
+  touch-sized hit targets. `learning-player.tsx` retains ownership of the `<video>` ref, so
+  resume position, 15-second auto-save, mark-complete, and auto-complete-on-end are unchanged.
+  The watermark overlay — the learner's email at 20% opacity, repositioned every 8–12s — is
+  carried over verbatim.
+- Validation for this change set: `pnpm typecheck` (5/5 workspaces) and `pnpm lint` (5/5) pass.
+  `pnpm build` could not be run due to a temporary classifier outage. Manual verification of the
+  three Bug-1 branches (enrolled → "Continue learning", pending → "Payment under review",
+  rejected → resubmit path) and the four Task-4 player behaviors was not possible; only an admin
+  seed script exists, so no enrolled student, active order, or course fixtures are available
+  without hand-authoring database rows.
 - Markdown editing and rendering are now wired into the course builder: `@uiw/react-md-editor`
   is installed for the web workspace, `packages/ui` exposes a reusable `MarkdownEditor`
   wrapper with dark theme overrides for the ink-navy/brass system, the course form and

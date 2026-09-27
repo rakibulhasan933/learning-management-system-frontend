@@ -4,6 +4,8 @@ import { Menu } from "lucide-react"
 import type { ProfileDto } from "@workspace/types"
 
 import { authenticatedApiFetch } from "@/lib/api-client"
+import { getDashboardPath } from "@/lib/auth/dashboard"
+import { Button } from "@workspace/ui/components/button"
 
 async function getPublicProfile() {
   try {
@@ -18,36 +20,61 @@ async function getPublicProfile() {
 export async function SiteHeader() {
   const profile = await getPublicProfile()
   const initials = (
-    profile?.fullName?.trim()?.[0] ?? profile?.email[0] ?? "L"
+    profile?.fullName?.trim()?.[0] ?? profile?.email?.[0] ?? "L"
   ).toUpperCase()
+  const dashboardPath = profile ? getDashboardPath(profile.role) : null
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-4 sm:px-6">
         <Link className="flex min-w-0 items-center gap-2.5" href="/">
-          <span className="flex h-7 w-7 items-center justify-center border border-primary font-mono text-[11px] text-primary">
+          <span className="flex size-7 items-center justify-center rounded-lg font-mono text-[11px] text-primary ring-1 ring-primary/60">
             F
           </span>
-          <span className="font-display text-lg tracking-tight">Folio</span>
+          <span className="font-heading text-lg tracking-tight">Folio</span>
         </Link>
 
         <nav className="hidden items-center gap-7 text-sm md:flex">
           <Link
-            className="text-muted-foreground transition-colors hover:text-foreground"
+            className="interactive-link text-muted-foreground"
+            href="/"
+          >
+            Home
+          </Link>
+          <Link
+            className="interactive-link text-muted-foreground"
             href="/courses"
           >
             Courses
           </Link>
+          <Link
+            className="interactive-link text-muted-foreground"
+            href="/about"
+          >
+            About
+          </Link>
+          <Link
+            className="interactive-link text-muted-foreground"
+            href="/faq"
+          >
+            FAQ
+          </Link>
+          <Link
+            className="interactive-link text-muted-foreground"
+            href="/contact"
+          >
+            Contact
+          </Link>
           {profile ? (
             <>
               <Link
-                className="text-muted-foreground transition-colors hover:text-foreground"
-                href="/dashboard/student"
+                className="interactive-link text-muted-foreground"
+                href={dashboardPath ?? "/dashboard/student"}
               >
-                Learning
+                Dashboard
               </Link>
               <Link
-                className="text-muted-foreground transition-colors hover:text-foreground"
+                className="interactive-link text-muted-foreground"
                 href="/dashboard/profile"
               >
                 Profile
@@ -60,90 +87,106 @@ export async function SiteHeader() {
           <div className="hidden items-center gap-3 md:flex">
             {profile ? (
               <>
-                <Link
-                  className="hidden border border-border px-4 py-2 text-sm text-foreground transition-colors hover:border-primary/50 md:inline-flex"
-                  href="/dashboard/profile"
+                <Button
+                  className="hidden md:inline-flex"
+                  asChild
+                  variant="outline"
                 >
-                  Profile settings
-                </Link>
-                <Link
-                  className="inline-flex items-center gap-2.5 border border-primary/60 px-3 py-1.5 text-sm text-primary transition-colors hover:border-primary"
-                  href="/dashboard/profile"
-                >
-                  <span className="relative h-7 w-7 overflow-hidden rounded-full border border-primary/50 bg-card">
-                    {profile.avatarUrl ? (
-                      <Image
-                        alt={profile.fullName ?? profile.email}
-                        className="object-cover"
-                        fill
-                        sizes="28px"
-                        src={profile.avatarUrl}
-                      />
-                    ) : (
-                      <span className="flex h-full items-center justify-center font-mono text-xs text-primary">
-                        {initials}
-                      </span>
-                    )}
-                  </span>
-                  <span>Account</span>
-                </Link>
+                  <Link href="/dashboard/profile">Profile settings</Link>
+                </Button>
+                <Button asChild variant="outline">
+                  <Link href={dashboardPath ?? "/dashboard/profile"} className="inline-flex items-center gap-2">
+                    <span className="relative size-7 overflow-hidden rounded-full bg-card ring-1 ring-primary/50">
+                      {profile.avatarUrl ? (
+                        <Image
+                          alt={profile.fullName ?? profile.email}
+                          className="object-cover"
+                          fill
+                          sizes="28px"
+                          src={profile.avatarUrl}
+                        />
+                      ) : (
+                        <span className="flex h-full items-center justify-center font-mono text-xs text-primary">
+                          {initials}
+                        </span>
+                      )}
+                    </span>
+                    <span>Account</span>
+                  </Link>
+                </Button>
               </>
             ) : (
               <>
                 <Link
-                  className="hidden text-sm text-muted-foreground transition-colors hover:text-foreground md:inline-flex"
+                  className="interactive-link hidden text-sm text-muted-foreground md:inline-flex"
                   href="/auth/login"
                 >
                   Sign in
                 </Link>
-                <Link
-                  className="border border-primary px-4 py-2 text-sm text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
-                  href="/auth/signup"
-                >
-                  Create account
-                </Link>
+                <Button asChild>
+                  <Link href="/auth/signup">Create account</Link>
+                </Button>
               </>
             )}
           </div>
 
           <details className="relative md:hidden">
             <summary className="list-none">
-              <span className="inline-flex items-center gap-2 border border-border px-3 py-2 text-sm text-foreground">
-                <Menu className="h-4 w-4" />
+              <span className="interactive-surface inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm text-foreground ring-1 ring-foreground/10">
+                <Menu className="size-4" />
                 Menu
               </span>
             </summary>
-            <div className="absolute right-0 top-[calc(100%+0.5rem)] z-50 w-64 border border-border bg-background p-3">
+            <div className="absolute right-0 top-[calc(100%+0.5rem)] z-50 w-64 rounded-2xl bg-card p-3 ring-1 ring-foreground/10">
               <nav className="grid gap-2 text-sm">
-                <Link className="border border-border px-3 py-2" href="/courses">
-                  Courses
-                </Link>
+                <Button className="justify-start" asChild variant="ghost">
+                  <Link href="/">Home</Link>
+                </Button>
+                <Button
+                  className="justify-start"
+                  asChild
+                  variant="ghost"
+                >
+                  <Link href="/courses">Courses</Link>
+                </Button>
+                <Button className="justify-start" asChild variant="ghost">
+                  <Link href="/about">About</Link>
+                </Button>
+                <Button className="justify-start" asChild variant="ghost">
+                  <Link href="/faq">FAQ</Link>
+                </Button>
+                <Button className="justify-start" asChild variant="ghost">
+                  <Link href="/contact">Contact</Link>
+                </Button>
                 {profile ? (
                   <>
-                    <Link
-                      className="border border-border px-3 py-2"
-                      href="/dashboard/student"
+                    <Button
+                      className="justify-start"
+                      asChild
+                      variant="ghost"
                     >
-                      Learning
-                    </Link>
-                    <Link
-                      className="border border-border px-3 py-2"
-                      href="/dashboard/profile"
+                      <Link href={dashboardPath ?? "/dashboard/student"}>Dashboard</Link>
+                    </Button>
+                    <Button
+                      className="justify-start"
+                      asChild
+                      variant="ghost"
                     >
-                      Profile
-                    </Link>
+                      <Link href="/dashboard/profile">Profile</Link>
+                    </Button>
                   </>
                 ) : (
                   <>
-                    <Link className="border border-border px-3 py-2" href="/auth/login">
-                      Sign in
-                    </Link>
-                    <Link
-                      className="border border-primary px-3 py-2 text-primary"
-                      href="/auth/signup"
+                    <Button
+                      className="justify-start"
+                      asChild
+                      variant="ghost"
                     >
-                      Create account
-                    </Link>
+                      <Link href="/auth/login">Sign in</Link>
+                    </Button>
+                    <Button asChild>
+                      <Link href="/auth/signup">Create account</Link>
+                    </Button>
                   </>
                 )}
               </nav>

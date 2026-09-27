@@ -5,6 +5,7 @@ import {
   enrollments,
   eq,
   lectures,
+  modules,
   quizAttempts,
   quizOptions,
   quizQuestions,
@@ -59,6 +60,7 @@ export function toInstructorQuizDto({
     id: quiz.id,
     isPublished: quiz.isPublished,
     lectureId: quiz.lectureId,
+    moduleId: quiz.moduleId,
     questions: questions
       .filter((question) => question.quizId === quiz.id)
       .map((question) => ({
@@ -100,6 +102,7 @@ export function toStudentQuizDto({
     id: quiz.id,
     latestAttempt: latestAttempt ? toAttemptDto(latestAttempt) : null,
     lectureId: quiz.lectureId,
+    moduleId: quiz.moduleId,
     questions: questions
       .filter((question) => question.quizId === quiz.id)
       .map((question) => {
@@ -120,6 +123,30 @@ export function toStudentQuizDto({
           questionText: question.questionText,
         }
       }),
+    review: latestAttempt
+      ? {
+          answers: latestAttempt.answers,
+          correctOptionIds: Object.fromEntries(
+            questions.map((question) => [
+              question.id,
+              options
+                .filter((option) => option.questionId === question.id && option.isCorrect)
+                .map((option) => option.id)
+                .sort(),
+            ]),
+          ),
+          correctQuestionIds: questions
+            .filter((question) => {
+              const correct = options
+                .filter((option) => option.questionId === question.id && option.isCorrect)
+                .map((option) => option.id)
+                .sort()
+              const submitted = [...(latestAttempt.answers[question.id] ?? [])].sort()
+              return correct.length === submitted.length && correct.every((id, index) => id === submitted[index])
+            })
+            .map((question) => question.id),
+        }
+      : null,
     sectionId: quiz.sectionId,
     title: quiz.title,
   }
@@ -202,10 +229,12 @@ export async function getQuizCourseId(quizId: string) {
 
 export async function getStudentQuizByTarget({
   lectureId,
+  moduleId,
   profileId,
   sectionId,
 }: {
   lectureId?: string
+  moduleId?: string
   profileId: string
   sectionId?: string
 }) {
@@ -216,6 +245,13 @@ export async function getStudentQuizByTarget({
         .innerJoin(sections, eq(lectures.sectionId, sections.id))
         .where(eq(lectures.id, lectureId))
         .limit(1)
+    : moduleId
+      ? await db
+          .select({ courseId: sections.courseId })
+          .from(modules)
+          .innerJoin(sections, eq(modules.milestoneId, sections.id))
+          .where(eq(modules.id, moduleId))
+          .limit(1)
     : await db
         .select({ courseId: sections.courseId })
         .from(sections)
@@ -233,7 +269,11 @@ export async function getStudentQuizByTarget({
     .from(quizzes)
     .where(
       and(
-        lectureId ? eq(quizzes.lectureId, lectureId) : eq(quizzes.sectionId, sectionId!),
+        lectureId
+          ? eq(quizzes.lectureId, lectureId)
+          : moduleId
+            ? eq(quizzes.moduleId, moduleId)
+            : eq(quizzes.sectionId, sectionId!),
         eq(quizzes.isPublished, true),
       ),
     )
@@ -254,6 +294,15 @@ export async function getStudentQuizDto(quizId: string, profileId: string) {
   }
 
   await assertActiveEnrollment(quiz.courseId, profileId)
+
+  const [existingAttempt] = await db
+    .select({ id: quizAttempts.id })
+    .from(quizAttempts)
+    .where(and(eq(quizAttempts.quizId, quiz.id), eq(quizAttempts.userId, profileId)))
+    .limit(1)
+  if (existingAttempt) {
+    throw new HttpError(409, "You have already submitted this quiz.")
+  }
 
   const questions = await db
     .select()
@@ -365,17 +414,19 @@ export async function submitQuizAttempt({
             ),
         })
   const correctQuestionIds: string[] = []
+  const correctOptionIds: Record<string, string[]> = {}
 
   for (const question of questions) {
-    const correctOptionIds = options
+    const questionCorrectOptionIds = options
       .filter((option) => option.questionId === question.id && option.isCorrect)
       .map((option) => option.id)
       .sort()
     const submittedOptionIds = [...(answers[question.id] ?? [])].sort()
+    correctOptionIds[question.id] = questionCorrectOptionIds
 
     if (
-      correctOptionIds.length === submittedOptionIds.length &&
-      correctOptionIds.every((optionId, index) => optionId === submittedOptionIds[index])
+      questionCorrectOptionIds.length === submittedOptionIds.length &&
+      questionCorrectOptionIds.every((optionId, index) => optionId === submittedOptionIds[index])
     ) {
       correctQuestionIds.push(question.id)
     }
@@ -398,6 +449,7 @@ export async function submitQuizAttempt({
 
   return {
     ...toAttemptDto(attempt),
+    correctOptionIds,
     correctQuestionIds,
   }
 }

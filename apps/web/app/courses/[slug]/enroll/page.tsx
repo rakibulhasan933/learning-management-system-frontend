@@ -1,5 +1,6 @@
 import Link from "next/link"
 import { redirect } from "next/navigation"
+import { AlertCircle, CheckCircle2 } from "lucide-react"
 import type { PaymentInstructionsResponse } from "@workspace/types"
 
 import { submitPaymentProofAction } from "@/app/courses/[slug]/enroll/actions"
@@ -7,7 +8,8 @@ import { ApiClientError, authenticatedApiFetch } from "@/lib/api-client"
 import { Button } from "@workspace/ui/components/button"
 import { Card, CardContent } from "@workspace/ui/components/card"
 import { FloatingInput } from "@workspace/ui/components/floating-input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@workspace/ui/components/select"
+import { ProgressThread } from "@workspace/ui/components/progress-thread"
+import { SubmitButton } from "@/components/submit-button"
 
 export const dynamic = "force-dynamic"
 
@@ -20,13 +22,6 @@ interface EnrollPageProps {
     orderId?: string
   }>
 }
-
-const paymentMethodLabels = {
-  bank_transfer: "Bank transfer",
-  bkash: "bKash",
-  nagad: "Nagad",
-  rocket: "Rocket",
-} as const
 
 export default async function EnrollPage({
   params,
@@ -56,34 +51,38 @@ export default async function EnrollPage({
 
   const { instructions, order } = payload
   const isPaid = order.status === "paid"
-  const paymentMethodOptions = Object.entries(paymentMethodLabels)
-
   return (
     <main className="min-h-screen bg-background px-4 py-8 text-foreground sm:px-6 sm:py-10">
       <section className="mx-auto max-w-5xl">
-        <div className="mb-8 h-px w-28 bg-primary" />
-        <p className="font-mono text-sm text-muted-foreground">
+        <ProgressThread className="mb-8" />
+        <p className="font-mono text-xs tracking-wide text-muted-foreground">
           Reference {order.referenceCode}
         </p>
-        <h1 className="mt-3 text-3xl tracking-tight sm:text-4xl">{order.courseTitle}</h1>
-        <p className="mt-4 max-w-2xl text-sm leading-6 text-muted-foreground">
+        <h1 className="mt-3 font-heading text-4xl leading-[1.1] tracking-tight sm:text-5xl">
+          {order.courseTitle}
+        </h1>
+        <p className="mt-5 max-w-2xl text-base leading-7 text-muted-foreground">
           Pay the exact amount using one of the listed methods, then submit the
-          transaction details for admin verification.
+          transaction ID and sender number for automatic verification.
         </p>
 
         {query.error ? (
-          <p className="mt-6 border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
-            {query.error}
-          </p>
+          <div className="mt-6 flex items-start gap-2 rounded-xl border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
+            <AlertCircle className="mt-0.5 size-4 shrink-0" />
+            <p>{query.error}</p>
+          </div>
         ) : null}
 
-        <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_380px]">
-          <Card className="border-border bg-card">
-            <CardContent className="grid gap-5 p-5 sm:p-6">
-              <h2 className="font-display text-2xl tracking-tight">
+        <div className="mt-10 grid gap-5 lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start">
+          <Card>
+            <CardContent>
+              <p className="font-mono text-xs tracking-wide text-muted-foreground">
+                Automatic verification
+              </p>
+              <h2 className="mt-2 font-heading text-2xl tracking-tight">
                 Payment instructions
               </h2>
-              <dl className="mt-5 grid gap-4 text-sm">
+              <dl className="mt-5 grid gap-4 border-t border-border pt-5 text-sm [&>div:last-child]:border-b-0 [&>div:last-child]:pb-0">
                 <div className="grid gap-1 border-b border-border pb-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:gap-4">
                   <dt className="text-muted-foreground">Amount</dt>
                   <dd className="font-mono sm:text-right">
@@ -132,59 +131,47 @@ export default async function EnrollPage({
             </CardContent>
           </Card>
 
-          <Card className="border-border bg-card">
-            <CardContent className="grid gap-5 p-5 sm:p-6">
-              <h2 className="font-display text-2xl tracking-tight">
-                {isPaid ? "Enrollment active" : "Submit proof"}
+          <Card>
+            <CardContent>
+              <p className="font-mono text-xs tracking-wide text-muted-foreground">
+                {isPaid ? "Verified" : "Step 2"}
+              </p>
+              <h2 className="mt-2 font-heading text-2xl tracking-tight">
+                {isPaid ? "Enrollment active" : "Verify payment"}
               </h2>
               {isPaid ? (
-                <div className="mt-4 space-y-4">
-                  <p className="text-sm leading-6 text-muted-foreground">
-                    This order is paid. Your course enrollment is active.
-                  </p>
-                  <Link
-                    className="block rounded-2xl bg-primary px-4 py-3 text-center text-sm text-primary-foreground"
-                    href="/dashboard/student"
+                <div className="mt-5 space-y-5 border-t border-border pt-5">
+                  <div className="flex items-start gap-2 rounded-xl border border-secondary/30 bg-secondary/5 p-3 text-sm text-secondary">
+                    <CheckCircle2 className="mt-0.5 size-4 shrink-0" />
+                    <p>This order is paid. Your course enrollment is active.</p>
+                  </div>
+                  <Button
+                    className="w-full"
+                    asChild
                   >
-                    Open dashboard
-                  </Link>
+                    <Link href="/dashboard/student">
+                      Open dashboard
+                    </Link>
+                  </Button>
                 </div>
               ) : (
                 <form
                   action={submitPaymentProofAction}
-                  className="mt-5 grid gap-5"
+                  className="mt-5 grid gap-5 border-t border-border pt-5"
                 >
                   <input name="orderId" type="hidden" value={order.id} />
                   <input name="slug" type="hidden" value={slug} />
-                  <div className="grid gap-2">
-                    <p className="text-sm text-muted-foreground">Payment method</p>
-                    <Select defaultValue="bkash" name="paymentMethod">
-                      <SelectTrigger className="w-full rounded-2xl border-border bg-input/20">
-                        <SelectValue placeholder="Payment method" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {paymentMethodOptions.map(([value, label]) => (
-                          <SelectItem key={value} value={value}>
-                            {label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
                   <FloatingInput label="Transaction ID" name="transactionId" />
+                  <p className="-mt-2 text-xs leading-5 text-muted-foreground">
+                    The exact order amount will be sent for verification: {order.currency} {order.amount}.
+                  </p>
                   <FloatingInput label="Sender number" name="senderNumber" />
-                  <label className="grid gap-2 text-sm text-muted-foreground">
-                    <span>Screenshot</span>
-                    <input
-                      accept="image/*"
-                      className="w-full rounded-2xl border border-border bg-input/20 px-3 py-2 text-sm text-foreground file:mr-3 file:border-0 file:bg-primary file:px-3 file:py-1 file:text-primary-foreground"
-                      name="proofScreenshot"
-                      type="file"
-                    />
-                  </label>
-                  <Button className="w-full" type="submit">
-                    Submit proof
-                  </Button>
+                  <SubmitButton
+                    className="w-full"
+                    pendingLabel="Verifying payment..."
+                  >
+                    Verify payment
+                  </SubmitButton>
                 </form>
               )}
             </CardContent>

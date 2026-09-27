@@ -29,6 +29,8 @@ import { MaterialUploadControl } from "./material-upload-control"
 import { QuizBuilder } from "./quiz-builder"
 import { VideoUploadControl } from "./video-upload-control"
 
+import { SubmitButton } from "@/components/submit-button"
+
 interface CourseOutlineEditorProps {
   courseId: string
   outline: InstructorCourseOutlineResponse
@@ -101,7 +103,7 @@ function StatusChip({
 }) {
   return (
     <span
-      className={`inline-flex items-center rounded-full border px-2 py-1 text-[11px] font-medium uppercase tracking-[0.18em] ${chipClasses[tone]}`}
+      className={`inline-flex items-center rounded-full border px-2 py-1 text-[11px] font-medium tracking-wide ${chipClasses[tone]}`}
     >
       {children}
     </span>
@@ -122,9 +124,9 @@ function ConfirmDeleteButton({
   if (confirming) {
     return (
       <div className="flex items-center gap-2">
-        <Button size={size} type="submit" variant="destructive">
+        <SubmitButton pendingLabel="Deleting..." size={size} variant="destructive">
           {confirmLabel}
-        </Button>
+        </SubmitButton>
         <Button
           onClick={() => setConfirming(false)}
           size={size}
@@ -139,12 +141,9 @@ function ConfirmDeleteButton({
 
   return (
     <Button
-      onClick={(event) => {
-        event.preventDefault()
-        setConfirming(true)
-      }}
+      onClick={() => setConfirming(true)}
       size={size}
-      type="submit"
+      type="button"
       variant="destructive"
     >
       {label}
@@ -161,6 +160,10 @@ function LectureAccordionItem({
   lecture: LectureDto
   onOpenLecture: (lectureId: string) => void
 }) {
+  const [moduleStep, setModuleStep] = useState<
+    "basic" | "video" | "materials" | "quiz" | "assignment"
+  >("basic")
+
   return (
     <AccordionItem
       className="border-border/80 data-open:bg-background/40"
@@ -207,46 +210,88 @@ function LectureAccordionItem({
 
       <AccordionContent keepMounted className="px-3 pb-3">
         <div className="grid gap-3 pt-3">
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
+            {([
+              ["basic", "Basic info"],
+              ["video", "Video"],
+              ["materials", "PDF / slides"],
+              ["quiz", "Quiz"],
+              ["assignment", "Assignment"],
+            ] as const).map(([value, label], index) => (
+              <button
+                className={`rounded-xl border px-2 py-2 text-left text-xs transition-colors ${
+                  moduleStep === value
+                    ? "border-primary/60 bg-primary/10 text-foreground"
+                    : "border-border text-muted-foreground hover:text-foreground"
+                }`}
+                key={value}
+                onClick={() => setModuleStep(value)}
+                type="button"
+              >
+                <span className="block font-mono text-[10px] text-primary">0{index + 1}</span>
+                <span className="mt-1 block truncate">{label}</span>
+              </button>
+            ))}
+          </div>
+
           <form
             action={updateInstructorLectureAction}
             className="grid gap-3 rounded-2xl border border-border/60 bg-background/40 p-3 md:grid-cols-4"
           >
             <input name="courseId" type="hidden" value={courseId} />
             <input name="lectureId" type="hidden" value={lecture.id} />
-            <FloatingInput
-              className={`${compactInputClass} md:col-span-2`}
-              defaultValue={lecture.title}
-              label="Lecture title"
-              name="title"
-              required
-            />
-            <FloatingInput
-              className={compactMonoInputClass}
-              defaultValue={lecture.position}
-              label="Position"
-              min="0"
-              name="position"
-              required
-              type="number"
-            />
-            <FloatingInput
-              className={compactMonoInputClass}
-              defaultValue={lecture.durationSeconds ?? ""}
-              label="Duration"
-              min="0"
-              name="durationSeconds"
-              placeholder="seconds"
-              type="number"
-            />
-            <FloatingInput
-              className={`${compactMonoInputClass} md:col-span-2`}
-              defaultValue={lecture.videoRef ?? ""}
-              label="Video reference"
-              name="videoRef"
-              placeholder="r2/object-key.mp4"
-            />
-            <VideoUploadControl courseId={courseId} lectureId={lecture.id} />
-            <div className="grid gap-3 md:col-span-4 md:grid-cols-2">
+            <div className={moduleStep === "basic" ? "contents" : "hidden"}>
+              <FloatingInput
+                className={`${compactInputClass} md:col-span-2`}
+                defaultValue={lecture.title}
+                label="Module title"
+                name="title"
+                required
+              />
+              <FloatingInput
+                className={compactMonoInputClass}
+                defaultValue={lecture.position}
+                label="Position"
+                min="0"
+                name="position"
+                required
+                type="number"
+              />
+              <FloatingInput
+                className={compactMonoInputClass}
+                defaultValue={lecture.durationSeconds ?? ""}
+                label="Duration"
+                min="0"
+                name="durationSeconds"
+                placeholder="seconds"
+                type="number"
+              />
+            </div>
+            <div className={moduleStep === "video" ? "contents" : "hidden"}>
+              <FloatingInput
+                className={`${compactMonoInputClass} md:col-span-2`}
+                defaultValue={lecture.videoRef ?? ""}
+                label="Video reference"
+                name="videoRef"
+                placeholder="r2/object-key.mp4"
+              />
+              <VideoUploadControl courseId={courseId} lectureId={lecture.id} />
+              <div className="grid gap-2">
+                <p className="text-sm text-muted-foreground">Video provider</p>
+                <Select defaultValue={lecture.videoProvider} name="videoProvider">
+                  <SelectTrigger className={compactSelectTriggerClass} size="sm">
+                    <SelectValue placeholder="R2" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="r2">R2</SelectItem>
+                    <SelectItem value="bunny">Bunny</SelectItem>
+                    <SelectItem value="cloudflare_stream">Cloudflare Stream</SelectItem>
+                    <SelectItem value="mux">Mux</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className={moduleStep === "materials" ? "grid gap-3 md:col-span-4 md:grid-cols-2" : "hidden"}>
               <MaterialUploadControl
                 courseId={courseId}
                 kind="pdf"
@@ -260,7 +305,7 @@ function LectureAccordionItem({
                 url={lecture.slidesUrl}
               />
             </div>
-            <div className="md:col-span-4">
+            <div className={moduleStep === "quiz" ? "md:col-span-4" : "hidden"}>
               <QuizBuilder
                 courseId={courseId}
                 quiz={lecture.quiz}
@@ -269,37 +314,22 @@ function LectureAccordionItem({
                 targetType="lecture"
               />
             </div>
-            <div className="grid gap-2">
-              <p className="text-sm text-muted-foreground">Provider</p>
-              <Select defaultValue={lecture.videoProvider} name="videoProvider">
-                <SelectTrigger className={compactSelectTriggerClass} size="sm">
-                  <SelectValue placeholder="R2" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="r2">R2</SelectItem>
-                  <SelectItem value="bunny">Bunny</SelectItem>
-                  <SelectItem value="cloudflare_stream">
-                    Cloudflare Stream
-                  </SelectItem>
-                  <SelectItem value="mux">Mux</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <FloatingInput
-              className={compactMonoInputClass}
-              defaultValue={toDateTimeLocal(lecture.availableAt)}
-              label="Available at"
-              name="availableAt"
-              type="datetime-local"
-            />
-            <MarkdownEditor
-              className="md:col-span-4"
-              defaultValue={lecture.description ?? ""}
-              helperText="Markdown is supported here."
-              label="Description"
-              name="description"
-              height={200}
-            />
+            <div className={moduleStep === "basic" ? "contents" : "hidden"}>
+              <FloatingInput
+                className={compactMonoInputClass}
+                defaultValue={toDateTimeLocal(lecture.availableAt)}
+                label="Available at"
+                name="availableAt"
+                type="datetime-local"
+              />
+              <MarkdownEditor
+                className="md:col-span-4"
+                defaultValue={lecture.description ?? ""}
+                helperText="Markdown is supported here."
+                label="Module description"
+                name="description"
+                height={200}
+              />
             <div className="flex flex-wrap gap-4 text-sm md:col-span-3">
               <label className="flex items-center gap-2 text-muted-foreground">
                 <Checkbox defaultChecked={lecture.isPreview} name="isPreview" />
@@ -310,16 +340,17 @@ function LectureAccordionItem({
                 Published
               </label>
             </div>
+            </div>
             <div className="flex gap-3">
-              <Button size="sm" type="submit">
+              <SubmitButton pendingLabel="Saving..." size="sm">
                 Save
-              </Button>
+              </SubmitButton>
             </div>
           </form>
 
-          <div className="grid gap-3 rounded-2xl border border-border/60 bg-background/40 p-3">
+          <div className={moduleStep === "assignment" ? "grid gap-3 rounded-2xl border border-border/60 bg-background/40 p-3" : "hidden"}>
             <h5 className="font-heading text-sm font-medium tracking-tight md:text-base">
-              Lecture assignment
+              Module assignment
             </h5>
             <AssignmentBuilder
               assignment={lecture.assignment}
@@ -398,7 +429,7 @@ function SectionAccordionItem({
                 {section.title}
               </h3>
               <span className="font-mono text-xs text-muted-foreground">
-                {section.lectures.length} lecture
+                {section.lectures.length} module
                 {section.lectures.length === 1 ? "" : "s"}
               </span>
             </div>
@@ -406,20 +437,6 @@ function SectionAccordionItem({
               <StatusChip tone={section.dripAfterDays > 0 ? "accent" : "success"}>
                 {formatDripLabel(section.dripAfterDays)}
               </StatusChip>
-              {section.quiz ? (
-                <StatusChip tone={section.quiz.isPublished ? "success" : "muted"}>
-                  {section.quiz.isPublished ? "quiz live" : "quiz draft"}
-                </StatusChip>
-              ) : null}
-              {section.assignment ? (
-                <StatusChip
-                  tone={section.assignment.isPublished ? "success" : "muted"}
-                >
-                  {section.assignment.isPublished
-                    ? "assignment live"
-                    : "assignment draft"}
-                </StatusChip>
-              ) : null}
             </div>
           </div>
         </AccordionTrigger>
@@ -452,7 +469,7 @@ function SectionAccordionItem({
             <FloatingInput
               className={compactInputClass}
               defaultValue={section.title}
-              label="Section title"
+              label="Milestone title"
               name="title"
               required
             />
@@ -482,49 +499,23 @@ function SectionAccordionItem({
               name="description"
               height={200}
             />
-            <Button
+            <SubmitButton
               className="w-fit md:col-span-3"
+              pendingLabel="Saving milestone..."
               size="sm"
-              type="submit"
               variant="secondary"
             >
-              Save section
-            </Button>
+              Save milestone
+            </SubmitButton>
           </form>
-
-          <div className="grid gap-2">
-            <h4 className="font-heading text-sm tracking-tight md:text-base">
-              Section quiz
-            </h4>
-            <QuizBuilder
-              courseId={courseId}
-              quiz={section.quiz}
-              targetId={section.id}
-              targetLabel={section.title}
-              targetType="section"
-            />
-          </div>
-
-          <div className="grid gap-2">
-            <h4 className="font-heading text-sm tracking-tight md:text-base">
-              Section assignment
-            </h4>
-            <AssignmentBuilder
-              assignment={section.assignment}
-              courseId={courseId}
-              targetId={section.id}
-              targetLabel={section.title}
-              targetType="section"
-            />
-          </div>
 
           <div className="grid gap-2">
             <div className="flex items-center justify-between gap-3">
               <h4 className="font-heading text-sm tracking-tight md:text-base">
-                Lectures
+                Modules
               </h4>
               <span className="font-mono text-xs text-muted-foreground">
-                {section.lectures.length} total
+                {section.lectures.length} total modules
               </span>
             </div>
 
@@ -557,7 +548,7 @@ function SectionAccordionItem({
             <input name="sectionId" type="hidden" value={section.id} />
             <FloatingInput
               className={`${compactInputClass} md:col-span-2`}
-              label="New lecture"
+              label="New module"
               name="title"
               required
             />
@@ -623,9 +614,9 @@ function SectionAccordionItem({
                 Published
               </label>
             </div>
-            <Button className="w-fit" size="sm" type="submit">
-              Add lecture
-            </Button>
+            <SubmitButton className="w-fit" pendingLabel="Adding module..." size="sm">
+              Add module
+            </SubmitButton>
           </form>
         </div>
       </AccordionContent>
@@ -637,43 +628,8 @@ export function CourseOutlineEditor({
   courseId,
   outline,
 }: CourseOutlineEditorProps) {
-  const [openSections, setOpenSections] = useState<string[]>([])
-  const previousSectionIdsRef = useRef<string[] | null>(null)
-
-  useEffect(() => {
-    const currentSectionIds = outline.sections.map((section) => section.id)
-    const previousSectionIds = previousSectionIdsRef.current
-    previousSectionIdsRef.current = currentSectionIds
-
-    let cancelled = false
-
-    queueMicrotask(() => {
-      if (cancelled) {
-        return
-      }
-
-      setOpenSections((current) =>
-        current.filter((sectionId) => currentSectionIds.includes(sectionId)),
-      )
-
-      if (previousSectionIds && currentSectionIds.length > previousSectionIds.length) {
-        const previousSectionIdSet = new Set(previousSectionIds)
-        const nextSection = outline.sections.find(
-          (section) => !previousSectionIdSet.has(section.id),
-        )
-
-        if (nextSection) {
-          setOpenSections((current) =>
-            current.includes(nextSection.id) ? current : [...current, nextSection.id],
-          )
-        }
-      }
-    })
-
-    return () => {
-      cancelled = true
-    }
-  }, [outline.sections])
+  const [activeSectionIndex, setActiveSectionIndex] = useState(0)
+  const activeSection = outline.sections[activeSectionIndex]
 
   return (
     <section className="grid gap-4">
@@ -683,8 +639,8 @@ export function CourseOutlineEditor({
           Course outline
         </h2>
         <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-          Build the course structure students will move through: sections,
-          lecture order, preview access, publication state, and drip scheduling.
+          Build the course as milestones. Each milestone contains modules, and
+          each module can have a video, quiz, assignment, and materials.
         </p>
       </div>
 
@@ -695,7 +651,7 @@ export function CourseOutlineEditor({
         <input name="courseId" type="hidden" value={courseId} />
         <FloatingInput
           className={compactInputClass}
-          label="Section title"
+          label="Milestone title"
           name="title"
           required
         />
@@ -724,35 +680,88 @@ export function CourseOutlineEditor({
           name="description"
           height={200}
         />
-        <Button className="w-fit md:col-span-3" size="sm" type="submit">
-          Add section
-        </Button>
+        <SubmitButton
+          className="w-fit md:col-span-3"
+          pendingLabel="Adding milestone..."
+          size="sm"
+        >
+          Add milestone
+        </SubmitButton>
       </form>
 
       {outline.sections.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
-          No sections yet. Add the first section to start building lectures.
+          No milestones yet. Add the first milestone to start building modules.
         </div>
       ) : (
-        <Accordion
-          multiple
-          value={openSections}
-          onValueChange={setOpenSections}
-          className="border-border/60 bg-card/80"
-        >
-          {outline.sections.map((section) => (
-            <SectionAccordionItem
-              courseId={courseId}
-              key={section.id}
-              onOpenSection={(sectionId) =>
-                setOpenSections((current) =>
-                  current.includes(sectionId) ? current : [...current, sectionId],
-                )
-              }
-              section={section}
-            />
-          ))}
-        </Accordion>
+        <div className="grid gap-3">
+          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+            {outline.sections.map((section, index) => (
+              <button
+                className={`rounded-2xl border p-3 text-left transition-colors ${
+                  index === activeSectionIndex
+                    ? "border-primary/60 bg-primary/10"
+                    : "border-border bg-card hover:border-primary/40"
+                }`}
+                key={section.id}
+                onClick={() => setActiveSectionIndex(index)}
+                type="button"
+              >
+                <span className="font-mono text-[10px] text-primary">
+                  Milestone {String(index + 1).padStart(2, "0")}
+                </span>
+                <span className="mt-1 block truncate text-sm font-medium">
+                  {section.title}
+                </span>
+                <span className="mt-1 block text-xs text-muted-foreground">
+                  {section.lectures.length} module{section.lectures.length === 1 ? "" : "s"}
+                </span>
+              </button>
+            ))}
+          </div>
+
+          {activeSection ? (
+            <>
+              <Accordion
+                multiple
+                defaultValue={[activeSection.id]}
+                className="border-border/60 bg-card/80"
+              >
+                <SectionAccordionItem
+                  courseId={courseId}
+                  key={activeSection.id}
+                  onOpenSection={() => undefined}
+                  section={activeSection}
+                />
+              </Accordion>
+
+              <div className="flex items-center justify-between gap-3 border-t border-border pt-4">
+                <Button
+                  disabled={activeSectionIndex === 0}
+                  onClick={() => setActiveSectionIndex((current) => Math.max(0, current - 1))}
+                  type="button"
+                  variant="outline"
+                >
+                  Previous milestone
+                </Button>
+                <span className="font-mono text-xs text-muted-foreground">
+                  {activeSectionIndex + 1} / {outline.sections.length}
+                </span>
+                <Button
+                  disabled={activeSectionIndex === outline.sections.length - 1}
+                  onClick={() =>
+                    setActiveSectionIndex((current) =>
+                      Math.min(outline.sections.length - 1, current + 1),
+                    )
+                  }
+                  type="button"
+                >
+                  Next milestone
+                </Button>
+              </div>
+            </>
+          ) : null}
+        </div>
       )}
     </section>
   )

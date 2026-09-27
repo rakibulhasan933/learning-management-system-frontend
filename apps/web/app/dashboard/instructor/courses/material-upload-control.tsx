@@ -4,13 +4,16 @@ import { useRef, useState, useTransition } from "react"
 import type { DragEvent } from "react"
 import { CheckCircle2, ExternalLink, FileText, Loader2, Presentation, X } from "lucide-react"
 
-import { uploadLectureMaterialAction } from "./actions"
+import { getBackendApiUrl } from "@/lib/auth/cookies"
+import { Button } from "@workspace/ui/components/button"
 import { cn } from "@workspace/ui/lib/utils"
 
 interface MaterialUploadControlProps {
   courseId: string
   kind: "pdf" | "slides"
   lectureId: string
+  videoId?: string
+  moduleId?: string
   url: string | null
 }
 
@@ -32,25 +35,12 @@ const labels = {
   },
 }
 
-function fileToBase64(file: File) {
-  return new Promise<string>((resolve, reject) => {
-    const reader = new FileReader()
-
-    reader.addEventListener("error", () => reject(reader.error))
-    reader.addEventListener("load", () => {
-      const result = String(reader.result ?? "")
-      const [, base64 = ""] = result.split(",")
-
-      resolve(base64)
-    })
-    reader.readAsDataURL(file)
-  })
-}
-
 export function MaterialUploadControl({
   courseId,
   kind,
   lectureId,
+  videoId,
+  moduleId,
   url,
 }: MaterialUploadControlProps) {
   const inputRef = useRef<HTMLInputElement>(null)
@@ -70,13 +60,28 @@ export function MaterialUploadControl({
 
     startTransition(async () => {
       try {
-        const response = await uploadLectureMaterialAction({
-          base64: await fileToBase64(file),
-          contentType: file.type || "application/octet-stream",
-          courseId,
-          fileName: file.name,
-          kind,
-          lectureId,
+        const resourcePath = moduleId
+          ? `modules/${moduleId}`
+          : videoId
+            ? `videos/${videoId}`
+            : `lectures/${lectureId}`
+        const query = new URLSearchParams({ fileName: file.name, kind })
+        const response = await new Promise<{ url: string }>((resolve, reject) => {
+          const xhr = new XMLHttpRequest()
+          xhr.open("POST", `${getBackendApiUrl()}/instructor/courses/${courseId}/${resourcePath}/material-upload?${query.toString()}`)
+          xhr.withCredentials = true
+          xhr.setRequestHeader("Content-Type", file.type || "application/octet-stream")
+          xhr.onload = () => {
+            try {
+              const payload = JSON.parse(xhr.responseText) as { message?: string; url?: string }
+              if (xhr.status >= 200 && xhr.status < 300 && payload.url) resolve({ url: payload.url })
+              else reject(new Error(payload.message ?? `Material upload failed (${xhr.status}).`))
+            } catch {
+              reject(new Error(`Material upload failed (${xhr.status}).`))
+            }
+          }
+          xhr.onerror = () => reject(new Error("Material upload failed. Check the backend connection."))
+          xhr.send(file)
         })
 
         setMaterialUrl(response.url)
@@ -104,17 +109,37 @@ export function MaterialUploadControl({
   }
 
   function clear() {
-    setMaterialUrl(null)
-    setFileName(null)
-    setMessage(null)
-    setIsError(false)
+    if (!moduleId) {
+      setMaterialUrl(null)
+      setFileName(null)
+      setMessage(null)
+      setIsError(false)
+      return
+    }
+
+    startTransition(async () => {
+      try {
+        const response = await fetch(`${getBackendApiUrl()}/instructor/courses/${courseId}/modules/${moduleId}/material`, {
+          credentials: "include",
+          method: "DELETE",
+        })
+        if (!response.ok) throw new Error("Material could not be deleted.")
+        setMaterialUrl(null)
+        setFileName(null)
+        setMessage("Deleted")
+        setIsError(false)
+      } catch (error) {
+        setIsError(true)
+        setMessage(error instanceof Error ? error.message : "Delete failed.")
+      }
+    })
   }
 
   return (
     <div className="grid gap-2">
       <div className="flex items-baseline justify-between gap-4">
         <p className="text-sm font-medium text-foreground">{label.title}</p>
-        <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+        <p className="font-mono text-[10px] tracking-wide text-muted-foreground">
           {label.hint}
         </p>
       </div>
@@ -171,7 +196,7 @@ export function MaterialUploadControl({
               {fileName ?? label.title}
             </p>
             <a
-              className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
+              className="interactive-link inline-flex items-center gap-1 text-xs text-primary"
               href={materialUrl}
               rel="noreferrer"
               target="_blank"
@@ -180,14 +205,17 @@ export function MaterialUploadControl({
               <ExternalLink className="h-3 w-3" />
             </a>
           </div>
-          <button
-            type="button"
-            onClick={clear}
+          <Button
             aria-label="Remove file"
-            className="text-muted-foreground transition-colors hover:text-destructive"
+            className="text-muted-foreground hover:text-destructive"
+            disabled={isPending}
+            onClick={clear}
+            size="icon-sm"
+            type="button"
+            variant="ghost"
           >
-            <X className="h-4 w-4" />
-          </button>
+            <X className="size-4" />
+          </Button>
         </div>
       )}
 

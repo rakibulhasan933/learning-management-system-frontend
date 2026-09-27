@@ -1,4 +1,7 @@
-import { BookOpen, DollarSign, ImageIcon, Rocket } from "lucide-react"
+"use client"
+
+import { useState } from "react"
+import { ArrowLeft, ArrowRight, BookOpen, DollarSign, ImageIcon, Rocket } from "lucide-react"
 import type { InstructorCourseDto } from "@workspace/types"
 
 import { ImageUploadControl } from "@/components/image-upload-control"
@@ -8,7 +11,6 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@workspace/ui/components/accordion"
-import { Button } from "@workspace/ui/components/button"
 import { FloatingInput } from "@workspace/ui/components/floating-input"
 import { FloatingTextarea } from "@workspace/ui/components/floating-textarea"
 import { Label } from "@workspace/ui/components/label"
@@ -20,6 +22,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@workspace/ui/components/select"
+import { SubmitButton } from "@/components/submit-button"
+import { cn } from "@workspace/ui/lib/utils"
 
 interface CourseFormProps {
   action: (formData: FormData) => Promise<void>
@@ -28,18 +32,50 @@ interface CourseFormProps {
 }
 
 export function CourseForm({ action, course, submitLabel }: CourseFormProps) {
+  const [step, setStep] = useState(1)
+  const steps = [
+    { label: "Basics", note: "Title and description" },
+    { label: "Pricing", note: "Category and price" },
+    { label: "Media", note: "Course thumbnail" },
+    { label: "Publish", note: "Choose course status" },
+  ]
+
   return (
     <form action={action} className="grid gap-4">
       {course ? (
         <input name="courseId" type="hidden" value={course.id} />
       ) : null}
 
+      <div className="grid gap-3 rounded-2xl border border-border bg-card/30 p-3 sm:p-4">
+        <div className="grid grid-cols-4 gap-2">
+          {steps.map((item, index) => {
+            const number = index + 1
+            return (
+              <button
+                className={cn(
+                  "rounded-xl border px-2 py-3 text-left transition-colors",
+                  step === number
+                    ? "border-primary/60 bg-primary/10 text-foreground"
+                    : "border-border text-muted-foreground hover:text-foreground",
+                )}
+                key={item.label}
+                onClick={() => setStep(number)}
+                type="button"
+              >
+                <span className="font-mono text-xs text-primary">0{number}</span>
+                <span className="mt-1 block truncate text-xs font-medium sm:text-sm">{item.label}</span>
+                <span className="mt-1 hidden truncate text-[11px] text-muted-foreground sm:block">{item.note}</span>
+              </button>
+            )
+          })}
+        </div>
+
       <Accordion
         defaultValue={["basics"]}
         multiple
         className="rounded-xl border-border/60 bg-background/40"
       >
-        <AccordionItem value="basics">
+        <AccordionItem className={cn(step !== 1 && "hidden")} value="basics">
           <AccordionTrigger className="px-3 py-2.5 text-sm">
             <span className="flex items-center gap-2">
               <BookOpen className="h-3.5 w-3.5 text-primary" />
@@ -77,16 +113,16 @@ export function CourseForm({ action, course, submitLabel }: CourseFormProps) {
               />
               <MarkdownEditor
                 defaultValue={course?.description ?? ""}
-                helperText="Write the long-form course description in markdown."
+                helperText="Write with the toolbar and preview the formatted result beside your text."
                 label="Description"
                 name="description"
-                height={220}
+                height={300}
               />
             </div>
           </AccordionContent>
         </AccordionItem>
 
-        <AccordionItem value="classification">
+        <AccordionItem className={cn(step !== 2 && "hidden")} value="classification">
           <AccordionTrigger className="px-3 py-2.5 text-sm">
             <span className="flex items-center gap-2">
               <DollarSign className="h-3.5 w-3.5 text-primary" />
@@ -138,7 +174,7 @@ export function CourseForm({ action, course, submitLabel }: CourseFormProps) {
           </AccordionContent>
         </AccordionItem>
 
-        <AccordionItem value="media">
+        <AccordionItem className={cn(step !== 3 && "hidden")} value="media">
           <AccordionTrigger className="px-3 py-2.5 text-sm">
             <span className="flex items-center gap-2">
               <ImageIcon className="h-3.5 w-3.5 text-primary" />
@@ -159,7 +195,7 @@ export function CourseForm({ action, course, submitLabel }: CourseFormProps) {
           </AccordionContent>
         </AccordionItem>
 
-        <AccordionItem value="publishing">
+        <AccordionItem className={cn(step !== 4 && "hidden")} value="publishing">
           <AccordionTrigger className="px-3 py-2.5 text-sm">
             <span className="flex items-center gap-2">
               <Rocket className="h-3.5 w-3.5 text-primary" />
@@ -185,9 +221,32 @@ export function CourseForm({ action, course, submitLabel }: CourseFormProps) {
         </AccordionItem>
       </Accordion>
 
-      <Button className="w-full sm:w-fit sm:px-8" size="sm" type="submit">
+        <div className="flex items-center justify-between gap-3 border-t border-border pt-3">
+          <button
+            className="inline-flex h-9 items-center gap-2 rounded-xl border border-border px-3 text-sm text-muted-foreground transition-colors hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40"
+            disabled={step === 1}
+            onClick={() => setStep((current) => Math.max(1, current - 1))}
+            type="button"
+          >
+            <ArrowLeft className="size-4" />
+            Previous
+          </button>
+          {step < steps.length ? (
+            <button
+              className="inline-flex h-9 items-center gap-2 rounded-xl bg-primary px-4 text-sm text-primary-foreground transition-opacity hover:opacity-85"
+              onClick={() => setStep((current) => Math.min(steps.length, current + 1))}
+              type="button"
+            >
+              Next
+              <ArrowRight className="size-4" />
+            </button>
+          ) : null}
+        </div>
+      </div>
+
+      <SubmitButton className="w-full sm:w-fit sm:px-8" pendingLabel={`${submitLabel}...`}>
         {submitLabel}
-      </Button>
+      </SubmitButton>
     </form>
   )
 }

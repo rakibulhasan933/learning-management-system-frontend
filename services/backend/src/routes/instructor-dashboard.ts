@@ -3,6 +3,9 @@ import { randomBytes } from "node:crypto"
 import { Router, type Router as ExpressRouter } from "express"
 import { z } from "zod"
 import type {
+  AnnouncementListResponse,
+  DiscussionListResponse,
+  InstructorQuizResultsResponse,
   InstructorAnalyticsOverviewResponse,
   InstructorCourseStudentsResponse,
   InstructorPayoutListResponse,
@@ -11,22 +14,29 @@ import type {
 import {
   and,
   alias,
+  announcements,
   courses,
   desc,
+  discussionPosts,
   enrollments,
   eq,
   inArray,
-  lectures,
+  modules,
   payoutRequests,
   profiles,
-  progress,
+  videoProgress,
+  quizAttempts,
+  quizzes,
+  notifications,
   sections,
   sql,
   users,
+  videos,
 } from "@workspace/db"
 
 import { asyncHandler, HttpError } from "../http/errors.js"
 import { db } from "../lib/database.js"
+import { createNotification } from "../lib/notifications.js"
 import { requireAuth, requireRole } from "../middleware/auth.js"
 
 export const instructorDashboardRouter: ExpressRouter = Router()
@@ -39,6 +49,15 @@ const payoutCreateSchema = z.object({
   amount: z.coerce.number().positive(),
   currency: z.string().trim().length(3).default("BDT"),
   note: z.string().trim().max(2000).optional(),
+})
+const discussionCreateSchema = z.object({
+  body: z.string().trim().min(2).max(5000),
+  lectureId: z.string().uuid().nullable().optional(),
+  parentId: z.string().uuid().nullable().optional(),
+})
+const announcementCreateSchema = z.object({
+  body: z.string().trim().min(2).max(5000),
+  title: z.string().trim().min(2).max(180),
 })
 
 function serializeDate(value: Date | null) {
@@ -124,12 +143,13 @@ async function loadInstructorAnalytics(instructorId: string) {
   const lectureRows = await db
     .select({
       courseId: sections.courseId,
-      lectureId: lectures.id,
+      lectureId: videos.id,
     })
-    .from(lectures)
-    .innerJoin(sections, eq(lectures.sectionId, sections.id))
+    .from(videos)
+    .innerJoin(modules, eq(videos.moduleId, modules.id))
+    .innerJoin(sections, eq(modules.milestoneId, sections.id))
     .where(
-      and(eq(lectures.isPublished, true), inArray(sections.courseId, courseIds)),
+      and(eq(videos.isPublished, true), inArray(sections.courseId, courseIds)),
     )
 
   const lectureIdsByCourse = new Map<string, string[]>()
@@ -164,17 +184,17 @@ async function loadInstructorAnalytics(instructorId: string) {
     studentIds.length > 0 && allLectureIds.size > 0
       ? await db
           .select({
-            completedAt: progress.completedAt,
-            isCompleted: progress.isCompleted,
-            lastWatchedAt: progress.lastWatchedAt,
-            lectureId: progress.lectureId,
-            userId: progress.userId,
+            completedAt: videoProgress.completedAt,
+            isCompleted: videoProgress.isCompleted,
+            lastWatchedAt: videoProgress.lastWatchedAt,
+            lectureId: videoProgress.videoId,
+            userId: videoProgress.userId,
           })
-          .from(progress)
+          .from(videoProgress)
           .where(
             and(
-              inArray(progress.userId, studentIds),
-              inArray(progress.lectureId, [...allLectureIds]),
+              inArray(videoProgress.userId, studentIds),
+              inArray(videoProgress.videoId, [...allLectureIds]),
             ),
           )
       : []
@@ -447,6 +467,21 @@ instructorDashboardRouter.get(
   asyncHandler(async (request, response) => {
     const analytics = await loadInstructorAnalytics(request.auth!.profile.id)
 
+    if (request.auth!.profile.role === "instructor") {
+      response.status(200).json({
+        courses: analytics.courses.map(({ revenue, ...course }) => {
+          void revenue
+          return course
+        }),
+        totals: (() => {
+          const { revenue, ...totals } = analytics.totals
+          void revenue
+          return totals
+        })(),
+      })
+      return
+    }
+
     response.status(200).json({
       courses: analytics.courses,
       totals: analytics.totals,
@@ -478,14 +513,15 @@ instructorDashboardRouter.get(
 
     const lectureRows = await db
       .select({
-        lectureId: lectures.id,
+        lectureId: videos.id,
       })
-      .from(lectures)
-      .innerJoin(sections, eq(lectures.sectionId, sections.id))
+      .from(videos)
+      .innerJoin(modules, eq(videos.moduleId, modules.id))
+      .innerJoin(sections, eq(modules.milestoneId, sections.id))
       .where(
         and(
           eq(sections.courseId, params.courseId),
-          eq(lectures.isPublished, true),
+          eq(videos.isPublished, true),
         ),
       )
 
@@ -512,17 +548,17 @@ instructorDashboardRouter.get(
       lectureIds.length > 0 && studentIds.length > 0
         ? await db
             .select({
-              completedAt: progress.completedAt,
-              isCompleted: progress.isCompleted,
-              lastWatchedAt: progress.lastWatchedAt,
-              lectureId: progress.lectureId,
-              userId: progress.userId,
+              completedAt: videoProgress.completedAt,
+              isCompleted: videoProgress.isCompleted,
+              lastWatchedAt: videoProgress.lastWatchedAt,
+              lectureId: videoProgress.videoId,
+              userId: videoProgress.userId,
             })
-            .from(progress)
+            .from(videoProgress)
             .where(
               and(
-                inArray(progress.userId, studentIds),
-                inArray(progress.lectureId, lectureIds),
+                inArray(videoProgress.userId, studentIds),
+                inArray(videoProgress.videoId, lectureIds),
               ),
             )
         : []
@@ -638,7 +674,7 @@ instructorDashboardRouter.get(
             : Math.round((completedEnrollmentCount / activeEnrollmentCount) * 100),
         completedEnrollmentCount,
         enrollmentCount: enrollmentRows.length,
-        revenue: toNumber(revenueRow.revenue),
+        revenue: request.auth!.profile.role === "admin" ? toNumber(revenueRow.revenue) : 0,
         totalLectureCount: lectureIds.length,
       },
       students,
@@ -649,8 +685,172 @@ instructorDashboardRouter.get(
 )
 
 instructorDashboardRouter.get(
+  "/notifications",
+  asyncHandler(async (request, response) => {
+    const rows = await db
+      .select({
+        body: notifications.body,
+        createdAt: notifications.createdAt,
+        href: notifications.href,
+        id: notifications.id,
+        readAt: notifications.readAt,
+        title: notifications.title,
+        type: notifications.type,
+      })
+      .from(notifications)
+      .where(eq(notifications.profileId, request.auth!.profile.id))
+      .orderBy(desc(notifications.createdAt))
+      .limit(50)
+
+    response.json({
+      notifications: rows.map((row) => ({ ...row, createdAt: row.createdAt.toISOString(), readAt: row.readAt?.toISOString() ?? null })),
+      unreadCount: rows.filter((row) => !row.readAt).length,
+    })
+  }),
+)
+
+instructorDashboardRouter.post(
+  "/notifications/:notificationId/read",
+  asyncHandler(async (request, response) => {
+    const notificationId = z.string().uuid().parse(request.params.notificationId)
+    await db.update(notifications).set({ readAt: new Date() }).where(and(
+      eq(notifications.id, notificationId),
+      eq(notifications.profileId, request.auth!.profile.id),
+    ))
+    response.status(204).send()
+  }),
+)
+
+instructorDashboardRouter.get(
+  "/courses/:courseId/quiz-results",
+  asyncHandler(async (request, response) => {
+    const { courseId } = courseParamsSchema.parse(request.params)
+    await assertInstructorOwnsCourse(courseId, request.auth!.profile.id)
+    const rows = await db
+      .select({
+        attemptId: quizAttempts.id,
+        completedAt: quizAttempts.completedAt,
+        courseId: courses.id,
+        courseTitle: courses.title,
+        quizId: quizzes.id,
+        quizTitle: quizzes.title,
+        score: quizAttempts.score,
+        studentId: profiles.id,
+        studentName: profiles.fullName,
+        studentEmail: users.email,
+        totalQuestions: quizAttempts.totalQuestions,
+      })
+      .from(quizAttempts)
+      .innerJoin(quizzes, eq(quizAttempts.quizId, quizzes.id))
+      .innerJoin(courses, eq(quizzes.courseId, courses.id))
+      .innerJoin(profiles, eq(quizAttempts.userId, profiles.id))
+      .innerJoin(users, eq(profiles.userId, users.id))
+      .where(eq(quizzes.courseId, courseId))
+      .orderBy(desc(quizAttempts.completedAt))
+
+    response.json({
+      results: rows.map((row) => ({
+        ...row,
+        completedAt: row.completedAt.toISOString(),
+        percentage: row.totalQuestions ? Math.round((row.score / row.totalQuestions) * 100) : 0,
+      })),
+    } satisfies InstructorQuizResultsResponse)
+  }),
+)
+
+instructorDashboardRouter.get(
+  "/courses/:courseId/discussions",
+  asyncHandler(async (request, response) => {
+    const { courseId } = courseParamsSchema.parse(request.params)
+    await assertInstructorOwnsCourse(courseId, request.auth!.profile.id)
+    const rows = await db
+      .select({
+        authorId: profiles.id,
+        authorName: profiles.fullName,
+        authorRole: profiles.role,
+        body: discussionPosts.body,
+        courseId: discussionPosts.courseId,
+        createdAt: discussionPosts.createdAt,
+        id: discussionPosts.id,
+        lectureId: discussionPosts.lectureId,
+        parentId: discussionPosts.parentId,
+      })
+      .from(discussionPosts)
+      .innerJoin(profiles, eq(discussionPosts.authorId, profiles.id))
+      .where(eq(discussionPosts.courseId, courseId))
+      .orderBy(desc(discussionPosts.createdAt))
+    response.json({ posts: rows.map((row) => ({ ...row, createdAt: row.createdAt.toISOString() })) } satisfies DiscussionListResponse)
+  }),
+)
+
+instructorDashboardRouter.post(
+  "/courses/:courseId/discussions",
+  asyncHandler(async (request, response) => {
+    const { courseId } = courseParamsSchema.parse(request.params)
+    const input = discussionCreateSchema.parse(request.body)
+    await assertInstructorOwnsCourse(courseId, request.auth!.profile.id)
+    const [post] = await db.insert(discussionPosts).values({
+      authorId: request.auth!.profile.id,
+      body: input.body,
+      courseId,
+      lectureId: input.lectureId ?? null,
+      parentId: input.parentId ?? null,
+    }).returning({ id: discussionPosts.id })
+    if (input.parentId) {
+      const [parent] = await db.select({ authorId: discussionPosts.authorId }).from(discussionPosts).where(eq(discussionPosts.id, input.parentId)).limit(1)
+      if (parent && parent.authorId !== request.auth!.profile.id) {
+        await createNotification({ body: input.body, href: `/learn/${courseId}`, profileId: parent.authorId, title: "Your discussion received a reply", type: "discussion_reply" })
+      }
+    }
+    response.status(201).json({ id: post!.id })
+  }),
+)
+
+instructorDashboardRouter.post(
+  "/courses/:courseId/announcements",
+  asyncHandler(async (request, response) => {
+    const { courseId } = courseParamsSchema.parse(request.params)
+    const input = announcementCreateSchema.parse(request.body)
+    await assertInstructorOwnsCourse(courseId, request.auth!.profile.id)
+    const [course] = await db.select({ title: courses.title }).from(courses).where(eq(courses.id, courseId)).limit(1)
+    const [announcement] = await db.insert(announcements).values({
+      body: input.body,
+      courseId,
+      instructorId: request.auth!.profile.id,
+      title: input.title,
+    }).returning({ id: announcements.id, createdAt: announcements.createdAt })
+    const students = await db.select({ profileId: enrollments.userId }).from(enrollments).where(and(
+      eq(enrollments.courseId, courseId),
+      eq(enrollments.status, "active"),
+    ))
+    if (students.length) {
+      await db.insert(notifications).values(students.map((student) => ({
+        body: input.body,
+        href: `/learn/${courseId}`,
+        profileId: student.profileId,
+        title: `${course?.title ?? "Course"}: ${input.title}`,
+        type: "course_announcement",
+      })))
+    }
+    response.status(201).json({
+      announcements: [{
+        body: input.body,
+        courseId,
+        courseTitle: course?.title ?? "Course",
+        createdAt: announcement!.createdAt.toISOString(),
+        id: announcement!.id,
+        title: input.title,
+      }],
+    } satisfies AnnouncementListResponse)
+  }),
+)
+
+instructorDashboardRouter.get(
   "/payouts",
   asyncHandler(async (request, response) => {
+    if (request.auth!.profile.role === "instructor") {
+      throw new HttpError(403, "Instructor payout access is disabled.")
+    }
     const payload = await loadInstructorPayoutList(request.auth!.profile.id)
 
     response.status(200).json(payload)
@@ -660,6 +860,9 @@ instructorDashboardRouter.get(
 instructorDashboardRouter.post(
   "/payouts",
   asyncHandler(async (request, response) => {
+    if (request.auth!.profile.role === "instructor") {
+      throw new HttpError(403, "Instructor payout access is disabled.")
+    }
     const input = payoutCreateSchema.parse(request.body)
     const instructorId = request.auth!.profile.id
     const current = await loadInstructorPayoutList(instructorId)

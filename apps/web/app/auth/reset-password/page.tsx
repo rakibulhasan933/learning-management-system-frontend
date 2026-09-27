@@ -4,10 +4,10 @@ import {
   confirmPasswordResetAction,
   sendPasswordResetAction,
 } from "@/app/auth/actions"
-import { Button } from "@workspace/ui/components/button"
 import { Card, CardContent } from "@workspace/ui/components/card"
 import { Alert, AlertDescription } from "@workspace/ui/components/alert"
 import { FloatingInput } from "@workspace/ui/components/floating-input"
+import { SubmitButton } from "@/components/submit-button"
 
 interface ResetPasswordPageProps {
   searchParams: Promise<{
@@ -28,7 +28,7 @@ export default async function ResetPasswordPage({
         <Card className="border-border bg-card">
           <CardContent className="grid gap-5 p-5 sm:p-6">
             <div className="space-y-2">
-              <h1 className="font-display text-3xl tracking-tight sm:text-4xl">
+              <h1 className="font-heading text-3xl tracking-tight sm:text-4xl">
                 Reset your password
               </h1>
               <p className="text-sm leading-6 text-muted-foreground">
@@ -53,9 +53,9 @@ export default async function ResetPasswordPage({
                   type="password"
                   autoComplete="new-password"
                 />
-                <Button className="w-full" type="submit">
+                <SubmitButton className="w-full" pendingLabel="Updating password...">
                   Update password
-                </Button>
+                </SubmitButton>
               </form>
             ) : (
               <form action={sendPasswordResetAction} className="grid gap-5">
@@ -65,15 +65,15 @@ export default async function ResetPasswordPage({
                   type="email"
                   autoComplete="email"
                 />
-                <Button className="w-full" type="submit">
+                <SubmitButton className="w-full" pendingLabel="Sending link...">
                   Send reset link
-                </Button>
+                </SubmitButton>
               </form>
             )}
 
             <p className="text-sm text-muted-foreground">
               Remembered it?{" "}
-              <Link className="text-primary hover:underline" href="/auth/login">
+              <Link className="interactive-link text-primary" href="/auth/login">
                 Sign in
               </Link>
             </p>

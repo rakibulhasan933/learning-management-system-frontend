@@ -4,9 +4,9 @@ import {
   courses,
   enrollments,
   eq,
-  lectures,
-  progress,
+  modules,
   sections,
+  videos,
 } from "@workspace/db"
 import { Router, type Router as ExpressRouter } from "express"
 import { z } from "zod"
@@ -26,18 +26,6 @@ const courseParamsSchema = z.object({
 
 function serializeDate(value: Date | null) {
   return value ? value.toISOString() : null
-}
-
-function toProgressDto(row: typeof progress.$inferSelect) {
-  return {
-    completedAt: serializeDate(row.completedAt),
-    id: row.id,
-    isCompleted: row.isCompleted,
-    lastWatchedAt: row.lastWatchedAt.toISOString(),
-    lectureId: row.lectureId,
-    positionSeconds: row.positionSeconds,
-    updatedAt: row.updatedAt.toISOString(),
-  }
 }
 
 learningRouter.get(
@@ -86,42 +74,58 @@ learningRouter.get(
       .where(eq(sections.courseId, params.courseId))
       .orderBy(asc(sections.position))
 
-    const lectureRows = await db
+    const moduleRows = await db
+      .select({ contentTypes: modules.contentTypes, id: modules.id, milestoneId: modules.milestoneId, pdfUrl: modules.pdfUrl, position: modules.position, slidesUrl: modules.slidesUrl, title: modules.title })
+      .from(modules)
+      .innerJoin(sections, eq(modules.milestoneId, sections.id))
+      .where(eq(sections.courseId, params.courseId))
+      .orderBy(asc(sections.position), asc(modules.position))
+    const videoRows = await db
       .select({
-        availableAt: lectures.availableAt,
-        durationSeconds: lectures.durationSeconds,
-        id: lectures.id,
-        isPreview: lectures.isPreview,
-        pdfUrl: lectures.pdfUrl,
-        position: lectures.position,
-        sectionId: lectures.sectionId,
-        slidesUrl: lectures.slidesUrl,
-        title: lectures.title,
+        availableAt: videos.availableAt,
+        description: videos.description,
+        durationSeconds: videos.durationSeconds,
+        id: videos.id,
+        isPreview: videos.isPreview,
+        pdfUrl: videos.pdfUrl,
+        position: videos.position,
+        moduleId: videos.moduleId,
+        slidesUrl: videos.slidesUrl,
+        title: videos.title,
       })
-      .from(lectures)
-      .innerJoin(sections, eq(lectures.sectionId, sections.id))
+      .from(videos)
+      .innerJoin(modules, eq(videos.moduleId, modules.id))
+      .innerJoin(sections, eq(modules.milestoneId, sections.id))
       .where(
-        and(eq(sections.courseId, params.courseId), eq(lectures.isPublished, true)),
+        and(eq(sections.courseId, params.courseId), eq(videos.isPublished, true)),
       )
-      .orderBy(asc(sections.position), asc(lectures.position))
-    const lectureIds = lectureRows.map((lecture) => lecture.id)
+      .orderBy(asc(sections.position), asc(modules.position), asc(videos.position))
+    const videoIds = videoRows.map((video) => video.id)
     const progressRows =
-      lectureIds.length === 0
+      videoIds.length === 0
         ? []
-        : await db.query.progress.findMany({
+        : await db.query.videoProgress.findMany({
             where: (table, { and: andWhere, eq: eqWhere, inArray }) =>
               andWhere(
                 eqWhere(table.userId, request.auth!.profile.id),
-                inArray(table.lectureId, lectureIds),
+                inArray(table.videoId, videoIds),
               ),
           })
-    const progressDtos = progressRows.map(toProgressDto)
-    const completedLectureCount = lectureRows.filter((lecture) =>
+    const progressDtos = progressRows.map((row) => ({
+      completedAt: serializeDate(row.completedAt),
+      id: row.id,
+      isCompleted: row.isCompleted,
+      lastWatchedAt: row.lastWatchedAt.toISOString(),
+      lectureId: row.videoId,
+      positionSeconds: row.positionSeconds,
+      updatedAt: row.updatedAt.toISOString(),
+    }))
+    const completedLectureCount = videoRows.filter((video) =>
       progressRows.some(
-        (row) => row.lectureId === lecture.id && row.isCompleted,
+        (row) => row.videoId === video.id && row.isCompleted,
       ),
     ).length
-    const totalLectureCount = lectureRows.length
+    const totalLectureCount = videoRows.length
     const quizDtos = await getStudentQuizzesForCourse(
       params.courseId,
       request.auth!.profile.id,
@@ -144,36 +148,54 @@ learningRouter.get(
       learner: {
         email: request.auth!.profile.email,
       },
-      sections: sectionRows.map((section) => ({
-        id: section.id,
-        lectures: lectureRows
-          .filter((lecture) => lecture.sectionId === section.id)
-          .map((lecture) => ({
-            availableAt: serializeDate(lecture.availableAt),
-            assignment:
-              assignmentDtos.find(
-                (assignment) => assignment.lectureId === lecture.id,
-              ) ?? null,
-            durationSeconds: lecture.durationSeconds,
-            id: lecture.id,
-            isPreview: lecture.isPreview,
-            pdfUrl: lecture.pdfUrl,
-            position: lecture.position,
-            progress:
-              progressDtos.find((item) => item.lectureId === lecture.id) ?? null,
-            quiz:
-              quizDtos.find((quiz) => quiz.lectureId === lecture.id) ?? null,
-            sectionId: lecture.sectionId,
-            slidesUrl: lecture.slidesUrl,
-            title: lecture.title,
-          })),
-        position: section.position,
-        assignment:
-          assignmentDtos.find((assignment) => assignment.sectionId === section.id) ??
-          null,
-        quiz: quizDtos.find((quiz) => quiz.sectionId === section.id) ?? null,
-        title: section.title,
-      })),
+      sections: sectionRows.map((section) => {
+        const sectionLectures = videoRows
+          .filter((video) => moduleRows.some((module) => module.id === video.moduleId && module.milestoneId === section.id))
+          .map((video) => {
+      const module = moduleRows.find((item) => item.id === video.moduleId)
+            const moduleVideos = videoRows.filter((item) => item.moduleId === video.moduleId)
+            return {
+              availableAt: serializeDate(video.availableAt),
+              assignment: moduleVideos[0]?.id === video.id ? assignmentDtos.find((assignment) => assignment.moduleId === video.moduleId) ?? null : null,
+              durationSeconds: video.durationSeconds,
+              description: video.description,
+              id: video.id,
+              isPreview: video.isPreview,
+              pdfUrl: video.pdfUrl,
+              position: video.position,
+              progress: progressDtos.find((item) => item.lectureId === video.id) ?? null,
+              quiz: moduleVideos[0]?.id === video.id ? quizDtos.find((quiz) => quiz.moduleId === video.moduleId) ?? null : null,
+              sectionId: module?.milestoneId ?? section.id,
+              moduleId: video.moduleId,
+              moduleTitle: module?.title ?? "Module",
+              modulePdfUrl: module?.pdfUrl ?? null,
+              moduleSlidesUrl: module?.slidesUrl ?? null,
+              slidesUrl: video.slidesUrl,
+              title: video.title,
+            }
+          })
+        return {
+          id: section.id,
+          lectures: sectionLectures,
+          modules: moduleRows
+            .filter((module) => module.milestoneId === section.id)
+            .map((module) => ({
+              assignment: assignmentDtos.find((assignment) => assignment.moduleId === module.id) ?? null,
+              contentTypes: module.contentTypes as Array<"video" | "pdf" | "quiz" | "assignment">,
+              id: module.id,
+              pdfUrl: module.pdfUrl,
+              position: module.position,
+              quiz: quizDtos.find((quiz) => quiz.moduleId === module.id) ?? null,
+              slidesUrl: module.slidesUrl,
+              title: module.title,
+              videos: sectionLectures.filter((lecture) => lecture.moduleId === module.id),
+            })),
+          position: section.position,
+          assignment: assignmentDtos.find((assignment) => assignment.sectionId === section.id) ?? null,
+          quiz: quizDtos.find((quiz) => quiz.sectionId === section.id) ?? null,
+          title: section.title,
+        }
+      }),
     }
 
     response.status(200).json(payload)
