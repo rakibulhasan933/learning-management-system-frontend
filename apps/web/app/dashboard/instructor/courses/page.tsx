@@ -1,7 +1,13 @@
 import Link from "next/link"
+import { ArrowRight, BookOpen, Plus } from "lucide-react"
 import type { InstructorCourseListResponse } from "@workspace/types"
 
 import { authenticatedApiFetch } from "@/lib/api-client"
+import { Button } from "@workspace/ui/components/button"
+import { EmptyState } from "@workspace/ui/components/empty-state"
+import { PageHeader } from "@workspace/ui/components/page-header"
+import { CourseStatusPill } from "@/components/status-pill"
+import { formatPrice } from "@/lib/format"
 
 export const dynamic = "force-dynamic"
 
@@ -12,55 +18,72 @@ export default async function InstructorCoursesPage() {
   )
 
   return (
-    <main className="min-h-screen bg-background px-6 py-10 text-foreground">
-      <section className="mx-auto max-w-6xl">
-        <div className="mb-8 h-px w-28 bg-primary" />
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <p className="font-mono text-sm text-muted-foreground">
-              Instructor courses
-            </p>
-            <h1 className="mt-3 text-4xl tracking-tight">Manage your courses</h1>
-          </div>
-          <Link
-            className="bg-primary px-4 py-2 text-sm text-primary-foreground"
-            href="/dashboard/instructor/courses/new"
-          >
-            Create course
-          </Link>
-        </div>
+    <>
+      <PageHeader
+        action={
+          <Button asChild>
+            <Link href="/dashboard/instructor/courses/new">
+              <Plus className="size-3.5" />
+              Create course
+            </Link>
+          </Button>
+        }
+        eyebrow="Instructor courses"
+        lede={`${data.courses.length} ${
+          data.courses.length === 1 ? "course" : "courses"
+        } in your catalog. Open one to edit its outline, lectures, and pricing.`}
+        title="Manage your courses"
+      />
 
-        <div className="mt-8 grid gap-4">
+      {data.courses.length === 0 ? (
+        <EmptyState
+          action={
+            <Button asChild variant="outline">
+              <Link href="/dashboard/instructor/courses/new">
+                <Plus className="size-3.5" />
+                Create course
+              </Link>
+            </Button>
+          }
+          className="mt-12"
+          description="Create your first draft to start building."
+          icon={<BookOpen />}
+          title="No courses yet"
+        />
+      ) : (
+        <div className="mt-12 grid gap-4">
           {data.courses.map((course) => (
             <Link
-              className="grid gap-4 border border-border bg-card p-5 md:grid-cols-[1fr_auto] md:items-center"
-              href={`/dashboard/instructor/courses/${course.id}/edit`}
+              className="group interactive-card rounded-2xl bg-card p-6 text-sm text-card-foreground ring-1 ring-foreground/10"
+              href={`/dashboard/instructor/courses/${course.id}`}
               key={course.id}
             >
-              <div>
-                <p className="font-mono text-xs text-muted-foreground">
-                  {course.status.replace("_", " ")} · {course.slug}
-                </p>
-                <h2 className="mt-2 text-2xl">{course.title}</h2>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  {course.shortDescription}
-                </p>
+              <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <CourseStatusPill status={course.status} />
+                    <span className="truncate font-mono text-xs text-muted-foreground">
+                      {course.slug}
+                    </span>
+                  </div>
+                  <h2 className="mt-3 font-heading text-2xl tracking-tight">
+                    {course.title}
+                  </h2>
+                  <p className="mt-2 line-clamp-2 text-sm leading-6 text-muted-foreground">
+                    {course.shortDescription}
+                  </p>
+                </div>
+                <div className="flex items-center gap-3 md:flex-col md:items-end">
+                  <p className="font-mono text-base text-primary tabular-nums">
+                    {formatPrice(course.price, course.currency)}
+                  </p>
+                  <ArrowRight className="size-4 text-muted-foreground transition-transform group-hover:translate-x-1 group-hover:text-primary" />
+                </div>
               </div>
-              <p className="font-mono text-sm">
-                {Number(course.price) === 0
-                  ? "Free"
-                  : `${course.currency} ${course.price}`}
-              </p>
             </Link>
           ))}
         </div>
-
-        {data.courses.length === 0 ? (
-          <p className="mt-8 border border-border bg-card p-5 text-muted-foreground">
-            No courses yet. Create your first draft to start building.
-          </p>
-        ) : null}
-      </section>
-    </main>
+      )}
+    </>
   )
 }

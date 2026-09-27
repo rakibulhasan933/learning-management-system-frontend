@@ -87,6 +87,31 @@ export async function requireAuth(
   }
 }
 
+export async function optionalAuth(
+  request: Request,
+  _response: Response,
+  next: NextFunction,
+) {
+  const accessToken = getBearerToken(request)
+
+  if (!accessToken) {
+    return next()
+  }
+
+  try {
+    const token = verifyAccessToken(accessToken)
+    const profile = await getProfileByUserId(token.sub)
+
+    if (profile && !profile.suspendedAt) {
+      request.auth = { profile, token }
+    }
+  } catch {
+    // An invalid or expired token is treated as an anonymous visitor.
+  }
+
+  return next()
+}
+
 export function requireRole(roles: UserRole[]) {
   return (request: Request, response: Response, next: NextFunction) => {
     if (!request.auth?.profile) {

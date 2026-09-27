@@ -1,129 +1,163 @@
-import { authenticatedApiFetch } from "@/lib/api-client"
+import type { ReactNode } from "react"
+import Link from "next/link"
+import {
+  ArrowRight,
+  BarChart3,
+  BookOpen,
+  Flame,
+  PlayCircle,
+  Target,
+} from "lucide-react"
 import type {
-  CertificateListResponse,
   ProfileDto,
+  StudentAnalyticsResponse,
   StudentOrderListResponse,
 } from "@workspace/types"
 
-import { downloadCertificateAction } from "./certificates/actions"
+import { authenticatedApiFetch } from "@/lib/api-client"
+import { formatDuration } from "@/lib/format"
+import { Button } from "@workspace/ui/components/button"
+import { Card, CardContent } from "@workspace/ui/components/card"
+import { PageHeader } from "@workspace/ui/components/page-header"
 
 export const dynamic = "force-dynamic"
 
 export default async function StudentDashboardPage() {
-  const profile = await authenticatedApiFetch<ProfileDto>("/auth/me")
-  const orderResponse =
-    await authenticatedApiFetch<StudentOrderListResponse>("/payments/my-orders")
-  const certificateResponse =
-    await authenticatedApiFetch<CertificateListResponse>("/certificates")
+  const [profile, analytics, orders] = await Promise.all([
+    authenticatedApiFetch<ProfileDto>("/auth/me"),
+    authenticatedApiFetch<StudentAnalyticsResponse>("/student/analytics"),
+    authenticatedApiFetch<StudentOrderListResponse>("/payments/my-orders"),
+  ])
+  const activeCourse = orders.orders.find((order) => order.status === "paid")
 
   return (
-    <main className="min-h-screen bg-background px-6 py-10 text-foreground">
-      <section className="mx-auto max-w-5xl">
-        <div className="mb-8 h-px w-28 bg-primary" />
-        <p className="font-mono text-sm text-muted-foreground">
-          Student dashboard
-        </p>
-        <h1 className="mt-3 text-4xl tracking-tight">Your learning workspace</h1>
-        <p className="mt-4 max-w-2xl text-sm leading-6 text-muted-foreground">
-          Track enrollment reviews, resume learning, and download certificates
-          once your completed courses are issued.
-        </p>
-        <div className="mt-8 border border-border bg-card p-5">
-          <p className="text-sm text-muted-foreground">Signed in as</p>
-          <p className="mt-1 font-mono text-sm">{profile.email}</p>
-        </div>
-        <div id="orders" className="mt-6 border border-border bg-card p-5">
-          <p className="font-mono text-sm text-muted-foreground">
-            Payment status
-          </p>
-          <h2 className="mt-2 text-2xl">Your orders</h2>
-          <div className="mt-5 space-y-3">
-            {orderResponse.orders.length === 0 ? (
-              <p className="text-sm text-muted-foreground">
-                No enrollment orders yet.
-              </p>
-            ) : (
-              orderResponse.orders.map((order) => (
-                <div
-                  className="grid gap-3 border border-border p-4 text-sm md:grid-cols-[1fr_auto]"
-                  key={order.id}
-                >
-                  <div>
-                    <p className="text-base text-foreground">
-                      {order.courseTitle}
-                    </p>
-                    <p className="mt-1 font-mono text-xs text-muted-foreground">
-                      {order.referenceCode} · {order.currency} {order.amount}
-                    </p>
-                    {order.rejectionReason ? (
-                      <p className="mt-2 text-destructive">
-                        {order.rejectionReason}
-                      </p>
-                    ) : null}
-                  </div>
-                  <div className="flex flex-col items-start gap-2 md:items-end">
-                    <span className="border border-primary px-2 py-1 font-mono text-xs text-primary">
-                      {order.status.replace("_", " ")}
-                    </span>
-                    {order.status === "rejected" ? (
-                      <a
-                        className="text-primary hover:text-foreground"
-                        href={`/courses/${order.courseSlug}/enroll?orderId=${order.id}`}
-                      >
-                        Resubmit proof
-                      </a>
-                    ) : null}
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-        <div id="certificates" className="mt-6 border border-border bg-card p-5">
-          <p className="font-mono text-sm text-muted-foreground">
-            Certificates
-          </p>
-          <h2 className="mt-2 text-2xl">Completed courses</h2>
-          <div className="mt-5 space-y-3">
-            {certificateResponse.certificates.length === 0 ? (
-              <p className="text-sm text-muted-foreground">
-                Complete every published lecture in a course to unlock its
-                certificate.
-              </p>
-            ) : (
-              certificateResponse.certificates.map((certificate) => (
-                <div
-                  className="grid gap-3 border border-border p-4 text-sm md:grid-cols-[1fr_auto]"
-                  key={certificate.id}
-                >
-                  <div>
-                    <p className="text-base text-foreground">
-                      {certificate.courseTitle}
-                    </p>
-                    <p className="mt-1 font-mono text-xs text-muted-foreground">
-                      {certificate.verificationCode} ·{" "}
-                      {new Date(certificate.issuedAt).toLocaleDateString()}
-                    </p>
-                  </div>
-                  <form action={downloadCertificateAction}>
-                    <input
-                      name="certificateId"
-                      type="hidden"
-                      value={certificate.id}
-                    />
-                    <button
-                      className="border border-primary px-4 py-2 text-sm text-primary hover:bg-primary hover:text-primary-foreground"
-                      type="submit"
-                    >
-                      Download certificate
-                    </button>
-                  </form>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
+    <div className="space-y-8">
+      <PageHeader
+        className="text-left"
+        eyebrow="Student dashboard"
+        lede={`Welcome back, ${profile.fullName?.trim() || profile.email}. Your learning progress at a glance.`}
+        title="Your overview"
+      />
+
+      <div className="flex justify-start">
+        <Button asChild variant="outline">
+          <Link href="/dashboard/student/classes">
+            View my classes <ArrowRight />
+          </Link>
+        </Button>
+      </div>
+
+      <section aria-label="Learning summary" className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <Metric
+          label="Completion"
+          note={`${analytics.completedLectures}/${analytics.totalLectures} lectures`}
+          value={`${analytics.completionPercentage}%`}
+        />
+        <Metric
+          label="Watch time"
+          note="Across all classes"
+          value={formatDuration(analytics.watchTimeSeconds) ?? "0m"}
+        />
+        <Metric
+          label="Quiz average"
+          note={`${analytics.quizAttempts} attempts`}
+          value={`${analytics.quizAveragePercentage}%`}
+        />
+        <Metric
+          icon={<Flame className="size-4 text-primary" />}
+          label="Streak"
+          note="Active learning days"
+          value={`${analytics.learningStreakDays}d`}
+        />
       </section>
-    </main>
+
+      <section className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_20rem]">
+        <Card className="overflow-hidden">
+          <CardContent className="flex h-full flex-col justify-between gap-8 p-6 sm:p-8">
+            <div>
+              <div className="mb-6 flex items-center gap-3">
+                <span className="h-px w-10 bg-primary" />
+                <p className="font-mono text-xs text-muted-foreground">Continue learning</p>
+              </div>
+              <h2 className="max-w-xl font-heading text-3xl font-normal tracking-tight sm:text-4xl">
+                Pick up where you left off
+              </h2>
+              <p className="mt-3 max-w-xl text-sm leading-6 text-muted-foreground">
+                Your lectures, assessments, and course materials are organized inside My classes.
+              </p>
+            </div>
+            {activeCourse ? (
+              <Button asChild className="w-fit">
+                <Link href={`/learn/${activeCourse.courseId}`}>
+                  <PlayCircle />
+                  Continue {activeCourse.courseTitle}
+                </Link>
+              </Button>
+            ) : (
+              <Button asChild className="w-fit">
+                <Link href="/courses">
+                  <BookOpen />
+                  Browse courses
+                </Link>
+              </Button>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center gap-3">
+              <BarChart3 className="size-4 text-primary" />
+              <p className="font-mono text-xs text-muted-foreground">Quick access</p>
+            </div>
+            <div className="mt-6 grid gap-3">
+              <QuickLink href="/dashboard/student/analytics">Open analytics</QuickLink>
+              <QuickLink href="/dashboard/student/orders">View payment status</QuickLink>
+            </div>
+          </CardContent>
+        </Card>
+      </section>
+
+      <div className="flex items-center gap-3 text-xs text-muted-foreground">
+        <Target className="size-4 text-primary" />
+        <span>Keep a steady pace and return to your next unfinished lecture.</span>
+      </div>
+    </div>
+  )
+}
+
+function QuickLink({ children, href }: { children: ReactNode; href: string }) {
+  return (
+    <Button asChild className="justify-between" variant="outline">
+      <Link href={href}>
+        {children}
+        <ArrowRight />
+      </Link>
+    </Button>
+  )
+}
+
+function Metric({
+  icon,
+  label,
+  note,
+  value,
+}: {
+  icon?: ReactNode
+  label: string
+  note: string
+  value: string
+}) {
+  return (
+    <Card size="sm">
+      <CardContent className="p-4 sm:p-5">
+        <p className="flex items-center gap-2 text-xs text-muted-foreground">
+          {icon}
+          {label}
+        </p>
+        <p className="mt-3 font-mono text-2xl text-foreground sm:text-3xl">{value}</p>
+        <p className="mt-1 truncate text-xs text-muted-foreground">{note}</p>
+      </CardContent>
+    </Card>
   )
 }

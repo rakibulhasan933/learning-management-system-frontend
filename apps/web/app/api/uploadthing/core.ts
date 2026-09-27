@@ -50,6 +50,21 @@ export const uploadRouter: FileRouter = {
       return { role: profile.role }
     })
     .onUploadComplete(async ({ file }) => ({ url: file.ufsUrl })),
+  paymentProofScreenshotImage: f({
+    "image/jpeg": { maxFileCount: 1, maxFileSize: "4MB" },
+    "image/png": { maxFileCount: 1, maxFileSize: "4MB" },
+    "image/webp": { maxFileCount: 1, maxFileSize: "4MB" },
+  })
+    .middleware(async ({ req }) => {
+      const profile = await getAuthenticatedProfile(req)
+
+      if (!["admin", "student"].includes(profile.role)) {
+        throw new UploadThingError("Access denied.")
+      }
+
+      return { role: profile.role }
+    })
+    .onUploadComplete(async ({ file }) => ({ url: file.ufsUrl })),
 }
 
 export type UploadRouter = typeof uploadRouter

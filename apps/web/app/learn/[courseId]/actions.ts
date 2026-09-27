@@ -14,7 +14,7 @@ import {
 
 export async function getLectureVideoUrlAction(lectureId: string) {
   return optionalAuthenticatedApiFetch<LectureVideoUrlResponse>(
-    `/lectures/${lectureId}/video-url`,
+    `/lectures/videos/${lectureId}/video-url`,
     { cache: "no-store" },
   )
 }
@@ -25,7 +25,7 @@ export async function saveLectureProgressAction(input: {
   positionSeconds: number
 }) {
   return authenticatedApiFetch<LectureProgressMutationResponse>(
-    `/progress/lectures/${input.lectureId}`,
+    `/progress/videos/${input.lectureId}`,
     {
       body: JSON.stringify({
         isCompleted: input.isCompleted,

@@ -1,116 +1,51 @@
 import Link from "next/link"
+import { redirect } from "next/navigation"
+import type { ProfileDto } from "@workspace/types"
 
-import {
-  resendVerificationEmailAction,
-  signInWithGoogleAction,
-  signInWithPasswordAction,
-} from "@/app/auth/actions"
+import { authenticatedApiFetch } from "@/lib/api-client"
+import { getDashboardPath } from "@/lib/auth/dashboard"
+import { LoginForm } from "./login-form"
 
 interface LoginPageProps {
   searchParams: Promise<{
-    error?: string
     next?: string
-    unverifiedEmail?: string
   }>
 }
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
   const params = await searchParams
+  let profile: ProfileDto | null = null
+  try {
+    profile = await authenticatedApiFetch<ProfileDto>("/auth/me", { cache: "no-store" })
+  } catch {
+    // Anonymous visitors should see the login form.
+  }
+  if (profile) redirect(getDashboardPath(profile.role))
 
   return (
-    <main className="min-h-screen bg-background px-6 py-10 text-foreground">
-      <section className="mx-auto grid max-w-5xl gap-10 lg:grid-cols-[1fr_420px] lg:items-center">
-        <div>
-          <div className="mb-8 h-px w-28 bg-primary" />
-          <p className="mb-3 font-mono text-sm text-muted-foreground">
-            Continue learning
-          </p>
-          <h1 className="max-w-2xl text-4xl tracking-tight md:text-6xl">
-            Sign in to your LMS workspace.
-          </h1>
-          <p className="mt-6 max-w-xl text-base leading-7 text-muted-foreground">
-            Access your dashboard, course builder, payment status, and learning
-            progress from one protected session.
-          </p>
-        </div>
+    <main className="relative min-h-screen overflow-hidden bg-background px-4 py-8 text-foreground sm:px-6 sm:py-12">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-border"
+      />
 
-        <div className="border border-border bg-card p-6">
-          <h2 className="text-2xl">Sign in</h2>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Use your email password or Google account.
-          </p>
-
-          {params.error ? (
-            <p className="mt-4 border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
-              {params.error}
+      <section className="mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-md flex-col justify-center sm:min-h-[calc(100vh-6rem)]">
+        <div className="mb-8 space-y-4 text-center">
+          <Link href="/" className="inline-flex items-center gap-3">
+            <span className="flex size-9 items-center justify-center rounded-lg font-mono text-xs text-primary ring-1 ring-primary/60">
+              F
+            </span>
+            <span className="font-heading text-lg tracking-tight">Folio</span>
+          </Link>
+          <div className="space-y-2">
+            <h1 className="font-heading text-3xl tracking-tight sm:text-4xl">Sign in</h1>
+            <p className="text-sm leading-6 text-muted-foreground">
+              Verified courses, tracked progress.
             </p>
-          ) : null}
-
-          {params.unverifiedEmail ? (
-            <form action={resendVerificationEmailAction} className="mt-3">
-              <input
-                type="hidden"
-                name="email"
-                value={params.unverifiedEmail}
-              />
-              <button
-                className="text-sm text-primary hover:text-foreground"
-                type="submit"
-              >
-                Resend verification email
-              </button>
-            </form>
-          ) : null}
-
-          <form action={signInWithPasswordAction} className="mt-6 space-y-4">
-            <input type="hidden" name="next" value={params.next ?? ""} />
-            <label className="block text-sm">
-              Email
-              <input
-                className="mt-2 w-full border border-input bg-background px-3 py-2 text-foreground outline-none focus:border-primary"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-              />
-            </label>
-            <label className="block text-sm">
-              Password
-              <input
-                className="mt-2 w-full border border-input bg-background px-3 py-2 text-foreground outline-none focus:border-primary"
-                name="password"
-                type="password"
-                autoComplete="current-password"
-                required
-              />
-            </label>
-            <button
-              className="w-full bg-primary px-4 py-2 text-primary-foreground"
-              type="submit"
-            >
-              Sign in
-            </button>
-          </form>
-
-          <form action={signInWithGoogleAction} className="mt-3">
-            <input type="hidden" name="next" value={params.next ?? ""} />
-            <button
-              className="w-full border border-border px-4 py-2 text-foreground"
-              type="submit"
-            >
-              Continue with Google
-            </button>
-          </form>
-
-          <div className="mt-6 flex items-center justify-between text-sm text-muted-foreground">
-            <Link className="hover:text-foreground" href="/auth/signup">
-              Create account
-            </Link>
-            <Link className="hover:text-foreground" href="/auth/reset-password">
-              Reset password
-            </Link>
           </div>
         </div>
+
+        <LoginForm next={params.next} />
       </section>
     </main>
   )

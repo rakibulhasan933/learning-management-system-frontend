@@ -1,8 +1,13 @@
-import type { LearningCourseResponse } from "@workspace/types"
+import Link from "next/link"
+import { ArrowLeft } from "lucide-react"
+import type { DiscussionListResponse, LearningCourseResponse } from "@workspace/types"
 
 import { authenticatedApiFetch } from "@/lib/api-client"
+import { Button } from "@workspace/ui/components/button"
+import { ProgressThread } from "@workspace/ui/components/progress-thread"
 
 import { LearningPlayer } from "./learning-player"
+import { DiscussionPanel } from "./discussion-panel"
 
 interface LearnPageProps {
   params: Promise<{
@@ -18,20 +23,38 @@ export default async function LearnPage({ params }: LearnPageProps) {
     `/learning/courses/${courseId}`,
     { cache: "no-store" },
   )
+  const discussion = await authenticatedApiFetch<DiscussionListResponse>(
+    `/community/courses/${courseId}/discussions`,
+    { cache: "no-store" },
+  )
 
   return (
-    <main className="min-h-screen bg-background px-6 py-10 text-foreground">
+    <main className="min-h-screen bg-background px-4 py-8 text-foreground sm:px-6 sm:py-12">
       <section className="mx-auto max-w-6xl">
-        <div className="mb-8 h-px w-28 bg-primary" />
-        <p className="font-mono text-sm text-muted-foreground">
-          Course {payload.course.slug}
-        </p>
-        <h1 className="mt-3 text-4xl tracking-tight">{payload.course.title}</h1>
+        <ProgressThread className="mb-8" />
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+          <div className="min-w-0">
+            <p className="font-mono text-xs tracking-wide text-muted-foreground">
+              Course {payload.course.slug}
+            </p>
+            <h1 className="mt-3 font-heading text-4xl leading-[1.1] tracking-tight sm:text-5xl">
+              {payload.course.title}
+            </h1>
+          </div>
+          <Button className="w-fit" asChild variant="outline">
+            <Link href="/dashboard/student">
+              <ArrowLeft className="size-3.5" />
+              Dashboard
+            </Link>
+          </Button>
+        </div>
+
         <LearningPlayer
           course={payload.course}
           learnerEmail={payload.learner.email}
           sections={payload.sections}
         />
+        <DiscussionPanel courseId={courseId} discussion={discussion} />
       </section>
     </main>
   )

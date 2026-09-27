@@ -198,7 +198,7 @@ export async function uploadPaymentProofScreenshot({
   )
 
   const response = await fetch(uploadUrl, {
-    body,
+    body: body as unknown as BodyInit,
     headers: {
       Authorization: `Bearer ${storage.serviceRoleKey}`,
       "Content-Type": contentType,
@@ -260,13 +260,15 @@ export async function uploadCertificatePdf({
 
 export async function uploadLectureMaterial({
   base64,
+  body: providedBody,
   contentType,
   courseId,
   fileName,
   kind,
   lectureId,
 }: {
-  base64: string
+  base64?: string
+  body?: Buffer
   contentType: string
   courseId: string
   fileName: string
@@ -292,7 +294,7 @@ export async function uploadLectureMaterial({
     )
   }
 
-  const body = Buffer.from(base64, "base64")
+  const body = providedBody ?? Buffer.from(base64 ?? "", "base64")
 
   if (body.length > maxLectureMaterialBytes) {
     throw new HttpError(400, "Lecture material must be 25 MB or smaller.")
@@ -319,7 +321,7 @@ export async function uploadLectureMaterial({
     storage.url,
   )
   const response = await fetch(uploadUrl, {
-    body,
+    body: body as unknown as BodyInit,
     headers: {
       Authorization: `Bearer ${storage.serviceRoleKey}`,
       "Content-Type": contentType,

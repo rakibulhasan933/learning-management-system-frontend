@@ -430,6 +430,63 @@ NEXT_PUBLIC_BACKEND_API_URL=
 10. Remaining features per "Phase 2 / Advanced Features" above
 
 ## Progress Log
+- Enrolled students no longer see the enroll/payment flow on a course they already own.
+  `GET /courses/:slug/enrollment-status` (`services/backend/src/routes/courses.ts`) returns
+  `isEnrolled`, `enrollmentStatus`, and the order that still needs the student's attention
+  (preferring `pending_verification`, then `rejected`, then most recent). The course detail
+  page branches on it: active enrollment renders "Continue learning" → `/learn/[courseId]`,
+  a pending order renders "Payment under review", and a rejected order renders the
+  resubmit-proof path. The open order is forced to `null` when enrolled so a stale order
+  can never mask the enrolled state.
+- Fixed the root cause behind that bug: on a *public* page an expired 15-minute access token
+  fell through to `optionalAuthenticatedApiFetch` → `refreshAccessToken()` → `cookies().set()`,
+  which throws in a Server Component. Because the backend revokes the presented refresh token
+  *before* the cookie write fails, this silently destroyed the session and degraded a signed-in
+  viewer to anonymous. `updateSession` (`apps/web/lib/auth/middleware.ts`, reached via
+  `apps/web/proxy.ts` — Next.js 16 renamed `middleware.ts` → `proxy.ts`) now renews the access
+  token at the edge for public routes too, and the refresh fallback was removed from
+  `optionalAuthenticatedApiFetch`.
+- Duplicate-submission risk closed app-wide. `apps/web/components/submit-button.tsx` wraps
+  `useFormStatus` and accepts the full `Button` prop surface plus a `pendingLabel`, rendering a
+  disabled button with a `Loader2` spinner while its form submits. Applied to enroll, payment
+  proof, quiz and assignment submit, admin approve/reject payment and payout, course create and
+  delete, instructor create, user suspend/reinstate, uploads, login/signup, and sign-out. Native
+  GET filter forms cannot use `useFormStatus`, so `apps/web/app/courses/course-filter-form.tsx`
+  drives the catalog filters through `useTransition` + `router.push` to get a real pending state.
+- Design system pass. The three specified fonts are now actually loaded in `app/layout.tsx`
+  (Fraunces, Inter, IBM Plex Mono) — previously only Figtree was wired, so `font-heading` and
+  `font-mono` silently fell back. `font-display` was found to be a dead class that Tailwind never
+  generated (the theme defines the utility as `font-heading`), meaning ~19 headings across 8 files
+  had never rendered in Fraunces; all were corrected. 353 hardcoded hex classes across the six
+  admin pages were replaced with design tokens, `uppercase`/`tracking-[…]` were removed per the
+  sentence-case rule, the landing page was rebuilt (nested `<a>` inside `<button>` → `Button
+  render={<Link/>}`, ALL-CAPS copy → sentence case, `rounded-none` dropped, progress-thread motif
+  added), and admin raw inputs/selects/textareas and hand-rolled link-buttons were replaced with
+  shadcn components. `apps/web/app` and `apps/web/components` now contain zero hex literals, zero
+  `shadow-`/`bg-gradient`/`drop-shadow`, and zero raw `<button>` elements.
+- The learning video player was rebuilt as `apps/web/app/learn/[courseId]/lecture-player.tsx`:
+  play/pause, ±10s skip, a scrub bar rendered as the progress-thread motif (thin brass line that
+  thickens on hover, buffered range behind the played range, pointer capture for drag-scrub),
+  volume, a playback-speed menu, fullscreen, mono time display, keyboard shortcuts
+  (space/k, arrows, m, f), hover-reveal with idle auto-hide, a buffering spinner, and
+  touch-sized hit targets. `learning-player.tsx` retains ownership of the `<video>` ref, so
+  resume position, 15-second auto-save, mark-complete, and auto-complete-on-end are unchanged.
+  The watermark overlay — the learner's email at 20% opacity, repositioned every 8–12s — is
+  carried over verbatim.
+- Validation for this change set: `pnpm typecheck` (5/5 workspaces) and `pnpm lint` (5/5) pass.
+  `pnpm build` could not be run due to a temporary classifier outage. Manual verification of the
+  three Bug-1 branches (enrolled → "Continue learning", pending → "Payment under review",
+  rejected → resubmit path) and the four Task-4 player behaviors was not possible; only an admin
+  seed script exists, so no enrolled student, active order, or course fixtures are available
+  without hand-authoring database rows.
+- Markdown editing and rendering are now wired into the course builder: `@uiw/react-md-editor`
+  is installed for the web workspace, `packages/ui` exposes a reusable `MarkdownEditor`
+  wrapper with dark theme overrides for the ink-navy/brass system, the course form and
+  outline editor now use markdown inputs for course/section/lecture descriptions, and
+  the public course detail page renders course descriptions through a sanitized
+  markdown viewer instead of raw text.
+- Validation completed for the markdown pass: `pnpm typecheck`, `pnpm lint`, and
+  `pnpm build` all pass after the editor, renderer, and styling updates.
 - Monorepo scaffold is in place with pnpm workspaces, Turborepo, shared TypeScript,
   ESLint, Tailwind/config packages, `apps/web`, `services/backend`, `packages/ui`,
   `packages/db`, and `packages/types`.
@@ -506,6 +563,13 @@ NEXT_PUBLIC_BACKEND_API_URL=
   and time-limited presigned GET URLs through `GET /lectures/:id/video-url`. The video
   URL resolver is provider-aware and currently supports `video_provider = 'r2'`, with
   unsupported providers returning a clear not-implemented response for future migration.
+- Video upload flow was hardened after the initial R2 rollout: the instructor upload
+  control now dispatches the upload action inside `startTransition`, the shared input
+  wrapper leaves `type="file"` uncontrolled so browser file inputs can reset cleanly,
+  and the leftover upload debug logs were removed. The upload path now avoids the
+  browser-to-R2 CORS failure mode while preserving the server-side R2 upload flow.
+- Validation completed for the upload-control fix: `pnpm typecheck`, `pnpm lint`, and
+  `pnpm build` all pass after the file-input and transition cleanup.
 - UploadThing is now wired for image uploads only. The web app hosts a typed
   `/api/uploadthing` route with a single `imageUploader` file route limited to JPG, PNG,
   and WEBP images up to 4 MB. The instructor course builder now uses an UploadThing
@@ -522,6 +586,9 @@ NEXT_PUBLIC_BACKEND_API_URL=
   a custom video player on `/learn/[courseId]` with signed video URL loading, custom
   play/progress controls, and the mandatory dynamic low-opacity email watermark that
   repositions every 8-12 seconds.
+- Dashboard shell navigation now defaults open on desktop and can be collapsed into a
+  compact left rail with icon-only navigation, while the mobile sheet navigation keeps
+  the full menu layout unchanged.
 - Video access control is enforced server-side: only users with an active enrollment
   for the lecture's course can fetch a signed lecture video URL. The web player never
   reads raw R2 URLs from the database.
@@ -529,6 +596,12 @@ NEXT_PUBLIC_BACKEND_API_URL=
   `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET_NAME`, and a
   bucket CORS rule allowing browser PUT uploads from the web origin are required to
   verify actual upload/playback against R2.
+- Instructor video uploads now use a browser-to-backend XHR flow so the UI can show
+  live MB progress and support pause/abort during upload while the backend writes the
+  bytes to R2 and saves the lecture ref server-side. The shared file input wrapper now
+  leaves `type="file"` uncontrolled so uploads reset cleanly after completion.
+- Validation completed for the upload-progress change set: `pnpm typecheck`,
+  `pnpm lint`, and `pnpm build` all pass after the XHR progress/pause rollout.
 - Quiz MVP is implemented for MCQ quizzes only. The Drizzle schema now includes
   `quizzes`, `quiz_questions`, `quiz_options`, and `quiz_attempts`, with each quiz
   attached to exactly one section or lecture, normalized MCQ options with
@@ -709,6 +782,16 @@ NEXT_PUBLIC_BACKEND_API_URL=
 - Instructor dashboard verification completed this session: `pnpm typecheck`,
   `pnpm lint`, and `pnpm build` all pass after adding the instructor analytics and
   payout workflow.
+- Responsive web pass completed across the main LMS surfaces: the dashboard shell now
+  uses a mobile drawer/sidebar pattern, public and auth pages use smaller responsive
+  paddings and text scales, course detail and enrollment layouts stack cleanly on
+  narrow screens, admin user and instructor student rosters switch to mobile card
+  layouts, and the learning/preview video players keep controls and watermark text
+  usable at phone widths. A few dense analytics and builder areas still rely on
+  intentional card/scroll patterns for long data sets, but the pages no longer depend
+  on fixed desktop-only widths.
+- Responsive verification completed: `pnpm typecheck`, `pnpm lint`, and `pnpm build`
+  all pass after the layout updates.
 - Admin user management now supports direct instructor creation from the backend-owned
   user store, and `services/backend/src/scripts/seed-admin.ts` seeds or updates a
   single verified admin account from `SEED_ADMIN_EMAIL`, `SEED_ADMIN_PASSWORD`, and
@@ -722,3 +805,16 @@ NEXT_PUBLIC_BACKEND_API_URL=
   the ink-navy sidebar with brass-accent active states, sentence-case nav labels,
   role-specific links, user name/email, logout action, and a mobile collapsible
   drawer for admin, instructor, and student dashboards.
+- Frontend UI/UX consistency pass completed: the shared floating-label field pattern
+  now lives in `packages/ui` (`FloatingInput` and `FloatingTextarea`), the app-local
+  wrapper re-exports the shared component, and the auth login/signup flows were moved
+  to RHF + Zod client forms with field-level validation, distinct server error
+  handling, resend-verification actions, and disabled loading submit states.
+- Key frontend screens were brought onto the shadcn primitives used elsewhere in the
+  design system, including the reset-password flow, profile settings, course
+  enrollment, pending payments, payout requests, instructor course forms, course
+  outline builder, assignment/quiz builders, student assignment/quiz panels, upload
+  controls, and the learning player controls.
+- Verification for this pass completed successfully: `pnpm typecheck`, `pnpm lint`,
+  and `pnpm build` all pass after moving auth form state out of the `use server`
+  module and forwarding refs from the shared input/textarea primitives.

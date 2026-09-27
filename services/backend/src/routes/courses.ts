@@ -2,6 +2,7 @@ import { Router, type Router as ExpressRouter } from "express"
 import { z } from "zod"
 import type {
   CourseDetailDto,
+  CourseEnrollmentStatusResponse,
   CourseListResponse,
   CourseSummaryDto,
 } from "@workspace/types"
@@ -12,17 +13,21 @@ import {
   count,
   courses,
   desc,
+  enrollments,
   eq,
   ilike,
-  lectures,
+  modules,
   or,
+  orders,
   profiles,
   sections,
+  videos,
   sql,
 } from "@workspace/db"
 
 import { asyncHandler, HttpError } from "../http/errors.js"
 import { db } from "../lib/database.js"
+import { optionalAuth } from "../middleware/auth.js"
 
 export const coursesRouter: ExpressRouter = Router()
 
@@ -143,6 +148,77 @@ coursesRouter.get(
 )
 
 coursesRouter.get(
+  "/:slug/enrollment-status",
+  optionalAuth,
+  asyncHandler(async (request, response) => {
+    const params = courseSlugParamsSchema.parse(request.params)
+    const [course] = await db
+      .select({ id: courses.id })
+      .from(courses)
+      .where(and(eq(courses.slug, params.slug), eq(courses.status, "published")))
+      .limit(1)
+
+    if (!course) {
+      throw new HttpError(404, "Course not found.")
+    }
+
+    const profileId = request.auth?.profile.id ?? null
+
+    if (!profileId) {
+      response.status(200).json({
+        courseId: course.id,
+        enrollmentStatus: null,
+        isAuthenticated: false,
+        isEnrolled: false,
+        latestOrder: null,
+      } satisfies CourseEnrollmentStatusResponse)
+
+      return
+    }
+
+    const [enrollment] = await db
+      .select({ status: enrollments.status })
+      .from(enrollments)
+      .where(
+        and(
+          eq(enrollments.courseId, course.id),
+          eq(enrollments.userId, profileId),
+        ),
+      )
+      .orderBy(desc(enrollments.enrolledAt))
+      .limit(1)
+
+    const orderRows = await db
+      .select({
+        id: orders.id,
+        rejectionReason: orders.rejectionReason,
+        status: orders.status,
+      })
+      .from(orders)
+      .where(
+        and(eq(orders.courseId, course.id), eq(orders.userId, profileId)),
+      )
+      .orderBy(desc(orders.createdAt))
+
+    // A student can retry after a rejection, so surface the order that still
+    // needs the student's attention ahead of older, closed ones.
+    const latestOrder =
+      orderRows.find((order) => order.status === "pending_verification") ??
+      orderRows.find((order) => order.status === "rejected") ??
+      orderRows[0] ??
+      null
+
+    response.status(200).json({
+      courseId: course.id,
+      enrollmentStatus: enrollment?.status ?? null,
+      isAuthenticated: true,
+      isEnrolled: enrollment?.status === "active",
+      latestOrder,
+    } satisfies CourseEnrollmentStatusResponse)
+  }),
+)
+
+coursesRouter.get(
   "/:slug",
   asyncHandler(async (request, response) => {
     const params = courseSlugParamsSchema.parse(request.params)
@@ -182,17 +258,36 @@ coursesRouter.get(
 
     const lectureRows = await db
       .select({
-        durationSeconds: lectures.durationSeconds,
-        id: lectures.id,
-        isPreview: lectures.isPreview,
-        position: lectures.position,
-        sectionId: lectures.sectionId,
-        title: lectures.title,
+        durationSeconds: videos.durationSeconds,
+        id: videos.id,
+        isPreview: videos.isPreview,
+        position: videos.position,
+        moduleId: videos.moduleId,
+        milestoneId: modules.milestoneId,
+        title: videos.title,
       })
-      .from(lectures)
-      .innerJoin(sections, eq(lectures.sectionId, sections.id))
-      .where(and(eq(sections.courseId, course.id), eq(lectures.isPublished, true)))
-      .orderBy(asc(sections.position), asc(lectures.position))
+      .from(videos)
+      .innerJoin(modules, eq(videos.moduleId, modules.id))
+      .innerJoin(sections, eq(modules.milestoneId, sections.id))
+      .where(and(eq(sections.courseId, course.id), eq(videos.isPublished, true)))
+      .orderBy(asc(sections.position), asc(modules.position), asc(videos.position))
+
+    const moduleRows = await db
+      .select({
+        contentTypes: modules.contentTypes,
+        durationSeconds: sql<number>`coalesce(sum(${videos.durationSeconds}), 0)`,
+        id: modules.id,
+        milestoneId: modules.milestoneId,
+        position: modules.position,
+        title: modules.title,
+        videoCount: count(videos.id),
+      })
+      .from(modules)
+      .innerJoin(sections, eq(modules.milestoneId, sections.id))
+      .leftJoin(videos, and(eq(videos.moduleId, modules.id), eq(videos.isPublished, true)))
+      .where(eq(sections.courseId, course.id))
+      .groupBy(modules.id)
+      .orderBy(asc(modules.position))
 
     const payload: CourseDetailDto = {
       ...toCourseSummary(course),
@@ -200,13 +295,23 @@ coursesRouter.get(
       sections: sectionRows.map((section) => ({
         id: section.id,
         lectures: lectureRows
-          .filter((lecture) => lecture.sectionId === section.id)
+          .filter((lecture) => section.id === lecture.milestoneId)
           .map((lecture) => ({
             durationSeconds: lecture.durationSeconds,
             id: lecture.id,
             isPreview: lecture.isPreview,
             position: lecture.position,
             title: lecture.title,
+          })),
+        modules: moduleRows
+          .filter((module) => module.milestoneId === section.id)
+          .map((module) => ({
+            contentTypes: Array.from(new Set(module.contentTypes)) as Array<"video" | "pdf" | "quiz" | "assignment">,
+            durationSeconds: Number(module.durationSeconds ?? 0),
+            id: module.id,
+            position: module.position,
+            title: module.title,
+            videoCount: Number(module.videoCount),
           })),
         position: section.position,
         title: section.title,

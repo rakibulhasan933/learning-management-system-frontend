@@ -1,16 +1,22 @@
+import Link from "next/link"
+import { AlertTriangle, ArrowLeft } from "lucide-react"
 import type {
   InstructorCourseDto,
-  InstructorCourseOutlineResponse,
+  InstructorCourseStructureResponse,
 } from "@workspace/types"
 
 import { authenticatedApiFetch } from "@/lib/api-client"
+import { SubmitButton } from "@/components/submit-button"
+import { Card, CardContent } from "@workspace/ui/components/card"
+import { ProgressThread } from "@workspace/ui/components/progress-thread"
 
 import {
   deleteInstructorCourseAction,
   updateInstructorCourseAction,
 } from "../../actions"
-import { CourseOutlineEditor } from "../../course-outline-editor"
 import { CourseForm } from "../../course-form"
+import { CourseEditWorkspace } from "./course-edit-workspace"
+import { MilestoneModuleBuilder } from "../../milestone-module-builder-v2"
 
 export const dynamic = "force-dynamic"
 
@@ -18,56 +24,85 @@ interface EditInstructorCoursePageProps {
   params: Promise<{
     id: string
   }>
+  searchParams?: Promise<{
+    step?: "details" | "content" | "settings"
+  }>
 }
 
 export default async function EditInstructorCoursePage({
   params,
+  searchParams,
 }: EditInstructorCoursePageProps) {
   const { id } = await params
-  const [course, outline] = await Promise.all([
+  const query = searchParams ? await searchParams : undefined
+  const [course, structure] = await Promise.all([
     authenticatedApiFetch<InstructorCourseDto>(`/instructor/courses/${id}`, {
       cache: "no-store",
     }),
-    authenticatedApiFetch<InstructorCourseOutlineResponse>(
-      `/instructor/courses/${id}/outline`,
+    authenticatedApiFetch<InstructorCourseStructureResponse>(
+      `/instructor/courses/${id}/milestones`,
       { cache: "no-store" },
     ),
   ])
 
   return (
-    <main className="min-h-screen bg-background px-6 py-10 text-foreground">
-      <section className="mx-auto max-w-4xl">
-        <div className="mb-8 h-px w-28 bg-primary" />
-        <p className="font-mono text-sm text-muted-foreground">
-          Editing {course.slug}
-        </p>
-        <h1 className="mt-3 text-4xl tracking-tight">{course.title}</h1>
-        <div className="mt-8">
-          <CourseForm
-            action={updateInstructorCourseAction}
-            course={course}
-            submitLabel="Save changes"
-          />
-        </div>
-        <div className="mt-10">
-          <CourseOutlineEditor courseId={course.id} outline={outline} />
-        </div>
-        <form
-          action={deleteInstructorCourseAction}
-          className="mt-6 border border-destructive/40 bg-destructive/10 p-5"
-        >
-          <input name="courseId" type="hidden" value={course.id} />
-          <p className="text-sm text-muted-foreground">
-            Delete this course draft and its sections. Use this only for courses
-            that should be permanently removed.
-          </p>
-          <button
-            className="mt-4 border border-destructive px-4 py-2 text-sm text-destructive"
-            type="submit"
+    <main className="min-h-screen bg-background text-foreground">
+      <section className="mx-auto grid max-w-5xl gap-5">
+        <div className="space-y-3">
+          <ProgressThread />
+          <Link
+            className="interactive-link inline-flex items-center gap-1.5 text-xs text-muted-foreground"
+            href="/dashboard/instructor/courses"
           >
-            Delete course
-          </button>
-        </form>
+            <ArrowLeft className="h-3 w-3" />
+            Back to courses
+          </Link>
+          <p className="font-mono text-sm text-muted-foreground">
+            Editing {course.slug}
+          </p>
+          <h1 className="font-heading text-3xl tracking-tight sm:text-4xl">
+            {course.title}
+          </h1>
+        </div>
+
+        <CourseEditWorkspace
+          content={<MilestoneModuleBuilder courseId={course.id} structure={structure} />}
+          details={
+              <CourseForm
+                action={updateInstructorCourseAction}
+                course={course}
+                submitLabel="Save changes"
+              />
+          }
+        settings={
+            <Card className="border-destructive/40 bg-destructive/5">
+              <CardContent className="grid gap-3 p-4 sm:p-5">
+                <div className="flex items-center gap-2">
+                  <AlertTriangle className="h-4 w-4 text-destructive" />
+                  <h3 className="font-heading text-sm font-medium text-destructive">
+                    Danger zone
+                  </h3>
+                </div>
+                <form action={deleteInstructorCourseAction} className="grid gap-3">
+                  <input name="courseId" type="hidden" value={course.id} />
+                  <p className="text-sm text-muted-foreground">
+                    Delete this course draft and its sections. Use this only for
+                    courses that should be permanently removed. This action
+                    cannot be undone.
+                  </p>
+                  <SubmitButton
+                    className="w-full sm:w-fit"
+                    pendingLabel="Deleting course..."
+                    variant="destructive"
+                  >
+                    Delete course
+                  </SubmitButton>
+                </form>
+              </CardContent>
+            </Card>
+        }
+        initialStep={query?.step ?? "details"}
+      />
       </section>
     </main>
   )

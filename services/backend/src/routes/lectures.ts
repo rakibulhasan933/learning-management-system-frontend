@@ -1,4 +1,4 @@
-import { and, courses, enrollments, eq, lectures, sections } from "@workspace/db"
+import { and, courses, enrollments, eq, lectures, modules, sections, videos } from "@workspace/db"
 import { Router, type Request, type Router as ExpressRouter } from "express"
 import { z } from "zod"
 import type { LectureVideoUrlResponse } from "@workspace/types"
@@ -17,6 +17,7 @@ export const lecturesRouter: ExpressRouter = Router()
 const lectureParamsSchema = z.object({
   id: z.string().uuid(),
 })
+const videoParamsSchema = lectureParamsSchema
 
 function parseCookies(header: string | undefined) {
   return Object.fromEntries(
@@ -125,5 +126,38 @@ lecturesRouter.get(
     }
 
     response.status(200).json(payload)
+  }),
+)
+
+lecturesRouter.get(
+  "/videos/:id/video-url",
+  asyncHandler(async (request, response) => {
+    const params = videoParamsSchema.parse(request.params)
+    const [video] = await db
+      .select({
+        courseId: courses.id,
+        courseStatus: courses.status,
+        isPreview: videos.isPreview,
+        isPublished: videos.isPublished,
+        videoProvider: videos.videoProvider,
+        videoRef: videos.videoRef,
+      })
+      .from(videos)
+      .innerJoin(modules, eq(videos.moduleId, modules.id))
+      .innerJoin(sections, eq(modules.milestoneId, sections.id))
+      .innerJoin(courses, eq(sections.courseId, courses.id))
+      .where(eq(videos.id, params.id))
+      .limit(1)
+
+    if (!video || !video.isPublished) throw new HttpError(404, "Video not found.")
+    const profileId = await getOptionalProfileId(request)
+    if (!(video.isPreview && video.courseStatus === "published")) {
+      if (!profileId) throw new HttpError(401, "Authentication is required.")
+      const [enrollment] = await db.select({ id: enrollments.id }).from(enrollments).where(and(eq(enrollments.courseId, video.courseId), eq(enrollments.userId, profileId), eq(enrollments.status, "active"))).limit(1)
+      if (!enrollment) throw new HttpError(403, "Active enrollment is required.")
+    }
+    if (!video.videoRef) throw new HttpError(404, "Video is not available.")
+    if (video.videoProvider !== "r2") throw new HttpError(501, "Video provider is not supported yet.")
+    response.status(200).json({ expiresInSeconds: 20 * 60, provider: video.videoProvider, url: await createR2PlaybackUrl(video.videoRef) })
   }),
 )

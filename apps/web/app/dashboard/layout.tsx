@@ -4,7 +4,9 @@ import type { ProfileDto } from "@workspace/types"
 
 import { authenticatedApiFetch } from "@/lib/api-client"
 
-import { DashboardShell } from "./dashboard-shell"
+import { AdminDashboardShell } from "./admin-dashboard-shell"
+import { InstructorDashboardShell } from "./instructor-dashboard-shell"
+import { StudentDashboardShell } from "./student-dashboard-shell"
 
 export const dynamic = "force-dynamic"
 
@@ -17,5 +19,13 @@ export default async function DashboardLayout({
     cache: "no-store",
   })
 
-  return <DashboardShell profile={profile}>{children}</DashboardShell>
+  if (profile.role === "admin") {
+    return <AdminDashboardShell profile={profile}>{children}</AdminDashboardShell>
+  }
+
+  if (profile.role === "instructor") {
+    return <InstructorDashboardShell profile={profile}>{children}</InstructorDashboardShell>
+  }
+
+  return <StudentDashboardShell profile={profile}>{children}</StudentDashboardShell>
 }

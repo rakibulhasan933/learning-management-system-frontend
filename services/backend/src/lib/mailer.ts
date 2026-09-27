@@ -124,23 +124,29 @@ export async function sendPasswordResetEmail({
 }
 
 export async function sendPaymentApprovedEmail({
+  amount,
   courseTitle,
   dashboardUrl,
   email,
+  referenceCode,
+  transactionId,
 }: {
+  amount: string
   courseTitle: string
   dashboardUrl: string
   email: string
+  referenceCode: string
+  transactionId: string | null
 }) {
   await sendMail({
     html: renderEmail({
-      body: `Your payment for ${courseTitle} has been approved. Enrollment is now active.`,
+      body: `Your payment for ${courseTitle} has been approved. Amount: ${amount} BDT. Reference: ${referenceCode}. Transaction ID: ${transactionId ?? "Not provided"}. Your enrollment is now active.`,
       ctaLabel: "Open dashboard",
       ctaUrl: dashboardUrl,
       title: "Payment approved",
     }),
     subject: "Your LMS payment was approved",
-    text: `Your payment for ${courseTitle} has been approved. Open your dashboard: ${dashboardUrl}`,
+    text: `Payment receipt\nCourse: ${courseTitle}\nAmount: ${amount} BDT\nReference: ${referenceCode}\nTransaction ID: ${transactionId ?? "Not provided"}\n\nYour enrollment is active. Open your dashboard: ${dashboardUrl}`,
     to: email,
   })
 }

@@ -1,7 +1,18 @@
 import Link from "next/link"
+import {
+  ArrowUpRight,
+  BookOpen,
+  CreditCard,
+  Landmark,
+  TrendingUp,
+  Users,
+} from "lucide-react"
 import type { AdminRevenueOverviewResponse } from "@workspace/types"
 
 import { authenticatedApiFetch } from "@/lib/api-client"
+import { PageHeader } from "@workspace/ui/components/page-header"
+import { StatTile } from "@workspace/ui/components/stat-tile"
+import { formatCurrency } from "@/lib/format"
 
 export const dynamic = "force-dynamic"
 
@@ -10,66 +21,113 @@ export default async function AdminDashboardPage() {
     "/admin/revenue",
     { cache: "no-store" },
   )
+
+  const { totals } = overview
+
   const panels = [
     {
       body: "Review roles and suspend or reactivate accounts.",
       href: "/dashboard/admin/users",
-      label: `${overview.totals.activeUsers} active`,
+      label: `${totals.activeUsers} active`,
       title: "User management",
+      icon: Users,
     },
     {
       body: "Approve submitted instructor courses before publishing.",
       href: "/dashboard/admin/courses",
-      label: `${overview.totals.pendingCourses} pending`,
+      label: `${totals.pendingCourses} pending`,
       title: "Course approval",
+      icon: BookOpen,
     },
     {
       body: "Track paid revenue, pending revenue, and payment-method totals.",
       href: "/dashboard/admin/revenue",
-      label: `BDT ${overview.totals.paidRevenue.toFixed(2)}`,
+      label: formatCurrency(totals.paidRevenue),
       title: "Revenue overview",
-    },
-    {
-      body: "Review submitted transaction details and activate enrollments.",
-      href: "/dashboard/admin/payments",
-      label: `${overview.totals.pendingOrders} pending`,
-      title: "Manual payments",
+      icon: TrendingUp,
     },
     {
       body: "Review instructor payout requests, approve them, and mark completed payouts as paid.",
       href: "/dashboard/admin/payouts",
-      label: "review queue",
+      label: "Review queue",
       title: "Instructor payouts",
+      icon: Landmark,
     },
   ]
 
   return (
-    <main className="min-h-screen bg-background px-6 py-10 text-foreground">
-      <section className="mx-auto max-w-6xl">
-        <div className="mb-8 h-px w-28 bg-primary" />
-        <p className="font-mono text-sm text-muted-foreground">Admin dashboard</p>
-        <h1 className="mt-3 text-4xl tracking-tight">Platform control center</h1>
-        <p className="mt-4 max-w-2xl text-sm leading-6 text-muted-foreground">
-          Manage users, review submitted courses, monitor revenue, and process
-          manual payments from the backend-owned control surface.
-        </p>
+    <>
+      <PageHeader
+        eyebrow="Admin dashboard"
+        lede="Manage users, review submitted courses, monitor revenue, and process manual payments from one place."
+        title="Platform control center"
+      />
 
-        <div className="mt-8 grid gap-4 md:grid-cols-2">
-          {panels.map((panel) => (
+      <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <StatTile
+          hint={`${totals.paidOrders} paid orders`}
+          icon={<TrendingUp />}
+          label="Paid revenue"
+          tone="primary"
+          value={formatCurrency(totals.paidRevenue)}
+        />
+        <StatTile
+          hint={`${totals.pendingOrders} awaiting review`}
+          icon={<CreditCard />}
+          label="Pending revenue"
+          value={formatCurrency(totals.pendingRevenue)}
+        />
+        <StatTile
+          hint={`${totals.publishedCourses} published courses`}
+          icon={<BookOpen />}
+          label="Active enrollments"
+          value={totals.activeEnrollments}
+        />
+        <StatTile
+          hint={
+            totals.suspendedUsers > 0
+              ? `${totals.suspendedUsers} suspended`
+              : "None suspended"
+          }
+          icon={<Users />}
+          label="Active users"
+          value={totals.activeUsers}
+        />
+      </div>
+
+      <div className="mt-6 grid gap-5 sm:grid-cols-2">
+        {panels.map((panel, index) => {
+          const Icon = panel.icon
+          return (
             <Link
-              className="block border border-border bg-card p-5 hover:border-primary"
+              className="group interactive-card relative flex flex-col justify-between rounded-2xl bg-card p-6 ring-1 ring-foreground/10"
               href={panel.href}
               key={panel.href}
             >
-              <p className="font-mono text-sm text-primary">{panel.label}</p>
-              <h2 className="mt-2 text-2xl">{panel.title}</h2>
-              <p className="mt-3 text-sm leading-6 text-muted-foreground">
-                {panel.body}
+              <div>
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <span className="font-mono text-xs text-muted-foreground">
+                      {index + 1}
+                    </span>
+                    <Icon className="size-4 text-primary" />
+                  </div>
+                  <ArrowUpRight className="size-4 text-muted-foreground transition-colors group-hover:text-primary" />
+                </div>
+                <h2 className="mt-4 font-heading text-xl tracking-tight sm:text-2xl">
+                  {panel.title}
+                </h2>
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                  {panel.body}
+                </p>
+              </div>
+              <p className="mt-6 font-mono text-sm text-primary">
+                {panel.label}
               </p>
             </Link>
-          ))}
-        </div>
-      </section>
-    </main>
+          )
+        })}
+      </div>
+    </>
   )
 }

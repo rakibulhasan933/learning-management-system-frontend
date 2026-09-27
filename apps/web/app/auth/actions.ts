@@ -14,6 +14,22 @@ import {
 } from "@/lib/api-client"
 import { getDashboardPath } from "@/lib/auth/dashboard"
 
+export interface AuthFormState {
+  fieldErrors: {
+    email?: string
+    fullName?: string
+    password?: string
+  }
+  formError: string | null
+  unverifiedEmail: string | null
+}
+
+const defaultAuthFormState: AuthFormState = {
+  fieldErrors: {},
+  formError: null,
+  unverifiedEmail: null,
+}
+
 function redirectWithError(pathname: string, message: string): never {
   const separator = pathname.includes("?") ? "&" : "?"
 
@@ -95,6 +111,60 @@ async function postAuthSession(path: string, body: unknown) {
   return payload as AuthSessionDto
 }
 
+function createAuthFormState(
+  overrides: Partial<AuthFormState> = {},
+): AuthFormState {
+  return {
+    ...defaultAuthFormState,
+    ...overrides,
+    fieldErrors: {
+      ...defaultAuthFormState.fieldErrors,
+      ...overrides.fieldErrors,
+    },
+  }
+}
+
+function mapLoginError(error: unknown, email: string): AuthFormState {
+  if (error instanceof ApiClientError) {
+    if (error.status === 403 && error.message.toLowerCase().includes("verify")) {
+      return createAuthFormState({
+        formError: error.message,
+        unverifiedEmail: email,
+      })
+    }
+
+    if (error.status === 401) {
+      return createAuthFormState({
+        fieldErrors: {
+          password: "Invalid email or password.",
+        },
+      })
+    }
+  }
+
+  return createAuthFormState({
+    formError:
+      error instanceof Error ? error.message : "Sign in could not be completed.",
+  })
+}
+
+function mapSignupError(error: unknown): AuthFormState {
+  if (error instanceof ApiClientError && error.status === 409) {
+    return createAuthFormState({
+      fieldErrors: {
+        email: "An account with this email already exists.",
+      },
+    })
+  }
+
+  return createAuthFormState({
+    formError:
+      error instanceof Error
+        ? error.message
+        : "Account could not be created.",
+  })
+}
+
 export async function signInWithPasswordAction(formData: FormData) {
   const email = getRequiredString(formData, "email")
   const password = getRequiredString(formData, "password")
@@ -127,6 +197,39 @@ export async function signInWithPasswordAction(formData: FormData) {
       "/auth/login",
       error instanceof Error ? error.message : "Sign in failed.",
     )
+  }
+}
+
+export async function signInWithPasswordFormAction(
+  _previousState: AuthFormState,
+  formData: FormData,
+): Promise<AuthFormState> {
+  const email = getRequiredString(formData, "email")
+  const password = getRequiredString(formData, "password")
+  const next = getRequiredString(formData, "next")
+
+  if (!email) {
+    return createAuthFormState({
+      fieldErrors: { email: "Email is required." },
+    })
+  }
+
+  if (!password) {
+    return createAuthFormState({
+      fieldErrors: { password: "Password is required." },
+    })
+  }
+
+  try {
+    const session = await postAuthSession("/auth/login", { email, password })
+
+    redirect(next ?? getDashboardPath(session.profile.role))
+  } catch (error) {
+    if (isNextRedirectError(error)) {
+      throw error
+    }
+
+    return mapLoginError(error, email)
   }
 }
 
@@ -197,6 +300,53 @@ export async function signUpWithPasswordAction(formData: FormData) {
       "/auth/signup",
       error instanceof Error ? error.message : "Account could not be created.",
     )
+  }
+
+  redirect("/auth/verify")
+}
+
+export async function signUpWithPasswordFormAction(
+  _previousState: AuthFormState,
+  formData: FormData,
+): Promise<AuthFormState> {
+  const email = getRequiredString(formData, "email")
+  const password = getRequiredString(formData, "password")
+  const fullName = getRequiredString(formData, "fullName")
+  const origin = await getOrigin()
+
+  if (!email) {
+    return createAuthFormState({
+      fieldErrors: { email: "Email is required." },
+    })
+  }
+
+  if (!fullName) {
+    return createAuthFormState({
+      fieldErrors: { fullName: "Full name is required." },
+    })
+  }
+
+  if (!password) {
+    return createAuthFormState({
+      fieldErrors: { password: "Password is required." },
+    })
+  }
+
+  try {
+    await publicApiFetch("/auth/signup", {
+      body: JSON.stringify({
+        email,
+        fullName,
+        origin,
+        password,
+      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      method: "POST",
+    })
+  } catch (error) {
+    return mapSignupError(error)
   }
 
   redirect("/auth/verify")

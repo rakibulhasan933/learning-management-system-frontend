@@ -76,6 +76,7 @@ export function toInstructorAssignmentDto({
     instructions: assignment.instructions,
     isPublished: assignment.isPublished,
     lectureId: assignment.lectureId,
+    moduleId: assignment.moduleId,
     maxScore: assignment.maxScore,
     sectionId: assignment.sectionId,
     submissions: submissions
@@ -103,6 +104,7 @@ function toStudentAssignmentDto({
     id: assignment.id,
     instructions: assignment.instructions,
     lectureId: assignment.lectureId,
+    moduleId: assignment.moduleId,
     maxScore: assignment.maxScore,
     sectionId: assignment.sectionId,
     submission: submission ? toStudentSubmissionDto(submission) : null,
@@ -178,6 +180,7 @@ export async function saveAssignmentForTarget({
   courseId,
   input,
   lectureId,
+  moduleId,
   sectionId,
 }: {
   courseId: string
@@ -189,6 +192,7 @@ export async function saveAssignmentForTarget({
     title: string
   }
   lectureId?: string
+  moduleId?: string
   sectionId?: string
 }) {
   const existing = await db
@@ -197,7 +201,9 @@ export async function saveAssignmentForTarget({
     .where(
       lectureId
         ? eq(assignments.lectureId, lectureId)
-        : eq(assignments.sectionId, sectionId!),
+        : moduleId
+          ? eq(assignments.moduleId, moduleId)
+          : eq(assignments.sectionId, sectionId!),
     )
     .limit(1)
   const [assignment] =
@@ -221,6 +227,7 @@ export async function saveAssignmentForTarget({
             instructions: input.instructions,
             isPublished: input.isPublished,
             lectureId: lectureId ?? null,
+            moduleId: moduleId ?? null,
             maxScore: input.maxScore,
             sectionId: sectionId ?? null,
             title: input.title,

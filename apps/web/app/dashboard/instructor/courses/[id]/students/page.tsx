@@ -1,22 +1,52 @@
 import Link from "next/link"
+import {
+  ArrowLeft,
+  BookOpen,
+  CheckCircle2,
+  TrendingUp,
+  UserCheck,
+  Users,
+} from "lucide-react"
 import type { InstructorCourseStudentsResponse } from "@workspace/types"
 
 import { authenticatedApiFetch } from "@/lib/api-client"
+import { Button } from "@workspace/ui/components/button"
+import { Card, CardContent } from "@workspace/ui/components/card"
+import { EmptyState } from "@workspace/ui/components/empty-state"
+import { PageHeader } from "@workspace/ui/components/page-header"
+import { ProgressThread } from "@workspace/ui/components/progress-thread"
+import { StatTile } from "@workspace/ui/components/stat-tile"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@workspace/ui/components/table"
+import { EnrollmentStatusPill } from "@/components/status-pill"
+import { formatDate } from "@/lib/format"
 
 export const dynamic = "force-dynamic"
-
-function formatCurrency(value: number) {
-  return `BDT ${value.toFixed(2)}`
-}
-
-function statusLabel(status: string) {
-  return status.replaceAll("_", " ")
-}
 
 interface InstructorCourseStudentsPageProps {
   params: Promise<{
     id: string
   }>
+}
+
+/** Both the stacked and tabulated views render from this one shape. */
+interface StudentRow {
+  id: string
+  email: string
+  name: string
+  status: string
+  completedLectures: number
+  totalLectures: number
+  completionRate: number
+  lastWatched: string
+  completedAt: string
+  enrolled: string
 }
 
 export default async function InstructorCourseStudentsPage({
@@ -28,155 +58,169 @@ export default async function InstructorCourseStudentsPage({
     { cache: "no-store" },
   )
 
+  const metrics = [
+    {
+      icon: <Users />,
+      label: "Enrollments",
+      value: response.metrics.enrollmentCount,
+    },
+    {
+      icon: <UserCheck />,
+      label: "Active",
+      value: response.metrics.activeEnrollmentCount,
+    },
+    {
+      icon: <CheckCircle2 />,
+      label: "Completed",
+      value: response.metrics.completedEnrollmentCount,
+    },
+    {
+      icon: <TrendingUp />,
+      label: "Completion rate",
+      meter: response.metrics.completionRate,
+      value: `${response.metrics.completionRate}%`,
+    },
+    {
+      icon: <BookOpen />,
+      label: "Lectures",
+      value: response.metrics.totalLectureCount,
+    },
+  ]
+
+  const rows: StudentRow[] = response.students.map((student) => ({
+    id: student.enrollmentId,
+    email: student.email,
+    name: student.fullName ?? "No name",
+    status: student.enrollmentStatus,
+    completedLectures: student.completedLectureCount,
+    totalLectures: student.totalLectureCount,
+    completionRate: student.completionRate,
+    lastWatched: student.lastWatchedAt
+      ? formatDate(student.lastWatchedAt)
+      : "No progress yet",
+    completedAt: student.completedAt
+      ? formatDate(student.completedAt)
+      : "Not completed",
+    enrolled: formatDate(student.enrolledAt),
+  }))
+
   return (
-    <main className="min-h-screen bg-background px-6 py-10 text-foreground">
-      <section className="mx-auto max-w-6xl">
-        <div className="mb-8 h-px w-28 bg-primary" />
-        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-          <div>
-            <p className="font-mono text-sm text-muted-foreground">
-              Instructor dashboard
-            </p>
-            <h1 className="mt-3 text-4xl tracking-tight">{response.course.title}</h1>
-            <p className="mt-4 max-w-2xl text-sm leading-6 text-muted-foreground">
-              Student roster, enrollment status, and completion progress for this
-              course.
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-3">
-            <Link
-              className="border border-border px-4 py-2 text-sm text-foreground"
-              href="/dashboard/instructor"
-            >
-              Back to dashboard
-            </Link>
-            <Link
-              className="border border-primary px-4 py-2 text-sm text-primary"
-              href={`/dashboard/instructor/courses/${response.course.id}/edit`}
-            >
-              Manage course
-            </Link>
-          </div>
-        </div>
+    <>
+      <PageHeader
+        eyebrow="Instructor dashboard"
+        lede="Student roster, enrollment status, and completion progress for this course."
+        title={response.course.title}
+      />
 
-        <div className="mt-8 grid gap-4 md:grid-cols-3 xl:grid-cols-6">
-          <div className="border border-border bg-card p-5">
-            <p className="font-mono text-xs text-muted-foreground">
-              Enrollments
-            </p>
-            <p className="mt-3 text-2xl">{response.metrics.enrollmentCount}</p>
-          </div>
-          <div className="border border-border bg-card p-5">
-            <p className="font-mono text-xs text-muted-foreground">
-              Active
-            </p>
-            <p className="mt-3 text-2xl">{response.metrics.activeEnrollmentCount}</p>
-          </div>
-          <div className="border border-border bg-card p-5">
-            <p className="font-mono text-xs text-muted-foreground">
-              Completed
-            </p>
-            <p className="mt-3 text-2xl">
-              {response.metrics.completedEnrollmentCount}
-            </p>
-          </div>
-          <div className="border border-border bg-card p-5">
-            <p className="font-mono text-xs text-muted-foreground">
-              Completion rate
-            </p>
-            <p className="mt-3 text-2xl">{response.metrics.completionRate}%</p>
-          </div>
-          <div className="border border-border bg-card p-5">
-            <p className="font-mono text-xs text-muted-foreground">Revenue</p>
-            <p className="mt-3 text-2xl">
-              {formatCurrency(response.metrics.revenue)}
-            </p>
-          </div>
-          <div className="border border-border bg-card p-5">
-            <p className="font-mono text-xs text-muted-foreground">
-              Lectures
-            </p>
-            <p className="mt-3 text-2xl">{response.metrics.totalLectureCount}</p>
-          </div>
-        </div>
+      <div className="mt-6 flex flex-wrap items-center gap-3">
+        <Button asChild variant="outline">
+          <Link href="/dashboard/instructor">
+            <ArrowLeft className="size-3.5" />
+            Dashboard
+          </Link>
+        </Button>
+        <Button asChild>
+          <Link href={`/dashboard/instructor/courses/${response.course.id}/edit`}>
+            Manage course
+          </Link>
+        </Button>
+      </div>
 
-        <section className="mt-8 border border-border bg-card p-5">
+      <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+        {metrics.map((metric) => (
+          <StatTile
+            icon={metric.icon}
+            key={metric.label}
+            label={metric.label}
+            meter={metric.meter}
+            value={metric.value}
+          />
+        ))}
+      </div>
+
+      <Card className="mt-6">
+        <CardContent className="space-y-5">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
-              <p className="font-mono text-sm text-muted-foreground">
+              <p className="font-mono text-xs tracking-wide text-muted-foreground">
                 Student list
               </p>
-              <h2 className="mt-2 text-2xl">Enrolled students</h2>
+              <h2 className="mt-2 font-heading text-2xl tracking-tight">
+                Enrolled students
+              </h2>
             </div>
-            <span className="font-mono text-xs text-muted-foreground">
-              {response.students.length} rows
+            <span className="font-mono text-xs text-muted-foreground tabular-nums">
+              {rows.length} {rows.length === 1 ? "student" : "students"}
             </span>
           </div>
 
-          <div className="mt-5 overflow-x-auto">
-            <table className="w-full min-w-[1080px] border-collapse text-sm">
-              <thead>
-                <tr className="border-b border-border text-left text-muted-foreground">
-                  <th className="px-4 py-3 font-normal">Student</th>
-                  <th className="px-4 py-3 font-normal">Status</th>
-                  <th className="px-4 py-3 font-normal">Progress</th>
-                  <th className="px-4 py-3 font-normal">Completion</th>
-                  <th className="px-4 py-3 font-normal">Last watched</th>
-                  <th className="px-4 py-3 font-normal">Completed at</th>
-                  <th className="px-4 py-3 font-normal">Enrolled</th>
-                </tr>
-              </thead>
-              <tbody>
-                {response.students.length === 0 ? (
-                  <tr>
-                    <td className="px-4 py-5 text-muted-foreground" colSpan={7}>
-                      No enrolled students yet.
-                    </td>
-                  </tr>
-                ) : (
-                  response.students.map((student) => (
-                    <tr className="border-b border-border" key={student.enrollmentId}>
-                      <td className="px-4 py-3">
-                        <div className="font-mono">{student.email}</div>
-                        <div className="text-muted-foreground">
-                          {student.fullName ?? "No name"}
-                        </div>
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className="border border-primary px-2 py-1 font-mono text-[11px] text-primary">
-                          {statusLabel(student.enrollmentStatus)}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 font-mono">
-                        {student.completedLectureCount}/{student.totalLectureCount}
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="font-mono">{student.completionRate}%</div>
-                        <div className="text-muted-foreground">
-                          {student.isCompleted ? "Completed" : "In progress"}
-                        </div>
-                      </td>
-                      <td className="px-4 py-3">
-                        {student.lastWatchedAt
-                          ? new Date(student.lastWatchedAt).toLocaleString()
-                          : "No progress yet"}
-                      </td>
-                      <td className="px-4 py-3">
-                        {student.completedAt
-                          ? new Date(student.completedAt).toLocaleString()
-                          : "Not completed"}
-                      </td>
-                      <td className="px-4 py-3">
-                        {new Date(student.enrolledAt).toLocaleString()}
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-        </section>
-      </section>
-    </main>
+          {rows.length === 0 ? (
+            <EmptyState
+              description="Students appear here once an enrollment is activated."
+              icon={<Users />}
+              title="No enrolled students yet"
+            />
+          ) : (
+            <div className="w-full overflow-x-auto">
+              <Table className="min-w-[760px]">
+                  <TableHeader>
+                    <TableRow className="hover:bg-transparent">
+                      <TableHead>Student</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="w-48">Progress</TableHead>
+                      <TableHead>Last watched</TableHead>
+                      <TableHead>Completed at</TableHead>
+                      <TableHead>Enrolled</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {rows.map((row) => (
+                      <TableRow key={row.id}>
+                        <TableCell className="py-4">
+                          <div className="font-mono">{row.email}</div>
+                          <div className="mt-1 text-muted-foreground">
+                            {row.name}
+                          </div>
+                        </TableCell>
+                        <TableCell className="py-4">
+                          <EnrollmentStatusPill status={row.status} />
+                        </TableCell>
+                        <TableCell className="w-48 py-4">
+                          <Progress row={row} />
+                        </TableCell>
+                        <TableCell className="py-4 text-muted-foreground">
+                          {row.lastWatched}
+                        </TableCell>
+                        <TableCell className="py-4 text-muted-foreground">
+                          {row.completedAt}
+                        </TableCell>
+                        <TableCell className="py-4 text-muted-foreground">
+                          {row.enrolled}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+              </Table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </>
+  )
+}
+
+function Progress({ row }: { row: StudentRow }) {
+  return (
+    <div>
+      <div className="flex items-baseline justify-between gap-2 text-sm">
+        <span className="font-mono tabular-nums">
+          {row.completedLectures}/{row.totalLectures}
+        </span>
+        <span className="font-mono text-xs text-muted-foreground tabular-nums">
+          {row.completionRate}%
+        </span>
+      </div>
+      <ProgressThread className="mt-2 w-full" value={row.completionRate} />
+    </div>
   )
 }
