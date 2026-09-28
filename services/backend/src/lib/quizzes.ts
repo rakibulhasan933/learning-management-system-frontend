@@ -4,6 +4,7 @@ import {
   desc,
   enrollments,
   eq,
+  inArray,
   lectures,
   modules,
   quizAttempts,
@@ -186,18 +187,20 @@ export async function getInstructorQuizDtosForCourse(courseId: string) {
   const allQuestionRows =
     quizRows.length === 1
       ? questionRows
-      : await db.query.quizQuestions.findMany({
-          orderBy: [asc(quizQuestions.position)],
-          where: (table, { inArray }) => inArray(table.quizId, quizIds),
-        })
+      : await db
+          .select()
+          .from(quizQuestions)
+          .where(inArray(quizQuestions.quizId, quizIds))
+          .orderBy(asc(quizQuestions.position))
   const questionIds = allQuestionRows.map((question) => question.id)
   const optionRows =
     questionIds.length === 0
       ? []
-      : await db.query.quizOptions.findMany({
-          orderBy: [asc(quizOptions.position)],
-          where: (table, { inArray }) => inArray(table.questionId, questionIds),
-        })
+      : await db
+          .select()
+          .from(quizOptions)
+          .where(inArray(quizOptions.questionId, questionIds))
+          .orderBy(asc(quizOptions.position))
 
   return quizRows.map((quiz) =>
     toInstructorQuizDto({
@@ -334,14 +337,16 @@ export async function getStudentQuizDto(quizId: string, profileId: string) {
   const options =
     questions.length === 0
       ? []
-      : await db.query.quizOptions.findMany({
-          orderBy: [asc(quizOptions.position)],
-          where: (table, { inArray }) =>
+      : await db
+          .select()
+          .from(quizOptions)
+          .where(
             inArray(
-              table.questionId,
+              quizOptions.questionId,
               questions.map((question) => question.id)
-            ),
-        })
+            )
+          )
+          .orderBy(asc(quizOptions.position))
   const attempts = await db
     .select()
     .from(quizAttempts)
@@ -364,39 +369,45 @@ export async function getStudentQuizzesForCourse(
   const questionRows =
     quizRows.length === 0
       ? []
-      : await db.query.quizQuestions.findMany({
-          orderBy: [asc(quizQuestions.position)],
-          where: (table, { inArray }) =>
+      : await db
+          .select()
+          .from(quizQuestions)
+          .where(
             inArray(
-              table.quizId,
+              quizQuestions.quizId,
               quizRows.map((quiz) => quiz.id)
-            ),
-        })
+            )
+          )
+          .orderBy(asc(quizQuestions.position))
   const optionRows =
     questionRows.length === 0
       ? []
-      : await db.query.quizOptions.findMany({
-          orderBy: [asc(quizOptions.position)],
-          where: (table, { inArray }) =>
+      : await db
+          .select()
+          .from(quizOptions)
+          .where(
             inArray(
-              table.questionId,
+              quizOptions.questionId,
               questionRows.map((question) => question.id)
-            ),
-        })
+            )
+          )
+          .orderBy(asc(quizOptions.position))
   const attempts =
     quizRows.length === 0
       ? []
-      : await db.query.quizAttempts.findMany({
-          orderBy: [desc(quizAttempts.completedAt)],
-          where: (table, { and: andWhere, eq: eqWhere, inArray }) =>
-            andWhere(
-              eqWhere(table.userId, profileId),
+      : await db
+          .select()
+          .from(quizAttempts)
+          .where(
+            and(
+              eq(quizAttempts.userId, profileId),
               inArray(
-                table.quizId,
+                quizAttempts.quizId,
                 quizRows.map((quiz) => quiz.id)
               )
-            ),
-        })
+            )
+          )
+          .orderBy(desc(quizAttempts.completedAt))
 
   return quizRows.map((quiz) =>
     toStudentQuizDto({
@@ -437,13 +448,15 @@ export async function submitQuizAttempt({
   const options =
     questions.length === 0
       ? []
-      : await db.query.quizOptions.findMany({
-          where: (table, { inArray }) =>
+      : await db
+          .select()
+          .from(quizOptions)
+          .where(
             inArray(
-              table.questionId,
+              quizOptions.questionId,
               questions.map((question) => question.id)
-            ),
-        })
+            )
+          )
   const correctQuestionIds: string[] = []
   const correctOptionIds: Record<string, string[]> = {}
 

@@ -264,14 +264,16 @@ export async function getStudentAssignmentsForCourse(
   const submissionRows =
     assignmentIds.length === 0
       ? []
-      : await db.query.assignmentSubmissions.findMany({
-          orderBy: [desc(assignmentSubmissions.updatedAt)],
-          where: (table, { and: andWhere, eq: eqWhere, inArray }) =>
-            andWhere(
-              eqWhere(table.userId, profileId),
-              inArray(table.assignmentId, assignmentIds)
-            ),
-        })
+      : await db
+          .select()
+          .from(assignmentSubmissions)
+          .where(
+            and(
+              eq(assignmentSubmissions.userId, profileId),
+              inArray(assignmentSubmissions.assignmentId, assignmentIds)
+            )
+          )
+          .orderBy(desc(assignmentSubmissions.updatedAt))
 
   return assignmentRows.map((assignment) =>
     toStudentAssignmentDto({ assignment, submissions: submissionRows })
