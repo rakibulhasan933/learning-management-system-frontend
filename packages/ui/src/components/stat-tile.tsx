@@ -53,7 +53,9 @@ function StatTile({
       <div className="flex items-start justify-between gap-3">
         <p className="text-sm text-muted-foreground">{label}</p>
         {icon ? (
-          <span className="shrink-0 text-muted-foreground [&_svg]:size-4">{icon}</span>
+          <span className="shrink-0 text-muted-foreground [&_svg]:size-4">
+            {icon}
+          </span>
         ) : null}
       </div>
 

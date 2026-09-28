@@ -14,7 +14,7 @@ export const dynamic = "force-dynamic"
 export default async function InstructorCoursesPage() {
   const data = await authenticatedApiFetch<InstructorCourseListResponse>(
     "/instructor/courses",
-    { cache: "no-store" },
+    { cache: "no-store" }
   )
 
   return (

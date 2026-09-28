@@ -7,7 +7,10 @@ import { cn } from "@workspace/ui/lib/utils"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { ArrowDown01Icon, ArrowUp01Icon } from "@hugeicons/core-free-icons"
 
-type AccordionProps = Omit<React.ComponentProps<typeof AccordionPrimitive.Root>, "type" | "value" | "defaultValue" | "onValueChange"> & {
+type AccordionProps = Omit<
+  React.ComponentProps<typeof AccordionPrimitive.Root>,
+  "type" | "value" | "defaultValue" | "onValueChange"
+> & {
   type?: "single" | "multiple"
   multiple?: boolean
   value?: string | string[]
@@ -16,7 +19,8 @@ type AccordionProps = Omit<React.ComponentProps<typeof AccordionPrimitive.Root>,
 }
 
 function Accordion({ className, multiple, type, ...props }: AccordionProps) {
-  const Root = AccordionPrimitive.Root as unknown as React.ComponentType<AccordionProps>
+  const Root =
+    AccordionPrimitive.Root as unknown as React.ComponentType<AccordionProps>
 
   return (
     <Root
@@ -60,8 +64,18 @@ function AccordionTrigger({
         {...props}
       >
         {children}
-        <HugeiconsIcon icon={ArrowDown01Icon} strokeWidth={2} data-slot="accordion-trigger-icon" className="pointer-events-none shrink-0 group-aria-expanded/accordion-trigger:hidden" />
-        <HugeiconsIcon icon={ArrowUp01Icon} strokeWidth={2} data-slot="accordion-trigger-icon" className="pointer-events-none hidden shrink-0 group-aria-expanded/accordion-trigger:inline" />
+        <HugeiconsIcon
+          icon={ArrowDown01Icon}
+          strokeWidth={2}
+          data-slot="accordion-trigger-icon"
+          className="pointer-events-none shrink-0 group-aria-expanded/accordion-trigger:hidden"
+        />
+        <HugeiconsIcon
+          icon={ArrowUp01Icon}
+          strokeWidth={2}
+          data-slot="accordion-trigger-icon"
+          className="pointer-events-none hidden shrink-0 group-aria-expanded/accordion-trigger:inline"
+        />
       </AccordionPrimitive.Trigger>
     </AccordionPrimitive.Header>
   )
@@ -72,7 +86,9 @@ function AccordionContent({
   children,
   keepMounted: _keepMounted,
   ...props
-}: React.ComponentProps<typeof AccordionPrimitive.Content> & { keepMounted?: boolean }) {
+}: React.ComponentProps<typeof AccordionPrimitive.Content> & {
+  keepMounted?: boolean
+}) {
   return (
     <AccordionPrimitive.Content
       data-slot="accordion-content"

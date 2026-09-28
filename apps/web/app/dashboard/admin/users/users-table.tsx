@@ -233,7 +233,7 @@ function AccessForm({
       <SubmitButton
         className={cn(
           fullWidth && "w-full",
-          row.suspended && "border-primary/60 text-primary",
+          row.suspended && "border-primary/60 text-primary"
         )}
         pendingLabel={row.suspended ? "Reinstating..." : "Suspending..."}
         size={fullWidth ? "default" : "sm"}

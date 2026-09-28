@@ -149,7 +149,7 @@ async function loadInstructorAnalytics(instructorId: string) {
     .innerJoin(modules, eq(videos.moduleId, modules.id))
     .innerJoin(sections, eq(modules.milestoneId, sections.id))
     .where(
-      and(eq(videos.isPublished, true), inArray(sections.courseId, courseIds)),
+      and(eq(videos.isPublished, true), inArray(sections.courseId, courseIds))
     )
 
   const lectureIdsByCourse = new Map<string, string[]>()
@@ -194,8 +194,8 @@ async function loadInstructorAnalytics(instructorId: string) {
           .where(
             and(
               inArray(videoProgress.userId, studentIds),
-              inArray(videoProgress.videoId, [...allLectureIds]),
-            ),
+              inArray(videoProgress.videoId, [...allLectureIds])
+            )
           )
       : []
 
@@ -284,15 +284,16 @@ async function loadInstructorAnalytics(instructorId: string) {
   const coursesWithMetrics = courseRows.map((course) => {
     const courseLectureIds = lectureIdsByCourse.get(course.id) ?? []
     const courseEnrollments = enrollmentRows.filter(
-      (row) => row.courseId === course.id,
+      (row) => row.courseId === course.id
     )
     const activeEnrollments = courseEnrollments.filter(
-      (row) => row.status === "active",
+      (row) => row.status === "active"
     )
     const completedEnrollmentCount = activeEnrollments.filter((row) =>
-      courseLectureIds.every((lectureId) =>
-        progressByUserLecture.get(`${row.userId}:${lectureId}`)?.isCompleted,
-      ),
+      courseLectureIds.every(
+        (lectureId) =>
+          progressByUserLecture.get(`${row.userId}:${lectureId}`)?.isCompleted
+      )
     ).length
     const revenue = revenueByCourse.get(course.id)?.revenue ?? 0
 
@@ -302,7 +303,9 @@ async function loadInstructorAnalytics(instructorId: string) {
       completionRate:
         activeEnrollments.length === 0
           ? 0
-          : Math.round((completedEnrollmentCount / activeEnrollments.length) * 100),
+          : Math.round(
+              (completedEnrollmentCount / activeEnrollments.length) * 100
+            ),
       currency: course.currency,
       enrollmentCount: courseEnrollments.length,
       id: course.id,
@@ -317,15 +320,18 @@ async function loadInstructorAnalytics(instructorId: string) {
 
   const totalActiveEnrollmentCount = coursesWithMetrics.reduce(
     (total, course) => total + course.activeEnrollmentCount,
-    0,
+    0
   )
   const totalCompletedEnrollmentCount = coursesWithMetrics.reduce(
     (total, course) => total + course.completedEnrollmentCount,
-    0,
+    0
   )
   const totalRevenue = toNumber(payoutSummary.total_revenue)
   const reservedPayoutAmount = toNumber(payoutSummary.reserved_amount)
-  const availablePayoutBalance = Math.max(totalRevenue - reservedPayoutAmount, 0)
+  const availablePayoutBalance = Math.max(
+    totalRevenue - reservedPayoutAmount,
+    0
+  )
 
   return {
     courses: coursesWithMetrics,
@@ -343,7 +349,7 @@ async function loadInstructorAnalytics(instructorId: string) {
         totalActiveEnrollmentCount === 0
           ? 0
           : Math.round(
-              (totalCompletedEnrollmentCount / totalActiveEnrollmentCount) * 100,
+              (totalCompletedEnrollmentCount / totalActiveEnrollmentCount) * 100
             ),
       courseCount: courseRows.length,
       pendingPayoutRequestCount: toNumber(payoutSummary.pending_payout_count),
@@ -354,9 +360,15 @@ async function loadInstructorAnalytics(instructorId: string) {
 }
 
 async function loadInstructorPayoutList(instructorId: string) {
-  const instructorProfiles = alias(profiles, "instructor_payout_instructor_profiles")
+  const instructorProfiles = alias(
+    profiles,
+    "instructor_payout_instructor_profiles"
+  )
   const instructorUsers = alias(users, "instructor_payout_instructor_users")
-  const reviewerProfiles = alias(profiles, "instructor_payout_reviewer_profiles")
+  const reviewerProfiles = alias(
+    profiles,
+    "instructor_payout_reviewer_profiles"
+  )
   const reviewerUsers = alias(users, "instructor_payout_reviewer_users")
 
   const [summary, rows] = await Promise.all([
@@ -405,9 +417,18 @@ async function loadInstructorPayoutList(instructorId: string) {
         updatedAt: payoutRequests.updatedAt,
       })
       .from(payoutRequests)
-      .innerJoin(instructorProfiles, eq(payoutRequests.instructorId, instructorProfiles.id))
-      .innerJoin(instructorUsers, eq(instructorProfiles.userId, instructorUsers.id))
-      .leftJoin(reviewerProfiles, eq(payoutRequests.reviewedBy, reviewerProfiles.id))
+      .innerJoin(
+        instructorProfiles,
+        eq(payoutRequests.instructorId, instructorProfiles.id)
+      )
+      .innerJoin(
+        instructorUsers,
+        eq(instructorProfiles.userId, instructorUsers.id)
+      )
+      .leftJoin(
+        reviewerProfiles,
+        eq(payoutRequests.reviewedBy, reviewerProfiles.id)
+      )
       .leftJoin(reviewerUsers, eq(reviewerProfiles.userId, reviewerUsers.id))
       .where(eq(payoutRequests.instructorId, instructorId))
       .orderBy(desc(payoutRequests.createdAt)),
@@ -420,7 +441,10 @@ async function loadInstructorPayoutList(instructorId: string) {
   }
   const totalRevenue = toNumber(payoutSummary.total_revenue)
   const reservedPayoutAmount = toNumber(payoutSummary.reserved_amount)
-  const availablePayoutBalance = Math.max(totalRevenue - reservedPayoutAmount, 0)
+  const availablePayoutBalance = Math.max(
+    totalRevenue - reservedPayoutAmount,
+    0
+  )
 
   return {
     availableBalance: availablePayoutBalance,
@@ -441,18 +465,23 @@ async function loadInstructorPayoutList(instructorId: string) {
         reviewedByEmail: row.reviewedByEmail,
         status: row.status,
         updatedAt: row.updatedAt,
-      }),
+      })
     ),
     reservedAmount: reservedPayoutAmount,
     totalRevenue,
   } satisfies InstructorPayoutListResponse
 }
 
-async function assertInstructorOwnsCourse(courseId: string, instructorId: string) {
+async function assertInstructorOwnsCourse(
+  courseId: string,
+  instructorId: string
+) {
   const [course] = await db
     .select({ id: courses.id })
     .from(courses)
-    .where(and(eq(courses.id, courseId), eq(courses.instructorId, instructorId)))
+    .where(
+      and(eq(courses.id, courseId), eq(courses.instructorId, instructorId))
+    )
     .limit(1)
 
   if (!course) {
@@ -486,7 +515,7 @@ instructorDashboardRouter.get(
       courses: analytics.courses,
       totals: analytics.totals,
     } satisfies InstructorAnalyticsOverviewResponse)
-  }),
+  })
 )
 
 instructorDashboardRouter.get(
@@ -521,8 +550,8 @@ instructorDashboardRouter.get(
       .where(
         and(
           eq(sections.courseId, params.courseId),
-          eq(videos.isPublished, true),
-        ),
+          eq(videos.isPublished, true)
+        )
       )
 
     const lectureIds = lectureRows.map((row) => row.lectureId)
@@ -558,8 +587,8 @@ instructorDashboardRouter.get(
             .where(
               and(
                 inArray(videoProgress.userId, studentIds),
-                inArray(videoProgress.videoId, lectureIds),
-              ),
+                inArray(videoProgress.videoId, lectureIds)
+              )
             )
         : []
 
@@ -594,7 +623,7 @@ instructorDashboardRouter.get(
     const revenueRow = revenueRows[0] ?? { orders_count: 0, revenue: "0" }
 
     const activeEnrollmentCount = enrollmentRows.filter(
-      (row) => row.status === "active",
+      (row) => row.status === "active"
     ).length
     const completedEnrollmentCount = enrollmentRows.filter((row) => {
       if (row.status !== "active" || lectureIds.length === 0) {
@@ -602,16 +631,20 @@ instructorDashboardRouter.get(
       }
 
       return lectureIds.every(
-        (lectureId) => progressByUserLecture.get(`${row.userId}:${lectureId}`)?.isCompleted,
+        (lectureId) =>
+          progressByUserLecture.get(`${row.userId}:${lectureId}`)?.isCompleted
       )
     }).length
 
     const students = enrollmentRows.map((row) => {
-      const completedLectureCount = lectureIds.filter((lectureId) =>
-        progressByUserLecture.get(`${row.userId}:${lectureId}`)?.isCompleted,
+      const completedLectureCount = lectureIds.filter(
+        (lectureId) =>
+          progressByUserLecture.get(`${row.userId}:${lectureId}`)?.isCompleted
       ).length
       const progressSnapshots = lectureIds
-        .map((lectureId) => progressByUserLecture.get(`${row.userId}:${lectureId}`))
+        .map((lectureId) =>
+          progressByUserLecture.get(`${row.userId}:${lectureId}`)
+        )
         .filter((value): value is NonNullable<typeof value> => Boolean(value))
 
       const lastWatchedAt = progressSnapshots.reduce<Date | null>(
@@ -622,20 +655,23 @@ instructorDashboardRouter.get(
 
           return value.lastWatchedAt > current ? value.lastWatchedAt : current
         },
-        null,
+        null
       )
 
-      const completedAt = progressSnapshots.reduce<Date | null>((current, value) => {
-        if (!value.isCompleted || !value.completedAt) {
-          return current
-        }
+      const completedAt = progressSnapshots.reduce<Date | null>(
+        (current, value) => {
+          if (!value.isCompleted || !value.completedAt) {
+            return current
+          }
 
-        if (!current) {
-          return value.completedAt
-        }
+          if (!current) {
+            return value.completedAt
+          }
 
-        return value.completedAt > current ? value.completedAt : current
-      }, null)
+          return value.completedAt > current ? value.completedAt : current
+        },
+        null
+      )
 
       const isCompleted =
         lectureIds.length > 0 && completedLectureCount === lectureIds.length
@@ -671,17 +707,22 @@ instructorDashboardRouter.get(
         completionRate:
           activeEnrollmentCount === 0
             ? 0
-            : Math.round((completedEnrollmentCount / activeEnrollmentCount) * 100),
+            : Math.round(
+                (completedEnrollmentCount / activeEnrollmentCount) * 100
+              ),
         completedEnrollmentCount,
         enrollmentCount: enrollmentRows.length,
-        revenue: request.auth!.profile.role === "admin" ? toNumber(revenueRow.revenue) : 0,
+        revenue:
+          request.auth!.profile.role === "admin"
+            ? toNumber(revenueRow.revenue)
+            : 0,
         totalLectureCount: lectureIds.length,
       },
       students,
     }
 
     response.status(200).json(payload)
-  }),
+  })
 )
 
 instructorDashboardRouter.get(
@@ -703,22 +744,34 @@ instructorDashboardRouter.get(
       .limit(50)
 
     response.json({
-      notifications: rows.map((row) => ({ ...row, createdAt: row.createdAt.toISOString(), readAt: row.readAt?.toISOString() ?? null })),
+      notifications: rows.map((row) => ({
+        ...row,
+        createdAt: row.createdAt.toISOString(),
+        readAt: row.readAt?.toISOString() ?? null,
+      })),
       unreadCount: rows.filter((row) => !row.readAt).length,
     })
-  }),
+  })
 )
 
 instructorDashboardRouter.post(
   "/notifications/:notificationId/read",
   asyncHandler(async (request, response) => {
-    const notificationId = z.string().uuid().parse(request.params.notificationId)
-    await db.update(notifications).set({ readAt: new Date() }).where(and(
-      eq(notifications.id, notificationId),
-      eq(notifications.profileId, request.auth!.profile.id),
-    ))
+    const notificationId = z
+      .string()
+      .uuid()
+      .parse(request.params.notificationId)
+    await db
+      .update(notifications)
+      .set({ readAt: new Date() })
+      .where(
+        and(
+          eq(notifications.id, notificationId),
+          eq(notifications.profileId, request.auth!.profile.id)
+        )
+      )
     response.status(204).send()
-  }),
+  })
 )
 
 instructorDashboardRouter.get(
@@ -752,10 +805,12 @@ instructorDashboardRouter.get(
       results: rows.map((row) => ({
         ...row,
         completedAt: row.completedAt.toISOString(),
-        percentage: row.totalQuestions ? Math.round((row.score / row.totalQuestions) * 100) : 0,
+        percentage: row.totalQuestions
+          ? Math.round((row.score / row.totalQuestions) * 100)
+          : 0,
       })),
     } satisfies InstructorQuizResultsResponse)
-  }),
+  })
 )
 
 instructorDashboardRouter.get(
@@ -779,8 +834,13 @@ instructorDashboardRouter.get(
       .innerJoin(profiles, eq(discussionPosts.authorId, profiles.id))
       .where(eq(discussionPosts.courseId, courseId))
       .orderBy(desc(discussionPosts.createdAt))
-    response.json({ posts: rows.map((row) => ({ ...row, createdAt: row.createdAt.toISOString() })) } satisfies DiscussionListResponse)
-  }),
+    response.json({
+      posts: rows.map((row) => ({
+        ...row,
+        createdAt: row.createdAt.toISOString(),
+      })),
+    } satisfies DiscussionListResponse)
+  })
 )
 
 instructorDashboardRouter.post(
@@ -789,21 +849,34 @@ instructorDashboardRouter.post(
     const { courseId } = courseParamsSchema.parse(request.params)
     const input = discussionCreateSchema.parse(request.body)
     await assertInstructorOwnsCourse(courseId, request.auth!.profile.id)
-    const [post] = await db.insert(discussionPosts).values({
-      authorId: request.auth!.profile.id,
-      body: input.body,
-      courseId,
-      lectureId: input.lectureId ?? null,
-      parentId: input.parentId ?? null,
-    }).returning({ id: discussionPosts.id })
+    const [post] = await db
+      .insert(discussionPosts)
+      .values({
+        authorId: request.auth!.profile.id,
+        body: input.body,
+        courseId,
+        lectureId: input.lectureId ?? null,
+        parentId: input.parentId ?? null,
+      })
+      .returning({ id: discussionPosts.id })
     if (input.parentId) {
-      const [parent] = await db.select({ authorId: discussionPosts.authorId }).from(discussionPosts).where(eq(discussionPosts.id, input.parentId)).limit(1)
+      const [parent] = await db
+        .select({ authorId: discussionPosts.authorId })
+        .from(discussionPosts)
+        .where(eq(discussionPosts.id, input.parentId))
+        .limit(1)
       if (parent && parent.authorId !== request.auth!.profile.id) {
-        await createNotification({ body: input.body, href: `/learn/${courseId}`, profileId: parent.authorId, title: "Your discussion received a reply", type: "discussion_reply" })
+        await createNotification({
+          body: input.body,
+          href: `/learn/${courseId}`,
+          profileId: parent.authorId,
+          title: "Your discussion received a reply",
+          type: "discussion_reply",
+        })
       }
     }
     response.status(201).json({ id: post!.id })
-  }),
+  })
 )
 
 instructorDashboardRouter.post(
@@ -812,37 +885,53 @@ instructorDashboardRouter.post(
     const { courseId } = courseParamsSchema.parse(request.params)
     const input = announcementCreateSchema.parse(request.body)
     await assertInstructorOwnsCourse(courseId, request.auth!.profile.id)
-    const [course] = await db.select({ title: courses.title }).from(courses).where(eq(courses.id, courseId)).limit(1)
-    const [announcement] = await db.insert(announcements).values({
-      body: input.body,
-      courseId,
-      instructorId: request.auth!.profile.id,
-      title: input.title,
-    }).returning({ id: announcements.id, createdAt: announcements.createdAt })
-    const students = await db.select({ profileId: enrollments.userId }).from(enrollments).where(and(
-      eq(enrollments.courseId, courseId),
-      eq(enrollments.status, "active"),
-    ))
-    if (students.length) {
-      await db.insert(notifications).values(students.map((student) => ({
-        body: input.body,
-        href: `/learn/${courseId}`,
-        profileId: student.profileId,
-        title: `${course?.title ?? "Course"}: ${input.title}`,
-        type: "course_announcement",
-      })))
-    }
-    response.status(201).json({
-      announcements: [{
+    const [course] = await db
+      .select({ title: courses.title })
+      .from(courses)
+      .where(eq(courses.id, courseId))
+      .limit(1)
+    const [announcement] = await db
+      .insert(announcements)
+      .values({
         body: input.body,
         courseId,
-        courseTitle: course?.title ?? "Course",
-        createdAt: announcement!.createdAt.toISOString(),
-        id: announcement!.id,
+        instructorId: request.auth!.profile.id,
         title: input.title,
-      }],
+      })
+      .returning({ id: announcements.id, createdAt: announcements.createdAt })
+    const students = await db
+      .select({ profileId: enrollments.userId })
+      .from(enrollments)
+      .where(
+        and(
+          eq(enrollments.courseId, courseId),
+          eq(enrollments.status, "active")
+        )
+      )
+    if (students.length) {
+      await db.insert(notifications).values(
+        students.map((student) => ({
+          body: input.body,
+          href: `/learn/${courseId}`,
+          profileId: student.profileId,
+          title: `${course?.title ?? "Course"}: ${input.title}`,
+          type: "course_announcement",
+        }))
+      )
+    }
+    response.status(201).json({
+      announcements: [
+        {
+          body: input.body,
+          courseId,
+          courseTitle: course?.title ?? "Course",
+          createdAt: announcement!.createdAt.toISOString(),
+          id: announcement!.id,
+          title: input.title,
+        },
+      ],
     } satisfies AnnouncementListResponse)
-  }),
+  })
 )
 
 instructorDashboardRouter.get(
@@ -854,7 +943,7 @@ instructorDashboardRouter.get(
     const payload = await loadInstructorPayoutList(request.auth!.profile.id)
 
     response.status(200).json(payload)
-  }),
+  })
 )
 
 instructorDashboardRouter.post(
@@ -868,7 +957,10 @@ instructorDashboardRouter.post(
     const current = await loadInstructorPayoutList(instructorId)
 
     if (input.amount > current.availableBalance) {
-      throw new HttpError(400, "Requested payout exceeds your available balance.")
+      throw new HttpError(
+        400,
+        "Requested payout exceeds your available balance."
+      )
     }
 
     const [created] = await db
@@ -890,5 +982,5 @@ instructorDashboardRouter.post(
     const refreshed = await loadInstructorPayoutList(instructorId)
 
     response.status(201).json(refreshed)
-  }),
+  })
 )

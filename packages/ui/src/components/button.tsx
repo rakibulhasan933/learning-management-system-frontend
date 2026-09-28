@@ -64,7 +64,9 @@ function Button({
       data-variant={variant}
       data-size={size}
       className={cn(buttonVariants({ variant, size, className }))}
-      {...(render ? { children: React.cloneElement(render, undefined, props.children) } : props)}
+      {...(render
+        ? { children: React.cloneElement(render, undefined, props.children) }
+        : props)}
     />
   )
 }

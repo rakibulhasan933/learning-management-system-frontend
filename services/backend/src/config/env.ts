@@ -19,15 +19,17 @@ for (const [key, value] of Object.entries(rootEnv)) {
 
 const optionalNonEmptyString = z.preprocess(
   (value) => (value === "" ? undefined : value),
-  z.string().min(1).optional(),
+  z.string().min(1).optional()
 )
 const optionalUrl = z.preprocess(
   (value) => (value === "" ? undefined : value),
-  z.string().url().optional(),
+  z.string().url().optional()
 )
 
 const environmentSchema = z.object({
-  NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
+  NODE_ENV: z
+    .enum(["development", "test", "production"])
+    .default("development"),
   PORT: z.coerce.number().int().positive().default(4000),
   CORS_ORIGIN: z.string().url().default("http://localhost:3000"),
   DATABASE_URL: z.string().min(1),
@@ -99,7 +101,7 @@ if (!parsedEnvironment.success) {
   throw new Error(
     `Invalid backend environment: ${parsedEnvironment.error.issues
       .map((issue) => issue.path.join("."))
-      .join(", ")}`,
+      .join(", ")}`
   )
 }
 

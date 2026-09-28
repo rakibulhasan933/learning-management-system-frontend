@@ -9,7 +9,7 @@ export async function GET(request: Request) {
   try {
     const response = await authenticatedApiFetch<unknown>(
       `/admin/users${search ? `?${search}` : ""}`,
-      { cache: "no-store" },
+      { cache: "no-store" }
     )
 
     return NextResponse.json(response)
@@ -17,13 +17,13 @@ export async function GET(request: Request) {
     if (error instanceof ApiClientError) {
       return NextResponse.json(
         { message: error.message },
-        { status: error.status },
+        { status: error.status }
       )
     }
 
     return NextResponse.json(
       { message: "Unable to load users." },
-      { status: 500 },
+      { status: 500 }
     )
   }
 }

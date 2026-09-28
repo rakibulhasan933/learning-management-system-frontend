@@ -3,7 +3,11 @@ import * as React from "react"
 import { cn } from "@workspace/ui/lib/utils"
 import { Button } from "@workspace/ui/components/button"
 import { HugeiconsIcon } from "@hugeicons/react"
-import { ArrowLeft01Icon, ArrowRight01Icon, MoreHorizontalCircle01Icon } from "@hugeicons/core-free-icons"
+import {
+  ArrowLeft01Icon,
+  ArrowRight01Icon,
+  MoreHorizontalCircle01Icon,
+} from "@hugeicons/core-free-icons"
 
 function Pagination({ className, ...props }: React.ComponentProps<"nav">) {
   return (
@@ -46,7 +50,19 @@ function PaginationLink({
   ...props
 }: PaginationLinkProps) {
   return (
-    <a aria-current={isActive ? "page" : undefined} data-slot="pagination-link" data-active={isActive} {...props} className={cn("inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-white transition-colors hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 dark:ring-offset-slate-950 dark:hover:bg-slate-800 dark:hover:text-slate-50 dark:focus-visible:ring-slate-300", isActive && "bg-slate-100 text-slate-900 dark:bg-slate-800 dark:text-slate-50", size === "icon" ? "h-9 w-9" : "h-10 px-3", className)} />
+    <a
+      aria-current={isActive ? "page" : undefined}
+      data-slot="pagination-link"
+      data-active={isActive}
+      {...props}
+      className={cn(
+        "inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-white transition-colors hover:bg-slate-100 hover:text-slate-900 focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 dark:ring-offset-slate-950 dark:hover:bg-slate-800 dark:hover:text-slate-50 dark:focus-visible:ring-slate-300",
+        isActive &&
+          "bg-slate-100 text-slate-900 dark:bg-slate-800 dark:text-slate-50",
+        size === "icon" ? "h-9 w-9" : "h-10 px-3",
+        className
+      )}
+    />
   )
 }
 
@@ -62,7 +78,11 @@ function PaginationPrevious({
       className={cn("pl-2!", className)}
       {...props}
     >
-      <HugeiconsIcon icon={ArrowLeft01Icon} strokeWidth={2} data-icon="inline-start" />
+      <HugeiconsIcon
+        icon={ArrowLeft01Icon}
+        strokeWidth={2}
+        data-icon="inline-start"
+      />
       <span className="hidden sm:block">{text}</span>
     </PaginationLink>
   )
@@ -81,7 +101,11 @@ function PaginationNext({
       {...props}
     >
       <span className="hidden sm:block">{text}</span>
-      <HugeiconsIcon icon={ArrowRight01Icon} strokeWidth={2} data-icon="inline-end" />
+      <HugeiconsIcon
+        icon={ArrowRight01Icon}
+        strokeWidth={2}
+        data-icon="inline-end"
+      />
     </PaginationLink>
   )
 }

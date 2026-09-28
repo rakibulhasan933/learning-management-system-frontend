@@ -22,16 +22,24 @@ const ibmPlexMono = IBM_Plex_Mono({
 })
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://folio.example.com"),
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL ?? "https://folio.example.com"
+  ),
   title: {
     default: "Folio — Verified online learning",
     template: "%s | Folio",
   },
   description:
     "A ledger-precise LMS for admins, instructors, and students: manual payment verification, course progress, and secure video in one workspace.",
-  keywords: ["online learning", "learning management system", "courses", "secure video learning"],
+  keywords: [
+    "online learning",
+    "learning management system",
+    "courses",
+    "secure video learning",
+  ],
   openGraph: {
-    description: "Verified online learning with structured courses, secure video, progress tracking, and trusted payments.",
+    description:
+      "Verified online learning with structured courses, secure video, progress tracking, and trusted payments.",
     locale: "en_US",
     siteName: "Folio",
     title: "Folio — Verified online learning",
@@ -43,7 +51,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    description: "Verified online learning with secure courses and tracked progress.",
+    description:
+      "Verified online learning with secure courses and tracked progress.",
     title: "Folio — Verified online learning",
   },
 }
@@ -59,9 +68,7 @@ export default function RootLayout({
       className={`dark ${inter.variable} ${fraunces.variable} ${ibmPlexMono.variable}`}
       suppressHydrationWarning
     >
-      <body className="font-sans antialiased">
-        <main>{children}</main>
-      </body>
+      <body className="min-h-screen font-sans antialiased">{children}</body>
     </html>
   )
 }

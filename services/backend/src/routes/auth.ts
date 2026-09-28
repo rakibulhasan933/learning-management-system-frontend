@@ -23,17 +23,18 @@ import {
   signAccessToken,
 } from "../lib/auth-tokens.js"
 import { db } from "../lib/database.js"
-import {
-  sendPasswordResetEmail,
-  sendVerificationEmail,
-} from "../lib/mailer.js"
+import { sendPasswordResetEmail, sendVerificationEmail } from "../lib/mailer.js"
 import { getProfileByUserId, toProfileDto } from "../lib/profiles.js"
 import { requireAuth } from "../middleware/auth.js"
 
 export const authRouter: ExpressRouter = Router()
 
 const loginSchema = z.object({
-  email: z.string().trim().email().transform((value) => value.toLowerCase()),
+  email: z
+    .string()
+    .trim()
+    .email()
+    .transform((value) => value.toLowerCase()),
   password: z.string().min(1),
 })
 const signupSchema = loginSchema.extend({
@@ -45,7 +46,11 @@ const profileUpdateSchema = z.object({
   fullName: z.string().trim().min(1).max(160).nullable().optional(),
 })
 const resetRequestSchema = z.object({
-  email: z.string().trim().email().transform((value) => value.toLowerCase()),
+  email: z
+    .string()
+    .trim()
+    .email()
+    .transform((value) => value.toLowerCase()),
   origin: z.string().url().optional(),
 })
 const resendVerificationSchema = resetRequestSchema
@@ -75,7 +80,7 @@ function parseCookies(header: string | undefined) {
           decodeURIComponent(part.slice(0, separatorIndex)),
           decodeURIComponent(part.slice(separatorIndex + 1)),
         ]
-      }),
+      })
   )
 }
 
@@ -152,13 +157,16 @@ async function issueSession(userId: string) {
 
 function sendSession(
   response: Response,
-  session: Awaited<ReturnType<typeof issueSession>>,
+  session: Awaited<ReturnType<typeof issueSession>>
 ) {
   setAuthCookies(response, session.accessToken, session.refreshToken)
 
   const payload: AuthSessionDto = {
     accessToken: session.accessToken,
     profile: session.profile,
+    ...(response.req.get("x-client") === "mobile"
+      ? { refreshToken: session.refreshToken }
+      : {}),
   }
 
   response.status(200).json(payload)
@@ -233,8 +241,10 @@ authRouter.post(
       verificationUrl: getVerificationUrl(verificationToken, input.origin),
     })
 
-    response.status(201).json({ message: "Account created. Verify your email." })
-  }),
+    response
+      .status(201)
+      .json({ message: "Account created. Verify your email." })
+  })
 )
 
 authRouter.post(
@@ -249,7 +259,10 @@ authRouter.post(
       throw new HttpError(401, "Invalid email or password.")
     }
 
-    const passwordMatches = await bcrypt.compare(input.password, user.passwordHash)
+    const passwordMatches = await bcrypt.compare(
+      input.password,
+      user.passwordHash
+    )
 
     if (!passwordMatches) {
       throw new HttpError(401, "Invalid email or password.")
@@ -262,7 +275,7 @@ authRouter.post(
     const session = await issueSession(user.id)
 
     sendSession(response, session)
-  }),
+  })
 )
 
 authRouter.get(
@@ -270,7 +283,7 @@ authRouter.get(
   requireAuth,
   asyncHandler(async (request, response) => {
     response.status(200).json(toProfileDto(request.auth!.profile))
-  }),
+  })
 )
 
 authRouter.patch(
@@ -283,9 +296,13 @@ authRouter.patch(
       .update(profiles)
       .set({
         avatarUrl:
-          input.avatarUrl === undefined ? request.auth!.profile.avatarUrl : input.avatarUrl,
+          input.avatarUrl === undefined
+            ? request.auth!.profile.avatarUrl
+            : input.avatarUrl,
         fullName:
-          input.fullName === undefined ? request.auth!.profile.fullName : input.fullName,
+          input.fullName === undefined
+            ? request.auth!.profile.fullName
+            : input.fullName,
       })
       .where(eq(profiles.userId, request.auth!.token.sub))
       .returning()
@@ -301,13 +318,17 @@ authRouter.patch(
     }
 
     response.status(200).json(toProfileDto(refreshedProfile))
-  }),
+  })
 )
 
 authRouter.post(
   "/refresh",
   asyncHandler(async (request, response) => {
-    const refreshToken = getRequestRefreshToken(request.get("cookie"))
+    const refreshToken =
+      request.get("x-client") === "mobile"
+        ? (z.string().min(20).safeParse(request.body?.refreshToken).data ??
+          null)
+        : getRequestRefreshToken(request.get("cookie"))
 
     if (!refreshToken) {
       throw new HttpError(401, "Authentication is required.")
@@ -320,8 +341,8 @@ authRouter.post(
       .where(
         and(
           eq(refreshTokens.tokenHash, tokenHash),
-          isNull(refreshTokens.revokedAt),
-        ),
+          isNull(refreshTokens.revokedAt)
+        )
       )
       .limit(1)
 
@@ -337,13 +358,17 @@ authRouter.post(
     const session = await issueSession(storedToken.userId)
 
     sendSession(response, session)
-  }),
+  })
 )
 
 authRouter.post(
   "/logout",
   asyncHandler(async (request, response) => {
-    const refreshToken = getRequestRefreshToken(request.get("cookie"))
+    const refreshToken =
+      request.get("x-client") === "mobile"
+        ? (z.string().min(20).safeParse(request.body?.refreshToken).data ??
+          null)
+        : getRequestRefreshToken(request.get("cookie"))
 
     if (refreshToken) {
       await db
@@ -354,7 +379,7 @@ authRouter.post(
 
     clearAuthCookies(response)
     response.status(204).send()
-  }),
+  })
 )
 
 authRouter.get(
@@ -368,8 +393,8 @@ authRouter.get(
       .where(
         and(
           eq(emailVerificationTokens.tokenHash, tokenHash),
-          isNull(emailVerificationTokens.usedAt),
-        ),
+          isNull(emailVerificationTokens.usedAt)
+        )
       )
       .limit(1)
 
@@ -389,7 +414,7 @@ authRouter.get(
     })
 
     response.status(200).json({ message: "Email verified." })
-  }),
+  })
 )
 
 authRouter.post(
@@ -417,7 +442,7 @@ authRouter.post(
     response.status(200).json({
       message: "If the email exists, a password reset link has been sent.",
     })
-  }),
+  })
 )
 
 authRouter.post(
@@ -440,7 +465,7 @@ authRouter.post(
     response.status(200).json({
       message: "If the email needs verification, a new link has been sent.",
     })
-  }),
+  })
 )
 
 authRouter.post(
@@ -454,8 +479,8 @@ authRouter.post(
       .where(
         and(
           eq(passwordResetTokens.tokenHash, tokenHash),
-          isNull(passwordResetTokens.usedAt),
-        ),
+          isNull(passwordResetTokens.usedAt)
+        )
       )
       .limit(1)
 
@@ -477,7 +502,7 @@ authRouter.post(
     })
 
     response.status(200).json({ message: "Password has been reset." })
-  }),
+  })
 )
 
 authRouter.get("/google", (request, response) => {
@@ -489,7 +514,8 @@ authRouter.get("/google", (request, response) => {
     throw new HttpError(500, "Google OAuth is not configured.")
   }
 
-  const state = typeof request.query.state === "string" ? request.query.state : ""
+  const state =
+    typeof request.query.state === "string" ? request.query.state : ""
   const url = new URL("https://accounts.google.com/o/oauth2/v2/auth")
   url.searchParams.set("client_id", env.GOOGLE_OAUTH_CLIENT_ID)
   url.searchParams.set("redirect_uri", env.GOOGLE_OAUTH_REDIRECT_URI)
@@ -532,7 +558,9 @@ authRouter.get(
       throw new HttpError(401, "Google OAuth exchange failed.")
     }
 
-    const tokenPayload = (await tokenResponse.json()) as { access_token?: string }
+    const tokenPayload = (await tokenResponse.json()) as {
+      access_token?: string
+    }
 
     if (!tokenPayload.access_token) {
       throw new HttpError(401, "Google OAuth exchange failed.")
@@ -544,7 +572,7 @@ authRouter.get(
         headers: {
           Authorization: `Bearer ${tokenPayload.access_token}`,
         },
-      },
+      }
     )
 
     if (!profileResponse.ok) {
@@ -618,5 +646,5 @@ authRouter.get(
 
     setAuthCookies(response, session.accessToken, session.refreshToken)
     response.redirect(redirectUrl.toString())
-  }),
+  })
 )

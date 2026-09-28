@@ -59,7 +59,12 @@ const courseMutationSchema = z.object({
   level: z.enum(courseLevels).default("all_levels"),
   price: z.coerce.number().nonnegative().default(0),
   shortDescription: z.string().trim().nullable().optional(),
-  slug: z.string().trim().min(3).max(255).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
+  slug: z
+    .string()
+    .trim()
+    .min(3)
+    .max(255)
+    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
   status: z.enum(courseStatuses).default("draft"),
   thumbnailUrl: z.string().trim().url().nullable().optional(),
   title: z.string().trim().min(3),
@@ -79,22 +84,32 @@ const moduleIdParamsSchema = courseIdParamsSchema.extend({
   moduleId: z.string().uuid(),
 })
 const moduleMutationSchema = z.object({
-  contentTypes: z.array(z.enum(["video", "pdf", "quiz", "assignment"])).default([]),
+  contentTypes: z
+    .array(z.enum(["video", "pdf", "quiz", "assignment"]))
+    .default([]),
   description: z.string().trim().nullable().optional(),
   position: z.coerce.number().int().nonnegative().optional(),
   title: z.string().trim().min(1),
 })
 const modulePatchSchema = z.object({
-  contentTypes: z.array(z.enum(["video", "pdf", "quiz", "assignment"])).optional(),
+  contentTypes: z
+    .array(z.enum(["video", "pdf", "quiz", "assignment"]))
+    .optional(),
   description: z.string().trim().nullable().optional(),
   title: z.string().trim().min(1).optional(),
 })
 
 type ModuleContentType = "video" | "pdf" | "quiz" | "assignment"
 
-function requireModuleContentType(module: { contentTypes: string[] }, expected: ModuleContentType) {
+function requireModuleContentType(
+  module: { contentTypes: string[] },
+  expected: ModuleContentType
+) {
   if (!module.contentTypes.includes(expected)) {
-    throw new HttpError(409, `This module does not include ${expected} content.`)
+    throw new HttpError(
+      409,
+      `This module does not include ${expected} content.`
+    )
   }
 }
 const videoMutationSchema = z.object({
@@ -189,7 +204,9 @@ function serializeDate(value: Date | null) {
   return value ? value.toISOString() : null
 }
 
-function toInstructorCourseDto(course: typeof courses.$inferSelect): InstructorCourseDto {
+function toInstructorCourseDto(
+  course: typeof courses.$inferSelect
+): InstructorCourseDto {
   return {
     category: course.category,
     createdAt: course.createdAt.toISOString(),
@@ -211,7 +228,7 @@ function toInstructorCourseDto(course: typeof courses.$inferSelect): InstructorC
 function toInstructorLectureDto(
   lecture: typeof lectures.$inferSelect,
   quiz: InstructorQuizDto | null = null,
-  assignment: InstructorAssignmentDto | null = null,
+  assignment: InstructorAssignmentDto | null = null
 ): InstructorLectureDto {
   return {
     assignment,
@@ -240,7 +257,7 @@ function toInstructorSectionDto(
   quiz: InstructorQuizDto | null = null,
   lectureQuizzes: InstructorQuizDto[] = [],
   assignment: InstructorAssignmentDto | null = null,
-  lectureAssignments: InstructorAssignmentDto[] = [],
+  lectureAssignments: InstructorAssignmentDto[] = []
 ): InstructorSectionDto {
   return {
     assignment,
@@ -252,12 +269,13 @@ function toInstructorSectionDto(
     lectures: sectionLectures.map((lecture) =>
       toInstructorLectureDto(
         lecture,
-        lectureQuizzes.find((lectureQuiz) => lectureQuiz.lectureId === lecture.id) ??
-          null,
-        lectureAssignments.find(
-          (lectureAssignment) => lectureAssignment.lectureId === lecture.id,
+        lectureQuizzes.find(
+          (lectureQuiz) => lectureQuiz.lectureId === lecture.id
         ) ?? null,
-      ),
+        lectureAssignments.find(
+          (lectureAssignment) => lectureAssignment.lectureId === lecture.id
+        ) ?? null
+      )
     ),
     position: section.position,
     quiz,
@@ -266,15 +284,22 @@ function toInstructorSectionDto(
   }
 }
 
-function getPublishedAtForStatus(status: (typeof courseStatuses)[number] | undefined) {
+function getPublishedAtForStatus(
+  status: (typeof courseStatuses)[number] | undefined
+) {
   return status === "published" ? new Date() : null
 }
 
-async function assertInstructorOwnsCourse(courseId: string, instructorId: string) {
+async function assertInstructorOwnsCourse(
+  courseId: string,
+  instructorId: string
+) {
   const [course] = await db
     .select({ id: courses.id })
     .from(courses)
-    .where(and(eq(courses.id, courseId), eq(courses.instructorId, instructorId)))
+    .where(
+      and(eq(courses.id, courseId), eq(courses.instructorId, instructorId))
+    )
     .limit(1)
 
   if (!course) {
@@ -282,7 +307,10 @@ async function assertInstructorOwnsCourse(courseId: string, instructorId: string
   }
 }
 
-async function assertSectionBelongsToCourse(sectionId: string, courseId: string) {
+async function assertSectionBelongsToCourse(
+  sectionId: string,
+  courseId: string
+) {
   const [section] = await db
     .select({ id: sections.id })
     .from(sections)
@@ -294,7 +322,10 @@ async function assertSectionBelongsToCourse(sectionId: string, courseId: string)
   }
 }
 
-async function assertLectureBelongsToCourse(lectureId: string, courseId: string) {
+async function assertLectureBelongsToCourse(
+  lectureId: string,
+  courseId: string
+) {
   const [lecture] = await db
     .select({ id: lectures.id })
     .from(lectures)
@@ -329,7 +360,7 @@ async function saveQuizForTarget({
           ? eq(quizzes.lectureId, lectureId)
           : moduleId
             ? eq(quizzes.moduleId, moduleId)
-            : eq(quizzes.sectionId, sectionId!),
+            : eq(quizzes.sectionId, sectionId!)
       )
       .limit(1)
     const [quiz] =
@@ -387,7 +418,7 @@ async function saveQuizForTarget({
             optionText: optionInput.optionText,
             position: optionInput.position,
             questionId: question.id,
-          })),
+          }))
         )
         .returning()
 
@@ -420,7 +451,7 @@ instructorCoursesRouter.get(
     }
 
     response.status(200).json(payload)
-  }),
+  })
 )
 
 instructorCoursesRouter.post(
@@ -444,7 +475,7 @@ instructorCoursesRouter.post(
     }
 
     response.status(201).json(toInstructorCourseDto(created))
-  }),
+  })
 )
 
 instructorCoursesRouter.patch(
@@ -457,13 +488,19 @@ instructorCoursesRouter.patch(
       .select({ id: modules.id })
       .from(modules)
       .innerJoin(sections, eq(modules.milestoneId, sections.id))
-      .where(and(eq(modules.id, params.moduleId), eq(sections.courseId, params.id)))
+      .where(
+        and(eq(modules.id, params.moduleId), eq(sections.courseId, params.id))
+      )
       .limit(1)
     if (!module) throw new HttpError(404, "Module not found.")
-    const [updated] = await db.update(modules).set(input).where(eq(modules.id, params.moduleId)).returning()
+    const [updated] = await db
+      .update(modules)
+      .set(input)
+      .where(eq(modules.id, params.moduleId))
+      .returning()
     if (!updated) throw new HttpError(404, "Module not found.")
     response.status(200).json(updated)
-  }),
+  })
 )
 
 instructorCoursesRouter.delete(
@@ -476,13 +513,13 @@ instructorCoursesRouter.delete(
       .where(
         and(
           eq(modules.id, params.moduleId),
-          sql`${modules.milestoneId} in (select id from ${sections} where ${sections.courseId} = ${params.id})`,
-        ),
+          sql`${modules.milestoneId} in (select id from ${sections} where ${sections.courseId} = ${params.id})`
+        )
       )
       .returning({ id: modules.id })
     if (!deleted) throw new HttpError(404, "Module not found.")
     response.status(204).send()
-  }),
+  })
 )
 
 instructorCoursesRouter.get(
@@ -494,7 +531,9 @@ instructorCoursesRouter.get(
     const [course] = await db
       .select()
       .from(courses)
-      .where(and(eq(courses.id, params.id), eq(courses.instructorId, instructorId)))
+      .where(
+        and(eq(courses.id, params.id), eq(courses.instructorId, instructorId))
+      )
       .limit(1)
 
     if (!course) {
@@ -502,7 +541,7 @@ instructorCoursesRouter.get(
     }
 
     response.status(200).json(toInstructorCourseDto(course))
-  }),
+  })
 )
 
 // New hierarchy endpoints. Legacy section/lecture handlers remain below while
@@ -514,33 +553,59 @@ instructorCoursesRouter.get(
     await assertInstructorOwnsCourse(params.id, request.auth!.profile!.id)
 
     const milestoneRows = await db
-      .select({ id: sections.id, title: sections.title, description: sections.description, position: sections.position })
+      .select({
+        id: sections.id,
+        title: sections.title,
+        description: sections.description,
+        position: sections.position,
+      })
       .from(sections)
       .where(eq(sections.courseId, params.id))
       .orderBy(asc(sections.position))
     const moduleQuizDtos = await getInstructorQuizDtosForCourse(params.id)
-    const moduleAssignmentDtos = await getInstructorAssignmentDtosForCourse(params.id)
+    const moduleAssignmentDtos = await getInstructorAssignmentDtosForCourse(
+      params.id
+    )
     response.status(200).json({
-      milestones: await Promise.all(milestoneRows.map(async (milestone) => {
-        const milestoneModules = await db.select().from(modules).where(eq(modules.milestoneId, milestone.id)).orderBy(asc(modules.position))
-        return {
-          ...milestone,
-          modules: await Promise.all(milestoneModules.map(async (module) => ({
-            ...module,
-            videos: await db.select().from(videos).where(eq(videos.moduleId, module.id)).orderBy(asc(videos.position)),
-            quiz: moduleQuizDtos.find((quiz) => quiz.moduleId === module.id) ?? null,
-            assignment: moduleAssignmentDtos.find((assignment) => assignment.moduleId === module.id) ?? null,
-          }))),
-        }
-      })),
+      milestones: await Promise.all(
+        milestoneRows.map(async (milestone) => {
+          const milestoneModules = await db
+            .select()
+            .from(modules)
+            .where(eq(modules.milestoneId, milestone.id))
+            .orderBy(asc(modules.position))
+          return {
+            ...milestone,
+            modules: await Promise.all(
+              milestoneModules.map(async (module) => ({
+                ...module,
+                videos: await db
+                  .select()
+                  .from(videos)
+                  .where(eq(videos.moduleId, module.id))
+                  .orderBy(asc(videos.position)),
+                quiz:
+                  moduleQuizDtos.find((quiz) => quiz.moduleId === module.id) ??
+                  null,
+                assignment:
+                  moduleAssignmentDtos.find(
+                    (assignment) => assignment.moduleId === module.id
+                  ) ?? null,
+              }))
+            ),
+          }
+        })
+      ),
     })
-  }),
+  })
 )
 
 instructorCoursesRouter.post(
   "/:id/milestones/:milestoneId/modules",
   asyncHandler(async (request, response) => {
-    const params = courseIdParamsSchema.extend({ milestoneId: z.string().uuid() }).parse(request.params)
+    const params = courseIdParamsSchema
+      .extend({ milestoneId: z.string().uuid() })
+      .parse(request.params)
     const input = moduleMutationSchema.parse(request.body)
     await assertInstructorOwnsCourse(params.id, request.auth!.profile!.id)
     await assertSectionBelongsToCourse(params.milestoneId, params.id)
@@ -548,9 +613,16 @@ instructorCoursesRouter.post(
       .select({ position: sql<number>`coalesce(max(${modules.position}), -1)` })
       .from(modules)
       .where(eq(modules.milestoneId, params.milestoneId))
-    const [created] = await db.insert(modules).values({ milestoneId: params.milestoneId, ...input, position: input.position ?? Number(lastModule?.position ?? -1) + 1 }).returning()
+    const [created] = await db
+      .insert(modules)
+      .values({
+        milestoneId: params.milestoneId,
+        ...input,
+        position: input.position ?? Number(lastModule?.position ?? -1) + 1,
+      })
+      .returning()
     response.status(201).json(created)
-  }),
+  })
 )
 
 instructorCoursesRouter.post(
@@ -559,26 +631,41 @@ instructorCoursesRouter.post(
     const params = moduleIdParamsSchema.parse(request.params)
     const input = videoMutationSchema.parse(request.body)
     await assertInstructorOwnsCourse(params.id, request.auth!.profile!.id)
-    const [module] = await db.select({ id: modules.id, contentTypes: modules.contentTypes }).from(modules).innerJoin(sections, eq(modules.milestoneId, sections.id)).where(and(eq(modules.id, params.moduleId), eq(sections.courseId, params.id))).limit(1)
+    const [module] = await db
+      .select({ id: modules.id, contentTypes: modules.contentTypes })
+      .from(modules)
+      .innerJoin(sections, eq(modules.milestoneId, sections.id))
+      .where(
+        and(eq(modules.id, params.moduleId), eq(sections.courseId, params.id))
+      )
+      .limit(1)
     if (!module) throw new HttpError(404, "Module not found.")
     requireModuleContentType(module, "video")
-    const [created] = await db.insert(videos).values({ moduleId: params.moduleId, ...input }).returning()
+    const [created] = await db
+      .insert(videos)
+      .values({ moduleId: params.moduleId, ...input })
+      .returning()
     response.status(201).json(created)
-  }),
+  })
 )
 
 instructorCoursesRouter.post(
   "/:id/modules/:moduleId/material",
   asyncHandler(async (request, response) => {
-    const params = courseIdParamsSchema.extend({ moduleId: z.string().uuid() }).parse(request.params)
+    const params = courseIdParamsSchema
+      .extend({ moduleId: z.string().uuid() })
+      .parse(request.params)
     const input = lectureMaterialUploadSchema.parse(request.body)
-    if (input.kind !== "pdf") throw new HttpError(400, "Only PDF is supported as module material.")
+    if (input.kind !== "pdf")
+      throw new HttpError(400, "Only PDF is supported as module material.")
     await assertInstructorOwnsCourse(params.id, request.auth!.profile!.id)
     const [module] = await db
       .select({ id: modules.id, contentTypes: modules.contentTypes })
       .from(modules)
       .innerJoin(sections, eq(modules.milestoneId, sections.id))
-      .where(and(eq(modules.id, params.moduleId), eq(sections.courseId, params.id)))
+      .where(
+        and(eq(modules.id, params.moduleId), eq(sections.courseId, params.id))
+      )
       .limit(1)
     if (!module) throw new HttpError(404, "Module not found.")
     requireModuleContentType(module, "pdf")
@@ -595,32 +682,56 @@ instructorCoursesRouter.post(
       .set({ pdfUrl: url, slidesUrl: null })
       .where(eq(modules.id, params.moduleId))
     response.status(201).json({ url })
-  }),
+  })
 )
 
 instructorCoursesRouter.post(
   "/:id/modules/:moduleId/material-upload",
   raw({ limit: "30mb", type: () => true }),
   asyncHandler(async (request, response) => {
-    const params = courseIdParamsSchema.extend({ moduleId: z.string().uuid() }).parse(request.params)
+    const params = courseIdParamsSchema
+      .extend({ moduleId: z.string().uuid() })
+      .parse(request.params)
     const query = materialUploadQuerySchema.parse(request.query)
-    if (query.kind !== "pdf") throw new HttpError(400, "Only PDF is supported as module material.")
+    if (query.kind !== "pdf")
+      throw new HttpError(400, "Only PDF is supported as module material.")
     await assertInstructorOwnsCourse(params.id, request.auth!.profile!.id)
-    const [module] = await db.select({ id: modules.id, contentTypes: modules.contentTypes }).from(modules).innerJoin(sections, eq(modules.milestoneId, sections.id)).where(and(eq(modules.id, params.moduleId), eq(sections.courseId, params.id))).limit(1)
+    const [module] = await db
+      .select({ id: modules.id, contentTypes: modules.contentTypes })
+      .from(modules)
+      .innerJoin(sections, eq(modules.milestoneId, sections.id))
+      .where(
+        and(eq(modules.id, params.moduleId), eq(sections.courseId, params.id))
+      )
+      .limit(1)
     if (!module) throw new HttpError(404, "Module not found.")
     requireModuleContentType(module, "pdf")
-    if (!Buffer.isBuffer(request.body) || request.body.length === 0) throw new HttpError(400, "Material file is required.")
-    const contentType = request.get("content-type")?.split(";")[0] ?? "application/octet-stream"
-    const url = await uploadLectureMaterial({ body: request.body, contentType, courseId: params.id, fileName: query.fileName, kind: query.kind, lectureId: params.moduleId })
-    await db.update(modules).set({ pdfUrl: url, slidesUrl: null }).where(eq(modules.id, params.moduleId))
+    if (!Buffer.isBuffer(request.body) || request.body.length === 0)
+      throw new HttpError(400, "Material file is required.")
+    const contentType =
+      request.get("content-type")?.split(";")[0] ?? "application/octet-stream"
+    const url = await uploadLectureMaterial({
+      body: request.body,
+      contentType,
+      courseId: params.id,
+      fileName: query.fileName,
+      kind: query.kind,
+      lectureId: params.moduleId,
+    })
+    await db
+      .update(modules)
+      .set({ pdfUrl: url, slidesUrl: null })
+      .where(eq(modules.id, params.moduleId))
     response.status(201).json({ url })
-  }),
+  })
 )
 
 instructorCoursesRouter.delete(
   "/:id/modules/:moduleId/material",
   asyncHandler(async (request, response) => {
-    const params = courseIdParamsSchema.extend({ moduleId: z.string().uuid() }).parse(request.params)
+    const params = courseIdParamsSchema
+      .extend({ moduleId: z.string().uuid() })
+      .parse(request.params)
     await assertInstructorOwnsCourse(params.id, request.auth!.profile!.id)
     const [updated] = await db
       .update(modules)
@@ -628,108 +739,220 @@ instructorCoursesRouter.delete(
       .where(
         and(
           eq(modules.id, params.moduleId),
-          sql`${modules.milestoneId} in (select id from ${sections} where ${sections.courseId} = ${params.id})`,
-        ),
+          sql`${modules.milestoneId} in (select id from ${sections} where ${sections.courseId} = ${params.id})`
+        )
       )
       .returning({ id: modules.id })
     if (!updated) throw new HttpError(404, "Module not found.")
     response.status(204).send()
-  }),
+  })
 )
 
 instructorCoursesRouter.patch(
   "/:id/videos/:videoId",
   asyncHandler(async (request, response) => {
-    const params = courseIdParamsSchema.extend({ videoId: z.string().uuid() }).parse(request.params)
+    const params = courseIdParamsSchema
+      .extend({ videoId: z.string().uuid() })
+      .parse(request.params)
     const input = videoPatchSchema.parse(request.body)
     await assertInstructorOwnsCourse(params.id, request.auth!.profile!.id)
-    const [video] = await db.select({ id: videos.id }).from(videos).innerJoin(modules, eq(videos.moduleId, modules.id)).innerJoin(sections, eq(modules.milestoneId, sections.id)).where(and(eq(videos.id, params.videoId), eq(sections.courseId, params.id))).limit(1)
+    const [video] = await db
+      .select({ id: videos.id })
+      .from(videos)
+      .innerJoin(modules, eq(videos.moduleId, modules.id))
+      .innerJoin(sections, eq(modules.milestoneId, sections.id))
+      .where(
+        and(eq(videos.id, params.videoId), eq(sections.courseId, params.id))
+      )
+      .limit(1)
     if (!video) throw new HttpError(404, "Video not found.")
-    const [updated] = await db.update(videos).set(input).where(eq(videos.id, params.videoId)).returning()
+    const [updated] = await db
+      .update(videos)
+      .set(input)
+      .where(eq(videos.id, params.videoId))
+      .returning()
     if (!updated) throw new HttpError(404, "Video not found.")
     response.status(200).json(updated)
-  }),
+  })
 )
 
 instructorCoursesRouter.delete(
   "/:id/videos/:videoId",
   asyncHandler(async (request, response) => {
-    const params = courseIdParamsSchema.extend({ videoId: z.string().uuid() }).parse(request.params)
+    const params = courseIdParamsSchema
+      .extend({ videoId: z.string().uuid() })
+      .parse(request.params)
     await assertInstructorOwnsCourse(params.id, request.auth!.profile!.id)
     const [deleted] = await db
       .delete(videos)
       .where(
         and(
           eq(videos.id, params.videoId),
-          sql`${videos.moduleId} in (select ${modules.id} from ${modules} inner join ${sections} on ${modules.milestoneId} = ${sections.id} where ${sections.courseId} = ${params.id})`,
-        ),
+          sql`${videos.moduleId} in (select ${modules.id} from ${modules} inner join ${sections} on ${modules.milestoneId} = ${sections.id} where ${sections.courseId} = ${params.id})`
+        )
       )
       .returning({ id: videos.id })
     if (!deleted) throw new HttpError(404, "Video not found.")
     response.status(204).send()
-  }),
+  })
 )
 
 instructorCoursesRouter.post(
   "/:id/videos/:videoId/video-upload-url",
   asyncHandler(async (request, response) => {
-    const params = courseIdParamsSchema.extend({ videoId: z.string().uuid() }).parse(request.params)
+    const params = courseIdParamsSchema
+      .extend({ videoId: z.string().uuid() })
+      .parse(request.params)
     const input = videoUploadUrlSchema.parse(request.body)
     await assertInstructorOwnsCourse(params.id, request.auth!.profile!.id)
-    const [video] = await db.select({ id: videos.id }).from(videos).innerJoin(modules, eq(videos.moduleId, modules.id)).innerJoin(sections, eq(modules.milestoneId, sections.id)).where(and(eq(videos.id, params.videoId), eq(sections.courseId, params.id))).limit(1)
+    const [video] = await db
+      .select({ id: videos.id })
+      .from(videos)
+      .innerJoin(modules, eq(videos.moduleId, modules.id))
+      .innerJoin(sections, eq(modules.milestoneId, sections.id))
+      .where(
+        and(eq(videos.id, params.videoId), eq(sections.courseId, params.id))
+      )
+      .limit(1)
     if (!video) throw new HttpError(404, "Video not found.")
-    const videoRef = createLectureVideoKey({ courseId: params.id, fileName: input.fileName, lectureId: params.videoId })
-    const uploadUrl = await createR2UploadUrl({ contentType: input.contentType, key: videoRef })
-    response.status(201).json({ expiresInSeconds: 15 * 60, headers: { "Content-Type": input.contentType }, uploadUrl, videoProvider: "r2", videoRef })
-  }),
+    const videoRef = createLectureVideoKey({
+      courseId: params.id,
+      fileName: input.fileName,
+      lectureId: params.videoId,
+    })
+    const uploadUrl = await createR2UploadUrl({
+      contentType: input.contentType,
+      key: videoRef,
+    })
+    response
+      .status(201)
+      .json({
+        expiresInSeconds: 15 * 60,
+        headers: { "Content-Type": input.contentType },
+        uploadUrl,
+        videoProvider: "r2",
+        videoRef,
+      })
+  })
 )
 
 instructorCoursesRouter.post(
   "/:id/videos/:videoId/video-upload",
   raw({ limit: "1024mb", type: "video/mp4" }),
   asyncHandler(async (request, response) => {
-    const params = courseIdParamsSchema.extend({ videoId: z.string().uuid() }).parse(request.params)
+    const params = courseIdParamsSchema
+      .extend({ videoId: z.string().uuid() })
+      .parse(request.params)
     const query = videoUploadQuerySchema.parse(request.query)
     await assertInstructorOwnsCourse(params.id, request.auth!.profile!.id)
-    const [video] = await db.select({ id: videos.id }).from(videos).innerJoin(modules, eq(videos.moduleId, modules.id)).innerJoin(sections, eq(modules.milestoneId, sections.id)).where(and(eq(videos.id, params.videoId), eq(sections.courseId, params.id))).limit(1)
+    const [video] = await db
+      .select({ id: videos.id })
+      .from(videos)
+      .innerJoin(modules, eq(videos.moduleId, modules.id))
+      .innerJoin(sections, eq(modules.milestoneId, sections.id))
+      .where(
+        and(eq(videos.id, params.videoId), eq(sections.courseId, params.id))
+      )
+      .limit(1)
     if (!video) throw new HttpError(404, "Video not found.")
-    if (!Buffer.isBuffer(request.body) || request.body.length === 0) throw new HttpError(400, "Video file is required.")
-    const videoRef = createLectureVideoKey({ courseId: params.id, fileName: query.fileName, lectureId: params.videoId })
-    await uploadLectureVideoToR2({ body: request.body, contentType: "video/mp4", key: videoRef })
-    await db.update(videos).set({ isPublished: true, title: query.fileName, videoProvider: "r2", videoRef }).where(eq(videos.id, params.videoId))
-    response.status(201).json({ message: "Video uploaded and saved.", videoRef })
-  }),
+    if (!Buffer.isBuffer(request.body) || request.body.length === 0)
+      throw new HttpError(400, "Video file is required.")
+    const videoRef = createLectureVideoKey({
+      courseId: params.id,
+      fileName: query.fileName,
+      lectureId: params.videoId,
+    })
+    await uploadLectureVideoToR2({
+      body: request.body,
+      contentType: "video/mp4",
+      key: videoRef,
+    })
+    await db
+      .update(videos)
+      .set({
+        isPublished: true,
+        title: query.fileName,
+        videoProvider: "r2",
+        videoRef,
+      })
+      .where(eq(videos.id, params.videoId))
+    response
+      .status(201)
+      .json({ message: "Video uploaded and saved.", videoRef })
+  })
 )
 
 instructorCoursesRouter.post(
   "/:id/videos/:videoId/material",
   asyncHandler(async (request, response) => {
-    const params = courseIdParamsSchema.extend({ videoId: z.string().uuid() }).parse(request.params)
+    const params = courseIdParamsSchema
+      .extend({ videoId: z.string().uuid() })
+      .parse(request.params)
     const input = lectureMaterialUploadSchema.parse(request.body)
     await assertInstructorOwnsCourse(params.id, request.auth!.profile!.id)
-    const [video] = await db.select({ id: videos.id }).from(videos).innerJoin(modules, eq(videos.moduleId, modules.id)).innerJoin(sections, eq(modules.milestoneId, sections.id)).where(and(eq(videos.id, params.videoId), eq(sections.courseId, params.id))).limit(1)
+    const [video] = await db
+      .select({ id: videos.id })
+      .from(videos)
+      .innerJoin(modules, eq(videos.moduleId, modules.id))
+      .innerJoin(sections, eq(modules.milestoneId, sections.id))
+      .where(
+        and(eq(videos.id, params.videoId), eq(sections.courseId, params.id))
+      )
+      .limit(1)
     if (!video) throw new HttpError(404, "Video not found.")
-    const url = await uploadLectureMaterial({ base64: input.base64, contentType: input.contentType, courseId: params.id, fileName: input.fileName, kind: input.kind, lectureId: params.videoId })
-    await db.update(videos).set(input.kind === "pdf" ? { pdfUrl: url } : { slidesUrl: url }).where(eq(videos.id, params.videoId))
+    const url = await uploadLectureMaterial({
+      base64: input.base64,
+      contentType: input.contentType,
+      courseId: params.id,
+      fileName: input.fileName,
+      kind: input.kind,
+      lectureId: params.videoId,
+    })
+    await db
+      .update(videos)
+      .set(input.kind === "pdf" ? { pdfUrl: url } : { slidesUrl: url })
+      .where(eq(videos.id, params.videoId))
     response.status(201).json({ url })
-  }),
+  })
 )
 
 instructorCoursesRouter.post(
   "/:id/videos/:videoId/material-upload",
   raw({ limit: "30mb", type: () => true }),
   asyncHandler(async (request, response) => {
-    const params = courseIdParamsSchema.extend({ videoId: z.string().uuid() }).parse(request.params)
+    const params = courseIdParamsSchema
+      .extend({ videoId: z.string().uuid() })
+      .parse(request.params)
     const query = materialUploadQuerySchema.parse(request.query)
     await assertInstructorOwnsCourse(params.id, request.auth!.profile!.id)
-    const [video] = await db.select({ id: videos.id }).from(videos).innerJoin(modules, eq(videos.moduleId, modules.id)).innerJoin(sections, eq(modules.milestoneId, sections.id)).where(and(eq(videos.id, params.videoId), eq(sections.courseId, params.id))).limit(1)
+    const [video] = await db
+      .select({ id: videos.id })
+      .from(videos)
+      .innerJoin(modules, eq(videos.moduleId, modules.id))
+      .innerJoin(sections, eq(modules.milestoneId, sections.id))
+      .where(
+        and(eq(videos.id, params.videoId), eq(sections.courseId, params.id))
+      )
+      .limit(1)
     if (!video) throw new HttpError(404, "Video not found.")
-    if (!Buffer.isBuffer(request.body) || request.body.length === 0) throw new HttpError(400, "Material file is required.")
-    const contentType = request.get("content-type")?.split(";")[0] ?? "application/octet-stream"
-    const url = await uploadLectureMaterial({ body: request.body, contentType, courseId: params.id, fileName: query.fileName, kind: query.kind, lectureId: params.videoId })
-    await db.update(videos).set(query.kind === "pdf" ? { pdfUrl: url } : { slidesUrl: url }).where(eq(videos.id, params.videoId))
+    if (!Buffer.isBuffer(request.body) || request.body.length === 0)
+      throw new HttpError(400, "Material file is required.")
+    const contentType =
+      request.get("content-type")?.split(";")[0] ?? "application/octet-stream"
+    const url = await uploadLectureMaterial({
+      body: request.body,
+      contentType,
+      courseId: params.id,
+      fileName: query.fileName,
+      kind: query.kind,
+      lectureId: params.videoId,
+    })
+    await db
+      .update(videos)
+      .set(query.kind === "pdf" ? { pdfUrl: url } : { slidesUrl: url })
+      .where(eq(videos.id, params.videoId))
     response.status(201).json({ url })
-  }),
+  })
 )
 
 instructorCoursesRouter.get(
@@ -763,17 +986,18 @@ instructorCoursesRouter.get(
           .map((row) => row.lectures),
         quizDtos.find((quiz) => quiz.sectionId === section.id) ?? null,
         quizDtos.filter((quiz) => Boolean(quiz.lectureId)),
-        assignmentDtos.find((assignment) => assignment.sectionId === section.id) ??
-          null,
-        assignmentDtos.filter((assignment) => Boolean(assignment.lectureId)),
-      ),
+        assignmentDtos.find(
+          (assignment) => assignment.sectionId === section.id
+        ) ?? null,
+        assignmentDtos.filter((assignment) => Boolean(assignment.lectureId))
+      )
     )
     const payload: InstructorCourseOutlineResponse = {
       sections: sectionEntities,
     }
 
     response.status(200).json(payload)
-  }),
+  })
 )
 
 instructorCoursesRouter.post(
@@ -786,7 +1010,9 @@ instructorCoursesRouter.post(
     await assertInstructorOwnsCourse(params.id, instructorId)
 
     const [lastMilestone] = await db
-      .select({ position: sql<number>`coalesce(max(${sections.position}), -1)` })
+      .select({
+        position: sql<number>`coalesce(max(${sections.position}), -1)`,
+      })
       .from(sections)
       .where(eq(sections.courseId, params.id))
 
@@ -804,7 +1030,7 @@ instructorCoursesRouter.post(
     }
 
     response.status(201).json(toInstructorSectionDto(created, []))
-  }),
+  })
 )
 
 instructorCoursesRouter.patch(
@@ -819,7 +1045,9 @@ instructorCoursesRouter.patch(
     const [updated] = await db
       .update(sections)
       .set(input)
-      .where(and(eq(sections.id, params.sectionId), eq(sections.courseId, params.id)))
+      .where(
+        and(eq(sections.id, params.sectionId), eq(sections.courseId, params.id))
+      )
       .returning()
 
     if (!updated) {
@@ -827,7 +1055,7 @@ instructorCoursesRouter.patch(
     }
 
     response.status(200).json(toInstructorSectionDto(updated, []))
-  }),
+  })
 )
 
 instructorCoursesRouter.put(
@@ -847,7 +1075,7 @@ instructorCoursesRouter.put(
     })
 
     response.status(200).json(quiz)
-  }),
+  })
 )
 
 instructorCoursesRouter.put(
@@ -867,7 +1095,7 @@ instructorCoursesRouter.put(
     })
 
     response.status(200).json(assignment)
-  }),
+  })
 )
 
 instructorCoursesRouter.delete(
@@ -880,7 +1108,9 @@ instructorCoursesRouter.delete(
 
     const [deleted] = await db
       .delete(sections)
-      .where(and(eq(sections.id, params.sectionId), eq(sections.courseId, params.id)))
+      .where(
+        and(eq(sections.id, params.sectionId), eq(sections.courseId, params.id))
+      )
       .returning({ id: sections.id })
 
     if (!deleted) {
@@ -888,7 +1118,7 @@ instructorCoursesRouter.delete(
     }
 
     response.status(204).send()
-  }),
+  })
 )
 
 instructorCoursesRouter.post(
@@ -915,7 +1145,7 @@ instructorCoursesRouter.post(
     }
 
     response.status(201).json(toInstructorLectureDto(created))
-  }),
+  })
 )
 
 instructorCoursesRouter.put(
@@ -935,7 +1165,7 @@ instructorCoursesRouter.put(
     })
 
     response.status(200).json(quiz)
-  }),
+  })
 )
 
 instructorCoursesRouter.put(
@@ -955,7 +1185,7 @@ instructorCoursesRouter.put(
     })
 
     response.status(200).json(assignment)
-  }),
+  })
 )
 
 instructorCoursesRouter.put(
@@ -964,11 +1194,26 @@ instructorCoursesRouter.put(
     const params = moduleIdParamsSchema.parse(request.params)
     const input = quizMutationSchema.parse(request.body)
     await assertInstructorOwnsCourse(params.id, request.auth!.profile!.id)
-    const [module] = await db.select({ id: modules.id, contentTypes: modules.contentTypes }).from(modules).innerJoin(sections, eq(modules.milestoneId, sections.id)).where(and(eq(modules.id, params.moduleId), eq(sections.courseId, params.id))).limit(1)
+    const [module] = await db
+      .select({ id: modules.id, contentTypes: modules.contentTypes })
+      .from(modules)
+      .innerJoin(sections, eq(modules.milestoneId, sections.id))
+      .where(
+        and(eq(modules.id, params.moduleId), eq(sections.courseId, params.id))
+      )
+      .limit(1)
     if (!module) throw new HttpError(404, "Module not found.")
     requireModuleContentType(module, "quiz")
-    response.status(200).json(await saveQuizForTarget({ courseId: params.id, input, moduleId: params.moduleId }))
-  }),
+    response
+      .status(200)
+      .json(
+        await saveQuizForTarget({
+          courseId: params.id,
+          input,
+          moduleId: params.moduleId,
+        })
+      )
+  })
 )
 
 instructorCoursesRouter.put(
@@ -977,11 +1222,26 @@ instructorCoursesRouter.put(
     const params = moduleIdParamsSchema.parse(request.params)
     const input = assignmentMutationSchema.parse(request.body)
     await assertInstructorOwnsCourse(params.id, request.auth!.profile!.id)
-    const [module] = await db.select({ id: modules.id, contentTypes: modules.contentTypes }).from(modules).innerJoin(sections, eq(modules.milestoneId, sections.id)).where(and(eq(modules.id, params.moduleId), eq(sections.courseId, params.id))).limit(1)
+    const [module] = await db
+      .select({ id: modules.id, contentTypes: modules.contentTypes })
+      .from(modules)
+      .innerJoin(sections, eq(modules.milestoneId, sections.id))
+      .where(
+        and(eq(modules.id, params.moduleId), eq(sections.courseId, params.id))
+      )
+      .limit(1)
     if (!module) throw new HttpError(404, "Module not found.")
     requireModuleContentType(module, "assignment")
-    response.status(200).json(await saveAssignmentForTarget({ courseId: params.id, input, moduleId: params.moduleId }))
-  }),
+    response
+      .status(200)
+      .json(
+        await saveAssignmentForTarget({
+          courseId: params.id,
+          input,
+          moduleId: params.moduleId,
+        })
+      )
+  })
 )
 
 instructorCoursesRouter.delete(
@@ -994,7 +1254,9 @@ instructorCoursesRouter.delete(
 
     const [deleted] = await db
       .delete(quizzes)
-      .where(and(eq(quizzes.id, params.quizId), eq(quizzes.courseId, params.id)))
+      .where(
+        and(eq(quizzes.id, params.quizId), eq(quizzes.courseId, params.id))
+      )
       .returning({ id: quizzes.id })
 
     if (!deleted) {
@@ -1002,7 +1264,7 @@ instructorCoursesRouter.delete(
     }
 
     response.status(204).send()
-  }),
+  })
 )
 
 instructorCoursesRouter.delete(
@@ -1018,8 +1280,8 @@ instructorCoursesRouter.delete(
       .where(
         and(
           eq(assignments.id, params.assignmentId),
-          eq(assignments.courseId, params.id),
-        ),
+          eq(assignments.courseId, params.id)
+        )
       )
       .returning({ id: assignments.id })
 
@@ -1028,7 +1290,7 @@ instructorCoursesRouter.delete(
     }
 
     response.status(204).send()
-  }),
+  })
 )
 
 instructorCoursesRouter.patch(
@@ -1047,13 +1309,25 @@ instructorCoursesRouter.patch(
       graderProfileId: instructorId,
       submissionId: params.submissionId,
     })
-    const [submission] = await db.select({ studentId: assignmentSubmissions.userId }).from(assignmentSubmissions).where(eq(assignmentSubmissions.id, params.submissionId)).limit(1)
+    const [submission] = await db
+      .select({ studentId: assignmentSubmissions.userId })
+      .from(assignmentSubmissions)
+      .where(eq(assignmentSubmissions.id, params.submissionId))
+      .limit(1)
     if (submission) {
-      await createNotification({ body: input.gradeFeedback ?? `Your assignment received ${input.gradeScore} points.`, href: `/learn/${params.id}`, profileId: submission.studentId, title: "Your assignment was graded", type: "assignment_graded" })
+      await createNotification({
+        body:
+          input.gradeFeedback ??
+          `Your assignment received ${input.gradeScore} points.`,
+        href: `/learn/${params.id}`,
+        profileId: submission.studentId,
+        title: "Your assignment was graded",
+        type: "assignment_graded",
+      })
     }
 
     response.status(204).send()
-  }),
+  })
 )
 
 instructorCoursesRouter.patch(
@@ -1073,8 +1347,8 @@ instructorCoursesRouter.patch(
         and(
           eq(lectures.id, params.lectureId),
           eq(lectures.sectionId, sections.id),
-          eq(sections.courseId, params.id),
-        ),
+          eq(sections.courseId, params.id)
+        )
       )
       .returning()
 
@@ -1083,7 +1357,7 @@ instructorCoursesRouter.patch(
     }
 
     response.status(200).json(toInstructorLectureDto(updated))
-  }),
+  })
 )
 
 instructorCoursesRouter.post(
@@ -1131,7 +1405,7 @@ instructorCoursesRouter.post(
     response.status(201).json({
       message: "Video uploaded and saved.",
     })
-  }),
+  })
 )
 
 instructorCoursesRouter.post(
@@ -1164,7 +1438,7 @@ instructorCoursesRouter.post(
     }
 
     response.status(201).json(payload)
-  }),
+  })
 )
 
 instructorCoursesRouter.post(
@@ -1199,7 +1473,7 @@ instructorCoursesRouter.post(
       lecture: toInstructorLectureDto(updated),
       url,
     } satisfies InstructorLectureMaterialUploadResponse)
-  }),
+  })
 )
 
 instructorCoursesRouter.post(
@@ -1210,12 +1484,24 @@ instructorCoursesRouter.post(
     const query = materialUploadQuerySchema.parse(request.query)
     await assertInstructorOwnsCourse(params.id, request.auth!.profile!.id)
     await assertLectureBelongsToCourse(params.lectureId, params.id)
-    if (!Buffer.isBuffer(request.body) || request.body.length === 0) throw new HttpError(400, "Material file is required.")
-    const contentType = request.get("content-type")?.split(";")[0] ?? "application/octet-stream"
-    const url = await uploadLectureMaterial({ body: request.body, contentType, courseId: params.id, fileName: query.fileName, kind: query.kind, lectureId: params.lectureId })
-    await db.update(lectures).set(query.kind === "pdf" ? { pdfUrl: url } : { slidesUrl: url }).where(eq(lectures.id, params.lectureId))
+    if (!Buffer.isBuffer(request.body) || request.body.length === 0)
+      throw new HttpError(400, "Material file is required.")
+    const contentType =
+      request.get("content-type")?.split(";")[0] ?? "application/octet-stream"
+    const url = await uploadLectureMaterial({
+      body: request.body,
+      contentType,
+      courseId: params.id,
+      fileName: query.fileName,
+      kind: query.kind,
+      lectureId: params.lectureId,
+    })
+    await db
+      .update(lectures)
+      .set(query.kind === "pdf" ? { pdfUrl: url } : { slidesUrl: url })
+      .where(eq(lectures.id, params.lectureId))
     response.status(201).json({ url })
-  }),
+  })
 )
 
 instructorCoursesRouter.delete(
@@ -1237,7 +1523,7 @@ instructorCoursesRouter.delete(
     }
 
     response.status(204).send()
-  }),
+  })
 )
 
 instructorCoursesRouter.patch(
@@ -1247,7 +1533,9 @@ instructorCoursesRouter.patch(
     const input = coursePatchSchema.parse(request.body)
     const instructorId = request.auth!.profile!.id
     const publishedAt =
-      input.status === undefined ? undefined : getPublishedAtForStatus(input.status)
+      input.status === undefined
+        ? undefined
+        : getPublishedAtForStatus(input.status)
 
     const [updated] = await db
       .update(courses)
@@ -1256,7 +1544,9 @@ instructorCoursesRouter.patch(
         price: input.price === undefined ? undefined : String(input.price),
         publishedAt,
       })
-      .where(and(eq(courses.id, params.id), eq(courses.instructorId, instructorId)))
+      .where(
+        and(eq(courses.id, params.id), eq(courses.instructorId, instructorId))
+      )
       .returning()
 
     if (!updated) {
@@ -1264,7 +1554,7 @@ instructorCoursesRouter.patch(
     }
 
     response.status(200).json(toInstructorCourseDto(updated))
-  }),
+  })
 )
 
 instructorCoursesRouter.delete(
@@ -1275,7 +1565,9 @@ instructorCoursesRouter.delete(
 
     const [deleted] = await db
       .delete(courses)
-      .where(and(eq(courses.id, params.id), eq(courses.instructorId, instructorId)))
+      .where(
+        and(eq(courses.id, params.id), eq(courses.instructorId, instructorId))
+      )
       .returning({ id: courses.id })
 
     if (!deleted) {
@@ -1283,5 +1575,5 @@ instructorCoursesRouter.delete(
     }
 
     response.status(204).send()
-  }),
+  })
 )

@@ -42,7 +42,7 @@ function getErrorMessage(
     password?: { message?: string }
   },
   key: keyof SignupValues,
-  serverState: AuthFormState,
+  serverState: AuthFormState
 ) {
   return values[key]?.message ?? serverState.fieldErrors[key] ?? undefined
 }
@@ -52,7 +52,7 @@ export function SignupForm() {
   const validationBypassRef = useRef(false)
   const [serverState, formAction] = useActionState(
     signUpWithPasswordFormAction,
-    initialAuthFormState,
+    initialAuthFormState
   )
   const {
     formState: { errors },
@@ -127,7 +127,10 @@ export function SignupForm() {
             type="password"
           />
 
-          <SubmitButton className="w-full gap-2" pendingLabel="Creating account...">
+          <SubmitButton
+            className="w-full gap-2"
+            pendingLabel="Creating account..."
+          >
             Create account
           </SubmitButton>
         </form>

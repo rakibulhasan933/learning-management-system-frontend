@@ -76,15 +76,15 @@ async function getCompletedCourseIds(profileId: string) {
       videoProgress,
       and(
         eq(videoProgress.videoId, videos.id),
-        eq(videoProgress.userId, enrollments.userId),
-      ),
+        eq(videoProgress.userId, enrollments.userId)
+      )
     )
     .where(
       and(
         eq(enrollments.userId, profileId),
         eq(enrollments.status, "active"),
-        eq(videos.isPublished, true),
-      ),
+        eq(videos.isPublished, true)
+      )
     )
     .groupBy(courses.id)
 
@@ -92,7 +92,7 @@ async function getCompletedCourseIds(profileId: string) {
     .filter(
       (row) =>
         Number(row.totalLectures) > 0 &&
-        Number(row.completedLectures) === Number(row.totalLectures),
+        Number(row.completedLectures) === Number(row.totalLectures)
     )
     .map((row) => row.courseId)
 }
@@ -126,8 +126,8 @@ async function issueCertificate(profileId: string, courseId: string) {
     .where(
       and(
         eq(certificates.userId, profileId),
-        eq(certificates.courseId, courseId),
-      ),
+        eq(certificates.courseId, courseId)
+      )
     )
     .limit(1)
 
@@ -192,10 +192,10 @@ certificatesRouter.get(
 
     response.status(200).json({
       certificates: (await getCertificateRows(request.auth!.profile.id)).map(
-        toCertificateDto,
+        toCertificateDto
       ),
     } satisfies CertificateListResponse)
-  }),
+  })
 )
 
 certificatesRouter.get(
@@ -224,7 +224,7 @@ certificatesRouter.get(
     response.status(200).json({
       downloadUrl: certificate.certificateUrl,
     } satisfies CertificateDownloadResponse)
-  }),
+  })
 )
 
 certificatesRouter.get(
@@ -251,5 +251,5 @@ certificatesRouter.get(
     }
 
     response.redirect(certificate.certificateUrl)
-  }),
+  })
 )

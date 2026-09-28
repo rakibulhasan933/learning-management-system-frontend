@@ -19,7 +19,10 @@ export function RevenueChart({ data }: RevenueChartProps) {
   return (
     <div className="h-80 w-full">
       <ResponsiveContainer height="100%" width="100%">
-        <BarChart data={data} margin={{ bottom: 8, left: 0, right: 8, top: 16 }}>
+        <BarChart
+          data={data}
+          margin={{ bottom: 8, left: 0, right: 8, top: 16 }}
+        >
           <CartesianGrid stroke="var(--border)" vertical={false} />
           <XAxis
             axisLine={{ stroke: "var(--border)" }}

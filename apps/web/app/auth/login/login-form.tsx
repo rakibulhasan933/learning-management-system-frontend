@@ -40,7 +40,7 @@ interface LoginFormProps {
 function getErrorMessage(
   values: { email?: { message?: string }; password?: { message?: string } },
   key: keyof LoginValues,
-  serverState: AuthFormState,
+  serverState: AuthFormState
 ) {
   return values[key]?.message ?? serverState.fieldErrors[key] ?? undefined
 }
@@ -50,7 +50,7 @@ export function LoginForm({ next }: LoginFormProps) {
   const validationBypassRef = useRef(false)
   const [serverState, formAction] = useActionState(
     signInWithPasswordFormAction,
-    initialAuthFormState,
+    initialAuthFormState
   )
   const {
     formState: { errors },

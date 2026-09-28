@@ -35,7 +35,7 @@ function serializeDate(value: Date | null) {
 }
 
 function toStudentSubmissionDto(
-  submission: SubmissionRow,
+  submission: SubmissionRow
 ): StudentAssignmentSubmissionDto {
   return {
     assignmentId: submission.assignmentId,
@@ -50,7 +50,7 @@ function toStudentSubmissionDto(
 }
 
 function toInstructorSubmissionDto(
-  submission: InstructorSubmissionRow,
+  submission: InstructorSubmissionRow
 ): InstructorAssignmentSubmissionDto {
   return {
     ...toStudentSubmissionDto(submission),
@@ -96,7 +96,9 @@ function toStudentAssignmentDto({
 }): StudentAssignmentDto {
   const submission = submissions
     .filter((row) => row.assignmentId === assignment.id)
-    .sort((left, right) => right.updatedAt.getTime() - left.updatedAt.getTime())[0]
+    .sort(
+      (left, right) => right.updatedAt.getTime() - left.updatedAt.getTime()
+    )[0]
 
   return {
     courseId: assignment.courseId,
@@ -112,7 +114,10 @@ function toStudentAssignmentDto({
   }
 }
 
-export async function assertActiveEnrollment(courseId: string, profileId: string) {
+export async function assertActiveEnrollment(
+  courseId: string,
+  profileId: string
+) {
   const [enrollment] = await db
     .select({ id: enrollments.id })
     .from(enrollments)
@@ -120,8 +125,8 @@ export async function assertActiveEnrollment(courseId: string, profileId: string
       and(
         eq(enrollments.courseId, courseId),
         eq(enrollments.userId, profileId),
-        eq(enrollments.status, "active"),
-      ),
+        eq(enrollments.status, "active")
+      )
     )
     .limit(1)
 
@@ -163,7 +168,10 @@ export async function getInstructorAssignmentDtosForCourse(courseId: string) {
     .from(assignmentSubmissions)
     .innerJoin(profiles, eq(assignmentSubmissions.userId, profiles.id))
     .innerJoin(users, eq(profiles.userId, users.id))
-    .leftJoin(graderProfiles, eq(assignmentSubmissions.gradedBy, graderProfiles.id))
+    .leftJoin(
+      graderProfiles,
+      eq(assignmentSubmissions.gradedBy, graderProfiles.id)
+    )
     .leftJoin(graderUsers, eq(graderProfiles.userId, graderUsers.id))
     .where(inArray(assignmentSubmissions.assignmentId, assignmentIds))
     .orderBy(desc(assignmentSubmissions.submittedAt))
@@ -172,7 +180,7 @@ export async function getInstructorAssignmentDtosForCourse(courseId: string) {
     toInstructorAssignmentDto({
       assignment,
       submissions: submissionRows,
-    }),
+    })
   )
 }
 
@@ -203,7 +211,7 @@ export async function saveAssignmentForTarget({
         ? eq(assignments.lectureId, lectureId)
         : moduleId
           ? eq(assignments.moduleId, moduleId)
-          : eq(assignments.sectionId, sectionId!),
+          : eq(assignments.sectionId, sectionId!)
     )
     .limit(1)
   const [assignment] =
@@ -243,12 +251,14 @@ export async function saveAssignmentForTarget({
 
 export async function getStudentAssignmentsForCourse(
   courseId: string,
-  profileId: string,
+  profileId: string
 ) {
   const assignmentRows = await db
     .select()
     .from(assignments)
-    .where(and(eq(assignments.courseId, courseId), eq(assignments.isPublished, true)))
+    .where(
+      and(eq(assignments.courseId, courseId), eq(assignments.isPublished, true))
+    )
     .orderBy(asc(assignments.createdAt))
   const assignmentIds = assignmentRows.map((assignment) => assignment.id)
   const submissionRows =
@@ -259,12 +269,12 @@ export async function getStudentAssignmentsForCourse(
           where: (table, { and: andWhere, eq: eqWhere, inArray }) =>
             andWhere(
               eqWhere(table.userId, profileId),
-              inArray(table.assignmentId, assignmentIds),
+              inArray(table.assignmentId, assignmentIds)
             ),
         })
 
   return assignmentRows.map((assignment) =>
-    toStudentAssignmentDto({ assignment, submissions: submissionRows }),
+    toStudentAssignmentDto({ assignment, submissions: submissionRows })
   )
 }
 
@@ -305,7 +315,10 @@ export async function submitAssignment({
         submittedAt: new Date(),
         submissionText,
       },
-      target: [assignmentSubmissions.assignmentId, assignmentSubmissions.userId],
+      target: [
+        assignmentSubmissions.assignmentId,
+        assignmentSubmissions.userId,
+      ],
     })
     .returning()
 
@@ -335,13 +348,16 @@ export async function gradeAssignmentSubmission({
       maxScore: assignments.maxScore,
     })
     .from(assignmentSubmissions)
-    .innerJoin(assignments, eq(assignmentSubmissions.assignmentId, assignments.id))
+    .innerJoin(
+      assignments,
+      eq(assignmentSubmissions.assignmentId, assignments.id)
+    )
     .innerJoin(courses, eq(assignments.courseId, courses.id))
     .where(
       and(
         eq(assignmentSubmissions.id, submissionId),
-        eq(assignments.courseId, courseId),
-      ),
+        eq(assignments.courseId, courseId)
+      )
     )
     .limit(1)
 
@@ -350,7 +366,10 @@ export async function gradeAssignmentSubmission({
   }
 
   if (gradeScore > target.maxScore) {
-    throw new HttpError(400, "Grade score cannot exceed the assignment max score.")
+    throw new HttpError(
+      400,
+      "Grade score cannot exceed the assignment max score."
+    )
   }
 
   const [submission] = await db

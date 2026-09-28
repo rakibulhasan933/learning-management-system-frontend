@@ -126,9 +126,16 @@
   * {
     @apply border-border outline-ring/50;
     }
+  html {
+    scroll-behavior: smooth;
+  }
   body {
     @apply bg-background text-foreground;
     }
+  ::selection {
+    background: color-mix(in srgb, var(--primary) 32%, transparent);
+    color: var(--foreground);
+  }
 
   /*
    * Tailwind v4's preflight sets `cursor: default` on <button>, so every button

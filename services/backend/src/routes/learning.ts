@@ -41,8 +41,8 @@ learningRouter.get(
         and(
           eq(enrollments.courseId, params.courseId),
           eq(enrollments.userId, request.auth!.profile.id),
-          eq(enrollments.status, "active"),
-        ),
+          eq(enrollments.status, "active")
+        )
       )
       .limit(1)
 
@@ -75,7 +75,15 @@ learningRouter.get(
       .orderBy(asc(sections.position))
 
     const moduleRows = await db
-      .select({ contentTypes: modules.contentTypes, id: modules.id, milestoneId: modules.milestoneId, pdfUrl: modules.pdfUrl, position: modules.position, slidesUrl: modules.slidesUrl, title: modules.title })
+      .select({
+        contentTypes: modules.contentTypes,
+        id: modules.id,
+        milestoneId: modules.milestoneId,
+        pdfUrl: modules.pdfUrl,
+        position: modules.position,
+        slidesUrl: modules.slidesUrl,
+        title: modules.title,
+      })
       .from(modules)
       .innerJoin(sections, eq(modules.milestoneId, sections.id))
       .where(eq(sections.courseId, params.courseId))
@@ -97,9 +105,16 @@ learningRouter.get(
       .innerJoin(modules, eq(videos.moduleId, modules.id))
       .innerJoin(sections, eq(modules.milestoneId, sections.id))
       .where(
-        and(eq(sections.courseId, params.courseId), eq(videos.isPublished, true)),
+        and(
+          eq(sections.courseId, params.courseId),
+          eq(videos.isPublished, true)
+        )
       )
-      .orderBy(asc(sections.position), asc(modules.position), asc(videos.position))
+      .orderBy(
+        asc(sections.position),
+        asc(modules.position),
+        asc(videos.position)
+      )
     const videoIds = videoRows.map((video) => video.id)
     const progressRows =
       videoIds.length === 0
@@ -108,7 +123,7 @@ learningRouter.get(
             where: (table, { and: andWhere, eq: eqWhere, inArray }) =>
               andWhere(
                 eqWhere(table.userId, request.auth!.profile.id),
-                inArray(table.videoId, videoIds),
+                inArray(table.videoId, videoIds)
               ),
           })
     const progressDtos = progressRows.map((row) => ({
@@ -121,18 +136,16 @@ learningRouter.get(
       updatedAt: row.updatedAt.toISOString(),
     }))
     const completedLectureCount = videoRows.filter((video) =>
-      progressRows.some(
-        (row) => row.videoId === video.id && row.isCompleted,
-      ),
+      progressRows.some((row) => row.videoId === video.id && row.isCompleted)
     ).length
     const totalLectureCount = videoRows.length
     const quizDtos = await getStudentQuizzesForCourse(
       params.courseId,
-      request.auth!.profile.id,
+      request.auth!.profile.id
     )
     const assignmentDtos = await getStudentAssignmentsForCourse(
       params.courseId,
-      request.auth!.profile.id,
+      request.auth!.profile.id
     )
 
     const payload: LearningCourseResponse = {
@@ -150,21 +163,41 @@ learningRouter.get(
       },
       sections: sectionRows.map((section) => {
         const sectionLectures = videoRows
-          .filter((video) => moduleRows.some((module) => module.id === video.moduleId && module.milestoneId === section.id))
+          .filter((video) =>
+            moduleRows.some(
+              (module) =>
+                module.id === video.moduleId &&
+                module.milestoneId === section.id
+            )
+          )
           .map((video) => {
-      const module = moduleRows.find((item) => item.id === video.moduleId)
-            const moduleVideos = videoRows.filter((item) => item.moduleId === video.moduleId)
+            const module = moduleRows.find((item) => item.id === video.moduleId)
+            const moduleVideos = videoRows.filter(
+              (item) => item.moduleId === video.moduleId
+            )
             return {
               availableAt: serializeDate(video.availableAt),
-              assignment: moduleVideos[0]?.id === video.id ? assignmentDtos.find((assignment) => assignment.moduleId === video.moduleId) ?? null : null,
+              assignment:
+                moduleVideos[0]?.id === video.id
+                  ? (assignmentDtos.find(
+                      (assignment) => assignment.moduleId === video.moduleId
+                    ) ?? null)
+                  : null,
               durationSeconds: video.durationSeconds,
               description: video.description,
               id: video.id,
               isPreview: video.isPreview,
               pdfUrl: video.pdfUrl,
               position: video.position,
-              progress: progressDtos.find((item) => item.lectureId === video.id) ?? null,
-              quiz: moduleVideos[0]?.id === video.id ? quizDtos.find((quiz) => quiz.moduleId === video.moduleId) ?? null : null,
+              progress:
+                progressDtos.find((item) => item.lectureId === video.id) ??
+                null,
+              quiz:
+                moduleVideos[0]?.id === video.id
+                  ? (quizDtos.find(
+                      (quiz) => quiz.moduleId === video.moduleId
+                    ) ?? null)
+                  : null,
               sectionId: module?.milestoneId ?? section.id,
               moduleId: video.moduleId,
               moduleTitle: module?.title ?? "Module",
@@ -180,18 +213,29 @@ learningRouter.get(
           modules: moduleRows
             .filter((module) => module.milestoneId === section.id)
             .map((module) => ({
-              assignment: assignmentDtos.find((assignment) => assignment.moduleId === module.id) ?? null,
-              contentTypes: module.contentTypes as Array<"video" | "pdf" | "quiz" | "assignment">,
+              assignment:
+                assignmentDtos.find(
+                  (assignment) => assignment.moduleId === module.id
+                ) ?? null,
+              contentTypes: module.contentTypes as Array<
+                "video" | "pdf" | "quiz" | "assignment"
+              >,
               id: module.id,
               pdfUrl: module.pdfUrl,
               position: module.position,
-              quiz: quizDtos.find((quiz) => quiz.moduleId === module.id) ?? null,
+              quiz:
+                quizDtos.find((quiz) => quiz.moduleId === module.id) ?? null,
               slidesUrl: module.slidesUrl,
               title: module.title,
-              videos: sectionLectures.filter((lecture) => lecture.moduleId === module.id),
+              videos: sectionLectures.filter(
+                (lecture) => lecture.moduleId === module.id
+              ),
             })),
           position: section.position,
-          assignment: assignmentDtos.find((assignment) => assignment.sectionId === section.id) ?? null,
+          assignment:
+            assignmentDtos.find(
+              (assignment) => assignment.sectionId === section.id
+            ) ?? null,
           quiz: quizDtos.find((quiz) => quiz.sectionId === section.id) ?? null,
           title: section.title,
         }
@@ -199,5 +243,5 @@ learningRouter.get(
     }
 
     response.status(200).json(payload)
-  }),
+  })
 )

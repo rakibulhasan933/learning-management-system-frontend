@@ -4,14 +4,14 @@ import { ZodError } from "zod"
 export class HttpError extends Error {
   constructor(
     public readonly statusCode: number,
-    message: string,
+    message: string
   ) {
     super(message)
   }
 }
 
 export function asyncHandler(
-  handler: (request: Request, response: Response) => Promise<void>,
+  handler: (request: Request, response: Response) => Promise<void>
 ) {
   return (request: Request, response: Response, next: NextFunction) => {
     handler(request, response).catch(next)
@@ -26,7 +26,7 @@ export function errorHandler(
   error: unknown,
   _request: Request,
   response: Response,
-  next: NextFunction,
+  next: NextFunction
 ) {
   void next
 

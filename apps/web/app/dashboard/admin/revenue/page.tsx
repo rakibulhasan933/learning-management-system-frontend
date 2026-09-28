@@ -29,7 +29,7 @@ function formatCurrency(value: number) {
 export default async function AdminRevenuePage() {
   const overview = await authenticatedApiFetch<AdminRevenueOverviewResponse>(
     "/admin/revenue",
-    { cache: "no-store" },
+    { cache: "no-store" }
   )
 
   const metrics = [
@@ -71,10 +71,7 @@ export default async function AdminRevenuePage() {
     },
   ]
 
-  const methodTotal = overview.byMethod.reduce(
-    (sum, m) => sum + m.revenue,
-    0,
-  )
+  const methodTotal = overview.byMethod.reduce((sum, m) => sum + m.revenue, 0)
 
   return (
     <main className="min-h-screen bg-background px-4 py-10 text-foreground sm:px-6 lg:px-10">
@@ -203,10 +200,7 @@ export default async function AdminRevenuePage() {
                             </span>
                           </div>
                         </div>
-                        <ProgressThread
-                          className="mt-3 w-full"
-                          value={share}
-                        />
+                        <ProgressThread className="mt-3 w-full" value={share} />
                       </div>
                     )
                   })}

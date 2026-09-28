@@ -14,7 +14,7 @@ export function PaymentProofUploadControl({
 }: PaymentProofUploadControlProps) {
   const [proofUrl, setProofUrl] = useState(currentUrl ?? "")
   const [message, setMessage] = useState<string | null>(
-    currentUrl ? "Screenshot uploaded." : null,
+    currentUrl ? "Screenshot uploaded." : null
   )
 
   return (
@@ -38,7 +38,11 @@ export function PaymentProofUploadControl({
           }}
           content={{
             button: ({ isUploading, ready }) =>
-              isUploading ? "Uploading..." : ready ? "Upload screenshot" : "Ready",
+              isUploading
+                ? "Uploading..."
+                : ready
+                  ? "Upload screenshot"
+                  : "Ready",
           }}
           onClientUploadComplete={(response) => {
             const uploadedUrl = response[0]?.url

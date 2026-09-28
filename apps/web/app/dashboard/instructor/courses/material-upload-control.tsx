@@ -2,7 +2,14 @@
 
 import { useRef, useState, useTransition } from "react"
 import type { DragEvent } from "react"
-import { CheckCircle2, ExternalLink, FileText, Loader2, Presentation, X } from "lucide-react"
+import {
+  CheckCircle2,
+  ExternalLink,
+  FileText,
+  Loader2,
+  Presentation,
+  X,
+} from "lucide-react"
 
 import { getBackendApiUrl } from "@/lib/auth/cookies"
 import { Button } from "@workspace/ui/components/button"
@@ -66,23 +73,46 @@ export function MaterialUploadControl({
             ? `videos/${videoId}`
             : `lectures/${lectureId}`
         const query = new URLSearchParams({ fileName: file.name, kind })
-        const response = await new Promise<{ url: string }>((resolve, reject) => {
-          const xhr = new XMLHttpRequest()
-          xhr.open("POST", `${getBackendApiUrl()}/instructor/courses/${courseId}/${resourcePath}/material-upload?${query.toString()}`)
-          xhr.withCredentials = true
-          xhr.setRequestHeader("Content-Type", file.type || "application/octet-stream")
-          xhr.onload = () => {
-            try {
-              const payload = JSON.parse(xhr.responseText) as { message?: string; url?: string }
-              if (xhr.status >= 200 && xhr.status < 300 && payload.url) resolve({ url: payload.url })
-              else reject(new Error(payload.message ?? `Material upload failed (${xhr.status}).`))
-            } catch {
-              reject(new Error(`Material upload failed (${xhr.status}).`))
+        const response = await new Promise<{ url: string }>(
+          (resolve, reject) => {
+            const xhr = new XMLHttpRequest()
+            xhr.open(
+              "POST",
+              `${getBackendApiUrl()}/instructor/courses/${courseId}/${resourcePath}/material-upload?${query.toString()}`
+            )
+            xhr.withCredentials = true
+            xhr.setRequestHeader(
+              "Content-Type",
+              file.type || "application/octet-stream"
+            )
+            xhr.onload = () => {
+              try {
+                const payload = JSON.parse(xhr.responseText) as {
+                  message?: string
+                  url?: string
+                }
+                if (xhr.status >= 200 && xhr.status < 300 && payload.url)
+                  resolve({ url: payload.url })
+                else
+                  reject(
+                    new Error(
+                      payload.message ??
+                        `Material upload failed (${xhr.status}).`
+                    )
+                  )
+              } catch {
+                reject(new Error(`Material upload failed (${xhr.status}).`))
+              }
             }
+            xhr.onerror = () =>
+              reject(
+                new Error(
+                  "Material upload failed. Check the backend connection."
+                )
+              )
+            xhr.send(file)
           }
-          xhr.onerror = () => reject(new Error("Material upload failed. Check the backend connection."))
-          xhr.send(file)
-        })
+        )
 
         setMaterialUrl(response.url)
         setMessage("Uploaded")
@@ -119,10 +149,13 @@ export function MaterialUploadControl({
 
     startTransition(async () => {
       try {
-        const response = await fetch(`${getBackendApiUrl()}/instructor/courses/${courseId}/modules/${moduleId}/material`, {
-          credentials: "include",
-          method: "DELETE",
-        })
+        const response = await fetch(
+          `${getBackendApiUrl()}/instructor/courses/${courseId}/modules/${moduleId}/material`,
+          {
+            credentials: "include",
+            method: "DELETE",
+          }
+        )
         if (!response.ok) throw new Error("Material could not be deleted.")
         setMaterialUrl(null)
         setFileName(null)
@@ -164,7 +197,7 @@ export function MaterialUploadControl({
             "flex cursor-pointer flex-col items-center justify-center gap-1.5 border border-dashed border-border bg-background px-4 py-6 text-center transition-colors",
             "hover:border-primary/50",
             isDragging && "border-primary bg-primary/5",
-            isPending && "cursor-not-allowed opacity-70",
+            isPending && "cursor-not-allowed opacity-70"
           )}
         >
           {isPending ? (
@@ -223,7 +256,7 @@ export function MaterialUploadControl({
         <p
           className={cn(
             "text-xs",
-            isError ? "text-destructive" : "text-muted-foreground",
+            isError ? "text-destructive" : "text-muted-foreground"
           )}
           role="status"
         >

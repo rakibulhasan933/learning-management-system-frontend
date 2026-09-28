@@ -1,5 +1,10 @@
 import { randomUUID } from "node:crypto"
-import { PutObjectCommand, GetObjectCommand, ListObjectsV2Command, S3Client } from "@aws-sdk/client-s3"
+import {
+  PutObjectCommand,
+  GetObjectCommand,
+  ListObjectsV2Command,
+  S3Client,
+} from "@aws-sdk/client-s3"
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
 
 import { env } from "../config/env.js"
@@ -66,7 +71,10 @@ export async function createR2UploadUrl({
   key: string
 }) {
   if (contentType !== "video/mp4") {
-    throw new HttpError(400, "Only MP4 lecture videos are supported for R2 upload.")
+    throw new HttpError(
+      400,
+      "Only MP4 lecture videos are supported for R2 upload."
+    )
   }
 
   const command = new PutObjectCommand({
@@ -75,7 +83,9 @@ export async function createR2UploadUrl({
     Key: key,
   })
 
-  return getSignedUrl(getR2Client(), command, { expiresIn: uploadUrlTtlSeconds })
+  return getSignedUrl(getR2Client(), command, {
+    expiresIn: uploadUrlTtlSeconds,
+  })
 }
 
 export async function createR2PlaybackUrl(key: string) {
@@ -84,7 +94,9 @@ export async function createR2PlaybackUrl(key: string) {
     Key: key,
   })
 
-  return getSignedUrl(getR2Client(), command, { expiresIn: playbackUrlTtlSeconds })
+  return getSignedUrl(getR2Client(), command, {
+    expiresIn: playbackUrlTtlSeconds,
+  })
 }
 
 export async function uploadLectureVideoToR2({
@@ -114,9 +126,17 @@ export async function getR2StorageUsage() {
     let objects = 0
     let bytes = 0
     do {
-      const result = await client.send(new ListObjectsV2Command({ Bucket: bucket, ContinuationToken: continuationToken }))
+      const result = await client.send(
+        new ListObjectsV2Command({
+          Bucket: bucket,
+          ContinuationToken: continuationToken,
+        })
+      )
       objects += result.KeyCount ?? result.Contents?.length ?? 0
-      bytes += (result.Contents ?? []).reduce((total, object) => total + Number(object.Size ?? 0), 0)
+      bytes += (result.Contents ?? []).reduce(
+        (total, object) => total + Number(object.Size ?? 0),
+        0
+      )
       continuationToken = result.NextContinuationToken
     } while (continuationToken)
     return { objects, bytes }

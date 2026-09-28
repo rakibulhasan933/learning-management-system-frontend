@@ -27,9 +27,7 @@ import { env } from "../config/env.js"
 import { asyncHandler, HttpError } from "../http/errors.js"
 import { db } from "../lib/database.js"
 import { createNotification } from "../lib/notifications.js"
-import {
-  sendPaymentApprovedEmail,
-} from "../lib/mailer.js"
+import { sendPaymentApprovedEmail } from "../lib/mailer.js"
 import { requireAuth, requireRole } from "../middleware/auth.js"
 
 export const paymentsRouter: ExpressRouter = Router()
@@ -122,16 +120,34 @@ function toOrderDto(row: OrderRow): PaymentOrderDto {
 }
 
 async function getSetting(key: string) {
-  const [row] = await db.select({ value: siteSettings.value }).from(siteSettings).where(eq(siteSettings.key, key)).limit(1)
+  const [row] = await db
+    .select({ value: siteSettings.value })
+    .from(siteSettings)
+    .where(eq(siteSettings.key, key))
+    .limit(1)
   return row?.value ?? null
 }
 
 async function getInstructions(): Promise<ManualPaymentInstructionsDto> {
-  const [bankDetails, paymentInstructions, bkashNumber, nagadNumber, rocketNumber] = await Promise.all([
-    getSetting("payment_bank_details"), getSetting("payment_instructions"), getSetting("payment_bkash_number"), getSetting("payment_nagad_number"), getSetting("payment_rocket_number"),
+  const [
+    bankDetails,
+    paymentInstructions,
+    bkashNumber,
+    nagadNumber,
+    rocketNumber,
+  ] = await Promise.all([
+    getSetting("payment_bank_details"),
+    getSetting("payment_instructions"),
+    getSetting("payment_bkash_number"),
+    getSetting("payment_nagad_number"),
+    getSetting("payment_rocket_number"),
   ])
   return {
-    bankDetails: bankDetails ?? paymentInstructions ?? env.MANUAL_PAYMENT_BANK_DETAILS ?? null,
+    bankDetails:
+      bankDetails ??
+      paymentInstructions ??
+      env.MANUAL_PAYMENT_BANK_DETAILS ??
+      null,
     bkashNumber: bkashNumber ?? env.MANUAL_PAYMENT_BKASH_NUMBER ?? null,
     nagadNumber: nagadNumber ?? env.MANUAL_PAYMENT_NAGAD_NUMBER ?? null,
     rocketNumber: rocketNumber ?? env.MANUAL_PAYMENT_ROCKET_NUMBER ?? null,
@@ -139,9 +155,11 @@ async function getInstructions(): Promise<ManualPaymentInstructionsDto> {
 }
 
 async function parseCoupons() {
-  const coupons: Record<string, { type: "amount" | "percent"; value: number }> = {}
+  const coupons: Record<string, { type: "amount" | "percent"; value: number }> =
+    {}
 
-  const configuredCoupons = (await getSetting("payment_coupons")) ?? env.MANUAL_PAYMENT_COUPONS ?? ""
+  const configuredCoupons =
+    (await getSetting("payment_coupons")) ?? env.MANUAL_PAYMENT_COUPONS ?? ""
   for (const entry of configuredCoupons.split(",")) {
     const [rawCode, rawType, rawValue] = entry.split(":")
     const code = rawCode?.trim().toUpperCase()
@@ -246,7 +264,9 @@ const defaultPayConfirmUrl = "https://api-payconfirm.duckdns.org/api/v1/verify"
 
 function maskPaymentValue(value: string) {
   const trimmed = value.trim()
-  return trimmed.length <= 4 ? "****" : `${trimmed.slice(0, 2)}****${trimmed.slice(-2)}`
+  return trimmed.length <= 4
+    ? "****"
+    : `${trimmed.slice(0, 2)}****${trimmed.slice(-2)}`
 }
 
 function maskId(value: string | null | undefined) {
@@ -298,13 +318,20 @@ async function verifyPaymentWithPayConfirm({
       error: error instanceof Error ? error.message : String(error),
       transactionId: maskPaymentValue(transactionId),
     })
-    throw new HttpError(502, "Payment verification service is unavailable. Try again shortly.")
+    throw new HttpError(
+      502,
+      "Payment verification service is unavailable. Try again shortly."
+    )
   }
 
   const responseText = await providerResponse.text()
   const payload = (() => {
     try {
-      return JSON.parse(responseText) as { reason?: string; status?: string; error?: string }
+      return JSON.parse(responseText) as {
+        reason?: string
+        status?: string
+        error?: string
+      }
     } catch {
       return null
     }
@@ -315,14 +342,21 @@ async function verifyPaymentWithPayConfirm({
       contentType: providerResponse.headers.get("content-type"),
       url: payConfirmUrl,
     })
-    throw new HttpError(503, "Payment verification endpoint is unavailable. Check PAYCONFIRM_API_URL.")
+    throw new HttpError(
+      503,
+      "Payment verification endpoint is unavailable. Check PAYCONFIRM_API_URL."
+    )
   }
 
   if (providerResponse.ok && payload?.status === "approved") {
     return
   }
 
-  const reason = payload?.reason ?? payload?.status ?? payload?.error ?? "verification_failed"
+  const reason =
+    payload?.reason ??
+    payload?.status ??
+    payload?.error ??
+    "verification_failed"
   console.warn("[payment] Pay-Confirm rejected payment", {
     providerStatus: providerResponse.status,
     reason,
@@ -335,17 +369,22 @@ async function verifyPaymentWithPayConfirm({
     invalid_amount: "The order amount could not be verified.",
     invalid_request: "The payment verification request is invalid.",
     invalid_sender: "Please enter a valid sender phone number.",
-    pending_or_not_found: "This transaction has not arrived yet. Try again after a few minutes.",
+    pending_or_not_found:
+      "This transaction has not arrived yet. Try again after a few minutes.",
     reversed: "This payment was reversed or refunded.",
     sender_mismatch: "The sender phone number does not match the transaction.",
-    sender_unverifiable: "The payment sender could not be verified. Try another transaction.",
+    sender_unverifiable:
+      "The payment sender could not be verified. Try another transaction.",
   }
 
   const status = [400, 404, 409, 422].includes(providerResponse.status)
     ? providerResponse.status
     : 502
 
-  throw new HttpError(status, messages[reason] ?? "Payment could not be verified.")
+  throw new HttpError(
+    status,
+    messages[reason] ?? "Payment could not be verified."
+  )
 }
 
 paymentsRouter.post(
@@ -354,11 +393,26 @@ paymentsRouter.post(
   requireRole(["admin", "student"]),
   asyncHandler(async (request, response) => {
     const input = couponPreviewSchema.parse(request.body)
-    const [course] = await db.select({ currency: courses.currency, price: courses.price, status: courses.status }).from(courses).where(eq(courses.id, input.courseId)).limit(1)
-    if (!course || course.status !== "published") throw new HttpError(404, "Course not found.")
+    const [course] = await db
+      .select({
+        currency: courses.currency,
+        price: courses.price,
+        status: courses.status,
+      })
+      .from(courses)
+      .where(eq(courses.id, input.courseId))
+      .limit(1)
+    if (!course || course.status !== "published")
+      throw new HttpError(404, "Course not found.")
     const pricing = await applyCoupon(Number(course.price), input.couponCode)
-    response.json({ currency: course.currency, discountAmount: pricing.discountAmount, amount: pricing.amount, originalAmount: toMoney(Number(course.price)), couponCode: pricing.couponCode })
-  }),
+    response.json({
+      currency: course.currency,
+      discountAmount: pricing.discountAmount,
+      amount: pricing.amount,
+      originalAmount: toMoney(Number(course.price)),
+      couponCode: pricing.couponCode,
+    })
+  })
 )
 
 paymentsRouter.post(
@@ -390,8 +444,8 @@ paymentsRouter.post(
         and(
           eq(enrollments.courseId, course.id),
           eq(enrollments.userId, request.auth!.profile.id),
-          eq(enrollments.status, "active"),
-        ),
+          eq(enrollments.status, "active")
+        )
       )
       .limit(1)
 
@@ -406,8 +460,8 @@ paymentsRouter.post(
         and(
           eq(orders.courseId, course.id),
           eq(orders.userId, request.auth!.profile.id),
-          sql`${orders.status} in ('pending_verification', 'rejected')`,
-        ),
+          sql`${orders.status} in ('pending_verification', 'rejected')`
+        )
       )
       .orderBy(desc(orders.createdAt))
       .limit(1)
@@ -461,7 +515,7 @@ paymentsRouter.post(
       instructions: await getInstructions(),
       order: toOrderDto(order!),
     } satisfies PaymentInstructionsResponse)
-  }),
+  })
 )
 
 paymentsRouter.get(
@@ -493,7 +547,7 @@ paymentsRouter.get(
       instructions: await getInstructions(),
       order: toOrderDto(order),
     } satisfies PaymentInstructionsResponse)
-  }),
+  })
 )
 
 paymentsRouter.post(
@@ -534,7 +588,8 @@ paymentsRouter.post(
       throw new HttpError(409, "This order is already paid.")
     }
 
-    const proofScreenshotUrl = input.proofScreenshotUrl ?? order.proofScreenshotUrl
+    const proofScreenshotUrl =
+      input.proofScreenshotUrl ?? order.proofScreenshotUrl
 
     await verifyPaymentWithPayConfirm({
       amount: order.amount,
@@ -568,13 +623,27 @@ paymentsRouter.post(
     const updatedOrder = await getOrderForViewer(orderId)
 
     await notifyPaymentApproved(toOrderDto(updatedOrder!))
-    const [course] = await db.select({ id: courses.id, instructorId: courses.instructorId, title: courses.title }).from(courses).where(eq(courses.id, order.courseId)).limit(1)
+    const [course] = await db
+      .select({
+        id: courses.id,
+        instructorId: courses.instructorId,
+        title: courses.title,
+      })
+      .from(courses)
+      .where(eq(courses.id, order.courseId))
+      .limit(1)
     if (course) {
-      await createNotification({ body: `A new student enrolled in ${course.title}.`, href: `/dashboard/instructor/courses/${course.id}/students`, profileId: course.instructorId, title: "New course enrollment", type: "new_enrollment" })
+      await createNotification({
+        body: `A new student enrolled in ${course.title}.`,
+        href: `/dashboard/instructor/courses/${course.id}/students`,
+        profileId: course.instructorId,
+        title: "New course enrollment",
+        type: "new_enrollment",
+      })
     }
 
     response.status(200).json(toOrderDto(updatedOrder!))
-  }),
+  })
 )
 
 paymentsRouter.get(
@@ -618,5 +687,5 @@ paymentsRouter.get(
     response.status(200).json({
       orders: (rows as OrderRow[]).map(toOrderDto),
     } satisfies StudentOrderListResponse)
-  }),
+  })
 )

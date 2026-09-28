@@ -65,8 +65,9 @@ export function verifyAccessToken(token: string): AccessTokenPayload {
     throw new Error("Invalid token signature.")
   }
 
-  const payload = JSON.parse(Buffer.from(body, "base64url").toString("utf8")) as
-    AccessTokenPayload & { exp?: number }
+  const payload = JSON.parse(
+    Buffer.from(body, "base64url").toString("utf8")
+  ) as AccessTokenPayload & { exp?: number }
 
   if (!payload.exp || payload.exp <= Math.floor(Date.now() / 1000)) {
     throw new Error("Token expired.")
@@ -86,9 +87,7 @@ export function hashRefreshToken(token: string) {
 }
 
 export function hashActionToken(token: string) {
-  return createHmac("sha256", env.JWT_ACCESS_SECRET)
-    .update(token)
-    .digest("hex")
+  return createHmac("sha256", env.JWT_ACCESS_SECRET).update(token).digest("hex")
 }
 
 export function getRefreshTokenExpiresAt() {
@@ -98,7 +97,7 @@ export function getRefreshTokenExpiresAt() {
 export function setAuthCookies(
   response: Response,
   accessToken: string,
-  refreshToken: string,
+  refreshToken: string
 ) {
   const secure = env.NODE_ENV === "production"
 

@@ -53,7 +53,10 @@ export default async function ResetPasswordPage({
                   type="password"
                   autoComplete="new-password"
                 />
-                <SubmitButton className="w-full" pendingLabel="Updating password...">
+                <SubmitButton
+                  className="w-full"
+                  pendingLabel="Updating password..."
+                >
                   Update password
                 </SubmitButton>
               </form>
@@ -73,7 +76,10 @@ export default async function ResetPasswordPage({
 
             <p className="text-sm text-muted-foreground">
               Remembered it?{" "}
-              <Link className="interactive-link text-primary" href="/auth/login">
+              <Link
+                className="interactive-link text-primary"
+                href="/auth/login"
+              >
                 Sign in
               </Link>
             </p>

@@ -16,9 +16,12 @@ export default async function InstructorCourseWorkspacePage({
   params,
 }: InstructorCourseWorkspacePageProps) {
   const { id } = await params
-  const course = await authenticatedApiFetch<InstructorCourseDto>(`/instructor/courses/${id}`, {
-    cache: "no-store",
-  })
+  const course = await authenticatedApiFetch<InstructorCourseDto>(
+    `/instructor/courses/${id}`,
+    {
+      cache: "no-store",
+    }
+  )
 
   return (
     <div className="grid gap-8">

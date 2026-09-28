@@ -76,6 +76,8 @@ export interface ProfileDto {
 export interface AuthSessionDto {
   accessToken: string
   profile: ProfileDto
+  /** Present only for non-browser clients that store it in secure OS storage. */
+  refreshToken?: string
 }
 
 export interface CourseSummaryDto {
@@ -326,6 +328,10 @@ export interface StudentQuizReviewDto {
 export interface QuizSubmissionResultDto extends StudentQuizAttemptDto {
   correctOptionIds: Record<string, string[]>
   correctQuestionIds: string[]
+  review: {
+    answers: Record<string, string[]>
+    correctOptionIds: Record<string, string[]>
+  }
 }
 
 export interface InstructorAssignmentSubmissionDto {

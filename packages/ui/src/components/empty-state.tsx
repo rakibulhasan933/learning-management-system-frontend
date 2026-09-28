@@ -42,7 +42,9 @@ function EmptyState({
           {description}
         </p>
       ) : null}
-      {action ? <div className="mt-6 flex flex-wrap justify-center gap-3">{action}</div> : null}
+      {action ? (
+        <div className="mt-6 flex flex-wrap justify-center gap-3">{action}</div>
+      ) : null}
     </div>
   )
 }

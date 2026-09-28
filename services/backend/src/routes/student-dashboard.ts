@@ -51,13 +51,19 @@ function createWeeklyActivity(
     isCompleted: boolean
     lastWatchedAt: Date
     positionSeconds: number
-  }>,
+  }>
 ) {
-  const activityByDate = new Map<string, { lecturesCompleted: number; minutes: number }>()
+  const activityByDate = new Map<
+    string,
+    { lecturesCompleted: number; minutes: number }
+  >()
 
   for (const row of rows) {
     const key = dateKey(row.lastWatchedAt)
-    const current = activityByDate.get(key) ?? { lecturesCompleted: 0, minutes: 0 }
+    const current = activityByDate.get(key) ?? {
+      lecturesCompleted: 0,
+      minutes: 0,
+    }
     current.minutes += Math.round(row.positionSeconds / 60)
     if (row.isCompleted) current.lecturesCompleted += 1
     activityByDate.set(key, current)
@@ -70,11 +76,17 @@ function createWeeklyActivity(
     const date = new Date(today)
     date.setUTCDate(today.getUTCDate() - (6 - index))
     const key = dateKey(date)
-    const activity = activityByDate.get(key) ?? { lecturesCompleted: 0, minutes: 0 }
+    const activity = activityByDate.get(key) ?? {
+      lecturesCompleted: 0,
+      minutes: 0,
+    }
 
     return {
       date: key,
-      label: date.toLocaleDateString("en-US", { timeZone: "UTC", weekday: "short" }),
+      label: date.toLocaleDateString("en-US", {
+        timeZone: "UTC",
+        weekday: "short",
+      }),
       ...activity,
     }
   })
@@ -95,10 +107,7 @@ studentDashboardRouter.get(
       .from(enrollments)
       .innerJoin(courses, eq(enrollments.courseId, courses.id))
       .where(
-        and(
-          eq(enrollments.userId, profileId),
-          eq(enrollments.status, "active"),
-        ),
+        and(eq(enrollments.userId, profileId), eq(enrollments.status, "active"))
       )
       .orderBy(desc(enrollments.enrolledAt))
 
@@ -131,12 +140,13 @@ studentDashboardRouter.get(
       .innerJoin(modules, eq(videos.moduleId, modules.id))
       .innerJoin(sections, eq(modules.milestoneId, sections.id))
       .where(
-        and(
-          inArray(sections.courseId, courseIds),
-          eq(videos.isPublished, true),
-        ),
+        and(inArray(sections.courseId, courseIds), eq(videos.isPublished, true))
       )
-      .orderBy(asc(sections.position), asc(modules.position), asc(videos.position))
+      .orderBy(
+        asc(sections.position),
+        asc(modules.position),
+        asc(videos.position)
+      )
     const lectureIds = lectureRows.map((row) => row.id)
     const progressRows = lectureIds.length
       ? await db
@@ -150,27 +160,44 @@ studentDashboardRouter.get(
           .where(
             and(
               eq(videoProgress.userId, profileId),
-              inArray(videoProgress.videoId, lectureIds),
-            ),
+              inArray(videoProgress.videoId, lectureIds)
+            )
           )
       : []
 
     const quizRows = await db
       .select({ id: quizzes.id, title: quizzes.title })
       .from(quizzes)
-      .where(and(inArray(quizzes.courseId, courseIds), eq(quizzes.isPublished, true)))
+      .where(
+        and(inArray(quizzes.courseId, courseIds), eq(quizzes.isPublished, true))
+      )
     const quizIds = quizRows.map((row) => row.id)
     const quizAttemptRows = quizIds.length
       ? await db
-          .select({ completedAt: quizAttempts.completedAt, quizId: quizAttempts.quizId, score: quizAttempts.score, totalQuestions: quizAttempts.totalQuestions })
+          .select({
+            completedAt: quizAttempts.completedAt,
+            quizId: quizAttempts.quizId,
+            score: quizAttempts.score,
+            totalQuestions: quizAttempts.totalQuestions,
+          })
           .from(quizAttempts)
-          .where(and(eq(quizAttempts.userId, profileId), inArray(quizAttempts.quizId, quizIds)))
+          .where(
+            and(
+              eq(quizAttempts.userId, profileId),
+              inArray(quizAttempts.quizId, quizIds)
+            )
+          )
       : []
 
     const assignmentRows = await db
       .select({ id: assignments.id, maxScore: assignments.maxScore })
       .from(assignments)
-      .where(and(inArray(assignments.courseId, courseIds), eq(assignments.isPublished, true)))
+      .where(
+        and(
+          inArray(assignments.courseId, courseIds),
+          eq(assignments.isPublished, true)
+        )
+      )
     const assignmentIds = assignmentRows.map((row) => row.id)
     const submissionRows = assignmentIds.length
       ? await db
@@ -181,10 +208,17 @@ studentDashboardRouter.get(
             updatedAt: assignmentSubmissions.updatedAt,
           })
           .from(assignmentSubmissions)
-          .where(and(eq(assignmentSubmissions.userId, profileId), inArray(assignmentSubmissions.assignmentId, assignmentIds)))
+          .where(
+            and(
+              eq(assignmentSubmissions.userId, profileId),
+              inArray(assignmentSubmissions.assignmentId, assignmentIds)
+            )
+          )
       : []
 
-    const progressByLecture = new Map(progressRows.map((row) => [row.lectureId, row]))
+    const progressByLecture = new Map(
+      progressRows.map((row) => [row.lectureId, row])
+    )
     const courseProgress = enrollmentRows.map((course) => {
       const courseLectureIds = lectureRows
         .filter((lecture) => lecture.courseId === course.courseId)
@@ -192,7 +226,9 @@ studentDashboardRouter.get(
       const courseProgressRows = courseLectureIds
         .map((lectureId) => progressByLecture.get(lectureId))
         .filter((row): row is (typeof progressRows)[number] => Boolean(row))
-      const completedLectures = courseProgressRows.filter((row) => row.isCompleted).length
+      const completedLectures = courseProgressRows.filter(
+        (row) => row.isCompleted
+      ).length
       const lastActivityAt = courseProgressRows
         .map((row) => row.lastWatchedAt)
         .sort((left, right) => right.getTime() - left.getTime())[0]
@@ -214,23 +250,35 @@ studentDashboardRouter.get(
       ...quizAttemptRows.map((row) => row.completedAt),
       ...submissionRows.map((row) => row.updatedAt),
     ]
-    const lastActivityAt = allActivityDates.sort((left, right) => right.getTime() - left.getTime())[0]
+    const lastActivityAt = allActivityDates.sort(
+      (left, right) => right.getTime() - left.getTime()
+    )[0]
     const quizAveragePercentage = quizAttemptRows.length
       ? Math.round(
           quizAttemptRows.reduce(
-            (total, row) => total + (row.totalQuestions ? (row.score / row.totalQuestions) * 100 : 0),
-            0,
-          ) / quizAttemptRows.length,
+            (total, row) =>
+              total +
+              (row.totalQuestions ? (row.score / row.totalQuestions) * 100 : 0),
+            0
+          ) / quizAttemptRows.length
         )
       : 0
-    const gradedSubmissions = submissionRows.filter((row) => row.gradeScore !== null)
-    const maxScoreByAssignment = new Map(assignmentRows.map((row) => [row.id, row.maxScore]))
+    const gradedSubmissions = submissionRows.filter(
+      (row) => row.gradeScore !== null
+    )
+    const maxScoreByAssignment = new Map(
+      assignmentRows.map((row) => [row.id, row.maxScore])
+    )
     const assignmentAveragePercentage = gradedSubmissions.length
       ? Math.round(
           gradedSubmissions.reduce(
-            (total, row) => total + ((row.gradeScore ?? 0) / (maxScoreByAssignment.get(row.assignmentId) ?? 1)) * 100,
-            0,
-          ) / gradedSubmissions.length,
+            (total, row) =>
+              total +
+              ((row.gradeScore ?? 0) /
+                (maxScoreByAssignment.get(row.assignmentId) ?? 1)) *
+                100,
+            0
+          ) / gradedSubmissions.length
         )
       : 0
     const quizTitleById = new Map(quizRows.map((row) => [row.id, row.title]))
@@ -239,11 +287,18 @@ studentDashboardRouter.get(
       activeCourses: enrollmentRows.length,
       assignmentAveragePercentage,
       assignmentsGraded: gradedSubmissions.length,
-      assignmentsPending: Math.max(0, assignmentRows.length - submissionRows.length),
+      assignmentsPending: Math.max(
+        0,
+        assignmentRows.length - submissionRows.length
+      ),
       assignmentsSubmitted: submissionRows.length,
       completedLectures: progressRows.filter((row) => row.isCompleted).length,
       completionPercentage: lectureRows.length
-        ? Math.round((progressRows.filter((row) => row.isCompleted).length / lectureRows.length) * 100)
+        ? Math.round(
+            (progressRows.filter((row) => row.isCompleted).length /
+              lectureRows.length) *
+              100
+          )
         : 0,
       courses: courseProgress,
       lastActivityAt: lastActivityAt?.toISOString() ?? null,
@@ -251,14 +306,19 @@ studentDashboardRouter.get(
       quizAttempts: quizAttemptRows.length,
       quizAveragePercentage,
       quizPerformance: quizAttemptRows.map((row) => ({
-        percentage: row.totalQuestions ? Math.round((row.score / row.totalQuestions) * 100) : 0,
+        percentage: row.totalQuestions
+          ? Math.round((row.score / row.totalQuestions) * 100)
+          : 0,
         quizTitle: quizTitleById.get(row.quizId) ?? "Quiz",
         score: row.score,
         totalQuestions: row.totalQuestions,
       })),
       totalLectures: lectureRows.length,
       weeklyActivity: createWeeklyActivity(progressRows),
-      watchTimeSeconds: progressRows.reduce((total, row) => total + row.positionSeconds, 0),
+      watchTimeSeconds: progressRows.reduce(
+        (total, row) => total + row.positionSeconds,
+        0
+      ),
     } satisfies StudentAnalyticsResponse)
-  }),
+  })
 )

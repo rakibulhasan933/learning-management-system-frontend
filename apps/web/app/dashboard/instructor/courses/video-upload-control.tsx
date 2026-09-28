@@ -21,24 +21,28 @@ function formatMegabytes(bytes: number) {
 }
 
 function readVideoMetadata(file: File) {
-  return new Promise<{ durationSeconds: number | null; title: string }>((resolve) => {
-    const title = file.name || "Video"
-    const objectUrl = URL.createObjectURL(file)
-    const element = document.createElement("video")
-    element.preload = "metadata"
-    element.onloadedmetadata = () => {
-      URL.revokeObjectURL(objectUrl)
-      resolve({
-        durationSeconds: Number.isFinite(element.duration) ? Math.max(0, Math.round(element.duration)) : null,
-        title,
-      })
+  return new Promise<{ durationSeconds: number | null; title: string }>(
+    (resolve) => {
+      const title = file.name || "Video"
+      const objectUrl = URL.createObjectURL(file)
+      const element = document.createElement("video")
+      element.preload = "metadata"
+      element.onloadedmetadata = () => {
+        URL.revokeObjectURL(objectUrl)
+        resolve({
+          durationSeconds: Number.isFinite(element.duration)
+            ? Math.max(0, Math.round(element.duration))
+            : null,
+          title,
+        })
+      }
+      element.onerror = () => {
+        URL.revokeObjectURL(objectUrl)
+        resolve({ durationSeconds: null, title })
+      }
+      element.src = objectUrl
     }
-    element.onerror = () => {
-      URL.revokeObjectURL(objectUrl)
-      resolve({ durationSeconds: null, title })
-    }
-    element.src = objectUrl
-  })
+  )
 }
 
 function readUploadMessage(xhr: XMLHttpRequest) {
@@ -72,7 +76,7 @@ export function VideoUploadControl({
     () => () => {
       xhrRef.current?.abort()
     },
-    [],
+    []
   )
 
   useEffect(() => {
@@ -122,7 +126,7 @@ export function VideoUploadControl({
     }
 
     const uploadUrl = new URL(
-      `${getBackendApiUrl()}/instructor/courses/${courseId}/${videoId ? `videos/${videoId}` : `lectures/${lectureId}`}/video-upload`,
+      `${getBackendApiUrl()}/instructor/courses/${courseId}/${videoId ? `videos/${videoId}` : `lectures/${lectureId}`}/video-upload`
     )
     uploadUrl.searchParams.set("fileName", file.name)
     const xhr = new XMLHttpRequest()
@@ -139,7 +143,10 @@ export function VideoUploadControl({
     xhr.setRequestHeader("Content-Type", "video/mp4")
     xhr.upload.onprogress = (event) => {
       if (event.lengthComputable) {
-        progressRef.current = { totalBytes: event.total, uploadedBytes: event.loaded }
+        progressRef.current = {
+          totalBytes: event.total,
+          uploadedBytes: event.loaded,
+        }
         setUploadedBytes(event.loaded)
         setTotalBytes(event.total)
       }
@@ -150,12 +157,15 @@ export function VideoUploadControl({
         if (videoId) {
           const metadata = await readVideoMetadata(file)
           try {
-            await fetch(`${getBackendApiUrl()}/instructor/courses/${courseId}/videos/${videoId}`, {
-              body: JSON.stringify(metadata),
-              credentials: "include",
-              headers: { "Content-Type": "application/json" },
-              method: "PATCH",
-            })
+            await fetch(
+              `${getBackendApiUrl()}/instructor/courses/${courseId}/videos/${videoId}`,
+              {
+                body: JSON.stringify(metadata),
+                credentials: "include",
+                headers: { "Content-Type": "application/json" },
+                method: "PATCH",
+              }
+            )
           } catch {
             // The upload is already complete; metadata can be edited later if detection fails.
           }
@@ -166,7 +176,9 @@ export function VideoUploadControl({
         setTotalBytes(file.size)
       } else {
         setPhase("error")
-        setMessage(readUploadMessage(xhr) ?? `Video upload failed (${xhr.status}).`)
+        setMessage(
+          readUploadMessage(xhr) ?? `Video upload failed (${xhr.status}).`
+        )
       }
     }
     xhr.onerror = () => {
@@ -201,10 +213,16 @@ export function VideoUploadControl({
   }
 
   const percent =
-    totalBytes > 0 ? Math.min(100, Math.round((uploadedBytes / totalBytes) * 100)) : 0
+    totalBytes > 0
+      ? Math.min(100, Math.round((uploadedBytes / totalBytes) * 100))
+      : 0
 
   const primaryLabel =
-    phase === "uploading" ? "Pause" : phase === "paused" ? "Resume" : "Start upload"
+    phase === "uploading"
+      ? "Pause"
+      : phase === "paused"
+        ? "Resume"
+        : "Start upload"
 
   return (
     <div className="grid gap-3 md:col-span-4">
@@ -234,7 +252,7 @@ export function VideoUploadControl({
           className={cn(
             "flex cursor-pointer flex-col items-center justify-center gap-2 border border-dashed border-border bg-background px-6 py-10 text-center transition-colors",
             "hover:border-primary/50",
-            isDragging && "border-primary bg-primary/5",
+            isDragging && "border-primary bg-primary/5"
           )}
         >
           <FileVideo className="h-6 w-6 text-muted-foreground" />
@@ -259,7 +277,7 @@ export function VideoUploadControl({
                     ? "border-secondary text-secondary"
                     : phase === "error"
                       ? "border-destructive text-destructive"
-                      : "border-primary/50 text-primary",
+                      : "border-primary/50 text-primary"
                 )}
               >
                 {phase === "success" ? (
@@ -292,20 +310,23 @@ export function VideoUploadControl({
             ) : null}
           </div>
 
-          {(phase === "uploading" || phase === "paused" || phase === "success") && (
+          {(phase === "uploading" ||
+            phase === "paused" ||
+            phase === "success") && (
             <div className="mt-4">
               <div className="h-1.5 w-full overflow-hidden bg-border">
                 <div
                   className={cn(
                     "h-full transition-all duration-200",
-                    phase === "success" ? "bg-secondary" : "bg-primary",
+                    phase === "success" ? "bg-secondary" : "bg-primary"
                   )}
                   style={{ width: `${phase === "success" ? 100 : percent}%` }}
                 />
               </div>
               <div className="mt-1.5 flex items-center justify-between font-mono text-[11px] text-muted-foreground">
                 <span>
-                  {formatMegabytes(uploadedBytes)} MB / {formatMegabytes(totalBytes)} MB
+                  {formatMegabytes(uploadedBytes)} MB /{" "}
+                  {formatMegabytes(totalBytes)} MB
                 </span>
                 <span>{phase === "success" ? 100 : percent}%</span>
               </div>
@@ -316,7 +337,7 @@ export function VideoUploadControl({
             <p
               className={cn(
                 "mt-3 text-xs",
-                phase === "error" ? "text-destructive" : "text-muted-foreground",
+                phase === "error" ? "text-destructive" : "text-muted-foreground"
               )}
               role="status"
             >

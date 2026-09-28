@@ -15,7 +15,7 @@ import {
 export async function getLectureVideoUrlAction(lectureId: string) {
   return optionalAuthenticatedApiFetch<LectureVideoUrlResponse>(
     `/lectures/videos/${lectureId}/video-url`,
-    { cache: "no-store" },
+    { cache: "no-store" }
   )
 }
 
@@ -35,7 +35,7 @@ export async function saveLectureProgressAction(input: {
         "Content-Type": "application/json",
       },
       method: "PUT",
-    },
+    }
   )
 }
 
@@ -51,7 +51,7 @@ export async function submitQuizAction(input: {
         "Content-Type": "application/json",
       },
       method: "POST",
-    },
+    }
   )
 }
 
@@ -67,6 +67,6 @@ export async function submitAssignmentAction(input: {
         "Content-Type": "application/json",
       },
       method: "POST",
-    },
+    }
   )
 }

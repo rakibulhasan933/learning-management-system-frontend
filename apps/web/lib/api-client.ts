@@ -15,7 +15,7 @@ const refreshTokenMaxAgeSeconds = 30 * 24 * 60 * 60
 export class ApiClientError extends Error {
   constructor(
     public readonly status: number,
-    message: string,
+    message: string
   ) {
     super(message)
   }
@@ -44,7 +44,7 @@ async function parseApiResponse<T>(response: Response): Promise<T> {
 
 export async function publicApiFetch<T>(
   path: string,
-  init: RequestInit = {},
+  init: RequestInit = {}
 ): Promise<T> {
   const response = await fetch(`${getBackendApiUrl()}${path}`, {
     ...init,
@@ -57,7 +57,10 @@ export async function publicApiFetch<T>(
   return parseApiResponse<T>(response)
 }
 
-export async function setAuthCookies(session: AuthSessionDto, refreshToken?: string) {
+export async function setAuthCookies(
+  session: AuthSessionDto,
+  refreshToken?: string
+) {
   const cookieStore = await cookies()
   const secure = process.env.NODE_ENV === "production"
 
@@ -135,7 +138,7 @@ async function getAccessToken() {
 
 export async function authenticatedApiFetch<T>(
   path: string,
-  init: RequestInit = {},
+  init: RequestInit = {}
 ): Promise<T> {
   let accessToken = await getAccessToken()
 
@@ -165,7 +168,7 @@ export async function authenticatedApiFetch<T>(
 
 export async function optionalAuthenticatedApiFetch<T>(
   path: string,
-  init: RequestInit = {},
+  init: RequestInit = {}
 ): Promise<T> {
   // No refresh fallback on purpose: this runs in server components, which can
   // read cookies but not write them, so a rotated token pair could not be

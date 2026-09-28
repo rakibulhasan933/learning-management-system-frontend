@@ -1,14 +1,35 @@
 "use client"
 
 import { useState, type ReactNode } from "react"
-import { BookOpen, ChevronLeft, ChevronRight, Layers3, Settings2 } from "lucide-react"
+import {
+  BookOpen,
+  ChevronLeft,
+  ChevronRight,
+  Layers3,
+  Settings2,
+} from "lucide-react"
 
 import { cn } from "@workspace/ui/lib/utils"
 
 const steps = [
-  { id: "details", label: "Course details", note: "Title, pricing, and media", icon: BookOpen },
-  { id: "content", label: "Course content", note: "Milestones, modules, and materials", icon: Layers3 },
-  { id: "settings", label: "Course settings", note: "Danger zone and course actions", icon: Settings2 },
+  {
+    id: "details",
+    label: "Course details",
+    note: "Title, pricing, and media",
+    icon: BookOpen,
+  },
+  {
+    id: "content",
+    label: "Course content",
+    note: "Milestones, modules, and materials",
+    icon: Layers3,
+  },
+  {
+    id: "settings",
+    label: "Course settings",
+    note: "Danger zone and course actions",
+    icon: Settings2,
+  },
 ] as const
 
 export function CourseEditWorkspace({
@@ -22,7 +43,8 @@ export function CourseEditWorkspace({
   settings: ReactNode
   initialStep?: (typeof steps)[number]["id"]
 }) {
-  const [activeStep, setActiveStep] = useState<(typeof steps)[number]["id"]>(initialStep)
+  const [activeStep, setActiveStep] =
+    useState<(typeof steps)[number]["id"]>(initialStep)
   const panels = { details, content, settings }
   const activeIndex = steps.findIndex((step) => step.id === activeStep)
   const previousStep = steps[activeIndex - 1]
@@ -30,7 +52,10 @@ export function CourseEditWorkspace({
 
   return (
     <div className="grid gap-5">
-      <nav aria-label="Course editing steps" className="grid gap-2 sm:grid-cols-3">
+      <nav
+        aria-label="Course editing steps"
+        className="grid gap-2 sm:grid-cols-3"
+      >
         {steps.map((step, index) => {
           const Icon = step.icon
           const active = activeStep === step.id
@@ -42,7 +67,7 @@ export function CourseEditWorkspace({
                 "flex min-w-0 items-center gap-3 rounded-2xl border p-3 text-left transition-colors sm:p-4",
                 active
                   ? "border-primary/60 bg-primary/10 text-foreground"
-                  : "border-border bg-card text-muted-foreground hover:text-foreground",
+                  : "border-border bg-card text-muted-foreground hover:text-foreground"
               )}
               key={step.id}
               onClick={() => setActiveStep(step.id)}
@@ -52,9 +77,15 @@ export function CourseEditWorkspace({
                 <Icon className="size-4" />
               </span>
               <span className="min-w-0">
-                <span className="block font-mono text-[10px] text-primary">0{index + 1}</span>
-                <span className="block truncate text-sm font-medium">{step.label}</span>
-                <span className="hidden truncate text-xs text-muted-foreground sm:block">{step.note}</span>
+                <span className="block font-mono text-[10px] text-primary">
+                  0{index + 1}
+                </span>
+                <span className="block truncate text-sm font-medium">
+                  {step.label}
+                </span>
+                <span className="hidden truncate text-xs text-muted-foreground sm:block">
+                  {step.note}
+                </span>
               </span>
             </button>
           )

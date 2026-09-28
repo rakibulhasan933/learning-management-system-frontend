@@ -23,7 +23,7 @@ export default async function VerifyPage({ searchParams }: VerifyPageProps) {
   if (params.token) {
     try {
       await publicApiFetch(
-        `/auth/verify?token=${encodeURIComponent(params.token)}`,
+        `/auth/verify?token=${encodeURIComponent(params.token)}`
       )
       verified = true
     } catch (verifyError) {
@@ -76,10 +76,9 @@ export default async function VerifyPage({ searchParams }: VerifyPageProps) {
               <Button
                 className="w-full"
                 variant={verified ? "default" : "outline"}
-               asChild>
-                <Link href="/auth/login">
-                Back to sign in
-                </Link>
+                asChild
+              >
+                <Link href="/auth/login">Back to sign in</Link>
               </Button>
             </div>
           </CardContent>

@@ -1,6 +1,9 @@
 import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
-import type { DiscussionListResponse, LearningCourseResponse } from "@workspace/types"
+import type {
+  DiscussionListResponse,
+  LearningCourseResponse,
+} from "@workspace/types"
 
 import { authenticatedApiFetch } from "@/lib/api-client"
 import { Button } from "@workspace/ui/components/button"
@@ -21,11 +24,11 @@ export default async function LearnPage({ params }: LearnPageProps) {
   const { courseId } = await params
   const payload = await authenticatedApiFetch<LearningCourseResponse>(
     `/learning/courses/${courseId}`,
-    { cache: "no-store" },
+    { cache: "no-store" }
   )
   const discussion = await authenticatedApiFetch<DiscussionListResponse>(
     `/community/courses/${courseId}/discussions`,
-    { cache: "no-store" },
+    { cache: "no-store" }
   )
 
   return (

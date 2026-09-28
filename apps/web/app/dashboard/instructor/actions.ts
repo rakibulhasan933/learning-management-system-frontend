@@ -61,7 +61,9 @@ export async function createInstructorAnnouncementAction(formData: FormData) {
   revalidatePath("/dashboard/instructor/notifications")
 }
 
-export async function createInstructorDiscussionReplyAction(formData: FormData) {
+export async function createInstructorDiscussionReplyAction(
+  formData: FormData
+) {
   const courseId = getRequiredString(formData, "courseId")
   const body = getRequiredString(formData, "body")
   const parentId = getOptionalString(formData, "parentId")

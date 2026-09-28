@@ -53,10 +53,11 @@ export default async function InstructorCourseStudentsPage({
   params,
 }: InstructorCourseStudentsPageProps) {
   const { id } = await params
-  const response = await authenticatedApiFetch<InstructorCourseStudentsResponse>(
-    `/instructor/courses/${id}/students`,
-    { cache: "no-store" },
-  )
+  const response =
+    await authenticatedApiFetch<InstructorCourseStudentsResponse>(
+      `/instructor/courses/${id}/students`,
+      { cache: "no-store" }
+    )
 
   const metrics = [
     {
@@ -120,7 +121,9 @@ export default async function InstructorCourseStudentsPage({
           </Link>
         </Button>
         <Button asChild>
-          <Link href={`/dashboard/instructor/courses/${response.course.id}/edit`}>
+          <Link
+            href={`/dashboard/instructor/courses/${response.course.id}/edit`}
+          >
             Manage course
           </Link>
         </Button>
@@ -163,43 +166,43 @@ export default async function InstructorCourseStudentsPage({
           ) : (
             <div className="w-full overflow-x-auto">
               <Table className="min-w-[760px]">
-                  <TableHeader>
-                    <TableRow className="hover:bg-transparent">
-                      <TableHead>Student</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="w-48">Progress</TableHead>
-                      <TableHead>Last watched</TableHead>
-                      <TableHead>Completed at</TableHead>
-                      <TableHead>Enrolled</TableHead>
+                <TableHeader>
+                  <TableRow className="hover:bg-transparent">
+                    <TableHead>Student</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="w-48">Progress</TableHead>
+                    <TableHead>Last watched</TableHead>
+                    <TableHead>Completed at</TableHead>
+                    <TableHead>Enrolled</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {rows.map((row) => (
+                    <TableRow key={row.id}>
+                      <TableCell className="py-4">
+                        <div className="font-mono">{row.email}</div>
+                        <div className="mt-1 text-muted-foreground">
+                          {row.name}
+                        </div>
+                      </TableCell>
+                      <TableCell className="py-4">
+                        <EnrollmentStatusPill status={row.status} />
+                      </TableCell>
+                      <TableCell className="w-48 py-4">
+                        <Progress row={row} />
+                      </TableCell>
+                      <TableCell className="py-4 text-muted-foreground">
+                        {row.lastWatched}
+                      </TableCell>
+                      <TableCell className="py-4 text-muted-foreground">
+                        {row.completedAt}
+                      </TableCell>
+                      <TableCell className="py-4 text-muted-foreground">
+                        {row.enrolled}
+                      </TableCell>
                     </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {rows.map((row) => (
-                      <TableRow key={row.id}>
-                        <TableCell className="py-4">
-                          <div className="font-mono">{row.email}</div>
-                          <div className="mt-1 text-muted-foreground">
-                            {row.name}
-                          </div>
-                        </TableCell>
-                        <TableCell className="py-4">
-                          <EnrollmentStatusPill status={row.status} />
-                        </TableCell>
-                        <TableCell className="w-48 py-4">
-                          <Progress row={row} />
-                        </TableCell>
-                        <TableCell className="py-4 text-muted-foreground">
-                          {row.lastWatched}
-                        </TableCell>
-                        <TableCell className="py-4 text-muted-foreground">
-                          {row.completedAt}
-                        </TableCell>
-                        <TableCell className="py-4 text-muted-foreground">
-                          {row.enrolled}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
+                  ))}
+                </TableBody>
               </Table>
             </div>
           )}

@@ -4,11 +4,13 @@ This file is the entry point for AI coding agents (Codex, etc.) working in this 
 Read this fully before writing any code.
 
 ## Project
+
 A premium LMS web platform covering all three roles: Admin, Instructor, Student.
 **Mobile app is out of scope for now** — do not scaffold, mention, or design around a
 mobile app anywhere in this project until explicitly instructed later.
 
 ## Tech Stack
+
 - **Framework**: Next.js (App Router, latest stable)
 - **UI**: shadcn/ui + Tailwind CSS
 - **ORM**: Drizzle ORM
@@ -32,6 +34,7 @@ mobile app anywhere in this project until explicitly instructed later.
 - **Monorepo tool**: Turborepo
 
 ## Repo Structure
+
 ```
 /apps
   /web        <- Next.js app (this is the only app right now)
@@ -43,17 +46,19 @@ mobile app anywhere in this project until explicitly instructed later.
   /types      <- shared TypeScript types/DTOs used by web + backend
   /config     <- eslint, tsconfig, tailwind config presets
 ```
+
 > Drizzle schema lives in `packages/db`, owned by `services/backend`. `apps/web` only
 > imports **types** from `packages/types` — it never runs migrations or writes raw DB
 > queries, and never imports any Supabase client SDK. All data mutations, all auth,
 > and all reads go through the backend REST API.
 
 ## User Roles & Access
-| Role | Access |
-|---|---|
-| Admin | Full dashboard, user management, all courses, payouts, site settings |
-| Instructor | Own courses CRUD, own students, own analytics, payout requests |
-| Student | Browse/buy courses, learning dashboard, progress, certificates |
+
+| Role       | Access                                                               |
+| ---------- | -------------------------------------------------------------------- |
+| Admin      | Full dashboard, user management, all courses, payouts, site settings |
+| Instructor | Own courses CRUD, own students, own analytics, payout requests       |
+| Student    | Browse/buy courses, learning dashboard, progress, certificates       |
 
 Role stored in the backend-owned `profiles` table (`role: 'admin' | 'instructor' |
 'student'`), linked 1:1 with the backend's own `users` table (not `auth.users`). Route
@@ -62,6 +67,7 @@ httpOnly cookie) and reads the `role` claim encoded in that JWT — no Supabase 
 check anywhere in the web app.
 
 ## Hard Rules (do not violate)
+
 1. `apps/web` never queries the database directly and never imports `packages/db`
    beyond types. All mutations go through `services/backend` REST API.
 2. Payment system is **manual verification** right now (transaction ID + screenshot,
@@ -85,6 +91,7 @@ Supabase Auth is **not used at all**. `services/backend` is the single source of
 for identity.
 
 ### Data Model (Drizzle) — sketch
+
 ```
 users
   id, email (unique), password_hash, email_verified_at (nullable),
@@ -109,6 +116,7 @@ email_verification_tokens
 ```
 
 ### Flow
+
 1. **Signup (email/password)**: backend hashes password (bcrypt/argon2), creates
    `users` + `profiles` row (`role: 'student'` by default), creates an
    `email_verification_tokens` row, sends a verification email (Resend/Nodemailer).
@@ -133,6 +141,7 @@ email_verification_tokens
    the refresh cookie.
 
 ### Route Protection
+
 - Next.js middleware reads the access-token cookie, verifies its signature/expiry
   locally (or calls a lightweight backend `GET /auth/me` if you'd rather not duplicate
   verification logic in the edge runtime), and checks the `role` claim against the
@@ -142,6 +151,7 @@ email_verification_tokens
   is UX only, never the source of truth.
 
 ### What stays on Supabase
+
 - **Postgres** (via Drizzle) — the actual database, including the `users`/`profiles`
   tables above.
 - **Supabase Storage** — PDFs, slides, certificates, payment screenshots
@@ -152,6 +162,7 @@ email_verification_tokens
   identity lives entirely in the backend's own `users` table now.
 
 ## Core Features (MVP — build first)
+
 1. Auth: custom email/password signup+login + Google OAuth (all backend-issued JWTs,
    no Supabase Auth), email verification, password reset — see "Custom Authentication"
 2. Course catalog (public): list, search, filter (category/level/price), course detail page
@@ -178,6 +189,7 @@ Automated gateways (Stripe/SSLCommerz/bKash Merchant API) are deferred. The sche
 generic enough to absorb an automated gateway later without a rewrite.
 
 ### Flow
+
 1. Student clicks "Enroll" on a paid course → sees a payment instructions page: admin's
    bKash/Nagad/Rocket number (or bank details), exact amount, and a unique **reference
    code** (e.g. `ORD-XXXXXX`) generated per order to help match payments manually.
@@ -193,6 +205,7 @@ generic enough to absorb an automated gateway later without a rewrite.
 5. Optional: auto-expire `pending_verification` orders after N days (cron/edge function).
 
 ### Data Model (Drizzle) — sketch
+
 ```
 orders
   id, user_id, course_id, amount, currency, reference_code,
@@ -207,6 +220,7 @@ enrollments
 ```
 
 ### Admin UI Requirements
+
 - "Pending Payments" table: sortable/filterable by course, date, payment method
 - Order detail view: full screenshot preview, copyable transaction ID, one-click
   Approve/Reject with confirmation dialog
@@ -214,16 +228,19 @@ enrollments
 - Search by reference code or student email (for support cases)
 
 ### Student-Facing Requirements
+
 - Clear status indicator on dashboard: Pending / Approved / Rejected
 - Resubmit proof if rejected (edit transaction ID/screenshot on same order)
 - Email notification on approval/rejection (backend-sent, e.g. Resend/Nodemailer)
 
 ### Coupons & Free Courses
+
 - Coupon applied at order-creation time; discounted amount shown as what to pay
 - Free courses skip the flow entirely: enroll immediately, `orders` row still created
   with `amount = 0`, `status = 'paid'` for consistent reporting/analytics
 
 ### Future: Automated Gateway (do not build yet)
+
 - Stripe / SSLCommerz / bKash Merchant API, webhook-driven `paid` transition (no admin
   step), subscription billing for membership tiers. Because `payment_method` and
   `status` are already generic, gateway becomes just a new `payment_method` value —
@@ -241,6 +258,7 @@ only. Migrate to a dedicated video service (Bunny.net Stream / Cloudflare Stream
 once adaptive bitrate streaming or automatic transcoding is needed.
 
 ### Build it now so migration is painless later
+
 - Store the video reference as an **abstract `video_source` object** in the `lectures`
   table, not a raw hardcoded URL string:
   ```
@@ -262,6 +280,7 @@ once adaptive bitrate streaming or automatic transcoding is needed.
   R2-specific SDK needed.
 
 ### Known limitations while on R2 (accept for MVP)
+
 - No adaptive bitrate — all students get the same file quality regardless of connection
   speed. Keep uploaded videos at a reasonable compressed resolution (e.g. 720p) to avoid
   extreme buffering issues.
@@ -271,11 +290,13 @@ once adaptive bitrate streaming or automatic transcoding is needed.
   library grows.
 
 ### Migration trigger points (revisit when any of these happen)
+
 - Need for adaptive streaming or automatic multi-resolution transcoding
 - Student complaints about buffering/quality
 - Need for DRM-level protection beyond signed URLs + watermark
 
 ### Migration path when ready
+
 1. Pick provider (Bunny.net Stream recommended first for cost)
 2. Bulk-upload existing videos from R2 to the new provider via their API
 3. Update each `lectures` row: `video_provider` → new value, `video_ref` → new video ID
@@ -284,6 +305,7 @@ once adaptive bitrate streaming or automatic transcoding is needed.
    coexist during a gradual rollout, no downtime needed
 
 ## Phase 2 / Advanced Features (not MVP)
+
 - AI tutor chatbot (per-course context, calls backend which proxies to Claude/OpenAI)
 - Auto-generated quizzes from lecture transcripts
 - Discussion forum per lecture (threaded comments, upvote)
@@ -294,6 +316,7 @@ once adaptive bitrate streaming or automatic transcoding is needed.
 - SCORM/xAPI import for enterprise content
 
 ## Key Pages (App Router structure)
+
 ```
 /                          landing/marketing
 /courses                   catalog
@@ -307,6 +330,7 @@ once adaptive bitrate streaming or automatic transcoding is needed.
 ```
 
 ## Backend Communication
+
 - All mutations (create course, enroll, submit quiz, etc.) → REST calls to
   `services/backend` (Express), never direct Drizzle calls from `apps/web`.
 - Use a typed API client (`apps/web/lib/api-client.ts`) wrapping `fetch`, attaching the
@@ -318,7 +342,9 @@ once adaptive bitrate streaming or automatic transcoding is needed.
   never trusts a client-supplied Supabase session.
 
 ## Design System (use for all UI — do not default to generic AI styling)
+
 **Palette**
+
 - Background (ink navy): `#12151C`
 - Surface/card: `#1B1F29`
 - Text primary (warm off-white): `#F2EFE7`
@@ -328,6 +354,7 @@ once adaptive bitrate streaming or automatic transcoding is needed.
 - Secondary accent (muted teal): `#3F7A6B`
 
 **Typography**
+
 - Display/headline: `Fraunces` (serif, used sparingly for headlines)
 - Body: `Inter` or `General Sans`
 - Stats / course codes / numeric data: `IBM Plex Mono`
@@ -343,12 +370,14 @@ functional UI element like a course/module card on the other) over generic cente
 hero + 3-icon-feature-grid templates.
 
 **General constraints**
+
 - Flat design, no gradients/drop-shadows/glow.
 - Sentence case everywhere in UI copy, never Title Case or ALL CAPS.
 - Dark theme is the primary theme — build every component dark-first using the
   palette above, not retrofitted from a light-mode default.
 
 ## Performance Guidelines
+
 - Use React Server Components by default; mark `"use client"` only where interactivity
   (video player, forms, watermark overlay) is required.
 - Use `next/image` for all thumbnails/avatars.
@@ -358,6 +387,7 @@ hero + 3-icon-feature-grid templates.
 - Keep shadcn/ui components in `packages/ui` to avoid duplication and bundle bloat.
 
 ## Environment Variables
+
 ```
 # Database (Postgres via Supabase, accessed only from services/backend)
 DATABASE_URL=
@@ -401,20 +431,23 @@ SUPABASE_STORAGE_LECTURE_MATERIALS_BUCKET=lecture-materials
 # apps/web
 NEXT_PUBLIC_BACKEND_API_URL=
 ```
+
 > Note: `apps/web` no longer needs `NEXT_PUBLIC_SUPABASE_URL` or
 > `NEXT_PUBLIC_SUPABASE_ANON_KEY` — it never talks to Supabase directly for auth, DB,
 > or storage. Everything goes through `NEXT_PUBLIC_BACKEND_API_URL`.
 
 ## Non-Goals
+
 - No mobile app work of any kind right now.
 - Do not put raw Express-style route handlers for core business logic in Next.js —
   keep that in services/backend.
 - Do not use Supabase Auth, Supabase session cookies, or `supabase.auth.*` anywhere.
 
 ## Build Order
+
 1. Monorepo scaffold (Turborepo, pnpm workspaces, folder structure above)
 2. Supabase project (Postgres + storage buckets only — **Supabase Auth is not used**)
-   + Cloudflare R2 bucket
+   - Cloudflare R2 bucket
 3. Drizzle schema: `users`, `profiles`, `refresh_tokens`, `password_reset_tokens`,
    `email_verification_tokens`, `courses`, `sections`, `lectures`, `enrollments`,
    `orders`, `progress`
@@ -430,6 +463,7 @@ NEXT_PUBLIC_BACKEND_API_URL=
 10. Remaining features per "Phase 2 / Advanced Features" above
 
 ## Progress Log
+
 - Enrolled students no longer see the enroll/payment flow on a course they already own.
   `GET /courses/:slug/enrollment-status` (`services/backend/src/routes/courses.ts`) returns
   `isEnrolled`, `enrollmentStatus`, and the order that still needs the student's attention
@@ -438,10 +472,10 @@ NEXT_PUBLIC_BACKEND_API_URL=
   a pending order renders "Payment under review", and a rejected order renders the
   resubmit-proof path. The open order is forced to `null` when enrolled so a stale order
   can never mask the enrolled state.
-- Fixed the root cause behind that bug: on a *public* page an expired 15-minute access token
+- Fixed the root cause behind that bug: on a _public_ page an expired 15-minute access token
   fell through to `optionalAuthenticatedApiFetch` → `refreshAccessToken()` → `cookies().set()`,
   which throws in a Server Component. Because the backend revokes the presented refresh token
-  *before* the cookie write fails, this silently destroyed the session and degraded a signed-in
+  _before_ the cookie write fails, this silently destroyed the session and degraded a signed-in
   viewer to anonymous. `updateSession` (`apps/web/lib/auth/middleware.ts`, reached via
   `apps/web/proxy.ts` — Next.js 16 renamed `middleware.ts` → `proxy.ts`) now renews the access
   token at the edge for public routes too, and the refresh fallback was removed from
@@ -460,7 +494,7 @@ NEXT_PUBLIC_BACKEND_API_URL=
   had never rendered in Fraunces; all were corrected. 353 hardcoded hex classes across the six
   admin pages were replaced with design tokens, `uppercase`/`tracking-[…]` were removed per the
   sentence-case rule, the landing page was rebuilt (nested `<a>` inside `<button>` → `Button
-  render={<Link/>}`, ALL-CAPS copy → sentence case, `rounded-none` dropped, progress-thread motif
+render={<Link/>}`, ALL-CAPS copy → sentence case, `rounded-none` dropped, progress-thread motif
   added), and admin raw inputs/selects/textareas and hand-rolled link-buttons were replaced with
   shadcn components. `apps/web/app` and `apps/web/components` now contain zero hex literals, zero
   `shadow-`/`bg-gradient`/`drop-shadow`, and zero raw `<button>` elements.
@@ -531,7 +565,7 @@ NEXT_PUBLIC_BACKEND_API_URL=
   callback, verify/reset pages, session-aware middleware/proxy, and role-based
   dashboard routing.~~ (superseded — see architecture change above)
 - ~~Auth profile creation is database-backed via `packages/db/drizzle/
-  0001_auth_user_profile_trigger.sql` (`AFTER INSERT ON auth.users` trigger) and the
+0001_auth_user_profile_trigger.sql` (`AFTER INSERT ON auth.users` trigger) and the
   `/auth/sync-profile` endpoint.~~ (superseded — no `auth.users` table anymore under
   custom auth; profile creation now happens directly in the backend's signup/OAuth
   handlers)
@@ -679,7 +713,7 @@ NEXT_PUBLIC_BACKEND_API_URL=
   instructor creates a published section assignment, enrolled student submits,
   instructor grades it, and the student learning response shows score `23` with grade
   feedback. Follow-up verification this session: `pnpm --filter @workspace/db
-  typecheck` and `pnpm --filter @workspace/backend typecheck` pass.
+typecheck` and `pnpm --filter @workspace/backend typecheck` pass.
 - Instructor course CRUD is implemented with list, new, edit, update, and delete
   screens calling backend REST mutations through server actions.
 - Instructor course builder now supports sections and lectures on the course edit page:
@@ -713,8 +747,8 @@ NEXT_PUBLIC_BACKEND_API_URL=
   complete on video end, and updates the course completion progress thread and outline
   completion/resume labels locally after saves.
 - Progress tracking verification completed: `pnpm --filter @workspace/types
-  typecheck`, `pnpm --filter @workspace/db typecheck`, `pnpm --filter
-  @workspace/backend typecheck`, `pnpm --filter @workspace/web typecheck`,
+typecheck`, `pnpm --filter @workspace/db typecheck`, `pnpm --filter
+@workspace/backend typecheck`, `pnpm --filter @workspace/web typecheck`,
   `pnpm lint`, and `pnpm build` all pass.
 - Certificate generation is now verified end-to-end against the configured database and
   Supabase Storage path. The certificate E2E script
@@ -732,7 +766,7 @@ NEXT_PUBLIC_BACKEND_API_URL=
   used for certificate PDFs and payment proof uploads.
 - Certificate verification completed: `pnpm --filter @workspace/types typecheck`,
   `pnpm --filter @workspace/db typecheck`, `pnpm --filter @workspace/backend
-  typecheck`, `pnpm --filter @workspace/web typecheck`, `pnpm lint`, and `pnpm build`
+typecheck`, `pnpm --filter @workspace/web typecheck`, `pnpm lint`, and `pnpm build`
   all pass after the certificate E2E and Storage fixes.
 - Lecture PDF/slides upload is implemented through the backend course-builder surface:
   instructors upload PDF/slides from the lecture editor, the web sends the selected
@@ -747,8 +781,8 @@ NEXT_PUBLIC_BACKEND_API_URL=
   detail page renders a dark-first free-preview player for preview lectures, and the
   enrolled learning player still uses the same endpoint with optional auth.
 - Course creation gap verification completed: `pnpm --filter @workspace/types
-  typecheck`, `pnpm --filter @workspace/db typecheck`, `pnpm --filter
-  @workspace/backend typecheck`, `pnpm --filter @workspace/web typecheck`,
+typecheck`, `pnpm --filter @workspace/db typecheck`, `pnpm --filter
+@workspace/backend typecheck`, `pnpm --filter @workspace/web typecheck`,
   `pnpm lint`, and `pnpm build` all pass.
 - Admin dashboard MVP features are implemented. A backend-owned `users.suspended_at`
   field and manual migration `packages/db/drizzle/0008_user_suspension.sql` support
@@ -766,7 +800,7 @@ NEXT_PUBLIC_BACKEND_API_URL=
   chart.
 - Admin dashboard verification completed: `pnpm --filter @workspace/types typecheck`,
   `pnpm --filter @workspace/db typecheck`, `pnpm --filter @workspace/backend
-  typecheck`, `pnpm --filter @workspace/web typecheck`, `pnpm lint`, and
+typecheck`, `pnpm --filter @workspace/web typecheck`, `pnpm lint`, and
   `pnpm build` all pass.
 - Task 2 admin dashboard surface is now confirmed end-to-end in this session:
   user management exposes list/filter/activate/suspend actions, the course approval
@@ -796,7 +830,7 @@ NEXT_PUBLIC_BACKEND_API_URL=
   user store, and `services/backend/src/scripts/seed-admin.ts` seeds or updates a
   single verified admin account from `SEED_ADMIN_EMAIL`, `SEED_ADMIN_PASSWORD`, and
   `SEED_ADMIN_NAME`. The backend package exposes `pnpm --filter @workspace/backend
-  seed:admin` for that script.
+seed:admin` for that script.
 - Task 1 redirect fix completed: the password login server action now preserves
   Next.js `NEXT_REDIRECT` throws instead of swallowing them in the login `catch`
   block, and the dashboard redirect path now resolves cleanly for admin,

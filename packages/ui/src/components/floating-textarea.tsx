@@ -28,23 +28,28 @@ function FloatingTextarea({
       <Textarea
         aria-invalid={error ? "true" : undefined}
         aria-describedby={
-          error ? `${resolvedId}-error` : hint ? `${resolvedId}-hint` : undefined
+          error
+            ? `${resolvedId}-error`
+            : hint
+              ? `${resolvedId}-hint`
+              : undefined
         }
         id={resolvedId}
         placeholder=" "
         className={cn(
-          "peer min-h-28 rounded-2xl border-border bg-input/20 px-4 pb-3 pt-5 text-base text-foreground placeholder:text-transparent focus-visible:border-primary focus-visible:ring-0 md:text-sm",
-          error && "border-destructive text-destructive focus-visible:border-destructive",
-          className,
+          "peer min-h-28 rounded-2xl border-border bg-input/20 px-4 pt-5 pb-3 text-base text-foreground placeholder:text-transparent focus-visible:border-primary focus-visible:ring-0 md:text-sm",
+          error &&
+            "border-destructive text-destructive focus-visible:border-destructive",
+          className
         )}
         {...props}
       />
       <Label
         className={cn(
-          "pointer-events-none absolute left-4 top-5 z-20 origin-left bg-background px-1 text-sm text-muted-foreground transition-all duration-200",
+          "pointer-events-none absolute top-5 left-4 z-20 origin-left bg-background px-1 text-sm text-muted-foreground transition-all duration-200",
           "peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:scale-90 peer-focus:text-primary",
           "peer-[&:not(:placeholder-shown)]:top-0 peer-[&:not(:placeholder-shown)]:-translate-y-1/2 peer-[&:not(:placeholder-shown)]:scale-90",
-          error && "text-destructive peer-focus:text-destructive",
+          error && "text-destructive peer-focus:text-destructive"
         )}
         htmlFor={resolvedId}
       >
@@ -52,7 +57,10 @@ function FloatingTextarea({
       </Label>
 
       {hint ? (
-        <p className="mt-1 text-xs text-muted-foreground" id={`${resolvedId}-hint`}>
+        <p
+          className="mt-1 text-xs text-muted-foreground"
+          id={`${resolvedId}-hint`}
+        >
           {hint}
         </p>
       ) : null}

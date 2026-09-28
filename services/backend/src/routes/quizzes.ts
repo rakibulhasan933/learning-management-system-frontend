@@ -22,10 +22,11 @@ const targetQuerySchema = z
   })
   .refine(
     (input) =>
-      [input.lectureId, input.moduleId, input.sectionId].filter(Boolean).length === 1,
+      [input.lectureId, input.moduleId, input.sectionId].filter(Boolean)
+        .length === 1,
     {
-    message: "Provide exactly one quiz target.",
-    },
+      message: "Provide exactly one quiz target.",
+    }
   )
 const quizParamsSchema = z.object({
   quizId: z.string().uuid(),
@@ -48,17 +49,20 @@ quizzesRouter.get(
     })
 
     response.status(200).json(quiz)
-  }),
+  })
 )
 
 quizzesRouter.get(
   "/:quizId",
   asyncHandler(async (request, response) => {
     const params = quizParamsSchema.parse(request.params)
-    const quiz = await getStudentQuizDto(params.quizId, request.auth!.profile.id)
+    const quiz = await getStudentQuizDto(
+      params.quizId,
+      request.auth!.profile.id
+    )
 
     response.status(200).json(quiz)
-  }),
+  })
 )
 
 quizzesRouter.post(
@@ -71,14 +75,28 @@ quizzesRouter.post(
       profileId: request.auth!.profile.id,
       quizId: params.quizId,
     })
-    const [quiz] = await db.select({ courseId: quizzes.courseId, title: quizzes.title }).from(quizzes).where(eq(quizzes.id, params.quizId)).limit(1)
+    const [quiz] = await db
+      .select({ courseId: quizzes.courseId, title: quizzes.title })
+      .from(quizzes)
+      .where(eq(quizzes.id, params.quizId))
+      .limit(1)
     if (quiz) {
-      const [course] = await db.select({ instructorId: courses.instructorId, title: courses.title }).from(courses).where(eq(courses.id, quiz.courseId)).limit(1)
+      const [course] = await db
+        .select({ instructorId: courses.instructorId, title: courses.title })
+        .from(courses)
+        .where(eq(courses.id, quiz.courseId))
+        .limit(1)
       if (course && course.instructorId !== request.auth!.profile.id) {
-        await createNotification({ body: `A student submitted ${quiz.title}.`, href: `/dashboard/instructor/quiz-results`, profileId: course.instructorId, title: `New quiz result in ${course.title}`, type: "quiz_submission" })
+        await createNotification({
+          body: `A student submitted ${quiz.title}.`,
+          href: `/dashboard/instructor/quiz-results`,
+          profileId: course.instructorId,
+          title: `New quiz result in ${course.title}`,
+          type: "quiz_submission",
+        })
       }
     }
 
     response.status(201).json(result)
-  }),
+  })
 )

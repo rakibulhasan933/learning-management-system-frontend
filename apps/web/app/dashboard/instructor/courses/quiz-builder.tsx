@@ -15,10 +15,7 @@ import { Button } from "@workspace/ui/components/button"
 import { Checkbox } from "@workspace/ui/components/checkbox"
 import { FloatingInput } from "@workspace/ui/components/floating-input"
 
-import {
-  deleteInstructorQuizAction,
-  saveInstructorQuizAction,
-} from "./actions"
+import { deleteInstructorQuizAction, saveInstructorQuizAction } from "./actions"
 
 interface QuizBuilderProps {
   courseId: string
@@ -56,7 +53,7 @@ function createOptionState(optionText = "", isCorrect = false): OptionState {
 
 function createQuestionState(
   questionText = "",
-  options = [createOptionState("", true), createOptionState("", false)],
+  options = [createOptionState("", true), createOptionState("", false)]
 ): QuestionState {
   return {
     id: createId(),
@@ -123,15 +120,15 @@ export function QuizBuilder({
   function updateQuestion(questionId: string, questionText: string) {
     setQuestions((current) =>
       current.map((question) =>
-        question.id === questionId ? { ...question, questionText } : question,
-      ),
+        question.id === questionId ? { ...question, questionText } : question
+      )
     )
   }
 
   function updateOption(
     questionId: string,
     optionId: string,
-    patch: Partial<Omit<OptionState, "id">>,
+    patch: Partial<Omit<OptionState, "id">>
   ) {
     setQuestions((current) =>
       current.map((question) =>
@@ -139,11 +136,11 @@ export function QuizBuilder({
           ? {
               ...question,
               options: question.options.map((option) =>
-                option.id === optionId ? { ...option, ...patch } : option,
+                option.id === optionId ? { ...option, ...patch } : option
               ),
             }
-          : question,
-      ),
+          : question
+      )
     )
   }
 
@@ -152,12 +149,16 @@ export function QuizBuilder({
 
     setQuestions((current) => [...current, nextQuestion])
     setOpenQuestions((current) =>
-      current.includes(nextQuestion.id) ? current : [...current, nextQuestion.id],
+      current.includes(nextQuestion.id)
+        ? current
+        : [...current, nextQuestion.id]
     )
   }
 
   function removeQuestion(questionId: string) {
-    setQuestions((current) => current.filter((question) => question.id !== questionId))
+    setQuestions((current) =>
+      current.filter((question) => question.id !== questionId)
+    )
     setOpenQuestions((current) => current.filter((id) => id !== questionId))
   }
 
@@ -168,8 +169,8 @@ export function QuizBuilder({
       current.map((question) =>
         question.id === questionId
           ? { ...question, options: [...question.options, nextOption] }
-        : question,
-      ),
+          : question
+      )
     )
   }
 
@@ -184,8 +185,8 @@ export function QuizBuilder({
                   ? question.options
                   : question.options.filter((option) => option.id !== optionId),
             }
-          : question,
-      ),
+          : question
+      )
     )
   }
 
@@ -212,7 +213,8 @@ export function QuizBuilder({
         setMessage({ text: "Quiz saved.", type: "success" })
       } catch (error) {
         setMessage({
-          text: error instanceof Error ? error.message : "Quiz could not be saved.",
+          text:
+            error instanceof Error ? error.message : "Quiz could not be saved.",
           type: "error",
         })
       }
@@ -233,7 +235,9 @@ export function QuizBuilder({
       } catch (error) {
         setMessage({
           text:
-            error instanceof Error ? error.message : "Quiz could not be deleted.",
+            error instanceof Error
+              ? error.message
+              : "Quiz could not be deleted.",
           type: "error",
         })
       }
@@ -268,7 +272,7 @@ export function QuizBuilder({
           return (
             <AccordionItem key={question.id} value={question.id}>
               <div className="grid gap-2 border-b border-border/70 px-3 py-2.5">
-                <AccordionTrigger className="min-w-0 w-full justify-start rounded-none p-0 text-left hover:bg-transparent">
+                <AccordionTrigger className="w-full min-w-0 justify-start rounded-none p-0 text-left hover:bg-transparent">
                   <div className="grid min-w-0 gap-1.5">
                     <div className="flex min-w-0 flex-wrap items-center gap-2">
                       <h4 className="min-w-0 truncate font-heading text-sm font-medium tracking-tight md:text-base">
@@ -312,23 +316,40 @@ export function QuizBuilder({
                   <div className="grid gap-2 rounded-xl border border-border/60 bg-background/40 p-2">
                     <div className="flex items-center justify-between gap-3 px-1 py-1">
                       <div>
-                        <p className="text-sm font-medium text-foreground">Options</p>
-                        <p className="text-xs text-muted-foreground">Select the correct answer.</p>
+                        <p className="text-sm font-medium text-foreground">
+                          Options
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          Select the correct answer.
+                        </p>
                       </div>
-                      <span className="font-mono text-[10px] text-muted-foreground">{question.options.length} total</span>
+                      <span className="font-mono text-[10px] text-muted-foreground">
+                        {question.options.length} total
+                      </span>
                     </div>
                     {question.options.map((option, optionIndex) => (
-                      <div className="grid gap-2 rounded-lg border border-border bg-card p-2.5 sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:items-center" key={option.id}>
+                      <div
+                        className="grid gap-2 rounded-lg border border-border bg-card p-2.5 sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:items-center"
+                        key={option.id}
+                      >
                         <FloatingInput
                           className="h-10 rounded-xl px-3 text-sm"
-                          onChange={(event) => updateOption(question.id, option.id, { optionText: event.target.value })}
+                          onChange={(event) =>
+                            updateOption(question.id, option.id, {
+                              optionText: event.target.value,
+                            })
+                          }
                           label={`Option ${optionIndex + 1}`}
                           value={option.optionText}
                         />
                         <label className="flex items-center gap-2 px-1 text-sm text-muted-foreground">
                           <Checkbox
                             checked={option.isCorrect}
-                            onCheckedChange={(checked) => updateOption(question.id, option.id, { isCorrect: Boolean(checked) })}
+                            onCheckedChange={(checked) =>
+                              updateOption(question.id, option.id, {
+                                isCorrect: Boolean(checked),
+                              })
+                            }
                           />
                           Correct
                         </label>
@@ -392,7 +413,9 @@ export function QuizBuilder({
                 type="button"
                 variant="destructive"
               >
-                {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                {isPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : null}
                 {isPending ? "Deleting..." : "Confirm delete"}
               </Button>
               <Button

@@ -18,7 +18,11 @@ export async function createNotification(input: {
   })
 }
 
-export async function createNotifications(inputs: Array<Parameters<typeof createNotification>[0]>) {
+export async function createNotifications(
+  inputs: Array<Parameters<typeof createNotification>[0]>
+) {
   if (inputs.length === 0) return
-  await db.insert(notifications).values(inputs.map((input) => ({ ...input, href: input.href ?? null })))
+  await db
+    .insert(notifications)
+    .values(inputs.map((input) => ({ ...input, href: input.href ?? null })))
 }

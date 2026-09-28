@@ -86,8 +86,8 @@ coursesRouter.get(
         or(
           ilike(courses.title, `%${query.q}%`),
           ilike(courses.shortDescription, `%${query.q}%`),
-          ilike(courses.category, `%${query.q}%`),
-        )!,
+          ilike(courses.category, `%${query.q}%`)
+        )!
       )
     }
 
@@ -144,7 +144,7 @@ coursesRouter.get(
     }
 
     response.status(200).json(payload)
-  }),
+  })
 )
 
 coursesRouter.get(
@@ -155,7 +155,9 @@ coursesRouter.get(
     const [course] = await db
       .select({ id: courses.id })
       .from(courses)
-      .where(and(eq(courses.slug, params.slug), eq(courses.status, "published")))
+      .where(
+        and(eq(courses.slug, params.slug), eq(courses.status, "published"))
+      )
       .limit(1)
 
     if (!course) {
@@ -182,8 +184,8 @@ coursesRouter.get(
       .where(
         and(
           eq(enrollments.courseId, course.id),
-          eq(enrollments.userId, profileId),
-        ),
+          eq(enrollments.userId, profileId)
+        )
       )
       .orderBy(desc(enrollments.enrolledAt))
       .limit(1)
@@ -195,9 +197,7 @@ coursesRouter.get(
         status: orders.status,
       })
       .from(orders)
-      .where(
-        and(eq(orders.courseId, course.id), eq(orders.userId, profileId)),
-      )
+      .where(and(eq(orders.courseId, course.id), eq(orders.userId, profileId)))
       .orderBy(desc(orders.createdAt))
 
     // A student can retry after a rejection, so surface the order that still
@@ -215,7 +215,7 @@ coursesRouter.get(
       isEnrolled: enrollment?.status === "active",
       latestOrder,
     } satisfies CourseEnrollmentStatusResponse)
-  }),
+  })
 )
 
 coursesRouter.get(
@@ -239,7 +239,9 @@ coursesRouter.get(
       })
       .from(courses)
       .innerJoin(profiles, eq(courses.instructorId, profiles.id))
-      .where(and(eq(courses.slug, params.slug), eq(courses.status, "published")))
+      .where(
+        and(eq(courses.slug, params.slug), eq(courses.status, "published"))
+      )
       .limit(1)
 
     if (!course) {
@@ -269,8 +271,14 @@ coursesRouter.get(
       .from(videos)
       .innerJoin(modules, eq(videos.moduleId, modules.id))
       .innerJoin(sections, eq(modules.milestoneId, sections.id))
-      .where(and(eq(sections.courseId, course.id), eq(videos.isPublished, true)))
-      .orderBy(asc(sections.position), asc(modules.position), asc(videos.position))
+      .where(
+        and(eq(sections.courseId, course.id), eq(videos.isPublished, true))
+      )
+      .orderBy(
+        asc(sections.position),
+        asc(modules.position),
+        asc(videos.position)
+      )
 
     const moduleRows = await db
       .select({
@@ -284,7 +292,10 @@ coursesRouter.get(
       })
       .from(modules)
       .innerJoin(sections, eq(modules.milestoneId, sections.id))
-      .leftJoin(videos, and(eq(videos.moduleId, modules.id), eq(videos.isPublished, true)))
+      .leftJoin(
+        videos,
+        and(eq(videos.moduleId, modules.id), eq(videos.isPublished, true))
+      )
       .where(eq(sections.courseId, course.id))
       .groupBy(modules.id)
       .orderBy(asc(modules.position))
@@ -306,7 +317,9 @@ coursesRouter.get(
         modules: moduleRows
           .filter((module) => module.milestoneId === section.id)
           .map((module) => ({
-            contentTypes: Array.from(new Set(module.contentTypes)) as Array<"video" | "pdf" | "quiz" | "assignment">,
+            contentTypes: Array.from(new Set(module.contentTypes)) as Array<
+              "video" | "pdf" | "quiz" | "assignment"
+            >,
             durationSeconds: Number(module.durationSeconds ?? 0),
             id: module.id,
             position: module.position,
@@ -319,5 +332,5 @@ coursesRouter.get(
     }
 
     response.status(200).json(payload)
-  }),
+  })
 )

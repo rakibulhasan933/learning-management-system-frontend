@@ -70,7 +70,21 @@ function SheetContent({
       >
         {children}
         {showCloseButton && (
-          <SheetPrimitive.Close data-slot="sheet-close" {...({ render: <Button variant="ghost" className="absolute top-4 right-4" size="icon-sm" /> } as any)}><HugeiconsIcon icon={Cancel01Icon} strokeWidth={2} /><span className="sr-only">Close</span></SheetPrimitive.Close>
+          <SheetPrimitive.Close
+            data-slot="sheet-close"
+            {...({
+              render: (
+                <Button
+                  variant="ghost"
+                  className="absolute top-4 right-4"
+                  size="icon-sm"
+                />
+              ),
+            } as any)}
+          >
+            <HugeiconsIcon icon={Cancel01Icon} strokeWidth={2} />
+            <span className="sr-only">Close</span>
+          </SheetPrimitive.Close>
         )}
       </SheetPrimitive.Content>
     </SheetPortal>

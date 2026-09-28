@@ -2,7 +2,10 @@
 
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
-import type { PaymentInstructionsResponse, PaymentOrderDto } from "@workspace/types"
+import type {
+  PaymentInstructionsResponse,
+  PaymentOrderDto,
+} from "@workspace/types"
 
 import { ApiClientError, authenticatedApiFetch } from "@/lib/api-client"
 
@@ -48,7 +51,7 @@ export async function createEnrollmentOrderAction(formData: FormData) {
           "Content-Type": "application/json",
         },
         method: "POST",
-      },
+      }
     )
 
     revalidatePath("/dashboard/student")
@@ -60,7 +63,7 @@ export async function createEnrollmentOrderAction(formData: FormData) {
     }
 
     redirect(
-      `/courses/${slug}?error=${encodeURIComponent(error instanceof Error ? error.message : "Enrollment could not be started.")}`,
+      `/courses/${slug}?error=${encodeURIComponent(error instanceof Error ? error.message : "Enrollment could not be started.")}`
     )
   }
 
@@ -71,7 +74,10 @@ export async function createEnrollmentOrderAction(formData: FormData) {
   redirect(`/checkout/bkash?order_id=${encodeURIComponent(orderId)}`)
 }
 
-export async function previewCouponAction(courseId: string, couponCode: string) {
+export async function previewCouponAction(
+  courseId: string,
+  couponCode: string
+) {
   return authenticatedApiFetch<{
     amount: string
     couponCode: string | null
@@ -97,21 +103,30 @@ export async function submitPaymentProofAction(formData: FormData) {
   console.info("[payment][web] Submitting payment proof", {
     gateway,
     orderId,
-    senderNumber: senderNumber.length > 4 ? `${senderNumber.slice(0, 2)}****${senderNumber.slice(-2)}` : "****",
-    transactionId: transactionId.length > 4 ? `${transactionId.slice(0, 2)}****${transactionId.slice(-2)}` : "****",
+    senderNumber:
+      senderNumber.length > 4
+        ? `${senderNumber.slice(0, 2)}****${senderNumber.slice(-2)}`
+        : "****",
+    transactionId:
+      transactionId.length > 4
+        ? `${transactionId.slice(0, 2)}****${transactionId.slice(-2)}`
+        : "****",
   })
 
   try {
-    paidOrder = await authenticatedApiFetch<PaymentOrderDto>(`/payments/orders/${orderId}/proof`, {
-      body: JSON.stringify({
-        senderNumber,
-        transactionId,
-      }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-      method: "POST",
-    })
+    paidOrder = await authenticatedApiFetch<PaymentOrderDto>(
+      `/payments/orders/${orderId}/proof`,
+      {
+        body: JSON.stringify({
+          senderNumber,
+          transactionId,
+        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        method: "POST",
+      }
+    )
   } catch (error) {
     console.error("[payment][web] Payment verification failed", {
       error: error instanceof Error ? error.message : String(error),
@@ -123,7 +138,7 @@ export async function submitPaymentProofAction(formData: FormData) {
     }
 
     redirect(
-      `${checkoutPath}&error=${encodeURIComponent(error instanceof Error ? error.message : "Payment could not be verified.")}`,
+      `${checkoutPath}&error=${encodeURIComponent(error instanceof Error ? error.message : "Payment could not be verified.")}`
     )
   }
 

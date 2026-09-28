@@ -7,9 +7,8 @@ import { Button } from "@workspace/ui/components/button"
 import { Badge } from "@workspace/ui/components/badge"
 import { Card, CardContent } from "@workspace/ui/components/card"
 import { ProgressThread } from "@workspace/ui/components/progress-thread"
-import { Separator } from "@workspace/ui/components/separator"
 
-import { SiteHeader } from "@/components/site-header"
+import { PublicShell } from "@/components/public-shell"
 import { authenticatedApiFetch, publicApiFetch } from "@/lib/api-client"
 import { getDashboardPath } from "@/lib/auth/dashboard"
 import { VerifiedSeal } from "@/components/verified-seal"
@@ -22,53 +21,70 @@ const stats = [
 
 const roles = [
   {
-    tag: "Role / admin",
-    title: "Runs the ledger",
-    body: "Monitors payment outcomes, manages access and keeps the course catalog healthy.",
+    tag: "Admin",
+    title: "Keeps the catalog honest",
+    body: "Reviews payments, manages access, and sees which courses are actually moving.",
   },
   {
-    tag: "Role / instructor",
+    tag: "Instructor",
     title: "Builds the course",
-    body: "Uploads lessons and video, structures modules, and sees which students are actually progressing.",
+    body: "Structures milestones, uploads lessons, and follows student progress in one workspace.",
   },
   {
-    tag: "Role / student",
-    title: "Learns and tracks",
-    body: "Enrolls, pays by bank transfer or mobile payment, and watches secured video once verified.",
+    tag: "Student",
+    title: "Learns without noise",
+    body: "Enrolls, pays, then watches secured video with a clear outline and saved progress.",
   },
 ]
 
 const steps = [
   {
-    code: "Folio-01",
+    code: "01",
     title: "Choose a course",
-    body: "Find a structured course and start checkout.",
+    body: "Open a published course and start checkout with the price already in view.",
     icon: CheckCircle2,
   },
   {
-    code: "Folio-02",
+    code: "02",
     title: "Apply a coupon",
-    body: "Add an active coupon and see the final payable amount.",
+    body: "Enter an active code and see the final amount from the server, not a guess.",
     icon: Upload,
   },
   {
-    code: "Folio-03",
-    title: "Pay securely",
-    body: "Send the exact amount through the available payment method.",
+    code: "03",
+    title: "Pay the exact amount",
+    body: "Send the shown amount through the payment method on the order.",
     icon: ShieldCheck,
   },
   {
-    code: "Folio-04",
+    code: "04",
     title: "Access opens",
-    body: "Pay-Confirm verifies the transaction and unlocks your course automatically.",
+    body: "Once payment is verified, the course unlocks and you can continue learning.",
     icon: PlayCircle,
+  },
+]
+
+const faqs = [
+  {
+    q: "When do I get course access?",
+    a: "After payment is verified. Pending orders stay locked until then.",
+  },
+  {
+    q: "How does payment verification work?",
+    a: "You pay outside the app, submit proof, and access opens when the order is marked paid.",
+  },
+  {
+    q: "Can I use a coupon during checkout?",
+    a: "Yes. Apply it before paying so the order records the discounted amount.",
   },
 ]
 
 export default async function Page() {
   let profile: ProfileDto | null = null
   try {
-    profile = await authenticatedApiFetch<ProfileDto>("/auth/me", { cache: "no-store" })
+    profile = await authenticatedApiFetch<ProfileDto>("/auth/me", {
+      cache: "no-store",
+    })
   } catch {
     // Anonymous visitors see the public CTA.
   }
@@ -76,58 +92,59 @@ export default async function Page() {
   try {
     const response = await publicApiFetch<CourseListResponse>(
       "/courses?page=1&pageSize=3",
-      { next: { revalidate: 300 } },
+      { next: { revalidate: 300 } }
     )
     featuredCourses = response.courses
   } catch {
     // The marketing page remains useful when the catalog API is unavailable.
   }
-  const dashboardPath = profile ? getDashboardPath(profile.role) : "/auth/signup"
+  const dashboardPath = profile
+    ? getDashboardPath(profile.role)
+    : "/auth/signup"
 
   return (
-    <main className="min-h-screen bg-background text-foreground">
+    <PublicShell>
       <script
         dangerouslySetInnerHTML={{
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "EducationalOrganization",
-            description: "Verified online learning with structured courses and secure video.",
+            description:
+              "Verified online learning with structured courses and secure video.",
             name: "Folio",
-            url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://folio.example.com",
+            url:
+              process.env.NEXT_PUBLIC_SITE_URL ?? "https://folio.example.com",
           }),
         }}
         type="application/ld+json"
       />
-      <SiteHeader />
 
-      {/* Hero */}
-      <section className="mx-auto grid max-w-6xl gap-16 px-6 py-20 lg:grid-cols-[1fr_420px] lg:items-center lg:py-28">
+      <section className="mx-auto grid max-w-6xl items-center gap-12 px-4 py-16 sm:px-6 lg:grid-cols-[minmax(0,1fr)_400px] lg:gap-16 lg:py-24">
         <div>
           <Badge
             variant="outline"
-            className="mb-6 border-primary/40 font-mono text-xs tracking-wide text-primary"
+            className="mb-6 border-primary/40 font-mono text-xs text-primary"
           >
-            Premium LMS · automatic verification
+            Premium LMS · verified enrollment
           </Badge>
-          <h1 className="max-w-2xl font-heading text-5xl font-light leading-[1.05] tracking-tight md:text-6xl">
-            Every enrollment,
-            <br />
-            <span className="italic text-primary">verified</span> before it
-            counts.
+          <h1 className="max-w-2xl font-heading text-4xl leading-[1.08] font-light tracking-tight sm:text-5xl md:text-6xl">
+            Learn in a workspace that
+            <span className="text-primary italic"> actually stays clear.</span>
           </h1>
           <ProgressThread className="mt-8 w-24" />
           <p className="mt-6 max-w-lg text-base leading-7 text-muted-foreground">
-            Folio is a dark-first learning platform built around structured
-            courses, automatic payment verification and secure learning.
-            Instructors teach, students learn, and every enrollment is tracked
-            in one clear workspace.
+            Folio is a dark-first learning platform for structured courses,
+            verified payments, and secure video. Instructors teach, students
+            continue, and every enrollment has a record.
           </p>
           <div className="mt-9 flex flex-wrap items-center gap-3">
             <Button asChild size="lg">
-              <Link href={dashboardPath}>{profile ? "Go to dashboard" : "Create account"}</Link>
+              <Link href={dashboardPath}>
+                {profile ? "Go to dashboard" : "Create account"}
+              </Link>
             </Button>
             <Button asChild size="lg" variant="outline">
-              <Link href="/auth/login">Sign in</Link>
+              <Link href="/courses">Browse courses</Link>
             </Button>
           </div>
         </div>
@@ -139,17 +156,15 @@ export default async function Page() {
             </p>
             <Badge
               variant="outline"
-              className="border-primary/40 font-mono text-xs tracking-wide text-primary"
+              className="border-primary/40 font-mono text-xs text-primary"
             >
-              Pending
+              In progress
             </Badge>
           </div>
           <div className="space-y-5 pt-6">
             <div>
               <p className="text-sm text-muted-foreground">Course</p>
-              <p className="mt-1 font-heading text-xl">
-                Advanced web systems
-              </p>
+              <p className="mt-1 font-heading text-xl">Advanced web systems</p>
             </div>
             <div className="grid grid-cols-2 gap-4 border-t border-border pt-5">
               <div>
@@ -163,48 +178,36 @@ export default async function Page() {
               </div>
             </div>
           </div>
-
-          <VerifiedSeal className="absolute -right-6 -top-6 size-24 rotate-[8deg] rounded-full bg-background" />
+          <VerifiedSeal className="absolute -top-5 -right-4 size-20 rotate-[8deg] rounded-full bg-background sm:-right-6 sm:size-24" />
         </div>
       </section>
 
-      <Separator className="bg-border" />
-
-      {/* Stats strip */}
-      <section className="mx-auto max-w-6xl px-6 py-12">
-        <dl className="grid gap-5 sm:grid-cols-3">
+      <section className="border-y border-border">
+        <dl className="mx-auto grid max-w-6xl gap-px bg-border sm:grid-cols-3">
           {stats.map((s) => (
-            <Card key={s.label}>
-              <CardContent className="text-center sm:text-left">
-                <dd className="font-mono text-3xl text-primary tabular-nums">
-                  {s.value}
-                </dd>
-                <dt className="mt-1 text-sm text-muted-foreground">
-                  {s.label}
-                </dt>
-              </CardContent>
-            </Card>
+            <div className="bg-background px-4 py-10 sm:px-8" key={s.label}>
+              <dd className="font-mono text-3xl text-primary tabular-nums">
+                {s.value}
+              </dd>
+              <dt className="mt-2 text-sm text-muted-foreground">{s.label}</dt>
+            </div>
           ))}
         </dl>
       </section>
 
-      {/* Roles ledger */}
-      <section className="mx-auto max-w-6xl px-6 py-20">
-        <p className="font-mono text-xs tracking-wide text-muted-foreground">
-          Three roles, one ledger
+      <section className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
+        <p className="font-mono text-xs text-muted-foreground">
+          Three roles, one workspace
         </p>
         <h2 className="mt-3 max-w-xl font-heading text-3xl tracking-tight md:text-4xl">
           Everyone sees exactly what their role needs.
         </h2>
         <ProgressThread className="mt-6 w-16" />
-
         <div className="mt-10 grid gap-5 md:grid-cols-3">
           {roles.map((r) => (
-            <Card className="group" key={r.tag}>
+            <Card key={r.tag}>
               <CardContent>
-                <p className="font-mono text-xs tracking-wide text-secondary">
-                  {r.tag}
-                </p>
+                <p className="font-mono text-xs text-secondary">{r.tag}</p>
                 <h3 className="mt-4 font-heading text-2xl tracking-tight">
                   {r.title}
                 </h3>
@@ -217,12 +220,11 @@ export default async function Page() {
         </div>
       </section>
 
-      {/* Featured courses */}
       <section className="border-y border-border bg-card">
-        <div className="mx-auto max-w-6xl px-6 py-20">
-          <div className="flex flex-col items-start justify-between gap-5 text-left sm:flex-row sm:items-end">
+        <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
+          <div className="flex flex-col items-start justify-between gap-5 sm:flex-row sm:items-end">
             <div>
-              <p className="font-mono text-xs tracking-wide text-muted-foreground">
+              <p className="font-mono text-xs text-muted-foreground">
                 Featured courses
               </p>
               <h2 className="mt-3 font-heading text-3xl tracking-tight md:text-4xl">
@@ -237,119 +239,142 @@ export default async function Page() {
           {featuredCourses.length > 0 ? (
             <div className="mt-10 grid gap-5 md:grid-cols-3">
               {featuredCourses.map((course) => (
-                <Link className="group" href={`/courses/${course.slug}`} key={course.id}>
-                  <Card className="h-full overflow-hidden transition-colors group-hover:ring-primary/50">
+                <Link
+                  className="group"
+                  href={`/courses/${course.slug}`}
+                  key={course.id}
+                >
+                  <Card className="h-full overflow-hidden transition-colors group-hover:ring-primary/40">
                     {course.thumbnailUrl ? (
                       <div className="relative aspect-[16/9] bg-background">
-                        <Image alt={course.title} className="object-cover transition-transform duration-300 group-hover:scale-[1.02]" fill sizes="(min-width: 768px) 33vw, 100vw" src={course.thumbnailUrl} />
+                        <Image
+                          alt={course.title}
+                          className="object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+                          fill
+                          sizes="(min-width: 768px) 33vw, 100vw"
+                          src={course.thumbnailUrl}
+                        />
                       </div>
-                    ) : <div className="flex aspect-[16/9] items-center justify-center bg-background font-mono text-xs text-muted-foreground">Folio course</div>}
+                    ) : (
+                      <div className="flex aspect-[16/9] items-center justify-center bg-background font-mono text-xs text-muted-foreground">
+                        Folio course
+                      </div>
+                    )}
                     <CardContent>
-                      <p className="font-mono text-xs text-primary">{course.category ?? course.level.replace("_", " ")}</p>
-                      <h3 className="mt-3 font-heading text-2xl tracking-tight">{course.title}</h3>
-                      <p className="mt-2 line-clamp-2 text-sm leading-6 text-muted-foreground">{course.shortDescription ?? "Explore a structured course with verified enrollment."}</p>
-                      <p className="mt-5 font-mono text-sm text-foreground">{Number(course.price) === 0 ? "Free" : `${course.currency} ${course.price}`}</p>
+                      <p className="font-mono text-xs text-primary">
+                        {course.category ?? course.level.replace("_", " ")}
+                      </p>
+                      <h3 className="mt-3 font-heading text-2xl tracking-tight">
+                        {course.title}
+                      </h3>
+                      <p className="mt-2 line-clamp-2 text-sm leading-6 text-muted-foreground">
+                        {course.shortDescription ??
+                          "Explore a structured course with verified enrollment."}
+                      </p>
+                      <p className="mt-5 font-mono text-sm text-foreground">
+                        {Number(course.price) === 0
+                          ? "Free"
+                          : `${course.currency} ${course.price}`}
+                      </p>
                     </CardContent>
                   </Card>
                 </Link>
               ))}
             </div>
           ) : (
-            <p className="mt-10 rounded-xl bg-background p-5 text-sm text-muted-foreground ring-1 ring-foreground/10">New courses are being prepared. Browse the catalog to see what is available.</p>
+            <p className="mt-10 rounded-xl bg-background p-5 text-sm text-muted-foreground ring-1 ring-foreground/10">
+              New courses are being prepared. Browse the catalog to see what is
+              available.
+            </p>
           )}
         </div>
       </section>
 
-      {/* Verification flow */}
-      <section className="border-y border-border bg-card">
-        <div className="mx-auto max-w-6xl px-6 py-20">
-          <div className="flex items-end justify-between gap-6">
-            <div>
-              <p className="font-mono text-xs tracking-wide text-muted-foreground">
-                How verification works
-              </p>
-              <h2 className="mt-3 max-w-xl font-heading text-3xl tracking-tight md:text-4xl">
-                Payment verification without the wait.
-              </h2>
-            </div>
-            <VerifiedSeal className="hidden size-20 shrink-0 -rotate-6 md:block" />
+      <section className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
+        <div className="flex items-end justify-between gap-6">
+          <div>
+            <p className="font-mono text-xs text-muted-foreground">
+              How enrollment works
+            </p>
+            <h2 className="mt-3 max-w-xl font-heading text-3xl tracking-tight md:text-4xl">
+              Four steps from browse to access.
+            </h2>
           </div>
-
-          <div className="mt-12 grid gap-8 md:grid-cols-4">
-            {steps.map((step) => (
-              <div key={step.code} className="pt-5">
-                <ProgressThread className="mb-5 w-full" />
-                <div className="flex items-center justify-between">
-                  <p className="font-mono text-xs text-muted-foreground">
-                    {step.code}
-                  </p>
-                  <step.icon className="size-4 text-primary" />
-                </div>
-                <h3 className="mt-4 font-heading text-xl tracking-tight">
-                  {step.title}
-                </h3>
-                <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                  {step.body}
+          <VerifiedSeal className="hidden size-20 shrink-0 -rotate-6 md:block" />
+        </div>
+        <div className="mt-12 grid gap-8 sm:grid-cols-2 md:grid-cols-4">
+          {steps.map((step) => (
+            <div key={step.code}>
+              <ProgressThread className="mb-5 w-full" />
+              <div className="flex items-center justify-between">
+                <p className="font-mono text-xs text-muted-foreground">
+                  {step.code}
                 </p>
+                <step.icon className="size-4 text-primary" />
               </div>
+              <h3 className="mt-4 font-heading text-xl tracking-tight">
+                {step.title}
+              </h3>
+              <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                {step.body}
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="border-t border-border">
+        <div className="mx-auto grid max-w-6xl gap-10 px-4 py-20 sm:px-6 lg:grid-cols-[0.85fr_1.15fr] lg:items-start">
+          <div>
+            <p className="font-mono text-xs text-muted-foreground">
+              Need to know
+            </p>
+            <h2 className="mt-3 font-heading text-3xl tracking-tight md:text-4xl">
+              A clearer start.
+            </h2>
+            <p className="mt-4 max-w-md text-sm leading-6 text-muted-foreground">
+              Learn how verification, course access, and secure video work
+              before you enroll.
+            </p>
+            <Button asChild className="mt-6" variant="outline">
+              <Link href="/faq">Read all FAQs</Link>
+            </Button>
+          </div>
+          <div className="grid gap-3">
+            {faqs.map((item) => (
+              <Card key={item.q}>
+                <CardContent className="py-5">
+                  <p className="font-heading text-lg">{item.q}</p>
+                  <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                    {item.a}
+                  </p>
+                </CardContent>
+              </Card>
             ))}
           </div>
         </div>
       </section>
 
-      {/* FAQ preview */}
-      <section className="mx-auto max-w-6xl px-6 py-20">
-        <div className="grid gap-8 lg:grid-cols-[0.8fr_1.2fr] lg:items-start">
-          <div>
-            <p className="font-mono text-xs tracking-wide text-muted-foreground">Need to know</p>
-            <h2 className="mt-3 font-heading text-3xl tracking-tight md:text-4xl">A clearer start.</h2>
-            <p className="mt-4 max-w-md text-sm leading-6 text-muted-foreground">Learn how verification, course access and secure video work before you enroll.</p>
-            <Button asChild className="mt-6" variant="outline"><Link href="/faq">Read all FAQs</Link></Button>
-          </div>
-          <div className="grid gap-3">
-            {["When do I get course access?", "How does payment verification work?", "Can I use a coupon during checkout?"].map((question) => <Card key={question}><CardContent className="flex items-center justify-between gap-4 py-5"><span className="font-heading text-lg">{question}</span><span className="font-mono text-primary">+</span></CardContent></Card>)}
-          </div>
-        </div>
-      </section>
-
-      {/* Closing CTA */}
-      <section className="mx-auto max-w-6xl px-6 py-24 text-center">
+      <section className="mx-auto max-w-6xl px-4 py-20 text-center sm:px-6 sm:py-24">
         <VerifiedSeal className="mx-auto size-16 text-primary" />
         <h2 className="mx-auto mt-8 max-w-lg font-heading text-3xl tracking-tight md:text-4xl">
-          Open your ledger and start teaching.
+          Open your workspace and start.
         </h2>
         <p className="mx-auto mt-4 max-w-md text-sm text-muted-foreground">
-          Free to set up. Automatic verification gets learners into the right
-          course as soon as their payment is confirmed.
+          Free to set up. Learners enter a course as soon as their payment is
+          confirmed.
         </p>
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
           <Button asChild size="lg">
-            <Link href={dashboardPath}>{profile ? "Go to dashboard" : "Create account"}</Link>
+            <Link href={dashboardPath}>
+              {profile ? "Go to dashboard" : "Create account"}
+            </Link>
           </Button>
           <Button asChild size="lg" variant="outline">
             <Link href="/courses">Browse courses</Link>
           </Button>
         </div>
       </section>
-
-      <Separator className="bg-border" />
-
-      <footer className="mx-auto max-w-6xl px-6 py-10">
-        <div className="flex flex-col items-center justify-between gap-4 text-sm text-muted-foreground sm:flex-row">
-          <span className="font-mono">© Folio, {new Date().getFullYear()}</span>
-          <div className="flex gap-6">
-            <Link href="/faq" className="interactive-link">
-              FAQ
-            </Link>
-            <Link href="/about" className="interactive-link">
-              About
-            </Link>
-            <Link href="/contact" className="interactive-link">
-              Contact
-            </Link>
-          </div>
-        </div>
-      </footer>
-    </main>
+    </PublicShell>
   )
 }

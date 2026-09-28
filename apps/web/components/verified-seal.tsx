@@ -1,10 +1,6 @@
 export function VerifiedSeal({ className }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 120 120"
-      className={className}
-      aria-hidden="true"
-    >
+    <svg viewBox="0 0 120 120" className={className} aria-hidden="true">
       <circle
         cx="60"
         cy="60"

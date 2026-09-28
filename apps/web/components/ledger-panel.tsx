@@ -23,7 +23,7 @@ export function LedgerPanel() {
       />
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -right-32 -top-32 h-[28rem] w-[28rem] rounded-full opacity-20 blur-3xl"
+        className="pointer-events-none absolute -top-32 -right-32 h-[28rem] w-[28rem] rounded-full opacity-20 blur-3xl"
         style={{
           background:
             "radial-gradient(circle, var(--primary) 0%, transparent 70%)",
@@ -40,14 +40,14 @@ export function LedgerPanel() {
 
       <div className="relative max-w-md">
         <ProgressThread className="mb-7 w-16" />
-        <h1 className="font-heading text-4xl font-light leading-[1.15] tracking-tight">
+        <h1 className="font-heading text-4xl leading-[1.15] font-light tracking-tight">
           Every enrollment,{" "}
-          <span className="italic text-primary">verified</span> before it
+          <span className="text-primary italic">verified</span> before it
           counts.
         </h1>
         <p className="mt-5 text-sm leading-6 text-muted-foreground">
-          Payments checked by a person, not assumed by a webhook. Admins
-          verify, instructors teach, students learn.
+          Payments checked by a person, not assumed by a webhook. Admins verify,
+          instructors teach, students learn.
         </p>
       </div>
 

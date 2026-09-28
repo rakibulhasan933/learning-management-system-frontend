@@ -93,7 +93,8 @@ export function LecturePlayer({
   const [activityTick, setActivityTick] = useState(0)
   const [renderedSrc, setRenderedSrc] = useState(src)
 
-  const percent = duration > 0 ? Math.min(100, (currentTime / duration) * 100) : 0
+  const percent =
+    duration > 0 ? Math.min(100, (currentTime / duration) * 100) : 0
   const bufferedPercent =
     duration > 0 ? Math.min(100, (bufferedEnd / duration) * 100) : 0
 
@@ -115,7 +116,7 @@ export function LecturePlayer({
 
     const timerId = setTimeout(
       () => setControlsVisible(false),
-      CONTROLS_IDLE_MS,
+      CONTROLS_IDLE_MS
     )
 
     return () => clearTimeout(timerId)
@@ -172,7 +173,7 @@ export function LecturePlayer({
 
       video.currentTime = Math.min(
         Math.max(0, video.currentTime + seconds),
-        video.duration,
+        video.duration
       )
     })
     revealControls()
@@ -199,9 +200,7 @@ export function LecturePlayer({
 
     const bounds = bar.getBoundingClientRect()
 
-    return bounds.width === 0
-      ? 0
-      : (event.clientX - bounds.left) / bounds.width
+    return bounds.width === 0 ? 0 : (event.clientX - bounds.left) / bounds.width
   }
 
   function handleSeekPointerDown(event: ReactPointerEvent<HTMLDivElement>) {
@@ -334,7 +333,8 @@ export function LecturePlayer({
     setBufferedEnd(video.buffered.end(video.buffered.length - 1))
   }
 
-  const VolumeIcon = isMuted || volume === 0 ? VolumeX : volume < 0.5 ? Volume1 : Volume2
+  const VolumeIcon =
+    isMuted || volume === 0 ? VolumeX : volume < 0.5 ? Volume1 : Volume2
 
   return (
     <div
@@ -342,7 +342,7 @@ export function LecturePlayer({
       className={cn(
         "group/player relative aspect-video w-full bg-background outline-none",
         isFullscreen && "aspect-auto h-screen",
-        !showControls && "cursor-none",
+        !showControls && "cursor-none"
       )}
       onBlur={() => setControlsVisible(true)}
       onKeyDown={handleContainerKeyDown}
@@ -438,7 +438,7 @@ export function LecturePlayer({
       */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute z-30 max-w-[72%] select-none break-words rounded-md bg-background/35 px-2 py-1 font-mono text-[11px] text-foreground ring-1 ring-foreground/10 transition-[left,top] duration-500 sm:text-sm"
+        className="pointer-events-none absolute z-30 max-w-[72%] rounded-md bg-background/35 px-2 py-1 font-mono text-[11px] break-words text-foreground ring-1 ring-foreground/10 transition-[left,top] duration-500 select-none sm:text-sm"
         style={{
           left: watermarkPosition.left,
           opacity: 0.2,
@@ -454,8 +454,8 @@ export function LecturePlayer({
       {src ? (
         <div
           className={cn(
-            "absolute inset-x-0 bottom-0 z-10 bg-background/85 px-3 pb-2 pt-2.5 transition-opacity duration-200 sm:px-4",
-            showControls ? "opacity-100" : "pointer-events-none opacity-0",
+            "absolute inset-x-0 bottom-0 z-10 bg-background/85 px-3 pt-2.5 pb-2 transition-opacity duration-200 sm:px-4",
+            showControls ? "opacity-100" : "pointer-events-none opacity-0"
           )}
         >
           {/* Seek bar — the progress thread motif, thickened for touch. */}
@@ -478,7 +478,7 @@ export function LecturePlayer({
             <div
               className={cn(
                 "relative w-full overflow-hidden bg-foreground/15 transition-[height] duration-150",
-                isScrubbing ? "h-[5px]" : "h-px group-hover/seek:h-[5px]",
+                isScrubbing ? "h-[5px]" : "h-px group-hover/seek:h-[5px]"
               )}
             >
               <div
@@ -495,7 +495,7 @@ export function LecturePlayer({
                 "pointer-events-none absolute size-3 -translate-x-1/2 rounded-full bg-primary transition-opacity duration-150",
                 isScrubbing
                   ? "opacity-100"
-                  : "opacity-0 group-hover/seek:opacity-100 group-focus-visible/seek:opacity-100",
+                  : "opacity-0 group-hover/seek:opacity-100 group-focus-visible/seek:opacity-100"
               )}
               style={{ left: `${percent}%` }}
             />
@@ -549,7 +549,7 @@ export function LecturePlayer({
               </Button>
               <input
                 aria-label="Volume"
-                className="ml-1 hidden h-1 w-0 cursor-pointer accent-primary transition-[width] duration-200 focus-visible:w-16 group-hover/volume:w-16 sm:block"
+                className="ml-1 hidden h-1 w-0 cursor-pointer accent-primary transition-[width] duration-200 group-hover/volume:w-16 focus-visible:w-16 sm:block"
                 max={1}
                 min={0}
                 onChange={(event) => applyVolume(Number(event.target.value))}
@@ -559,8 +559,10 @@ export function LecturePlayer({
               />
             </div>
 
-            <p className="ml-1.5 font-mono text-[11px] tabular-nums text-muted-foreground sm:text-xs">
-              <span className="text-foreground">{formatClock(currentTime)}</span>
+            <p className="ml-1.5 font-mono text-[11px] text-muted-foreground tabular-nums sm:text-xs">
+              <span className="text-foreground">
+                {formatClock(currentTime)}
+              </span>
               {" / "}
               {formatClock(duration)}
             </p>
@@ -580,7 +582,11 @@ export function LecturePlayer({
                 >
                   {playbackRate}×
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="min-w-28" side="top">
+                <DropdownMenuContent
+                  align="end"
+                  className="min-w-28"
+                  side="top"
+                >
                   <DropdownMenuRadioGroup
                     onValueChange={(value) => applyPlaybackRate(Number(value))}
                     value={String(playbackRate)}

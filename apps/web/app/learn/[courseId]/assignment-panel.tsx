@@ -17,7 +17,7 @@ interface AssignmentPanelProps {
 
 export function AssignmentPanel({ assignment }: AssignmentPanelProps) {
   const [submissionText, setSubmissionText] = useState(
-    assignment.submission?.submissionText ?? "",
+    assignment.submission?.submissionText ?? ""
   )
   const [submission, setSubmission] =
     useState<StudentAssignmentSubmissionDto | null>(assignment.submission)
@@ -40,7 +40,7 @@ export function AssignmentPanel({ assignment }: AssignmentPanelProps) {
         setMessage(
           error instanceof Error
             ? error.message
-            : "Assignment could not be submitted.",
+            : "Assignment could not be submitted."
         )
       }
     })
@@ -55,7 +55,7 @@ export function AssignmentPanel({ assignment }: AssignmentPanelProps) {
         <h3 className="mt-1 font-heading text-xl tracking-tight">
           {assignment.title}
         </h3>
-        <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-muted-foreground">
+        <p className="mt-2 text-sm leading-6 whitespace-pre-wrap text-muted-foreground">
           {assignment.instructions}
         </p>
         <div className="mt-3 flex flex-wrap gap-3 font-mono text-xs text-muted-foreground">
@@ -92,11 +92,7 @@ export function AssignmentPanel({ assignment }: AssignmentPanelProps) {
       />
 
       <div className="flex flex-wrap items-center gap-3">
-        <Button
-          disabled={isPending}
-          onClick={submitAssignment}
-          type="button"
-        >
+        <Button disabled={isPending} onClick={submitAssignment} type="button">
           {isPending ? <Loader2 className="size-4 animate-spin" /> : null}
           {isPending
             ? "Submitting..."

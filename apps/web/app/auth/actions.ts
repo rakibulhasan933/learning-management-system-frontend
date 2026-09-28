@@ -68,8 +68,9 @@ function getRefreshTokenFromResponse(response: Response) {
   }
   const setCookies = headersWithSetCookie.getSetCookie?.() ?? []
   const header =
-    setCookies.find((value) => value.startsWith(`${refreshTokenCookieName}=`)) ??
-    response.headers.get("set-cookie")
+    setCookies.find((value) =>
+      value.startsWith(`${refreshTokenCookieName}=`)
+    ) ?? response.headers.get("set-cookie")
 
   if (!header?.includes(`${refreshTokenCookieName}=`)) {
     return null
@@ -112,7 +113,7 @@ async function postAuthSession(path: string, body: unknown) {
 }
 
 function createAuthFormState(
-  overrides: Partial<AuthFormState> = {},
+  overrides: Partial<AuthFormState> = {}
 ): AuthFormState {
   return {
     ...defaultAuthFormState,
@@ -126,7 +127,10 @@ function createAuthFormState(
 
 function mapLoginError(error: unknown, email: string): AuthFormState {
   if (error instanceof ApiClientError) {
-    if (error.status === 403 && error.message.toLowerCase().includes("verify")) {
+    if (
+      error.status === 403 &&
+      error.message.toLowerCase().includes("verify")
+    ) {
       return createAuthFormState({
         formError: error.message,
         unverifiedEmail: email,
@@ -144,7 +148,9 @@ function mapLoginError(error: unknown, email: string): AuthFormState {
 
   return createAuthFormState({
     formError:
-      error instanceof Error ? error.message : "Sign in could not be completed.",
+      error instanceof Error
+        ? error.message
+        : "Sign in could not be completed.",
   })
 }
 
@@ -159,9 +165,7 @@ function mapSignupError(error: unknown): AuthFormState {
 
   return createAuthFormState({
     formError:
-      error instanceof Error
-        ? error.message
-        : "Account could not be created.",
+      error instanceof Error ? error.message : "Account could not be created.",
   })
 }
 
@@ -189,20 +193,20 @@ export async function signInWithPasswordAction(formData: FormData) {
       error.message.toLowerCase().includes("verify")
     ) {
       redirect(
-        `/auth/login?error=${encodeURIComponent(error.message)}&unverifiedEmail=${encodeURIComponent(email)}`,
+        `/auth/login?error=${encodeURIComponent(error.message)}&unverifiedEmail=${encodeURIComponent(email)}`
       )
     }
 
     redirectWithError(
       "/auth/login",
-      error instanceof Error ? error.message : "Sign in failed.",
+      error instanceof Error ? error.message : "Sign in failed."
     )
   }
 }
 
 export async function signInWithPasswordFormAction(
   _previousState: AuthFormState,
-  formData: FormData,
+  formData: FormData
 ): Promise<AuthFormState> {
   const email = getRequiredString(formData, "email")
   const password = getRequiredString(formData, "password")
@@ -254,7 +258,7 @@ export async function resendVerificationEmailAction(formData: FormData) {
       `/auth/login?unverifiedEmail=${encodeURIComponent(email)}`,
       error instanceof Error
         ? error.message
-        : "Verification email could not be resent.",
+        : "Verification email could not be resent."
     )
   }
 
@@ -264,7 +268,9 @@ export async function resendVerificationEmailAction(formData: FormData) {
 export async function signInWithGoogleAction(formData: FormData) {
   const origin = await getOrigin()
   const next = getRequiredString(formData, "next")
-  const state = Buffer.from(JSON.stringify({ next, origin })).toString("base64url")
+  const state = Buffer.from(JSON.stringify({ next, origin })).toString(
+    "base64url"
+  )
   const url = new URL("/auth/google", getBackendApiUrl())
 
   url.searchParams.set("state", state)
@@ -298,7 +304,7 @@ export async function signUpWithPasswordAction(formData: FormData) {
   } catch (error) {
     redirectWithError(
       "/auth/signup",
-      error instanceof Error ? error.message : "Account could not be created.",
+      error instanceof Error ? error.message : "Account could not be created."
     )
   }
 
@@ -307,7 +313,7 @@ export async function signUpWithPasswordAction(formData: FormData) {
 
 export async function signUpWithPasswordFormAction(
   _previousState: AuthFormState,
-  formData: FormData,
+  formData: FormData
 ): Promise<AuthFormState> {
   const email = getRequiredString(formData, "email")
   const password = getRequiredString(formData, "password")
@@ -371,7 +377,7 @@ export async function sendPasswordResetAction(formData: FormData) {
   } catch (error) {
     redirectWithError(
       "/auth/reset-password",
-      error instanceof Error ? error.message : "Password reset failed.",
+      error instanceof Error ? error.message : "Password reset failed."
     )
   }
 
@@ -383,7 +389,10 @@ export async function confirmPasswordResetAction(formData: FormData) {
   const token = getRequiredString(formData, "token")
 
   if (!password || !token) {
-    redirectWithError("/auth/reset-password", "Password and reset token are required.")
+    redirectWithError(
+      "/auth/reset-password",
+      "Password and reset token are required."
+    )
   }
 
   try {
@@ -397,7 +406,7 @@ export async function confirmPasswordResetAction(formData: FormData) {
   } catch (error) {
     redirectWithError(
       `/auth/reset-password?token=${encodeURIComponent(token)}`,
-      error instanceof Error ? error.message : "Password reset failed.",
+      error instanceof Error ? error.message : "Password reset failed."
     )
   }
 

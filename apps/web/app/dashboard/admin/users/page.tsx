@@ -1,13 +1,8 @@
 import Link from "next/link"
-import {
-  ArrowLeft,
-  UserPlus,
-} from "lucide-react"
+import { ArrowLeft, UserPlus } from "lucide-react"
 import type { AdminUserListResponse } from "@workspace/types"
 
-import {
-  createInstructorAction,
-} from "@/app/dashboard/admin/actions"
+import { createInstructorAction } from "@/app/dashboard/admin/actions"
 import { authenticatedApiFetch } from "@/lib/api-client"
 import { Card, CardContent } from "@workspace/ui/components/card"
 import { FloatingInput } from "@workspace/ui/components/floating-input"
@@ -21,7 +16,7 @@ export const dynamic = "force-dynamic"
 export default async function AdminUsersPage() {
   const initialResponse = await authenticatedApiFetch<AdminUserListResponse>(
     "/admin/users",
-    { cache: "no-store" },
+    { cache: "no-store" }
   )
 
   return (

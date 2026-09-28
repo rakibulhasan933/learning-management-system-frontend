@@ -105,7 +105,7 @@ export async function createInstructorCourseAction(formData: FormData) {
         "Content-Type": "application/json",
       },
       method: "POST",
-    },
+    }
   )
 
   revalidatePath("/dashboard/instructor/courses")
@@ -123,7 +123,7 @@ export async function updateInstructorCourseAction(formData: FormData) {
         "Content-Type": "application/json",
       },
       method: "PATCH",
-    },
+    }
   )
 
   revalidatePath("/dashboard/instructor/courses")
@@ -152,7 +152,7 @@ export async function createInstructorSectionAction(formData: FormData) {
         "Content-Type": "application/json",
       },
       method: "POST",
-    },
+    }
   )
 
   revalidatePath(`/dashboard/instructor/courses/${courseId}/edit`)
@@ -170,7 +170,7 @@ export async function updateInstructorSectionAction(formData: FormData) {
         "Content-Type": "application/json",
       },
       method: "PATCH",
-    },
+    }
   )
 
   revalidatePath(`/dashboard/instructor/courses/${courseId}/edit`)
@@ -184,7 +184,7 @@ export async function deleteInstructorSectionAction(formData: FormData) {
     `/instructor/courses/${courseId}/sections/${sectionId}`,
     {
       method: "DELETE",
-    },
+    }
   )
 
   revalidatePath(`/dashboard/instructor/courses/${courseId}/edit`)
@@ -202,7 +202,7 @@ export async function createInstructorLectureAction(formData: FormData) {
         "Content-Type": "application/json",
       },
       method: "POST",
-    },
+    }
   )
 
   revalidatePath(`/dashboard/instructor/courses/${courseId}/edit`)
@@ -211,93 +211,128 @@ export async function createInstructorLectureAction(formData: FormData) {
 export async function createInstructorModuleAction(formData: FormData) {
   const courseId = getRequiredString(formData, "courseId")
   const milestoneId = getRequiredString(formData, "milestoneId")
-  const contentTypes = formData.getAll("contentTypes").filter((value): value is string => typeof value === "string")
-  await authenticatedApiFetch(`/instructor/courses/${courseId}/milestones/${milestoneId}/modules`, {
-    body: JSON.stringify({
-      contentTypes,
-      description: getOptionalString(formData, "description"),
-      title: getRequiredString(formData, "title"),
-    }),
-    headers: { "Content-Type": "application/json" },
-    method: "POST",
-  })
+  const contentTypes = formData
+    .getAll("contentTypes")
+    .filter((value): value is string => typeof value === "string")
+  await authenticatedApiFetch(
+    `/instructor/courses/${courseId}/milestones/${milestoneId}/modules`,
+    {
+      body: JSON.stringify({
+        contentTypes,
+        description: getOptionalString(formData, "description"),
+        title: getRequiredString(formData, "title"),
+      }),
+      headers: { "Content-Type": "application/json" },
+      method: "POST",
+    }
+  )
   revalidatePath(`/dashboard/instructor/courses/${courseId}/edit`)
 }
 
 export async function addInstructorModuleContentAction(formData: FormData) {
   const courseId = getRequiredString(formData, "courseId")
   const moduleId = getRequiredString(formData, "moduleId")
-  const contentTypes = formData.getAll("contentTypes").filter((value): value is "video" | "pdf" | "quiz" | "assignment" =>
-    value === "video" || value === "pdf" || value === "quiz" || value === "assignment",
-  )
+  const contentTypes = formData
+    .getAll("contentTypes")
+    .filter(
+      (value): value is "video" | "pdf" | "quiz" | "assignment" =>
+        value === "video" ||
+        value === "pdf" ||
+        value === "quiz" ||
+        value === "assignment"
+    )
   const contentType = getRequiredString(formData, "contentType")
-  if (contentType === "video" || contentType === "pdf" || contentType === "quiz" || contentType === "assignment") {
-    if (contentType === "video" || !contentTypes.includes(contentType)) contentTypes.push(contentType)
+  if (
+    contentType === "video" ||
+    contentType === "pdf" ||
+    contentType === "quiz" ||
+    contentType === "assignment"
+  ) {
+    if (contentType === "video" || !contentTypes.includes(contentType))
+      contentTypes.push(contentType)
   }
-  await authenticatedApiFetch(`/instructor/courses/${courseId}/modules/${moduleId}`, {
-    body: JSON.stringify({ contentTypes }),
-    headers: { "Content-Type": "application/json" },
-    method: "PATCH",
-  })
+  await authenticatedApiFetch(
+    `/instructor/courses/${courseId}/modules/${moduleId}`,
+    {
+      body: JSON.stringify({ contentTypes }),
+      headers: { "Content-Type": "application/json" },
+      method: "PATCH",
+    }
+  )
   revalidatePath(`/dashboard/instructor/courses/${courseId}/edit`)
 }
 
 export async function createInstructorVideoAction(formData: FormData) {
   const courseId = getRequiredString(formData, "courseId")
   const moduleId = getRequiredString(formData, "moduleId")
-  await authenticatedApiFetch(`/instructor/courses/${courseId}/modules/${moduleId}/videos`, {
-    body: JSON.stringify({
-      description: getOptionalString(formData, "description"),
-      durationSeconds: getOptionalNumber(formData, "durationSeconds"),
-      isPreview: getCheckboxValue(formData, "isPreview"),
-      isPublished: getCheckboxValue(formData, "isPublished"),
-      position: getRequiredNumber(formData, "position"),
-      title: getRequiredString(formData, "title"),
-      videoProvider: getOptionalString(formData, "videoProvider") ?? "r2",
-      videoRef: getOptionalString(formData, "videoRef"),
-    }),
-    headers: { "Content-Type": "application/json" },
-    method: "POST",
-  })
+  await authenticatedApiFetch(
+    `/instructor/courses/${courseId}/modules/${moduleId}/videos`,
+    {
+      body: JSON.stringify({
+        description: getOptionalString(formData, "description"),
+        durationSeconds: getOptionalNumber(formData, "durationSeconds"),
+        isPreview: getCheckboxValue(formData, "isPreview"),
+        isPublished: getCheckboxValue(formData, "isPublished"),
+        position: getRequiredNumber(formData, "position"),
+        title: getRequiredString(formData, "title"),
+        videoProvider: getOptionalString(formData, "videoProvider") ?? "r2",
+        videoRef: getOptionalString(formData, "videoRef"),
+      }),
+      headers: { "Content-Type": "application/json" },
+      method: "POST",
+    }
+  )
   revalidatePath(`/dashboard/instructor/courses/${courseId}/edit`)
 }
 
 export async function updateInstructorModuleAction(formData: FormData) {
   const courseId = getRequiredString(formData, "courseId")
   const moduleId = getRequiredString(formData, "moduleId")
-  await authenticatedApiFetch(`/instructor/courses/${courseId}/modules/${moduleId}`, {
-    body: JSON.stringify({
-      description: getOptionalString(formData, "description") ?? null,
-      title: getRequiredString(formData, "title"),
-    }),
-    headers: { "Content-Type": "application/json" },
-    method: "PATCH",
-  })
+  await authenticatedApiFetch(
+    `/instructor/courses/${courseId}/modules/${moduleId}`,
+    {
+      body: JSON.stringify({
+        description: getOptionalString(formData, "description") ?? null,
+        title: getRequiredString(formData, "title"),
+      }),
+      headers: { "Content-Type": "application/json" },
+      method: "PATCH",
+    }
+  )
   revalidatePath(`/dashboard/instructor/courses/${courseId}/edit`)
 }
 
 export async function deleteInstructorModuleAction(formData: FormData) {
   const courseId = getRequiredString(formData, "courseId")
   const moduleId = getRequiredString(formData, "moduleId")
-  await authenticatedApiFetch(`/instructor/courses/${courseId}/modules/${moduleId}`, { method: "DELETE" })
+  await authenticatedApiFetch(
+    `/instructor/courses/${courseId}/modules/${moduleId}`,
+    { method: "DELETE" }
+  )
   revalidatePath(`/dashboard/instructor/courses/${courseId}/edit`)
 }
 
 export async function deleteInstructorVideoAction(formData: FormData) {
   const courseId = getRequiredString(formData, "courseId")
   const videoId = getRequiredString(formData, "videoId")
-  await authenticatedApiFetch(`/instructor/courses/${courseId}/videos/${videoId}`, { method: "DELETE" })
+  await authenticatedApiFetch(
+    `/instructor/courses/${courseId}/videos/${videoId}`,
+    { method: "DELETE" }
+  )
   revalidatePath(`/dashboard/instructor/courses/${courseId}/edit`)
 }
 
 export async function publishInstructorVideoAction(formData: FormData) {
   const courseId = getRequiredString(formData, "courseId")
   const videoId = getRequiredString(formData, "videoId")
-  await authenticatedApiFetch(`/instructor/courses/${courseId}/videos/${videoId}`, {
-    body: JSON.stringify({ isPublished: true }),
-    headers: { "Content-Type": "application/json" },
-    method: "PATCH",
-  })
+  await authenticatedApiFetch(
+    `/instructor/courses/${courseId}/videos/${videoId}`,
+    {
+      body: JSON.stringify({ isPublished: true }),
+      headers: { "Content-Type": "application/json" },
+      method: "PATCH",
+    }
+  )
   revalidatePath(`/dashboard/instructor/courses/${courseId}/edit`)
 }
 
@@ -313,7 +348,7 @@ export async function updateInstructorLectureAction(formData: FormData) {
         "Content-Type": "application/json",
       },
       method: "PATCH",
-    },
+    }
   )
 
   revalidatePath(`/dashboard/instructor/courses/${courseId}/edit`)
@@ -336,7 +371,7 @@ export async function requestLectureVideoUploadAction(input: {
         "Content-Type": "application/json",
       },
       method: "POST",
-    },
+    }
   )
 }
 
@@ -356,7 +391,7 @@ export async function saveLectureVideoRefAction(input: {
         "Content-Type": "application/json",
       },
       method: "PATCH",
-    },
+    }
   )
 
   revalidatePath(`/dashboard/instructor/courses/${input.courseId}/edit`)
@@ -368,7 +403,7 @@ export interface LectureVideoUploadState {
 
 export async function uploadLectureVideoAction(
   _previousState: LectureVideoUploadState,
-  formData: FormData,
+  formData: FormData
 ): Promise<LectureVideoUploadState> {
   const courseId = getRequiredString(formData, "courseId")
   const lectureId = getRequiredString(formData, "lectureId")
@@ -409,8 +444,7 @@ export async function uploadLectureVideoAction(
     return { message: "Video uploaded and saved." }
   } catch (error) {
     return {
-      message:
-        error instanceof Error ? error.message : "Video upload failed.",
+      message: error instanceof Error ? error.message : "Video upload failed.",
     }
   }
 }
@@ -437,7 +471,7 @@ export async function uploadLectureMaterialAction(input: {
           "Content-Type": "application/json",
         },
         method: "POST",
-      },
+      }
     )
 
   revalidatePath(`/dashboard/instructor/courses/${input.courseId}/edit`)
@@ -459,7 +493,7 @@ export async function uploadVideoMaterialAction(input: {
       body: JSON.stringify(input),
       headers: { "Content-Type": "application/json" },
       method: "POST",
-    },
+    }
   )
 }
 
@@ -477,7 +511,7 @@ export async function uploadModuleMaterialAction(input: {
       body: JSON.stringify(input),
       headers: { "Content-Type": "application/json" },
       method: "POST",
-    },
+    }
   )
 }
 
@@ -497,11 +531,12 @@ export async function saveInstructorQuizAction(input: {
   targetType: "lecture" | "section" | "module"
   title: string
 }) {
-  const path = input.targetType === "lecture"
-    ? `/instructor/courses/${input.courseId}/lectures/${input.targetId}/quiz`
-    : input.targetType === "module"
-      ? `/instructor/courses/${input.courseId}/modules/${input.targetId}/quiz`
-      : `/instructor/courses/${input.courseId}/sections/${input.targetId}/quiz`
+  const path =
+    input.targetType === "lecture"
+      ? `/instructor/courses/${input.courseId}/lectures/${input.targetId}/quiz`
+      : input.targetType === "module"
+        ? `/instructor/courses/${input.courseId}/modules/${input.targetId}/quiz`
+        : `/instructor/courses/${input.courseId}/sections/${input.targetId}/quiz`
 
   await authenticatedApiFetch<InstructorQuizDto>(path, {
     body: JSON.stringify({
@@ -526,7 +561,7 @@ export async function deleteInstructorQuizAction(input: {
     `/instructor/courses/${input.courseId}/quizzes/${input.quizId}`,
     {
       method: "DELETE",
-    },
+    }
   )
 
   revalidatePath(`/dashboard/instructor/courses/${input.courseId}/edit`)
@@ -542,11 +577,12 @@ export async function saveInstructorAssignmentAction(input: {
   targetType: "lecture" | "section" | "module"
   title: string
 }) {
-  const path = input.targetType === "section"
-    ? `/instructor/courses/${input.courseId}/sections/${input.targetId}/assignment`
-    : input.targetType === "module"
-      ? `/instructor/courses/${input.courseId}/modules/${input.targetId}/assignment`
-      : `/instructor/courses/${input.courseId}/lectures/${input.targetId}/assignment`
+  const path =
+    input.targetType === "section"
+      ? `/instructor/courses/${input.courseId}/sections/${input.targetId}/assignment`
+      : input.targetType === "module"
+        ? `/instructor/courses/${input.courseId}/modules/${input.targetId}/assignment`
+        : `/instructor/courses/${input.courseId}/lectures/${input.targetId}/assignment`
 
   await authenticatedApiFetch<InstructorAssignmentDto>(path, {
     body: JSON.stringify({
@@ -573,7 +609,7 @@ export async function deleteInstructorAssignmentAction(input: {
     `/instructor/courses/${input.courseId}/assignments/${input.assignmentId}`,
     {
       method: "DELETE",
-    },
+    }
   )
 
   revalidatePath(`/dashboard/instructor/courses/${input.courseId}/edit`)
@@ -596,7 +632,7 @@ export async function gradeAssignmentSubmissionAction(input: {
         "Content-Type": "application/json",
       },
       method: "PATCH",
-    },
+    }
   )
 
   revalidatePath(`/dashboard/instructor/courses/${input.courseId}/edit`)
@@ -610,7 +646,7 @@ export async function deleteInstructorLectureAction(formData: FormData) {
     `/instructor/courses/${courseId}/lectures/${lectureId}`,
     {
       method: "DELETE",
-    },
+    }
   )
 
   revalidatePath(`/dashboard/instructor/courses/${courseId}/edit`)

@@ -5,7 +5,11 @@ import { eq, profiles, users } from "@workspace/db"
 import { db } from "../lib/database.js"
 
 const seedAdminSchema = z.object({
-  email: z.string().trim().email().transform((value) => value.toLowerCase()),
+  email: z
+    .string()
+    .trim()
+    .email()
+    .transform((value) => value.toLowerCase()),
   name: z.string().trim().min(1).max(160),
   password: z.string().min(8),
 })

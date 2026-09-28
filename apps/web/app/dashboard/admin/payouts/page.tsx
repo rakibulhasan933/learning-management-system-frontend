@@ -29,7 +29,7 @@ export const dynamic = "force-dynamic"
 export default async function AdminPayoutsPage() {
   const response = await authenticatedApiFetch<AdminPayoutListResponse>(
     "/admin/payouts",
-    { cache: "no-store" },
+    { cache: "no-store" }
   )
 
   const countOf = (status: string) =>
@@ -56,7 +56,7 @@ export default async function AdminPayoutsPage() {
     <>
       <PageHeader
         action={
-          <Button  variant="outline">
+          <Button variant="outline">
             <Link href="/dashboard/admin">
               <ArrowLeft className="size-3.5" />
               Dashboard
@@ -159,7 +159,11 @@ export default async function AdminPayoutsPage() {
                   {payout.status === "pending" ? (
                     <>
                       <form action={approvePayoutAction}>
-                        <input name="payoutId" type="hidden" value={payout.id} />
+                        <input
+                          name="payoutId"
+                          type="hidden"
+                          value={payout.id}
+                        />
                         <SubmitButton
                           className="w-full"
                           pendingLabel="Approving..."
@@ -169,7 +173,11 @@ export default async function AdminPayoutsPage() {
                         </SubmitButton>
                       </form>
                       <form className="grid gap-3" action={rejectPayoutAction}>
-                        <input name="payoutId" type="hidden" value={payout.id} />
+                        <input
+                          name="payoutId"
+                          type="hidden"
+                          value={payout.id}
+                        />
                         <FloatingTextarea
                           className="min-h-24"
                           label="Rejection reason"

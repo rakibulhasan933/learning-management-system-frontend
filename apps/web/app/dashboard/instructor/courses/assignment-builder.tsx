@@ -79,15 +79,15 @@ export function AssignmentBuilder({
   targetType,
 }: AssignmentBuilderProps) {
   const [title, setTitle] = useState(
-    assignment?.title ?? `${targetLabel} assignment`,
+    assignment?.title ?? `${targetLabel} assignment`
   )
   const [instructions, setInstructions] = useState(
-    assignment?.instructions ?? "",
+    assignment?.instructions ?? ""
   )
   const [maxScore, setMaxScore] = useState(assignment?.maxScore ?? 100)
   const [dueAt, setDueAt] = useState(toDateTimeLocal(assignment?.dueAt ?? null))
   const [isPublished, setIsPublished] = useState(
-    assignment?.isPublished ?? false,
+    assignment?.isPublished ?? false
   )
   const [message, setMessage] = useState<StatusMessage>(null)
   const [confirmingDelete, setConfirmingDelete] = useState(false)
@@ -168,7 +168,9 @@ export function AssignmentBuilder({
       } catch (error) {
         setMessage({
           text:
-            error instanceof Error ? error.message : "Grade could not be saved.",
+            error instanceof Error
+              ? error.message
+              : "Grade could not be saved.",
           type: "error",
         })
       }
@@ -209,7 +211,7 @@ export function AssignmentBuilder({
       </div>
 
       <FloatingTextarea
-        className="min-h-20 rounded-xl px-3 pb-2 pt-4 text-sm"
+        className="min-h-20 rounded-xl px-3 pt-4 pb-2 text-sm"
         label="Instructions"
         onChange={(event) => setInstructions(event.target.value)}
         value={instructions}
@@ -237,7 +239,9 @@ export function AssignmentBuilder({
                 type="button"
                 variant="destructive"
               >
-                {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                {isPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : null}
                 {isPending ? "Deleting..." : "Confirm delete"}
               </Button>
               <Button
@@ -310,7 +314,7 @@ export function AssignmentBuilder({
                             type="hidden"
                             value={submission.id}
                           />
-                          <p className="whitespace-pre-wrap rounded-xl border border-border bg-background p-3 text-muted-foreground">
+                          <p className="rounded-xl border border-border bg-background p-3 whitespace-pre-wrap text-muted-foreground">
                             {submission.submissionText}
                           </p>
                           <div className="grid gap-3 sm:grid-cols-[120px_minmax(0,1fr)_auto]">
@@ -345,7 +349,8 @@ export function AssignmentBuilder({
                           </div>
                           {submission.gradedAt ? (
                             <p className="font-mono text-xs text-muted-foreground">
-                              Graded {new Date(submission.gradedAt).toLocaleString()}
+                              Graded{" "}
+                              {new Date(submission.gradedAt).toLocaleString()}
                               {submission.gradedByEmail
                                 ? ` by ${submission.gradedByEmail}`
                                 : ""}

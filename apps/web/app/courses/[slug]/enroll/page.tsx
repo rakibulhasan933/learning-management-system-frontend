@@ -39,11 +39,13 @@ export default async function EnrollPage({
   try {
     payload = await authenticatedApiFetch<PaymentInstructionsResponse>(
       `/payments/orders/${query.orderId}/instructions`,
-      { cache: "no-store" },
+      { cache: "no-store" }
     )
   } catch (error) {
     if (error instanceof ApiClientError && error.status === 401) {
-      redirect(`/auth/login?next=${encodeURIComponent(`/courses/${slug}/enroll`)}`)
+      redirect(
+        `/auth/login?next=${encodeURIComponent(`/courses/${slug}/enroll`)}`
+      )
     }
 
     throw error
@@ -91,38 +93,47 @@ export default async function EnrollPage({
                 </div>
                 <div className="grid gap-1 border-b border-border pb-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:gap-4">
                   <dt className="text-muted-foreground">Reference</dt>
-                  <dd className="font-mono sm:text-right">{order.referenceCode}</dd>
+                  <dd className="font-mono sm:text-right">
+                    {order.referenceCode}
+                  </dd>
                 </div>
                 {order.couponCode ? (
                   <div className="grid gap-1 border-b border-border pb-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:gap-4">
                     <dt className="text-muted-foreground">Coupon</dt>
                     <dd className="font-mono sm:text-right">
-                      {order.couponCode} (-{order.currency} {order.discountAmount})
+                      {order.couponCode} (-{order.currency}{" "}
+                      {order.discountAmount})
                     </dd>
                   </div>
                 ) : null}
                 {instructions.bkashNumber ? (
                   <div className="grid gap-1 border-b border-border pb-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:gap-4">
                     <dt className="text-muted-foreground">bKash</dt>
-                    <dd className="font-mono sm:text-right">{instructions.bkashNumber}</dd>
+                    <dd className="font-mono sm:text-right">
+                      {instructions.bkashNumber}
+                    </dd>
                   </div>
                 ) : null}
                 {instructions.nagadNumber ? (
                   <div className="grid gap-1 border-b border-border pb-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:gap-4">
                     <dt className="text-muted-foreground">Nagad</dt>
-                    <dd className="font-mono sm:text-right">{instructions.nagadNumber}</dd>
+                    <dd className="font-mono sm:text-right">
+                      {instructions.nagadNumber}
+                    </dd>
                   </div>
                 ) : null}
                 {instructions.rocketNumber ? (
                   <div className="grid gap-1 border-b border-border pb-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:gap-4">
                     <dt className="text-muted-foreground">Rocket</dt>
-                    <dd className="font-mono sm:text-right">{instructions.rocketNumber}</dd>
+                    <dd className="font-mono sm:text-right">
+                      {instructions.rocketNumber}
+                    </dd>
                   </div>
                 ) : null}
                 {instructions.bankDetails ? (
                   <div className="grid gap-2 border-b border-border pb-3">
                     <dt className="text-muted-foreground">Bank details</dt>
-                    <dd className="whitespace-pre-line font-mono">
+                    <dd className="font-mono whitespace-pre-line">
                       {instructions.bankDetails}
                     </dd>
                   </div>
@@ -145,13 +156,8 @@ export default async function EnrollPage({
                     <CheckCircle2 className="mt-0.5 size-4 shrink-0" />
                     <p>This order is paid. Your course enrollment is active.</p>
                   </div>
-                  <Button
-                    className="w-full"
-                    asChild
-                  >
-                    <Link href="/dashboard/student">
-                      Open dashboard
-                    </Link>
+                  <Button className="w-full" asChild>
+                    <Link href="/dashboard/student">Open dashboard</Link>
                   </Button>
                 </div>
               ) : (
@@ -163,7 +169,8 @@ export default async function EnrollPage({
                   <input name="slug" type="hidden" value={slug} />
                   <FloatingInput label="Transaction ID" name="transactionId" />
                   <p className="-mt-2 text-xs leading-5 text-muted-foreground">
-                    The exact order amount will be sent for verification: {order.currency} {order.amount}.
+                    The exact order amount will be sent for verification:{" "}
+                    {order.currency} {order.amount}.
                   </p>
                   <FloatingInput label="Sender number" name="senderNumber" />
                   <SubmitButton

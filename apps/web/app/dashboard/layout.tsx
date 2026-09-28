@@ -20,12 +20,20 @@ export default async function DashboardLayout({
   })
 
   if (profile.role === "admin") {
-    return <AdminDashboardShell profile={profile}>{children}</AdminDashboardShell>
+    return (
+      <AdminDashboardShell profile={profile}>{children}</AdminDashboardShell>
+    )
   }
 
   if (profile.role === "instructor") {
-    return <InstructorDashboardShell profile={profile}>{children}</InstructorDashboardShell>
+    return (
+      <InstructorDashboardShell profile={profile}>
+        {children}
+      </InstructorDashboardShell>
+    )
   }
 
-  return <StudentDashboardShell profile={profile}>{children}</StudentDashboardShell>
+  return (
+    <StudentDashboardShell profile={profile}>{children}</StudentDashboardShell>
+  )
 }

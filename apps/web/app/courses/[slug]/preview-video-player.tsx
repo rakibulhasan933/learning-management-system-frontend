@@ -39,10 +39,10 @@ export function PreviewVideoPlayer({
       sections
         .flatMap((section) => section.lectures)
         .filter((lecture) => lecture.isPreview),
-    [sections],
+    [sections]
   )
   const [selectedLectureId, setSelectedLectureId] = useState(
-    previewLectures[0]?.id ?? null,
+    previewLectures[0]?.id ?? null
   )
   const [videoUrl, setVideoUrl] = useState<string | null>(null)
   const [message, setMessage] = useState<string | null>(null)
@@ -54,7 +54,7 @@ export function PreviewVideoPlayer({
   })
   const videoRef = useRef<HTMLVideoElement>(null)
   const selectedLecture = previewLectures.find(
-    (lecture) => lecture.id === selectedLectureId,
+    (lecture) => lecture.id === selectedLectureId
   )
 
   useEffect(() => {
@@ -72,7 +72,9 @@ export function PreviewVideoPlayer({
       } catch (error) {
         setVideoUrl(null)
         setMessage(
-          error instanceof Error ? error.message : "Preview could not be loaded.",
+          error instanceof Error
+            ? error.message
+            : "Preview could not be loaded."
         )
       }
     })
@@ -87,7 +89,7 @@ export function PreviewVideoPlayer({
           setWatermarkPosition(getWatermarkPosition())
           scheduleMove()
         },
-        8000 + Math.floor(Math.random() * 4000),
+        8000 + Math.floor(Math.random() * 4000)
       )
     }
 
@@ -154,7 +156,7 @@ export function PreviewVideoPlayer({
           </div>
         )}
         <div
-          className="pointer-events-none absolute max-w-[72%] break-words font-mono text-[11px] text-foreground opacity-20 sm:text-sm"
+          className="pointer-events-none absolute max-w-[72%] font-mono text-[11px] break-words text-foreground opacity-20 sm:text-sm"
           style={{
             left: watermarkPosition.left,
             top: watermarkPosition.top,

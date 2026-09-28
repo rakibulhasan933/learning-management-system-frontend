@@ -54,5 +54,5 @@ uploadsRouter.post(
 
     const payload: ImageUploadResponse = { url }
     response.status(201).json(payload)
-  }),
+  })
 )

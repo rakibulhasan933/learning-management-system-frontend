@@ -18,7 +18,10 @@ export default async function GatewayCheckoutPage({
   const { gateway } = await params
   const query = await searchParams
 
-  if (!gateways.includes(gateway as (typeof gateways)[number]) || !query.order_id) {
+  if (
+    !gateways.includes(gateway as (typeof gateways)[number]) ||
+    !query.order_id
+  ) {
     notFound()
   }
 
@@ -29,13 +32,15 @@ export default async function GatewayCheckoutPage({
     ;[orderResponse, profile] = await Promise.all([
       authenticatedApiFetch<PaymentInstructionsResponse>(
         `/payments/orders/${query.order_id}/instructions`,
-        { cache: "no-store" },
+        { cache: "no-store" }
       ),
       authenticatedApiFetch<ProfileDto>("/auth/me", { cache: "no-store" }),
     ])
   } catch (error) {
     if (error instanceof ApiClientError && error.status === 401) {
-      redirect(`/auth/login?next=${encodeURIComponent(`/checkout/${gateway}?order_id=${query.order_id}`)}`)
+      redirect(
+        `/auth/login?next=${encodeURIComponent(`/checkout/${gateway}?order_id=${query.order_id}`)}`
+      )
     }
 
     throw error

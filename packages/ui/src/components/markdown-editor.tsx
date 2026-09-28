@@ -38,7 +38,8 @@ export function MarkdownEditor({
   const [internalValue, setInternalValue] = useState(defaultValue)
 
   const resolvedValue = isControlled ? value : internalValue
-  const MarkdownEditorComponent = MDEditor.default as unknown as ComponentType<MDEditorProps>
+  const MarkdownEditorComponent =
+    MDEditor.default as unknown as ComponentType<MDEditorProps>
 
   return (
     <div className={cn("grid gap-2", className)}>

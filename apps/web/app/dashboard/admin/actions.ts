@@ -83,7 +83,16 @@ export async function rejectCourseAction(formData: FormData) {
 }
 
 export async function assignCourseCategoryAction(formData: FormData) {
-  await authenticatedApiFetch<void>(`/admin/courses/${getRequiredString(formData, "courseId")}/category`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ category: String(formData.get("category") ?? "").trim() || null }) })
+  await authenticatedApiFetch<void>(
+    `/admin/courses/${getRequiredString(formData, "courseId")}/category`,
+    {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        category: String(formData.get("category") ?? "").trim() || null,
+      }),
+    }
+  )
   revalidatePath("/dashboard/admin/courses")
 }
 
@@ -132,42 +141,82 @@ export async function markPayoutPaidAction(formData: FormData) {
 }
 
 export async function createCategoryAction(formData: FormData) {
-  await authenticatedApiFetch<void>("/admin/categories", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name: getRequiredString(formData, "name"), slug: getRequiredString(formData, "slug"), description: String(formData.get("description") ?? "").trim() || null }) })
+  await authenticatedApiFetch<void>("/admin/categories", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      name: getRequiredString(formData, "name"),
+      slug: getRequiredString(formData, "slug"),
+      description: String(formData.get("description") ?? "").trim() || null,
+    }),
+  })
   revalidatePath("/dashboard/admin/categories")
 }
 
 export async function deleteCategoryAction(formData: FormData) {
-  await authenticatedApiFetch<void>(`/admin/categories/${getRequiredString(formData, "categoryId")}`, { method: "DELETE" })
+  await authenticatedApiFetch<void>(
+    `/admin/categories/${getRequiredString(formData, "categoryId")}`,
+    { method: "DELETE" }
+  )
   revalidatePath("/dashboard/admin/categories")
 }
 
 export async function updateAdminSettingsAction(formData: FormData) {
   const settings: Record<string, string> = {}
-  for (const [key, value] of formData.entries()) if (typeof value === "string") settings[key] = value.trim()
-  await authenticatedApiFetch<void>("/admin/settings", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ settings }) })
+  for (const [key, value] of formData.entries())
+    if (typeof value === "string") settings[key] = value.trim()
+  await authenticatedApiFetch<void>("/admin/settings", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ settings }),
+  })
   revalidatePath("/dashboard/admin/settings")
 }
 
 export async function sendAdminAnnouncementAction(formData: FormData) {
-  await authenticatedApiFetch<void>("/admin/announcements", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ audience: getRequiredString(formData, "audience"), title: getRequiredString(formData, "title"), body: getRequiredString(formData, "body") }) })
+  await authenticatedApiFetch<void>("/admin/announcements", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      audience: getRequiredString(formData, "audience"),
+      title: getRequiredString(formData, "title"),
+      body: getRequiredString(formData, "body"),
+    }),
+  })
   revalidatePath("/dashboard/admin/announcements")
 }
 
 export async function setEnrollmentStatusAction(formData: FormData) {
   const id = getRequiredString(formData, "enrollmentId")
   const action = getRequiredString(formData, "action")
-  await authenticatedApiFetch<void>(`/admin/enrollments/${id}/${action}`, { method: "PATCH" })
+  await authenticatedApiFetch<void>(`/admin/enrollments/${id}/${action}`, {
+    method: "PATCH",
+  })
   revalidatePath("/dashboard/admin/enrollments")
 }
 
 export async function createRefundAction(formData: FormData) {
-  await authenticatedApiFetch<void>("/admin/refunds", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ orderId: getRequiredString(formData, "orderId"), amount: Number(getRequiredString(formData, "amount")), reason: getRequiredString(formData, "reason") }) })
+  await authenticatedApiFetch<void>("/admin/refunds", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      orderId: getRequiredString(formData, "orderId"),
+      amount: Number(getRequiredString(formData, "amount")),
+      reason: getRequiredString(formData, "reason"),
+    }),
+  })
   revalidatePath("/dashboard/admin/refunds")
 }
 
 export async function decideRefundAction(formData: FormData) {
   const id = getRequiredString(formData, "refundId")
   const action = getRequiredString(formData, "action")
-  await authenticatedApiFetch<void>(`/admin/refunds/${id}/${action}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ reason: String(formData.get("reason") ?? "").trim() || undefined }) })
+  await authenticatedApiFetch<void>(`/admin/refunds/${id}/${action}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      reason: String(formData.get("reason") ?? "").trim() || undefined,
+    }),
+  })
   revalidatePath("/dashboard/admin/refunds")
 }

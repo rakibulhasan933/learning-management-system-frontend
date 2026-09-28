@@ -19,7 +19,7 @@ export const dynamic = "force-dynamic"
 export default async function AdminDashboardPage() {
   const overview = await authenticatedApiFetch<AdminRevenueOverviewResponse>(
     "/admin/revenue",
-    { cache: "no-store" },
+    { cache: "no-store" }
   )
 
   const { totals } = overview

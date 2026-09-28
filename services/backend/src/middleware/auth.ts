@@ -41,7 +41,7 @@ function parseCookies(header: string | undefined) {
           decodeURIComponent(part.slice(0, separatorIndex)),
           decodeURIComponent(part.slice(separatorIndex + 1)),
         ]
-      }),
+      })
   )
 }
 
@@ -63,7 +63,7 @@ function sendUnauthorized(response: Response) {
 export async function requireAuth(
   request: Request,
   response: Response,
-  next: NextFunction,
+  next: NextFunction
 ) {
   const accessToken = getBearerToken(request)
 
@@ -90,7 +90,7 @@ export async function requireAuth(
 export async function optionalAuth(
   request: Request,
   _response: Response,
-  next: NextFunction,
+  next: NextFunction
 ) {
   const accessToken = getBearerToken(request)
 

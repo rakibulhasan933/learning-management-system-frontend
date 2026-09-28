@@ -86,7 +86,7 @@ async function requestJson<T>({
 
   assert(
     response.ok,
-    `${method} ${url} failed with ${response.status}: ${text}`,
+    `${method} ${url} failed with ${response.status}: ${text}`
   )
 
   return payload as T
@@ -174,23 +174,24 @@ async function runCertificateE2E() {
       userId: student.profile.id,
     })
 
-    const publishedLectures = lectureRows.filter((lecture) => lecture.isPublished)
+    const publishedLectures = lectureRows.filter(
+      (lecture) => lecture.isPublished
+    )
 
     for (const lecture of publishedLectures) {
-      const savedProgress =
-        await requestJson<LectureProgressMutationResponse>({
-          body: {
-            isCompleted: true,
-            positionSeconds: lecture.durationSeconds ?? 0,
-          },
-          method: "PUT",
-          token: student.accessToken,
-          url: `${baseUrl}/progress/lectures/${lecture.id}`,
-        })
+      const savedProgress = await requestJson<LectureProgressMutationResponse>({
+        body: {
+          isCompleted: true,
+          positionSeconds: lecture.durationSeconds ?? 0,
+        },
+        method: "PUT",
+        token: student.accessToken,
+        url: `${baseUrl}/progress/lectures/${lecture.id}`,
+      })
 
       assert(
         savedProgress.progress.isCompleted,
-        `Lecture ${lecture.id} was not marked complete`,
+        `Lecture ${lecture.id} was not marked complete`
       )
     }
 
@@ -200,20 +201,20 @@ async function runCertificateE2E() {
       url: `${baseUrl}/certificates`,
     })
     const certificate = certificateList.certificates.find(
-      (item) => item.courseId === course.id,
+      (item) => item.courseId === course.id
     )
 
     assert(certificate, "Certificate was not generated for completed course")
     assert(
       certificate.certificateUrl.endsWith("/certificate.pdf"),
-      "Certificate URL does not point to a generated PDF",
+      "Certificate URL does not point to a generated PDF"
     )
 
     const [storedCertificate] = await db
       .select()
       .from(certificates)
       .where(
-        sql`${certificates.userId} = ${student.profile.id} and ${certificates.courseId} = ${course.id}`,
+        sql`${certificates.userId} = ${student.profile.id} and ${certificates.courseId} = ${course.id}`
       )
       .limit(1)
 

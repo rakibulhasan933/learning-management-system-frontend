@@ -33,21 +33,23 @@ export default async function StudentDashboardPage() {
   return (
     <div className="space-y-8">
       <PageHeader
+        action={
+          <Button asChild variant="outline">
+            <Link href="/dashboard/student/classes">
+              View my classes <ArrowRight />
+            </Link>
+          </Button>
+        }
         className="text-left"
         eyebrow="Student dashboard"
         lede={`Welcome back, ${profile.fullName?.trim() || profile.email}. Your learning progress at a glance.`}
         title="Your overview"
       />
 
-      <div className="flex justify-start">
-        <Button asChild variant="outline">
-          <Link href="/dashboard/student/classes">
-            View my classes <ArrowRight />
-          </Link>
-        </Button>
-      </div>
-
-      <section aria-label="Learning summary" className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <section
+        aria-label="Learning summary"
+        className="grid grid-cols-2 gap-3 lg:grid-cols-4"
+      >
         <Metric
           label="Completion"
           note={`${analytics.completedLectures}/${analytics.totalLectures} lectures`}
@@ -77,13 +79,16 @@ export default async function StudentDashboardPage() {
             <div>
               <div className="mb-6 flex items-center gap-3">
                 <span className="h-px w-10 bg-primary" />
-                <p className="font-mono text-xs text-muted-foreground">Continue learning</p>
+                <p className="font-mono text-xs text-muted-foreground">
+                  Continue learning
+                </p>
               </div>
               <h2 className="max-w-xl font-heading text-3xl font-normal tracking-tight sm:text-4xl">
                 Pick up where you left off
               </h2>
               <p className="mt-3 max-w-xl text-sm leading-6 text-muted-foreground">
-                Your lectures, assessments, and course materials are organized inside My classes.
+                Your lectures, assessments, and course materials are organized
+                inside My classes.
               </p>
             </div>
             {activeCourse ? (
@@ -108,11 +113,17 @@ export default async function StudentDashboardPage() {
           <CardContent className="p-6">
             <div className="flex items-center gap-3">
               <BarChart3 className="size-4 text-primary" />
-              <p className="font-mono text-xs text-muted-foreground">Quick access</p>
+              <p className="font-mono text-xs text-muted-foreground">
+                Quick access
+              </p>
             </div>
             <div className="mt-6 grid gap-3">
-              <QuickLink href="/dashboard/student/analytics">Open analytics</QuickLink>
-              <QuickLink href="/dashboard/student/orders">View payment status</QuickLink>
+              <QuickLink href="/dashboard/student/analytics">
+                Open analytics
+              </QuickLink>
+              <QuickLink href="/dashboard/student/orders">
+                View payment status
+              </QuickLink>
             </div>
           </CardContent>
         </Card>
@@ -120,7 +131,9 @@ export default async function StudentDashboardPage() {
 
       <div className="flex items-center gap-3 text-xs text-muted-foreground">
         <Target className="size-4 text-primary" />
-        <span>Keep a steady pace and return to your next unfinished lecture.</span>
+        <span>
+          Keep a steady pace and return to your next unfinished lecture.
+        </span>
       </div>
     </div>
   )
@@ -155,7 +168,9 @@ function Metric({
           {icon}
           {label}
         </p>
-        <p className="mt-3 font-mono text-2xl text-foreground sm:text-3xl">{value}</p>
+        <p className="mt-3 font-mono text-2xl text-foreground sm:text-3xl">
+          {value}
+        </p>
         <p className="mt-1 truncate text-xs text-muted-foreground">{note}</p>
       </CardContent>
     </Card>

@@ -71,8 +71,8 @@ async function assertCanTrackLecture(lectureId: string, profileId: string) {
       and(
         eq(enrollments.courseId, lecture.courseId),
         eq(enrollments.userId, profileId),
-        eq(enrollments.status, "active"),
-      ),
+        eq(enrollments.status, "active")
+      )
     )
     .limit(1)
 
@@ -128,22 +128,80 @@ progressRouter.put(
     response.status(200).json({
       progress: toProgressDto(saved),
     } satisfies LectureProgressMutationResponse)
-  }),
+  })
 )
 
 progressRouter.put(
   "/videos/:videoId",
   asyncHandler(async (request, response) => {
-    const params = lectureParamsSchema.extend({ videoId: z.string().uuid() }).parse(request.params)
+    const params = lectureParamsSchema
+      .extend({ videoId: z.string().uuid() })
+      .parse(request.params)
     const input = progressMutationSchema.parse(request.body)
     const profileId = request.auth!.profile.id
-    const [video] = await db.select({ courseId: courses.id, id: videos.id, isPublished: videos.isPublished }).from(videos).innerJoin(modules, eq(videos.moduleId, modules.id)).innerJoin(sections, eq(modules.milestoneId, sections.id)).innerJoin(courses, eq(sections.courseId, courses.id)).where(eq(videos.id, params.videoId)).limit(1)
-    if (!video || !video.isPublished) throw new HttpError(404, "Video not found.")
-    const [enrollment] = await db.select({ id: enrollments.id }).from(enrollments).where(and(eq(enrollments.courseId, video.courseId), eq(enrollments.userId, profileId), eq(enrollments.status, "active"))).limit(1)
+    const [video] = await db
+      .select({
+        courseId: courses.id,
+        id: videos.id,
+        isPublished: videos.isPublished,
+      })
+      .from(videos)
+      .innerJoin(modules, eq(videos.moduleId, modules.id))
+      .innerJoin(sections, eq(modules.milestoneId, sections.id))
+      .innerJoin(courses, eq(sections.courseId, courses.id))
+      .where(eq(videos.id, params.videoId))
+      .limit(1)
+    if (!video || !video.isPublished)
+      throw new HttpError(404, "Video not found.")
+    const [enrollment] = await db
+      .select({ id: enrollments.id })
+      .from(enrollments)
+      .where(
+        and(
+          eq(enrollments.courseId, video.courseId),
+          eq(enrollments.userId, profileId),
+          eq(enrollments.status, "active")
+        )
+      )
+      .limit(1)
     if (!enrollment) throw new HttpError(403, "Active enrollment is required.")
     const now = new Date()
-    const [saved] = await db.insert(videoProgress).values({ completedAt: input.isCompleted === true ? now : null, isCompleted: input.isCompleted === true, lastWatchedAt: now, positionSeconds: input.positionSeconds, updatedAt: now, userId: profileId, videoId: params.videoId }).onConflictDoUpdate({ set: { ...(input.isCompleted === true ? { completedAt: now, isCompleted: true } : {}), lastWatchedAt: now, positionSeconds: input.positionSeconds, updatedAt: now }, target: [videoProgress.userId, videoProgress.videoId] }).returning()
+    const [saved] = await db
+      .insert(videoProgress)
+      .values({
+        completedAt: input.isCompleted === true ? now : null,
+        isCompleted: input.isCompleted === true,
+        lastWatchedAt: now,
+        positionSeconds: input.positionSeconds,
+        updatedAt: now,
+        userId: profileId,
+        videoId: params.videoId,
+      })
+      .onConflictDoUpdate({
+        set: {
+          ...(input.isCompleted === true
+            ? { completedAt: now, isCompleted: true }
+            : {}),
+          lastWatchedAt: now,
+          positionSeconds: input.positionSeconds,
+          updatedAt: now,
+        },
+        target: [videoProgress.userId, videoProgress.videoId],
+      })
+      .returning()
     if (!saved) throw new HttpError(500, "Progress could not be saved.")
-    response.status(200).json({ progress: { completedAt: serializeDate(saved.completedAt), id: saved.id, isCompleted: saved.isCompleted, lastWatchedAt: saved.lastWatchedAt.toISOString(), lectureId: saved.videoId, positionSeconds: saved.positionSeconds, updatedAt: saved.updatedAt.toISOString() } })
-  }),
+    response
+      .status(200)
+      .json({
+        progress: {
+          completedAt: serializeDate(saved.completedAt),
+          id: saved.id,
+          isCompleted: saved.isCompleted,
+          lastWatchedAt: saved.lastWatchedAt.toISOString(),
+          lectureId: saved.videoId,
+          positionSeconds: saved.positionSeconds,
+          updatedAt: saved.updatedAt.toISOString(),
+        },
+      })
+  })
 )

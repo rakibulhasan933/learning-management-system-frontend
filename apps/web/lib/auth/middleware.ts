@@ -25,11 +25,15 @@ type RefreshedSession = AuthSessionDto & { refreshToken: string }
 
 function getMatchedProtectedRoute(pathname: string) {
   return protectedRoutes.find(
-    ({ prefix }) => pathname === prefix || pathname.startsWith(`${prefix}/`),
+    ({ prefix }) => pathname === prefix || pathname.startsWith(`${prefix}/`)
   )
 }
 
-function redirectTo(request: NextRequest, pathname: string, params?: URLSearchParams) {
+function redirectTo(
+  request: NextRequest,
+  pathname: string,
+  params?: URLSearchParams
+) {
   const url = request.nextUrl.clone()
   url.pathname = pathname
   url.search = params?.toString() ?? ""
@@ -53,7 +57,7 @@ async function getProfile(accessToken: string) {
 }
 
 async function refreshSession(
-  refreshToken: string,
+  refreshToken: string
 ): Promise<RefreshedSession | null> {
   const response = await fetch(`${getBackendApiUrl()}/auth/refresh`, {
     headers: {
@@ -74,7 +78,9 @@ async function refreshSession(
   const setCookies = headers.getSetCookie?.() ?? []
   const setCookieHeader = response.headers.get("set-cookie")
   const refreshCookie =
-    setCookies.find((value) => value.startsWith(`${refreshTokenCookieName}=`)) ??
+    setCookies.find((value) =>
+      value.startsWith(`${refreshTokenCookieName}=`)
+    ) ??
     (setCookieHeader?.includes(`${refreshTokenCookieName}=`)
       ? setCookieHeader
       : null)

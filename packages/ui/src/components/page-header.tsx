@@ -35,9 +35,15 @@ function PageHeader({
   ...props
 }: PageHeaderProps) {
   return (
-    <header data-slot="page-header" className={cn("w-full", className)} {...props}>
+    <header
+      data-slot="page-header"
+      className={cn("w-full", className)}
+      {...props}
+    >
       {thread ? (
-        <ProgressThread className={cn(size === "compact" ? "mb-5 w-16" : "mb-8 w-24")} />
+        <ProgressThread
+          className={cn(size === "compact" ? "mb-5 w-16" : "mb-8 w-24")}
+        />
       ) : null}
 
       <div
@@ -78,7 +84,9 @@ function PageHeader({
         </div>
 
         {action ? (
-          <div className="flex shrink-0 flex-wrap items-center gap-3">{action}</div>
+          <div className="flex shrink-0 flex-wrap items-center gap-3">
+            {action}
+          </div>
         ) : null}
       </div>
     </header>

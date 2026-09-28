@@ -29,8 +29,13 @@ export const dynamic = "force-dynamic"
 
 export default async function AdminCoursesPage() {
   const [response, categoryResponse] = await Promise.all([
-    authenticatedApiFetch<AdminCourseApprovalQueueResponse>("/admin/courses/pending", { cache: "no-store" }),
-    authenticatedApiFetch<AdminCategoryListResponse>("/admin/categories", { cache: "no-store" }),
+    authenticatedApiFetch<AdminCourseApprovalQueueResponse>(
+      "/admin/courses/pending",
+      { cache: "no-store" }
+    ),
+    authenticatedApiFetch<AdminCategoryListResponse>("/admin/categories", {
+      cache: "no-store",
+    }),
   ])
 
   const total = response.courses.length
@@ -39,7 +44,7 @@ export default async function AdminCoursesPage() {
     <>
       <PageHeader
         action={
-          <Button  variant="outline" asChild>
+          <Button variant="outline" asChild>
             <Link href="/dashboard/admin">
               <ArrowLeft className="size-3.5" />
               Dashboard
@@ -53,7 +58,11 @@ export default async function AdminCoursesPage() {
 
       <div className="mt-12 grid gap-4 sm:max-w-xs">
         <StatTile
-          hint={total === 1 ? "course waiting on review" : "courses waiting on review"}
+          hint={
+            total === 1
+              ? "course waiting on review"
+              : "courses waiting on review"
+          }
           icon={<Clock />}
           label="In the queue"
           tone={total > 0 ? "primary" : "default"}
@@ -138,18 +147,34 @@ export default async function AdminCoursesPage() {
                 <div className="flex flex-col gap-2 lg:justify-center">
                   <form action={approveCourseAction}>
                     <input name="courseId" type="hidden" value={course.id} />
-                    <SubmitButton className="w-full" pendingLabel="Approving...">
+                    <SubmitButton
+                      className="w-full"
+                      pendingLabel="Approving..."
+                    >
                       <CheckCircle2 className="size-3.5" />
                       Approve
                     </SubmitButton>
                   </form>
-                  <form action={assignCourseCategoryAction} className="flex gap-2">
+                  <form
+                    action={assignCourseCategoryAction}
+                    className="flex gap-2"
+                  >
                     <input name="courseId" type="hidden" value={course.id} />
-                    <select className="h-10 min-w-0 flex-1 rounded-xl border border-input bg-input/30 px-2 text-xs" defaultValue={course.category ?? ""} name="category">
+                    <select
+                      className="h-10 min-w-0 flex-1 rounded-xl border border-input bg-input/30 px-2 text-xs"
+                      defaultValue={course.category ?? ""}
+                      name="category"
+                    >
                       <option value="">No category</option>
-                      {categoryResponse.categories.map((category) => <option key={category.id} value={category.slug}>{category.name}</option>)}
+                      {categoryResponse.categories.map((category) => (
+                        <option key={category.id} value={category.slug}>
+                          {category.name}
+                        </option>
+                      ))}
                     </select>
-                    <SubmitButton pendingLabel="..." variant="outline">Save</SubmitButton>
+                    <SubmitButton pendingLabel="..." variant="outline">
+                      Save
+                    </SubmitButton>
                   </form>
                   <form action={rejectCourseAction}>
                     <input name="courseId" type="hidden" value={course.id} />

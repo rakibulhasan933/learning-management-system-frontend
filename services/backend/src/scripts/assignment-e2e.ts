@@ -103,7 +103,10 @@ async function verifySchema() {
     assert(tableNames.has(tableName), `Missing table: ${tableName}`)
   }
 
-  const columns = await db.execute<{ table_name: string; column_name: string }>(sql`
+  const columns = await db.execute<{
+    table_name: string
+    column_name: string
+  }>(sql`
     select table_name, column_name
     from information_schema.columns
     where table_schema = 'public'
@@ -123,7 +126,7 @@ async function verifySchema() {
     const actual = columnsByTable.get(tableName) ?? []
     assert(
       expected.every((columnName) => actual.includes(columnName)),
-      `Table ${tableName} is missing expected columns. Actual: ${actual.join(", ")}`,
+      `Table ${tableName} is missing expected columns. Actual: ${actual.join(", ")}`
     )
   }
 
@@ -138,7 +141,7 @@ async function verifySchema() {
     order by table_name, constraint_name
   `)
   const constraintNames = new Set(
-    constraints.map((constraint) => constraint.constraint_name),
+    constraints.map((constraint) => constraint.constraint_name)
   )
 
   for (const constraintName of [
@@ -151,7 +154,7 @@ async function verifySchema() {
   ]) {
     assert(
       constraintNames.has(constraintName),
-      `Missing expected constraint: ${constraintName}`,
+      `Missing expected constraint: ${constraintName}`
     )
   }
 
@@ -245,7 +248,7 @@ async function requestJson<T>({
 
   assert(
     response.ok,
-    `${method} ${url} failed with ${response.status}: ${text}`,
+    `${method} ${url} failed with ${response.status}: ${text}`
   )
 
   return payload as T
@@ -313,7 +316,10 @@ async function runAssignmentE2E() {
       url: `${baseUrl}/instructor/courses/${course.id}/sections/${section.id}/assignment`,
     })
 
-    const submission = await requestJson<{ id: string; gradeScore: number | null }>({
+    const submission = await requestJson<{
+      id: string
+      gradeScore: number | null
+    }>({
       body: {
         submissionText: "This is the student's assignment submission.",
       },
@@ -353,12 +359,18 @@ async function runAssignmentE2E() {
       learning.sections.find((item) => item.assignment)?.assignment
         ?.submission ?? null
 
-    assert(feedback, "Student learning response did not include submission feedback")
-    assert(feedback.id === submission.id, "Learning response returned wrong submission")
+    assert(
+      feedback,
+      "Student learning response did not include submission feedback"
+    )
+    assert(
+      feedback.id === submission.id,
+      "Learning response returned wrong submission"
+    )
     assert(feedback.gradeScore === 23, "Student did not see graded score")
     assert(
       feedback.gradeFeedback === "Clear reflection with enough detail.",
-      "Student did not see grade feedback",
+      "Student did not see grade feedback"
     )
 
     return {

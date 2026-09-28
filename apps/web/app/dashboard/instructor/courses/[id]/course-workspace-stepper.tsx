@@ -2,15 +2,55 @@
 
 import { useRouter } from "next/navigation"
 import { useState } from "react"
-import { ArrowRight, BookOpen, ChevronLeft, ChevronRight, Layers3, Settings2, Users } from "lucide-react"
+import {
+  ArrowRight,
+  BookOpen,
+  ChevronLeft,
+  ChevronRight,
+  Layers3,
+  Settings2,
+  Users,
+} from "lucide-react"
 
 import { Button } from "@workspace/ui/components/button"
 
 const steps = [
-  { number: "01", icon: BookOpen, title: "Course details", description: "Update title, thumbnail, description, price, and publish status.", path: "edit?step=details", action: "Open details" },
-  { number: "02", icon: Layers3, title: "Build course content", description: "Create milestones and modules. Each module can contain multiple videos, PDFs, quizzes, and assignments.", path: "edit?step=content", action: "Open builder" },
-  { number: "03", icon: Users, title: "Student progress", description: "Review enrollments, completion progress, and the latest learning activity.", path: "students", action: "View students" },
-  { number: "04", icon: Settings2, title: "Course settings", description: "Manage course actions and the danger zone from one separate workspace.", path: "edit?step=settings", action: "Open settings" },
+  {
+    number: "01",
+    icon: BookOpen,
+    title: "Course details",
+    description:
+      "Update title, thumbnail, description, price, and publish status.",
+    path: "edit?step=details",
+    action: "Open details",
+  },
+  {
+    number: "02",
+    icon: Layers3,
+    title: "Build course content",
+    description:
+      "Create milestones and modules. Each module can contain multiple videos, PDFs, quizzes, and assignments.",
+    path: "edit?step=content",
+    action: "Open builder",
+  },
+  {
+    number: "03",
+    icon: Users,
+    title: "Student progress",
+    description:
+      "Review enrollments, completion progress, and the latest learning activity.",
+    path: "students",
+    action: "View students",
+  },
+  {
+    number: "04",
+    icon: Settings2,
+    title: "Course settings",
+    description:
+      "Manage course actions and the danger zone from one separate workspace.",
+    path: "edit?step=settings",
+    action: "Open settings",
+  },
 ] as const
 
 export function CourseWorkspaceStepper({ courseId }: { courseId: string }) {
@@ -21,14 +61,19 @@ export function CourseWorkspaceStepper({ courseId }: { courseId: string }) {
 
   function openStep(index: number) {
     setActiveIndex(index)
-    router.push(`/dashboard/instructor/courses/${courseId}/${steps[index]!.path}`)
+    router.push(
+      `/dashboard/instructor/courses/${courseId}/${steps[index]!.path}`
+    )
   }
 
   return (
     <section className="grid gap-4" aria-labelledby="course-steps-title">
       <div>
         <p className="font-mono text-xs text-muted-foreground">Next steps</p>
-        <h2 className="mt-2 font-heading text-2xl tracking-tight" id="course-steps-title">
+        <h2
+          className="mt-2 font-heading text-2xl tracking-tight"
+          id="course-steps-title"
+        >
           Manage this course step by step
         </h2>
       </div>
@@ -53,9 +98,15 @@ export function CourseWorkspaceStepper({ courseId }: { courseId: string }) {
             <Icon className="size-5" />
           </span>
           <div>
-            <p className="font-mono text-xs text-primary">Step {step.number} of {steps.length}</p>
-            <h3 className="mt-1 font-heading text-2xl tracking-tight">{step.title}</h3>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">{step.description}</p>
+            <p className="font-mono text-xs text-primary">
+              Step {step.number} of {steps.length}
+            </p>
+            <h3 className="mt-1 font-heading text-2xl tracking-tight">
+              {step.title}
+            </h3>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
+              {step.description}
+            </p>
           </div>
           <Button onClick={() => openStep(activeIndex)}>
             {step.action}
@@ -64,12 +115,21 @@ export function CourseWorkspaceStepper({ courseId }: { courseId: string }) {
         </div>
 
         <div className="flex items-center justify-between gap-3 border-t border-border pt-4">
-          <Button disabled={activeIndex === 0} onClick={() => openStep(activeIndex - 1)} variant="outline">
+          <Button
+            disabled={activeIndex === 0}
+            onClick={() => openStep(activeIndex - 1)}
+            variant="outline"
+          >
             <ChevronLeft className="size-4" />
             Previous
           </Button>
-          <span className="font-mono text-xs text-muted-foreground">Choose a step to continue</span>
-          <Button disabled={activeIndex === steps.length - 1} onClick={() => openStep(activeIndex + 1)}>
+          <span className="font-mono text-xs text-muted-foreground">
+            Choose a step to continue
+          </span>
+          <Button
+            disabled={activeIndex === steps.length - 1}
+            onClick={() => openStep(activeIndex + 1)}
+          >
             Next
             <ChevronRight className="size-4" />
           </Button>

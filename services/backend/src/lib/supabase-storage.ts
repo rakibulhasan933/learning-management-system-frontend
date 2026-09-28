@@ -30,22 +30,27 @@ function getSupabaseStorageUrl() {
   if (url.protocol === "https:" || url.protocol === "http:") {
     projectUrl = url
   } else if (url.protocol === "postgres:" || url.protocol === "postgresql:") {
-    const directHostMatch = url.hostname.match(/^db\.([a-z0-9]+)\.supabase\.co$/i)
+    const directHostMatch = url.hostname.match(
+      /^db\.([a-z0-9]+)\.supabase\.co$/i
+    )
     const poolerUserMatch = decodeURIComponent(url.username).match(
-      /^postgres\.([a-z0-9]+)$/i,
+      /^postgres\.([a-z0-9]+)$/i
     )
     const projectRef = directHostMatch?.[1] ?? poolerUserMatch?.[1]
 
     if (!projectRef) {
       throw new HttpError(
         503,
-        "Supabase Storage URL must be an HTTP(S) project URL or a Supabase Postgres URL with a project ref.",
+        "Supabase Storage URL must be an HTTP(S) project URL or a Supabase Postgres URL with a project ref."
       )
     }
 
     projectUrl = new URL(`https://${projectRef}.supabase.co`)
   } else {
-    throw new HttpError(503, "Supabase Storage URL must be an HTTP(S) project URL.")
+    throw new HttpError(
+      503,
+      "Supabase Storage URL must be an HTTP(S) project URL."
+    )
   }
 
   return {
@@ -138,7 +143,10 @@ async function uploadPublicObject({
 
   const safeFileName = sanitizeFileName(fileName) || "file"
   const objectKey = `${objectPrefix}/${randomUUID()}-${safeFileName}`
-  const uploadUrl = new URL(`/storage/v1/object/${bucket}/${objectKey}`, storage.url)
+  const uploadUrl = new URL(
+    `/storage/v1/object/${bucket}/${objectKey}`,
+    storage.url
+  )
 
   const response = await fetch(uploadUrl, {
     body: body as unknown as BodyInit,
@@ -155,8 +163,10 @@ async function uploadPublicObject({
     throw new HttpError(502, "Supabase Storage upload failed.")
   }
 
-  return new URL(`/storage/v1/object/public/${bucket}/${objectKey}`, storage.url)
-    .toString()
+  return new URL(
+    `/storage/v1/object/public/${bucket}/${objectKey}`,
+    storage.url
+  ).toString()
 }
 
 export async function uploadPaymentProofScreenshot({
@@ -190,11 +200,15 @@ export async function uploadPaymentProofScreenshot({
     serviceRoleKey: storage.serviceRoleKey,
     url: storage.url,
   })
-  const extension = fileName.split(".").pop()?.replace(/[^a-z0-9]/gi, "") || "jpg"
+  const extension =
+    fileName
+      .split(".")
+      .pop()
+      ?.replace(/[^a-z0-9]/gi, "") || "jpg"
   const objectKey = `${orderId}/${randomUUID()}.${extension}`
   const uploadUrl = new URL(
     `/storage/v1/object/${bucket}/${objectKey}`,
-    storage.url,
+    storage.url
   )
 
   const response = await fetch(uploadUrl, {
@@ -212,8 +226,10 @@ export async function uploadPaymentProofScreenshot({
     throw new HttpError(502, "Payment proof upload failed.")
   }
 
-  return new URL(`/storage/v1/object/public/${bucket}/${objectKey}`, storage.url)
-    .toString()
+  return new URL(
+    `/storage/v1/object/public/${bucket}/${objectKey}`,
+    storage.url
+  ).toString()
 }
 
 export async function uploadCertificatePdf({
@@ -236,7 +252,7 @@ export async function uploadCertificatePdf({
   const objectKey = `${certificateId}/certificate.pdf`
   const uploadUrl = new URL(
     `/storage/v1/object/${bucket}/${objectKey}`,
-    storage.url,
+    storage.url
   )
 
   const response = await fetch(uploadUrl, {
@@ -254,8 +270,10 @@ export async function uploadCertificatePdf({
     throw new HttpError(502, "Certificate upload failed.")
   }
 
-  return new URL(`/storage/v1/object/public/${bucket}/${objectKey}`, storage.url)
-    .toString()
+  return new URL(
+    `/storage/v1/object/public/${bucket}/${objectKey}`,
+    storage.url
+  ).toString()
 }
 
 export async function uploadLectureMaterial({
@@ -290,7 +308,7 @@ export async function uploadLectureMaterial({
       400,
       kind === "pdf"
         ? "Lecture PDF must be an application/pdf file."
-        : "Lecture slides must be a PDF, PPT, PPTX, or ODP file.",
+        : "Lecture slides must be a PDF, PPT, PPTX, or ODP file."
     )
   }
 
@@ -313,12 +331,15 @@ export async function uploadLectureMaterial({
   })
 
   const extension =
-    fileName.split(".").pop()?.replace(/[^a-z0-9]/gi, "").toLowerCase() ||
-    (kind === "pdf" ? "pdf" : "pptx")
+    fileName
+      .split(".")
+      .pop()
+      ?.replace(/[^a-z0-9]/gi, "")
+      .toLowerCase() || (kind === "pdf" ? "pdf" : "pptx")
   const objectKey = `${courseId}/${lectureId}/${kind}-${randomUUID()}.${extension}`
   const uploadUrl = new URL(
     `/storage/v1/object/${bucket}/${objectKey}`,
-    storage.url,
+    storage.url
   )
   const response = await fetch(uploadUrl, {
     body: body as unknown as BodyInit,
@@ -335,8 +356,10 @@ export async function uploadLectureMaterial({
     throw new HttpError(502, "Lecture material upload failed.")
   }
 
-  return new URL(`/storage/v1/object/public/${bucket}/${objectKey}`, storage.url)
-    .toString()
+  return new URL(
+    `/storage/v1/object/public/${bucket}/${objectKey}`,
+    storage.url
+  ).toString()
 }
 
 export async function uploadCourseThumbnailImage({
@@ -351,7 +374,7 @@ export async function uploadCourseThumbnailImage({
   if (!allowedImageContentTypes.has(contentType)) {
     throw new HttpError(
       400,
-      "Course thumbnail must be a JPG, PNG, WEBP, GIF, or AVIF image.",
+      "Course thumbnail must be a JPG, PNG, WEBP, GIF, or AVIF image."
     )
   }
 
@@ -362,7 +385,8 @@ export async function uploadCourseThumbnailImage({
   }
 
   const bucket =
-    env.SUPABASE_STORAGE_COURSE_THUMBNAILS_BUCKET ?? defaultCourseThumbnailsBucket
+    env.SUPABASE_STORAGE_COURSE_THUMBNAILS_BUCKET ??
+    defaultCourseThumbnailsBucket
 
   return uploadPublicObject({
     body,
@@ -385,7 +409,7 @@ export async function uploadProfileAvatarImage({
   if (!allowedImageContentTypes.has(contentType)) {
     throw new HttpError(
       400,
-      "Profile avatar must be a JPG, PNG, WEBP, GIF, or AVIF image.",
+      "Profile avatar must be a JPG, PNG, WEBP, GIF, or AVIF image."
     )
   }
 

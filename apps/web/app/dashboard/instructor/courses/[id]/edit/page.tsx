@@ -41,7 +41,7 @@ export default async function EditInstructorCoursePage({
     }),
     authenticatedApiFetch<InstructorCourseStructureResponse>(
       `/instructor/courses/${id}/milestones`,
-      { cache: "no-store" },
+      { cache: "no-store" }
     ),
   ])
 
@@ -66,15 +66,20 @@ export default async function EditInstructorCoursePage({
         </div>
 
         <CourseEditWorkspace
-          content={<MilestoneModuleBuilder courseId={course.id} structure={structure} />}
-          details={
-              <CourseForm
-                action={updateInstructorCourseAction}
-                course={course}
-                submitLabel="Save changes"
-              />
+          content={
+            <MilestoneModuleBuilder
+              courseId={course.id}
+              structure={structure}
+            />
           }
-        settings={
+          details={
+            <CourseForm
+              action={updateInstructorCourseAction}
+              course={course}
+              submitLabel="Save changes"
+            />
+          }
+          settings={
             <Card className="border-destructive/40 bg-destructive/5">
               <CardContent className="grid gap-3 p-4 sm:p-5">
                 <div className="flex items-center gap-2">
@@ -83,7 +88,10 @@ export default async function EditInstructorCoursePage({
                     Danger zone
                   </h3>
                 </div>
-                <form action={deleteInstructorCourseAction} className="grid gap-3">
+                <form
+                  action={deleteInstructorCourseAction}
+                  className="grid gap-3"
+                >
                   <input name="courseId" type="hidden" value={course.id} />
                   <p className="text-sm text-muted-foreground">
                     Delete this course draft and its sections. Use this only for
@@ -100,9 +108,9 @@ export default async function EditInstructorCoursePage({
                 </form>
               </CardContent>
             </Card>
-        }
-        initialStep={query?.step ?? "details"}
-      />
+          }
+          initialStep={query?.step ?? "details"}
+        />
       </section>
     </main>
   )

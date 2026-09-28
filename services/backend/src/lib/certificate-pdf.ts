@@ -6,7 +6,10 @@ type CertificatePdfInput = {
 }
 
 function escapePdfText(value: string) {
-  return value.replace(/\\/g, "\\\\").replace(/\(/g, "\\(").replace(/\)/g, "\\)")
+  return value
+    .replace(/\\/g, "\\\\")
+    .replace(/\(/g, "\\(")
+    .replace(/\)/g, "\\)")
 }
 
 function textLine({
@@ -27,7 +30,10 @@ function textLine({
   y: number
 }) {
   const escaped = escapePdfText(text)
-  const tx = align === "center" ? `${x} ${y} Td (${escaped}) Tj` : `${x} ${y} Td (${escaped}) Tj`
+  const tx =
+    align === "center"
+      ? `${x} ${y} Td (${escaped}) Tj`
+      : `${x} ${y} Td (${escaped}) Tj`
 
   return `BT /${font} ${size} Tf ${color} rg ${tx} ET`
 }

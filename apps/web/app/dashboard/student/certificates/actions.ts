@@ -13,7 +13,7 @@ export async function downloadCertificateAction(formData: FormData) {
   }
 
   const response = await authenticatedApiFetch<CertificateDownloadResponse>(
-    `/certificates/${certificateId}/download-url`,
+    `/certificates/${certificateId}/download-url`
   )
 
   redirect(response.downloadUrl)

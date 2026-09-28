@@ -32,7 +32,7 @@ export default async function DashboardProfilePage() {
         {/* Identity card */}
         <Card className="overflow-hidden">
           <CardContent className="p-0">
-            <div className="flex flex-col items-center gap-4 bg-gradient-to-b from-primary/5 to-transparent px-6 pb-6 pt-8">
+            <div className="flex flex-col items-center gap-4 bg-gradient-to-b from-primary/5 to-transparent px-6 pt-8 pb-6">
               <div className="group relative aspect-square w-32 overflow-hidden rounded-full bg-background ring-2 ring-primary/30 transition-all duration-300 hover:ring-primary/60 sm:w-40">
                 {profile.avatarUrl ? (
                   <Image
@@ -53,7 +53,7 @@ export default async function DashboardProfilePage() {
                 <p className="font-heading text-lg tracking-tight">
                   {profile.fullName ?? "Unnamed account"}
                 </p>
-                <p className="mt-0.5 break-words font-mono text-xs text-muted-foreground">
+                <p className="mt-0.5 font-mono text-xs break-words text-muted-foreground">
                   {profile.email}
                 </p>
               </div>

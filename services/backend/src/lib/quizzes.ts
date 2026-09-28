@@ -95,7 +95,9 @@ export function toStudentQuizDto({
 }): StudentQuizDto {
   const latestAttempt = attempts
     .filter((attempt) => attempt.quizId === quiz.id)
-    .sort((left, right) => right.completedAt.getTime() - left.completedAt.getTime())[0]
+    .sort(
+      (left, right) => right.completedAt.getTime() - left.completedAt.getTime()
+    )[0]
 
   return {
     courseId: quiz.courseId,
@@ -107,7 +109,7 @@ export function toStudentQuizDto({
       .filter((question) => question.quizId === quiz.id)
       .map((question) => {
         const questionOptions = options.filter(
-          (option) => option.questionId === question.id,
+          (option) => option.questionId === question.id
         )
 
         return {
@@ -130,19 +132,30 @@ export function toStudentQuizDto({
             questions.map((question) => [
               question.id,
               options
-                .filter((option) => option.questionId === question.id && option.isCorrect)
+                .filter(
+                  (option) =>
+                    option.questionId === question.id && option.isCorrect
+                )
                 .map((option) => option.id)
                 .sort(),
-            ]),
+            ])
           ),
           correctQuestionIds: questions
             .filter((question) => {
               const correct = options
-                .filter((option) => option.questionId === question.id && option.isCorrect)
+                .filter(
+                  (option) =>
+                    option.questionId === question.id && option.isCorrect
+                )
                 .map((option) => option.id)
                 .sort()
-              const submitted = [...(latestAttempt.answers[question.id] ?? [])].sort()
-              return correct.length === submitted.length && correct.every((id, index) => id === submitted[index])
+              const submitted = [
+                ...(latestAttempt.answers[question.id] ?? []),
+              ].sort()
+              return (
+                correct.length === submitted.length &&
+                correct.every((id, index) => id === submitted[index])
+              )
             })
             .map((question) => question.id),
         }
@@ -191,11 +204,14 @@ export async function getInstructorQuizDtosForCourse(courseId: string) {
       options: optionRows,
       questions: allQuestionRows,
       quiz,
-    }),
+    })
   )
 }
 
-export async function assertActiveEnrollment(courseId: string, profileId: string) {
+export async function assertActiveEnrollment(
+  courseId: string,
+  profileId: string
+) {
   const [enrollment] = await db
     .select({ id: enrollments.id })
     .from(enrollments)
@@ -203,8 +219,8 @@ export async function assertActiveEnrollment(courseId: string, profileId: string
       and(
         eq(enrollments.courseId, courseId),
         eq(enrollments.userId, profileId),
-        eq(enrollments.status, "active"),
-      ),
+        eq(enrollments.status, "active")
+      )
     )
     .limit(1)
 
@@ -252,11 +268,11 @@ export async function getStudentQuizByTarget({
           .innerJoin(sections, eq(modules.milestoneId, sections.id))
           .where(eq(modules.id, moduleId))
           .limit(1)
-    : await db
-        .select({ courseId: sections.courseId })
-        .from(sections)
-        .where(eq(sections.id, sectionId!))
-        .limit(1)
+      : await db
+          .select({ courseId: sections.courseId })
+          .from(sections)
+          .where(eq(sections.id, sectionId!))
+          .limit(1)
 
   if (!target) {
     throw new HttpError(404, "Quiz target not found.")
@@ -274,8 +290,8 @@ export async function getStudentQuizByTarget({
           : moduleId
             ? eq(quizzes.moduleId, moduleId)
             : eq(quizzes.sectionId, sectionId!),
-        eq(quizzes.isPublished, true),
-      ),
+        eq(quizzes.isPublished, true)
+      )
     )
     .limit(1)
 
@@ -287,7 +303,11 @@ export async function getStudentQuizByTarget({
 }
 
 export async function getStudentQuizDto(quizId: string, profileId: string) {
-  const [quiz] = await db.select().from(quizzes).where(eq(quizzes.id, quizId)).limit(1)
+  const [quiz] = await db
+    .select()
+    .from(quizzes)
+    .where(eq(quizzes.id, quizId))
+    .limit(1)
 
   if (!quiz || !quiz.isPublished) {
     throw new HttpError(404, "Quiz not found.")
@@ -298,7 +318,9 @@ export async function getStudentQuizDto(quizId: string, profileId: string) {
   const [existingAttempt] = await db
     .select({ id: quizAttempts.id })
     .from(quizAttempts)
-    .where(and(eq(quizAttempts.quizId, quiz.id), eq(quizAttempts.userId, profileId)))
+    .where(
+      and(eq(quizAttempts.quizId, quiz.id), eq(quizAttempts.userId, profileId))
+    )
     .limit(1)
   if (existingAttempt) {
     throw new HttpError(409, "You have already submitted this quiz.")
@@ -317,19 +339,24 @@ export async function getStudentQuizDto(quizId: string, profileId: string) {
           where: (table, { inArray }) =>
             inArray(
               table.questionId,
-              questions.map((question) => question.id),
+              questions.map((question) => question.id)
             ),
         })
   const attempts = await db
     .select()
     .from(quizAttempts)
-    .where(and(eq(quizAttempts.quizId, quiz.id), eq(quizAttempts.userId, profileId)))
+    .where(
+      and(eq(quizAttempts.quizId, quiz.id), eq(quizAttempts.userId, profileId))
+    )
     .orderBy(desc(quizAttempts.completedAt))
 
   return toStudentQuizDto({ attempts, options, questions, quiz })
 }
 
-export async function getStudentQuizzesForCourse(courseId: string, profileId: string) {
+export async function getStudentQuizzesForCourse(
+  courseId: string,
+  profileId: string
+) {
   const quizRows = await db
     .select()
     .from(quizzes)
@@ -342,7 +369,7 @@ export async function getStudentQuizzesForCourse(courseId: string, profileId: st
           where: (table, { inArray }) =>
             inArray(
               table.quizId,
-              quizRows.map((quiz) => quiz.id),
+              quizRows.map((quiz) => quiz.id)
             ),
         })
   const optionRows =
@@ -353,7 +380,7 @@ export async function getStudentQuizzesForCourse(courseId: string, profileId: st
           where: (table, { inArray }) =>
             inArray(
               table.questionId,
-              questionRows.map((question) => question.id),
+              questionRows.map((question) => question.id)
             ),
         })
   const attempts =
@@ -366,8 +393,8 @@ export async function getStudentQuizzesForCourse(courseId: string, profileId: st
               eqWhere(table.userId, profileId),
               inArray(
                 table.quizId,
-                quizRows.map((quiz) => quiz.id),
-              ),
+                quizRows.map((quiz) => quiz.id)
+              )
             ),
         })
 
@@ -377,7 +404,7 @@ export async function getStudentQuizzesForCourse(courseId: string, profileId: st
       options: optionRows,
       questions: questionRows,
       quiz,
-    }),
+    })
   )
 }
 
@@ -390,7 +417,11 @@ export async function submitQuizAttempt({
   profileId: string
   quizId: string
 }): Promise<QuizSubmissionResultDto> {
-  const [quiz] = await db.select().from(quizzes).where(eq(quizzes.id, quizId)).limit(1)
+  const [quiz] = await db
+    .select()
+    .from(quizzes)
+    .where(eq(quizzes.id, quizId))
+    .limit(1)
 
   if (!quiz || !quiz.isPublished) {
     throw new HttpError(404, "Quiz not found.")
@@ -410,7 +441,7 @@ export async function submitQuizAttempt({
           where: (table, { inArray }) =>
             inArray(
               table.questionId,
-              questions.map((question) => question.id),
+              questions.map((question) => question.id)
             ),
         })
   const correctQuestionIds: string[] = []
@@ -426,7 +457,9 @@ export async function submitQuizAttempt({
 
     if (
       questionCorrectOptionIds.length === submittedOptionIds.length &&
-      questionCorrectOptionIds.every((optionId, index) => optionId === submittedOptionIds[index])
+      questionCorrectOptionIds.every(
+        (optionId, index) => optionId === submittedOptionIds[index]
+      )
     ) {
       correctQuestionIds.push(question.id)
     }
@@ -451,5 +484,9 @@ export async function submitQuizAttempt({
     ...toAttemptDto(attempt),
     correctOptionIds,
     correctQuestionIds,
+    review: {
+      answers,
+      correctOptionIds,
+    },
   }
 }

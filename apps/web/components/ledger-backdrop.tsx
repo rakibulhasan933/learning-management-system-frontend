@@ -5,7 +5,7 @@ export function LedgerBackdrop() {
       className="pointer-events-none absolute inset-0 overflow-hidden"
     >
       <div
-        className="absolute -left-40 -top-40 h-[32rem] w-[32rem] rounded-full opacity-[0.15] blur-3xl"
+        className="absolute -top-40 -left-40 h-[32rem] w-[32rem] rounded-full opacity-[0.15] blur-3xl"
         style={{
           background:
             "radial-gradient(circle, var(--primary) 0%, transparent 70%)",

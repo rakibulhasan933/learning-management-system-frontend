@@ -29,7 +29,7 @@ function toNumber(value: string | number) {
  */
 export function formatCurrency(
   value: string | number,
-  currency = "BDT",
+  currency = "BDT"
 ): string {
   const numeric = toNumber(value)
 
@@ -49,10 +49,7 @@ export function formatCurrency(
  * A catalog price: `Free` at zero, otherwise trimmed of trailing `.00`
  * (`৳ 4,500`). Use where the number is a label rather than an amount owed.
  */
-export function formatPrice(
-  price: string | number,
-  currency = "BDT",
-): string {
+export function formatPrice(price: string | number, currency = "BDT"): string {
   const numeric = toNumber(price)
 
   if (numeric === null) {

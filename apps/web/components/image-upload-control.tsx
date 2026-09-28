@@ -96,9 +96,7 @@ export function ImageUploadControl({
               setMessage(error.message)
             }}
           />
-          <p className="text-sm leading-6 text-muted-foreground">
-            {helpText}
-          </p>
+          <p className="text-sm leading-6 text-muted-foreground">{helpText}</p>
           <p className="font-mono text-[11px] tracking-wide text-muted-foreground">
             JPG, PNG, or WEBP only. Max {Math.round(maxBytes / 1024 / 1024)} MB.
           </p>

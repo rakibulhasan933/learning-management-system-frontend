@@ -25,14 +25,20 @@ function getInitialAnswers(questions: StudentQuizQuestionDto[]) {
 }
 
 export function QuizPanel({ quiz }: QuizPanelProps) {
-  const [answers, setAnswers] = useState<Record<string, string[]>>(() => quiz.review?.answers ?? getInitialAnswers(quiz.questions))
+  const [answers, setAnswers] = useState<Record<string, string[]>>(
+    () => quiz.review?.answers ?? getInitialAnswers(quiz.questions)
+  )
   const [result, setResult] = useState<QuizSubmissionResultDto | null>(null)
   const [message, setMessage] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
   const latestResult = result ?? quiz.latestAttempt
   const isLocked = Boolean(latestResult)
   const review = result
-    ? { answers, correctOptionIds: result.correctOptionIds, correctQuestionIds: result.correctQuestionIds }
+    ? {
+        answers,
+        correctOptionIds: result.correctOptionIds,
+        correctQuestionIds: result.correctQuestionIds,
+      }
     : quiz.review
 
   function setSingleAnswer(questionId: string, optionId: string) {
@@ -63,7 +69,11 @@ export function QuizPanel({ quiz }: QuizPanelProps) {
 
         setResult(submissionResult)
       } catch (error) {
-        setMessage(error instanceof Error ? error.message : "Quiz could not be submitted.")
+        setMessage(
+          error instanceof Error
+            ? error.message
+            : "Quiz could not be submitted."
+        )
       }
     })
   }
@@ -75,10 +85,13 @@ export function QuizPanel({ quiz }: QuizPanelProps) {
           Quiz
         </p>
         <div className="mt-2 flex flex-wrap items-start justify-between gap-3">
-          <h3 className="font-heading text-xl tracking-tight">
-          {quiz.title}
-          </h3>
-          {isLocked ? <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary"><LockKeyhole className="size-3.5" />Submitted</span> : null}
+          <h3 className="font-heading text-xl tracking-tight">{quiz.title}</h3>
+          {isLocked ? (
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
+              <LockKeyhole className="size-3.5" />
+              Submitted
+            </span>
+          ) : null}
         </div>
         {latestResult ? (
           <p className="mt-3 flex items-center gap-2 font-mono text-sm text-primary">
@@ -90,9 +103,15 @@ export function QuizPanel({ quiz }: QuizPanelProps) {
       </div>
 
       {quiz.questions.map((question) => (
-        <fieldset className="grid gap-3 rounded-2xl border border-border p-4" disabled={isLocked} key={question.id}>
+        <fieldset
+          className="grid gap-3 rounded-2xl border border-border p-4"
+          disabled={isLocked}
+          key={question.id}
+        >
           <legend className="px-1 text-sm font-medium text-foreground">
-            <span className="mr-2 font-mono text-xs text-primary">{String(question.position + 1).padStart(2, "0")}</span>
+            <span className="mr-2 font-mono text-xs text-primary">
+              {String(question.position + 1).padStart(2, "0")}
+            </span>
             {question.questionText}
           </legend>
           {question.allowMultiple ? (
@@ -113,7 +132,13 @@ export function QuizPanel({ quiz }: QuizPanelProps) {
                       }
                     />
                     {option.optionText}
-                    {review?.correctOptionIds[question.id]?.includes(option.id) ? <CheckCircle2 className="ml-auto size-4 text-emerald-300" /> : review && checked ? <CircleAlert className="ml-auto size-4 text-destructive" /> : null}
+                    {review?.correctOptionIds[question.id]?.includes(
+                      option.id
+                    ) ? (
+                      <CheckCircle2 className="ml-auto size-4 text-emerald-300" />
+                    ) : review && checked ? (
+                      <CircleAlert className="ml-auto size-4 text-destructive" />
+                    ) : null}
                   </label>
                 )
               })}
@@ -131,7 +156,14 @@ export function QuizPanel({ quiz }: QuizPanelProps) {
                 >
                   <RadioGroupItem disabled={isLocked} value={option.id} />
                   {option.optionText}
-                  {review?.correctOptionIds[question.id]?.includes(option.id) ? <CheckCircle2 className="ml-auto size-4 text-emerald-300" /> : review && (answers[question.id] ?? []).includes(option.id) ? <CircleAlert className="ml-auto size-4 text-destructive" /> : null}
+                  {review?.correctOptionIds[question.id]?.includes(
+                    option.id
+                  ) ? (
+                    <CheckCircle2 className="ml-auto size-4 text-emerald-300" />
+                  ) : review &&
+                    (answers[question.id] ?? []).includes(option.id) ? (
+                    <CircleAlert className="ml-auto size-4 text-destructive" />
+                  ) : null}
                 </label>
               ))}
             </RadioGroup>
@@ -146,9 +178,18 @@ export function QuizPanel({ quiz }: QuizPanelProps) {
           type="button"
         >
           {isPending ? <Loader2 className="size-4 animate-spin" /> : null}
-          {isPending ? "Submitting..." : isLocked ? "Quiz already submitted" : "Submit quiz"}
+          {isPending
+            ? "Submitting..."
+            : isLocked
+              ? "Quiz already submitted"
+              : "Submit quiz"}
         </Button>
-        {review ? <p className="text-sm text-muted-foreground">Review mode: green answers are correct, and your selected wrong answers are marked in red.</p> : null}
+        {review ? (
+          <p className="text-sm text-muted-foreground">
+            Review mode: green answers are correct, and your selected wrong
+            answers are marked in red.
+          </p>
+        ) : null}
         {message ? (
           <p className="text-sm text-destructive" role="status">
             {message}
