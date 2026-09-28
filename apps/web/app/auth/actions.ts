@@ -271,7 +271,7 @@ export async function signInWithGoogleAction(formData: FormData) {
   const state = Buffer.from(JSON.stringify({ next, origin })).toString(
     "base64url"
   )
-  const url = new URL("/api/auth/google", origin)
+  const url = new URL("/auth/google", getBackendApiUrl())
 
   url.searchParams.set("state", state)
 
