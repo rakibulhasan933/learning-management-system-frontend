@@ -4,8 +4,10 @@ import {
   courses,
   enrollments,
   eq,
+  inArray,
   modules,
   sections,
+  videoProgress,
   videos,
 } from "@workspace/db"
 import { Router, type Router as ExpressRouter } from "express"
@@ -119,13 +121,15 @@ learningRouter.get(
     const progressRows =
       videoIds.length === 0
         ? []
-        : await db.query.videoProgress.findMany({
-            where: (table, { and: andWhere, eq: eqWhere, inArray }) =>
-              andWhere(
-                eqWhere(table.userId, request.auth!.profile.id),
-                inArray(table.videoId, videoIds)
-              ),
-          })
+        : await db
+            .select()
+            .from(videoProgress)
+            .where(
+              and(
+                eq(videoProgress.userId, request.auth!.profile.id),
+                inArray(videoProgress.videoId, videoIds)
+              )
+            )
     const progressDtos = progressRows.map((row) => ({
       completedAt: serializeDate(row.completedAt),
       id: row.id,
