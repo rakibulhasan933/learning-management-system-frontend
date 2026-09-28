@@ -41,8 +41,8 @@ function redirectTo(
   return NextResponse.redirect(url)
 }
 
-async function getProfile(accessToken: string) {
-  const response = await fetch(`${getBackendApiUrl()}/auth/me`, {
+async function getProfile(accessToken: string, origin: string) {
+  const response = await fetch(`${getBackendApiUrl(origin)}/auth/me`, {
     headers: {
       Accept: "application/json",
       Authorization: `Bearer ${accessToken}`,
@@ -57,9 +57,10 @@ async function getProfile(accessToken: string) {
 }
 
 async function refreshSession(
-  refreshToken: string
+  refreshToken: string,
+  origin: string
 ): Promise<RefreshedSession | null> {
-  const response = await fetch(`${getBackendApiUrl()}/auth/refresh`, {
+  const response = await fetch(`${getBackendApiUrl(origin)}/auth/refresh`, {
     headers: {
       Accept: "application/json",
       Cookie: `${refreshTokenCookieName}=${encodeURIComponent(refreshToken)}`,
@@ -146,15 +147,17 @@ export async function updateSession(request: NextRequest) {
       return NextResponse.next({ request })
     }
 
-    const session = await refreshSession(refreshToken)
+    const session = await refreshSession(refreshToken, request.nextUrl.origin)
 
     return session ? applySession(request, session) : clearSession(request)
   }
 
-  const profile = accessToken ? await getProfile(accessToken) : null
+  const profile = accessToken
+    ? await getProfile(accessToken, request.nextUrl.origin)
+    : null
 
   if (!profile && refreshToken) {
-    const session = await refreshSession(refreshToken)
+    const session = await refreshSession(refreshToken, request.nextUrl.origin)
 
     if (session) {
       const response = applySession(request, session)
