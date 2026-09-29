@@ -1,5 +1,6 @@
 packages:
   - "apps/*"
+  - "backend-with-nestjs"
   - "services/*"
   - "packages/*"
 
