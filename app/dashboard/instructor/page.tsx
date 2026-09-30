@@ -19,32 +19,32 @@ export default async function InstructorDashboardPage() {
       { cache: "no-store" }
     )
   return (
-    <div className="space-y-8">
+    <div className="instructor-page instructor-overview-page space-y-8">
       <PageHeader
         className="text-left"
-        eyebrow="Instructor dashboard"
-        lede="Manage your courses, students, learning progress, and content from separate workspaces."
-        title="Course operations"
+        eyebrow="ইন্সট্রাক্টর ড্যাশবোর্ড"
+        lede="আপনার কোর্স, শিক্ষার্থী, শেখার অগ্রগতি ও কনটেন্ট এক জায়গা থেকে পরিচালনা করুন।"
+        title="কোর্স পরিচালনা"
       />
       <div className="flex justify-start">
         <Button asChild>
-          <Link href="/dashboard/instructor/courses">Manage courses</Link>
+          <Link href="/dashboard/instructor/courses">কোর্স পরিচালনা করুন</Link>
         </Button>
       </div>
       <div className="grid gap-3 sm:grid-cols-3">
         <StatTile
           icon={<BookOpen />}
-          label="Courses"
+          label="কোর্স"
           value={overview.totals.courseCount}
         />
         <StatTile
           icon={<Users />}
-          label="Active students"
+          label="সক্রিয় শিক্ষার্থী"
           value={overview.totals.activeEnrollmentCount}
         />
         <StatTile
           icon={<CheckCircle2 />}
-          label="Completion rate"
+          label="সম্পন্নের হার"
           value={`${overview.totals.completionRate}%`}
         />
       </div>
@@ -52,12 +52,12 @@ export default async function InstructorDashboardPage() {
         <div className="flex items-end justify-between gap-4">
           <div>
             <p className="font-mono text-xs text-muted-foreground">
-              Course management
+              কোর্স ব্যবস্থাপনা
             </p>
-            <h2 className="mt-2 font-heading text-2xl">Your courses</h2>
+            <h2 className="mt-2 font-heading text-2xl">আপনার কোর্সগুলো</h2>
           </div>
           <Button asChild size="sm" variant="outline">
-            <Link href="/dashboard/instructor/courses/new">Create course</Link>
+            <Link href="/dashboard/instructor/courses/new">নতুন কোর্স তৈরি করুন</Link>
           </Button>
         </div>
         <div className="mt-5 grid gap-4 lg:grid-cols-2">
@@ -65,7 +65,7 @@ export default async function InstructorDashboardPage() {
             <EmptyState
               description="Create a draft to start building your first course."
               icon={<BookOpen />}
-              title="No courses yet"
+              title="এখনও কোনো কোর্স নেই"
             />
           ) : (
             overview.courses.map((course) => (
@@ -89,14 +89,14 @@ export default async function InstructorDashboardPage() {
                   <div className="mt-5 grid gap-2 sm:grid-cols-2">
                     <Button asChild variant="outline">
                       <Link href={`/dashboard/instructor/courses/${course.id}`}>
-                        Manage course
+                        কোর্স পরিচালনা
                       </Link>
                     </Button>
                     <Button asChild variant="outline">
                       <Link
                         href={`/dashboard/instructor/courses/${course.id}/students`}
                       >
-                        View students <ArrowRight />
+                        শিক্ষার্থী দেখুন <ArrowRight />
                       </Link>
                     </Button>
                   </div>

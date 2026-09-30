@@ -667,6 +667,15 @@
 .courses-hero > * { position: relative; z-index: 1; }
 .course-trust-pill { border: 1px solid color-mix(in srgb, var(--primary) 25%, var(--border)); border-radius: 999px; padding: .55rem .8rem; background: color-mix(in srgb, var(--background) 32%, transparent); }
 .dashboard-shell { background-image: linear-gradient(to bottom, color-mix(in srgb, var(--primary) 3%, transparent), transparent 32rem); }
+.instructor-page { position: relative; }
+.instructor-page::before { position: absolute; top: -5rem; right: -4rem; width: 18rem; height: 18rem; border: 1px solid color-mix(in srgb, var(--primary) 17%, transparent); border-radius: 50%; content: ""; pointer-events: none; box-shadow: 0 0 0 2rem color-mix(in srgb, var(--primary) 4%, transparent), 0 0 0 5rem color-mix(in srgb, var(--primary) 2%, transparent); }
+.instructor-page > * { position: relative; z-index: 1; }
+.instructor-page [data-slot="card"], .instructor-page .interactive-card { border-color: color-mix(in srgb, var(--primary) 15%, var(--border)); background: color-mix(in srgb, var(--card) 88%, transparent); box-shadow: inset 0 1px 0 rgb(255 255 255 / .04); transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease; }
+.instructor-page [data-slot="card"]:hover, .instructor-page .interactive-card:hover { transform: translateY(-3px); border-color: color-mix(in srgb, var(--primary) 40%, var(--border)); box-shadow: 0 20px 45px -34px rgb(0 0 0 / .9); }
+.instructor-page h1, .instructor-page h2 { text-wrap: balance; }
+.instructor-courses-page > div.mt-12 { margin-top: 2rem; }
+@media (max-width: 640px) { .instructor-page::before { width: 11rem; height: 11rem; top: -2rem; right: -5rem; } .instructor-page { padding-bottom: 1rem; } }
+@media (prefers-reduced-motion: reduce) { .instructor-page [data-slot="card"], .instructor-page .interactive-card { transition: none; } .instructor-page [data-slot="card"]:hover, .instructor-page .interactive-card:hover { transform: none; } }
 .dashboard-shell header { box-shadow: 0 12px 34px -30px rgb(0 0 0 / .9); }
 .dashboard-shell aside { background: color-mix(in srgb, var(--card) 78%, transparent); }
 .dashboard-shell main, .dashboard-shell [role="main"] { animation: dashboard-enter .45s ease both; }
