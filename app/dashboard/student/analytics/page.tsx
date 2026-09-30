@@ -17,32 +17,32 @@ export default async function StudentAnalyticsPage() {
   const analytics =
     await authenticatedApiFetch<StudentAnalyticsResponse>("/student/analytics")
   return (
-    <>
+    <div className="student-analytics-page">
       <PageHeader
-        eyebrow="Student dashboard · Analytics"
-        lede="See your learning rhythm, course progress, and assessment performance."
-        title="Learning analytics"
+        eyebrow="শিক্ষার্থী ড্যাশবোর্ড · অ্যানালিটিক্স"
+        lede="আপনার শেখার ছন্দ, কোর্সের অগ্রগতি এবং মূল্যায়নের ফলাফল দেখুন।"
+        title="শেখার অগ্রগতি"
       />
       <div className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-4">
         <Metric
-          label="Completion"
-          note={`${analytics.completedLectures}/${analytics.totalLectures} lectures`}
+          label="সম্পন্ন"
+          note={`${analytics.completedLectures}/${analytics.totalLectures}টি লেকচার`}
           value={`${analytics.completionPercentage}%`}
         />
         <Metric
-          label="Watch time"
-          note="Saved learning time"
+          label="দেখার সময়"
+          note="শেখার মোট সময়"
           value={formatDuration(analytics.watchTimeSeconds) ?? "0m"}
         />
         <Metric
-          label="Quiz average"
-          note={`${analytics.quizAttempts} attempts`}
+          label="কুইজের গড়"
+          note={`${analytics.quizAttempts}টি চেষ্টা`}
           value={`${analytics.quizAveragePercentage}%`}
         />
         <Metric
           icon={<Flame className="size-5 text-primary" />}
-          label="Streak"
-          note="Active days"
+          label="শেখার ধারাবাহিকতা"
+          note="সক্রিয় শেখার দিন"
           value={`${analytics.learningStreakDays}d`}
         />
       </div>
@@ -50,10 +50,10 @@ export default async function StudentAnalyticsPage() {
         <Card size="sm">
           <CardContent>
             <p className="font-mono text-xs text-muted-foreground">
-              Last 7 days
+              গত ৭ দিন
             </p>
             <h2 className="mt-1 font-heading text-xl">
-              Weekly learning activity
+              সাপ্তাহিক শেখার কার্যক্রম
             </h2>
             <div className="mt-4">
               <WeeklyActivityChart data={analytics.weeklyActivity} />
@@ -62,8 +62,8 @@ export default async function StudentAnalyticsPage() {
         </Card>
         <Card size="sm">
           <CardContent>
-            <p className="font-mono text-xs text-muted-foreground">By course</p>
-            <h2 className="mt-1 font-heading text-xl">Course progress</h2>
+            <p className="font-mono text-xs text-muted-foreground">কোর্স অনুযায়ী</p>
+            <h2 className="mt-1 font-heading text-xl">কোর্সের অগ্রগতি</h2>
             <div className="mt-5 grid gap-4">
               {analytics.courses.map((course) => (
                 <div key={course.courseId}>
@@ -80,7 +80,7 @@ export default async function StudentAnalyticsPage() {
                     />
                   </div>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    {course.completedLectures}/{course.totalLectures} lectures
+                    {course.completedLectures}/{course.totalLectures}টি লেকচার
                   </p>
                 </div>
               ))}
@@ -91,38 +91,38 @@ export default async function StudentAnalyticsPage() {
       <Card className="mt-5" size="sm">
         <CardContent>
           <p className="font-mono text-xs text-muted-foreground">
-            Assessment results
+            মূল্যায়নের ফলাফল
           </p>
-          <h2 className="mt-1 font-heading text-xl">Quiz performance</h2>
+          <h2 className="mt-1 font-heading text-xl">কুইজের ফলাফল</h2>
           {analytics.quizPerformance.length ? (
             <div className="mt-4">
               <QuizPerformanceChart data={analytics.quizPerformance} />
             </div>
           ) : (
             <p className="mt-4 text-sm text-muted-foreground">
-              Complete a quiz to see your scores.
+              আপনার স্কোর দেখতে একটি কুইজ সম্পন্ন করুন।
             </p>
           )}
         </CardContent>
       </Card>
       <div className="mt-5 grid grid-cols-3 gap-3">
         <Metric
-          label="Submitted"
-          note="Assignments"
+          label="জমা দেওয়া"
+          note="অ্যাসাইনমেন্ট"
           value={`${analytics.assignmentsSubmitted}`}
         />
         <Metric
-          label="Graded"
-          note="Assignments"
+          label="মূল্যায়িত"
+          note="অ্যাসাইনমেন্ট"
           value={`${analytics.assignmentsGraded}`}
         />
         <Metric
-          label="Pending"
-          note="Assignments"
+          label="অপেক্ষমাণ"
+          note="অ্যাসাইনমেন্ট"
           value={`${analytics.assignmentsPending}`}
         />
       </div>
-    </>
+    </div>
   )
 }
 

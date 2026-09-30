@@ -17,17 +17,17 @@ const principles = [
   {
     icon: Workflow,
     title: "গুছানো শেখা",
-    body: "Courses move from milestone to module to focused content, so students always know what comes next.",
+    body: "কোর্সগুলো ধাপে ধাপে সাজানো থাকে, তাই শিক্ষার্থীরা সবসময় বুঝতে পারেন এরপর কী শিখতে হবে।",
   },
   {
     icon: CheckCircle2,
     title: "যাচাইকৃত অ্যাক্সেস",
-    body: "Payment status is checked before access is activated, and the right course unlocks after confirmation.",
+    body: "অ্যাক্সেস চালু করার আগে পেমেন্ট যাচাই করা হয়, আর নিশ্চিত হওয়ার পরেই সঠিক কোর্সটি উন্মুক্ত হয়।",
   },
   {
     icon: LockKeyhole,
     title: "নিরাপদ কনটেন্ট ডেলিভারি",
-    body: "Signed video URLs, progress tracking and a visible learner watermark protect the learning experience.",
+    body: "নিরাপদ ভিডিও লিংক, অগ্রগতি ট্র্যাকিং এবং দৃশ্যমান লার্নার ওয়াটারমার্ক শেখার অভিজ্ঞতাকে সুরক্ষিত রাখে।",
   },
 ]
 
@@ -68,13 +68,13 @@ export default function AboutPage() {
               কোর্সের আউটলাইন থেকে সফল সমাপ্তি পর্যন্ত।
             </h2>
             <p className="mt-5 max-w-xl text-sm leading-7 text-muted-foreground">
-              Instructors create milestones, modules, videos, PDFs, quizzes and
-              assignments. Students learn through a focused player, see their
-              progress and receive access only to the course they purchased.
+              মেন্টররা ধাপ, মডিউল, ভিডিও, PDF, কুইজ ও অ্যাসাইনমেন্ট তৈরি করেন।
+              শিক্ষার্থীরা মনোযোগী লার্নিং প্লেয়ারের মাধ্যমে শেখেন, নিজের অগ্রগতি দেখেন
+              এবং শুধুমাত্র কেনা কোর্সেই প্রবেশাধিকার পান।
             </p>
           </div>
           <div className="rounded-2xl bg-card p-6 ring-1 ring-foreground/10">
-            <p className="font-mono text-xs text-primary">Explore Folio</p>
+            <p className="font-mono text-xs text-primary">ফোলিও ঘুরে দেখুন</p>
             <div className="mt-5 grid gap-3">
               <Button asChild>
                 <Link href="/courses">কোর্স দেখুন</Link>
