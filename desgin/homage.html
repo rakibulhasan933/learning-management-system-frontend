@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="bn">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>Folio · বাংলাদেশের অনলাইন কোর্স</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #f5f8f6;
+            --card: #fff;
+            --fg: #10201a;
+            --mut: #5b6b64;
+            --line: #dbe4df;
+            --pri: #0b6b50;
+            --pri-fg: #fff;
+            --soft: #e4f1ea;
+            --red: #c8323c;
+            box-sizing: border-box;
+            padding-top: env(safe-area-inset-top, 0px);
+            padding-bottom: env(safe-area-inset-bottom, 0px)
+        }
+
+        @media (prefers-color-scheme:dark) {
+            :root:not([data-theme="light"]) {
+                --bg: #0d1512;
+                --card: #141f1a;
+                --fg: #e8f0ec;
+                --mut: #94a59d;
+                --line: #24342d;
+                --pri: #3fbf95;
+                --pri-fg: #06231a;
+                --soft: #12302a;
+                --red: #ef6a72
+            }
+        }
+
+        :root[data-theme="dark"] {
+            --bg: #0d1512;
+            --card: #141f1a;
+            --fg: #e8f0ec;
+            --mut: #94a59d;
+            --line: #24342d;
+            --pri: #3fbf95;
+            --pri-fg: #06231a;
+            --soft: #12302a;
+            --red: #ef6a72
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: inherit
+        }
+
+        html {
+            scroll-padding-top: env(safe-area-inset-top, 0px)
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--fg);
+            font-family: "Hind Siliguri", "Noto Sans Bengali", system-ui, sans-serif;
+            line-height: 1.85;
+            font-size: 16px
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none
+        }
+
+        .w {
+            max-width: 1120px;
+            margin: 0 auto;
+            padding: 0 20px
+        }
+
+        nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 64px;
+            border-bottom: 1px solid var(--line)
+        }
+
+        .logo {
+            font-weight: 600;
+            font-size: 22px;
+            letter-spacing: -.01em
+        }
+
+        .logo i {
+            display: inline-block;
+            width: 9px;
+            height: 9px;
+            background: var(--red);
+            border-radius: 50%;
+            margin-left: 3px
+        }
+
+        nav .links {
+            display: flex;
+            gap: 22px;
+            align-items: center;
+            font-size: 15px;
+            color: var(--mut)
+        }
+
+        @media(max-width:640px) {
+            nav .links a.h {
+                display: none
+            }
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 46px;
+            padding: 0 24px;
+            border-radius: 10px;
+            font-weight: 500;
+            font-size: 16px;
+            border: 1px solid var(--line);
+            background: transparent;
+            color: var(--fg);
+            cursor: pointer
+        }
+
+        .btn.p {
+            background: var(--pri);
+            color: var(--pri-fg);
+            border-color: var(--pri)
+        }
+
+        .btn.s {
+            height: 38px;
+            padding: 0 16px;
+            font-size: 14px
+        }
+
+        .btn:focus-visible,
+        a:focus-visible,
+        summary:focus-visible {
+            outline: 2px solid var(--pri);
+            outline-offset: 2px
+        }
+
+        .hero {
+            display: grid;
+            gap: 48px;
+            padding: 64px 0 72px;
+            align-items: center;
+            grid-template-columns: 1fr
+        }
+
+        @media(min-width:960px) {
+            .hero {
+                grid-template-columns: 1fr 420px;
+                gap: 72px;
+                padding: 96px 0
+            }
+        }
+
+        .tag {
+            display: inline-block;
+            font-size: 14px;
+            color: var(--pri);
+            background: var(--soft);
+            padding: 2px 14px;
+            border-radius: 99px;
+            margin-bottom: 22px
+        }
+
+        h1 {
+            font-size: clamp(32px, 5.4vw, 58px);
+            line-height: 1.22;
+            font-weight: 600;
+            margin: 0;
+            letter-spacing: -.01em
+        }
+
+        .lead {
+            color: var(--mut);
+            font-size: 18px;
+            max-width: 34em;
+            margin: 22px 0 0
+        }
+
+        .cta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 32px
+        }
+
+        .note {
+            margin-top: 18px;
+            font-size: 14px;
+            color: var(--mut)
+        }
+
+        .order {
+            position: relative;
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            padding: 24px;
+            box-shadow: 0 20px 50px -28px rgba(11, 107, 80, .45)
+        }
+
+        .order .top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 14px;
+            border-bottom: 1px solid var(--line);
+            font-size: 13px;
+            color: var(--mut)
+        }
+
+        .ok {
+            color: var(--pri);
+            border: 1px solid var(--pri);
+            border-radius: 99px;
+            padding: 0 12px;
+            font-size: 13px
+        }
+
+        .order h3 {
+            font-size: 22px;
+            line-height: 1.4;
+            margin: 18px 0 12px;
+            font-weight: 600
+        }
+
+        .ls {
+            list-style: none;
+            margin: 0 0 16px;
+            padding: 0;
+            font-size: 15px
+        }
+
+        .ls li {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--mut)
+        }
+
+        .ls li.d {
+            color: var(--fg)
+        }
+
+        .ls li::before {
+            content: "";
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--line)
+        }
+
+        .ls li.d::before {
+            background: var(--pri)
+        }
+
+        .pay {
+            background: var(--bg);
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 12px 16px;
+            font-size: 14px
+        }
+
+        .pay div {
+            display: flex;
+            justify-content: space-between
+        }
+
+        .pay b {
+            font-weight: 500
+        }
+
+        .pay code {
+            font-family: ui-monospace, monospace;
+            font-size: 13px
+        }
+
+        .two {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-top: 18px;
+            padding-top: 16px;
+            border-top: 1px solid var(--line)
+        }
+
+        .two small {
+            color: var(--mut);
+            font-size: 13px
+        }
+
+        .two strong {
+            display: block;
+            font-size: 28px;
+            font-weight: 500;
+            line-height: 1.3
+        }
+
+        .bar {
+            height: 5px;
+            background: var(--line);
+            border-radius: 9px;
+            margin-top: 8px;
+            overflow: hidden
+        }
+
+        .bar span {
+            display: block;
+            height: 100%;
+            width: 68%;
+            background: var(--pri)
+        }
+
+        .seal {
+            position: absolute;
+            top: -22px;
+            right: -14px;
+            width: 78px;
+            height: 78px;
+            border-radius: 50%;
+            background: var(--pri);
+            color: var(--pri-fg);
+            display: grid;
+            place-items: center;
+            text-align: center;
+            font-size: 12px;
+            line-height: 1.25;
+            font-weight: 600;
+            transform: rotate(8deg);
+            border: 4px solid var(--bg)
+        }
+
+        .strip {
+            background: var(--card);
+            border-block: 1px solid var(--line)
+        }
+
+        .strip .w {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px 24px;
+            align-items: center;
+            justify-content: space-between;
+            padding-block: 22px
+        }
+
+        .strip p {
+            margin: 0;
+            font-weight: 500
+        }
+
+        .chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px
+        }
+
+        .chip {
+            background: var(--bg);
+            border: 1px solid var(--line);
+            border-radius: 99px;
+            padding: 2px 16px;
+            font-size: 14px
+        }
+
+        .chip em {
+            font-style: normal;
+            color: var(--mut);
+            font-size: 12px;
+            margin-left: 6px
+        }
+
+        .stats {
+            display: grid;
+            gap: 1px;
+            background: var(--line);
+            border-bottom: 1px solid var(--line)
+        }
+
+        @media(min-width:720px) {
+            .stats {
+                grid-template-columns: repeat(3, 1fr)
+            }
+        }
+
+        .stats div {
+            background: var(--bg);
+            padding: 36px 24px
+        }
+
+        .stats b {
+            display: block;
+            font-size: 34px;
+            line-height: 1.3;
+            color: var(--pri);
+            font-weight: 600
+        }
+
+        .stats span {
+            color: var(--mut);
+            font-size: 15px
+        }
+
+        section.s {
+            padding: 80px 0
+        }
+
+        .sh {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: end;
+            gap: 16px
+        }
+
+        .sh small {
+            color: var(--pri);
+            font-size: 15px
+        }
+
+        h2 {
+            font-size: clamp(26px, 3.6vw, 38px);
+            line-height: 1.35;
+            font-weight: 600;
+            margin: 6px 0 0;
+            max-width: 20em
+        }
+
+        .g {
+            display: grid;
+            gap: 20px;
+            margin-top: 44px
+        }
+
+        @media(min-width:640px) {
+            .g.c4 {
+                grid-template-columns: repeat(2, 1fr)
+            }
+        }
+
+        @media(min-width:960px) {
+            .g.c4 {
+                grid-template-columns: repeat(4, 1fr)
+            }
+
+            .g.c3 {
+                grid-template-columns: repeat(3, 1fr)
+            }
+        }
+
+        @media(min-width:640px) and (max-width:959px) {
+            .g.c3 {
+                grid-template-columns: repeat(2, 1fr)
+            }
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            padding: 24px
+        }
+
+        .card h3 {
+            font-size: 19px;
+            line-height: 1.5;
+            margin: 0 0 6px;
+            font-weight: 600
+        }
+
+        .card p {
+            margin: 0;
+            color: var(--mut);
+            font-size: 15px
+        }
+
+        .band {
+            background: var(--card);
+            border-block: 1px solid var(--line)
+        }
+
+        .course {
+            padding: 0;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column
+        }
+
+        .th {
+            aspect-ratio: 16/9;
+            display: flex;
+            align-items: flex-end;
+            padding: 14px 18px;
+            color: #fff;
+            font-weight: 600;
+            font-size: 20px;
+            line-height: 1.3
+        }
+
+        .th.a {
+            background: linear-gradient(135deg, #0b6b50, #0f3d33)
+        }
+
+        .th.b {
+            background: linear-gradient(135deg, #1c5f7a, #12303d)
+        }
+
+        .th.c {
+            background: linear-gradient(135deg, #8b2a33, #3a1418)
+        }
+
+        .cb {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            flex: 1
+        }
+
+        .cb .cat {
+            color: var(--pri);
+            font-size: 14px
+        }
+
+        .cb .meta {
+            font-size: 13px;
+            color: var(--mut)
+        }
+
+        .cb .f {
+            margin-top: auto;
+            padding-top: 14px;
+            border-top: 1px solid var(--line);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 20px;
+            font-weight: 600
+        }
+
+        .f s {
+            font-size: 14px;
+            color: var(--mut);
+            font-weight: 400;
+            margin-left: 8px
+        }
+
+        ol.st {
+            list-style: none;
+            padding: 0;
+            margin: 44px 0 0;
+            display: grid;
+            gap: 32px
+        }
+
+        @media(min-width:720px) {
+            ol.st {
+                grid-template-columns: repeat(4, 1fr)
+            }
+        }
+
+        ol.st li {
+            border-top: 2px solid var(--pri);
+            padding-top: 14px
+        }
+
+        ol.st li:nth-child(n+3) {
+            border-color: color-mix(in srgb, var(--pri) 30%, transparent)
+        }
+
+        ol.st small {
+            color: var(--mut);
+            font-size: 14px
+        }
+
+        ol.st h3 {
+            margin: 6px 0 4px;
+            font-size: 19px;
+            line-height: 1.5;
+            font-weight: 600
+        }
+
+        ol.st p {
+            margin: 0;
+            color: var(--mut);
+            font-size: 15px
+        }
+
+        .faq {
+            display: grid;
+            gap: 40px
+        }
+
+        @media(min-width:900px) {
+            .faq {
+                grid-template-columns: .85fr 1.15fr
+            }
+        }
+
+        details {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 12px
+        }
+
+        summary {
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 17px;
+            line-height: 1.6;
+            list-style: none;
+            display: flex;
+            justify-content: space-between;
+            gap: 12px
+        }
+
+        summary::after {
+            content: "+";
+            color: var(--pri);
+            font-size: 22px;
+            line-height: 1.3
+        }
+
+        details[open] summary::after {
+            content: "–"
+        }
+
+        details p {
+            margin: 10px 0 0;
+            color: var(--mut);
+            font-size: 15px
+        }
+
+        .fin {
+            text-align: center;
+            padding: 88px 0;
+            border-top: 1px solid var(--line)
+        }
+
+        .fin h2 {
+            margin: 0 auto
+        }
+
+        .fin p {
+            color: var(--mut);
+            max-width: 30em;
+            margin: 16px auto 0
+        }
+
+        .fin .cta {
+            justify-content: center
+        }
+
+        footer {
+            border-top: 1px solid var(--line);
+            padding: 24px 0;
+            color: var(--mut);
+            font-size: 14px;
+            text-align: center
+        }
+    </style>
+</head>
+
+<body>
+    <div class="w">
+        <nav>
+            <a class="logo" href="#">Folio<i></i></a>
+            <div class="links"><a class="h" href="#courses">কোর্স</a><a class="h" href="#steps">কীভাবে কাজ করে</a><a
+                    class="h" href="#faq">প্রশ্নোত্তর</a><a class="btn s p" href="#">অ্যাকাউন্ট খুলুন</a></div>
+        </nav>
+
+        <header class="hero">
+            <div>
+                <span class="tag">বাংলাদেশের শিক্ষার্থীদের জন্য</span>
+                <h1>শিখুন গুছিয়ে, পেমেন্ট করুন নিজের মোবাইল ব্যাংকিং থেকে।</h1>
+                <p class="lead">সাজানো কোর্স, bKash ও Nagad এ সহজ পেমেন্ট, আর সুরক্ষিত ভিডিও ক্লাস। প্রতিটি এনরোলমেন্টের
+                    একটি যাচাইকৃত রেকর্ড থাকে।</p>
+                <div class="cta"><a class="btn p" href="#">অ্যাকাউন্ট খুলুন</a><a class="btn" href="#courses">কোর্স
+                        দেখুন</a></div>
+                <p class="note">পেমেন্ট করুন, TrxID জমা দিন, যাচাইয়ের পর ক্লাস চালু।</p>
+            </div>
+            <div class="order">
+                <div class="seal">যাচাই<br>সম্পন্ন</div>
+                <div class="top"><span>ORD-482913</span><span class="ok">যাচাই সম্পন্ন</span></div>
+                <h3>ফ্রিল্যান্সিং ওয়েব ডেভেলপমেন্ট</h3>
+                <ul class="ls">
+                    <li class="d">ক্লাস ১ · রিকোয়েস্ট লাইফসাইকেল</li>
+                    <li class="d">ক্লাস ২ · ক্যাশিং স্ট্র্যাটেজি</li>
+                    <li>ক্লাস ৩ · কিউ ও ওয়ার্কার</li>
+                </ul>
+                <div class="pay">
+                    <div><span>পেমেন্ট মাধ্যম</span><b>bKash</b></div>
+                    <div><span>TrxID</span><code>9K4H2XQ7LM</code></div>
+                </div>
+                <div class="two">
+                    <div><small>অগ্রগতি</small><strong>৬৮%</strong>
+                        <div class="bar"><span></span></div>
+                    </div>
+                    <div><small>পরিশোধিত</small><strong>৳৪,৫০০</strong></div>
+                </div>
+            </div>
+        </header>
+    </div>
+
+    <div class="strip">
+        <div class="w">
+            <p>যেভাবে পেমেন্ট করতে পারবেন</p>
+            <div class="chips"><span class="chip">bKash<em>Send Money</em></span><span class="chip">Nagad<em>Send
+                        Money</em></span><span class="chip">Rocket<em>Send Money</em></span><span class="chip">ব্যাংক
+                    ট্রান্সফার</span></div>
+        </div>
+    </div>
+
+    <div class="stats">
+        <div><b>১০০%</b><span>হাতে যাচাই করা পেমেন্ট</span></div>
+        <div><b>TrxID সহ রেকর্ড</b><span>প্রতি এনরোলমেন্টে ১টি</span></div>
+        <div><b>সুরক্ষিত</b><span>ডাউনলোড-নিরাপদ ভিডিও ক্লাস</span></div>
+    </div>
+
+    <section class="s">
+        <div class="w">
+            <div class="sh">
+                <div><small>ক্যাটাগরি</small>
+                    <h2>আপনার লক্ষ্য অনুযায়ী কোর্স বেছে নিন।</h2>
+                </div>
+            </div>
+            <div class="g c4">
+                <div class="card">
+                    <h3>ফ্রিল্যান্সিং ও আইটি</h3>
+                    <p>ওয়েব, ডিজাইন, ডিজিটাল মার্কেটিং। আন্তর্জাতিক মার্কেটপ্লেসের জন্য তৈরি হন।</p>
+                </div>
+                <div class="card">
+                    <h3>ভর্তি ও একাডেমিক</h3>
+                    <p>HSC, বিশ্ববিদ্যালয় ভর্তি ও বিষয়ভিত্তিক কোর্স, ধাপে ধাপে সাজানো।</p>
+                </div>
+                <div class="card">
+                    <h3>চাকরি ও BCS প্রস্তুতি</h3>
+                    <p>সিলেবাস অনুযায়ী ক্লাস, মডেল টেস্ট ও প্রগ্রেস ট্র্যাকিং।</p>
+                </div>
+                <div class="card">
+                    <h3>ভাষা ও ক্যারিয়ার</h3>
+                    <p>IELTS, স্পোকেন ইংলিশ, CV ও ইন্টারভিউ প্রস্তুতি।</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="s band" id="courses">
+        <div class="w">
+            <div class="sh">
+                <div><small>জনপ্রিয় কোর্স</small>
+                    <h2>শুরু করুন এমন কিছু দিয়ে যা শেষ করার মতো।</h2>
+                </div><a class="btn" href="#">সব কোর্স দেখুন</a>
+            </div>
+            <div class="g c3">
+                <div class="card course">
+                    <div class="th a">ফ্রিল্যান্সিং ওয়েব ডেভেলপমেন্ট</div>
+                    <div class="cb"><span class="cat">ফ্রিল্যান্সিং ও আইটি</span><span class="meta">৪২ ক্লাস · বাংলা ·
+                            শুরু থেকে</span>
+                        <p>HTML থেকে শুরু করে ক্লায়েন্টের প্রজেক্ট ডেলিভারি পর্যন্ত।</p>
+                        <div class="f"><span>৳৪,৫০০<s>৳৬,০০০</s></span><span aria-hidden="true">↗</span></div>
+                    </div>
+                </div>
+                <div class="card course">
+                    <div class="th b">IELTS ৭+ প্রস্তুতি</div>
+                    <div class="cb"><span class="cat">ভাষা ও ক্যারিয়ার</span><span class="meta">৩০ ক্লাস · মক
+                            টেস্টসহ</span>
+                        <p>চারটি মডিউলের জন্য আলাদা কৌশল ও সাপ্তাহিক অনুশীলন।</p>
+                        <div class="f"><span>৳৩,২০০</span><span aria-hidden="true">↗</span></div>
+                    </div>
+                </div>
+                <div class="card course">
+                    <div class="th c">BCS প্রিলি মডেল টেস্ট</div>
+                    <div class="cb"><span class="cat">চাকরি ও BCS প্রস্তুতি</span><span class="meta">৬০ টেস্ট ·
+                            সিলেবাসভিত্তিক</span>
+                        <p>প্রতিটি বিষয়ের পর ফলাফল বিশ্লেষণ ও দুর্বল অংশ চিহ্নিতকরণ।</p>
+                        <div class="f"><span>ফ্রি</span><span aria-hidden="true">↗</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="s" id="steps">
+        <div class="w">
+            <div class="sh">
+                <div><small>এনরোলমেন্ট</small>
+                    <h2>ব্রাউজ থেকে ক্লাস পর্যন্ত চার ধাপ।</h2>
+                </div>
+            </div>
+            <ol class="st">
+                <li><small>ধাপ ১</small>
+                    <h3>কোর্স বেছে নিন</h3>
+                    <p>দাম শুরু থেকেই টাকায় দেখা যাবে, লুকানো চার্জ নেই।</p>
+                </li>
+                <li><small>ধাপ ২</small>
+                    <h3>কুপন দিন</h3>
+                    <p>সক্রিয় কোড বসালে চূড়ান্ত টাকার অঙ্ক দেখতে পাবেন।</p>
+                </li>
+                <li><small>ধাপ ৩</small>
+                    <h3>bKash / Nagad এ পাঠান</h3>
+                    <p>অর্ডারে দেখানো নম্বরে ঠিক ওই অঙ্ক পাঠিয়ে TrxID জমা দিন।</p>
+                </li>
+                <li><small>ধাপ ৪</small>
+                    <h3>যাচাইয়ের পর ক্লাস চালু</h3>
+                    <p>পেমেন্ট যাচাই হলেই কোর্স খুলে যায়, ফোনে বা ল্যাপটপে।</p>
+                </li>
+            </ol>
+        </div>
+    </section>
+
+    <section class="s band" id="faq">
+        <div class="w faq">
+            <div><small style="color:var(--pri)">জানার কথা</small>
+                <h2>এনরোল করার আগে পরিষ্কার হয়ে নিন।</h2>
+                <p style="color:var(--mut);max-width:26em">পেমেন্ট যাচাই, কোর্স অ্যাক্সেস ও ভিডিও নিরাপত্তা কীভাবে কাজ
+                    করে জেনে নিন।</p>
+            </div>
+            <div>
+                <details open>
+                    <summary>কখন কোর্সে ঢুকতে পারব?</summary>
+                    <p>পেমেন্ট যাচাই হওয়ার পর। যাচাই না হওয়া পর্যন্ত অর্ডার পেন্ডিং থাকে এবং কোর্স লক থাকে।</p>
+                </details>
+                <details>
+                    <summary>bKash বা Nagad এ পেমেন্ট করলে কীভাবে যাচাই হয়?</summary>
+                    <p>অ্যাপের বাইরে পেমেন্ট করে TrxID ও সময় জমা দেবেন। আমাদের টিম মিলিয়ে দেখে অর্ডার Paid করলে
+                        অ্যাক্সেস খোলে।</p>
+                </details>
+                <details>
+                    <summary>ভুল অঙ্ক পাঠিয়ে ফেললে কী হবে?</summary>
+                    <p>সাপোর্টে অর্ডার নম্বর ও TrxID পাঠান। আমরা ঘাটতি বা অতিরিক্ত অঙ্ক মিটিয়ে দেব।</p>
+                </details>
+                <details>
+                    <summary>কুপন কি চেকআউটেই দিতে হবে?</summary>
+                    <p>হ্যাঁ। পেমেন্টের আগে কুপন দিন, তাহলে অর্ডারে ছাড়ের পরের অঙ্ক লেখা থাকবে।</p>
+                </details>
+            </div>
+        </div>
+    </section>
+
+    <section class="fin">
+        <div class="w">
+            <h2>আজই আপনার ওয়ার্কস্পেস খুলুন এবং শেখা শুরু করুন।</h2>
+            <p>অ্যাকাউন্ট খোলা বিনামূল্যে। পেমেন্ট নিশ্চিত হলেই কোর্সে ঢুকতে পারবেন।</p>
+            <div class="cta"><a class="btn p" href="#">অ্যাকাউন্ট খুলুন</a><a class="btn" href="#courses">কোর্স
+                    দেখুন</a></div>
+        </div>
+    </section>
+    <footer>© Folio · বাংলাদেশ</footer>
+</body>
+
+</html>

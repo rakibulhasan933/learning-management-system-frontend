@@ -1,0 +1,81 @@
+import type { AdminEnrollmentListResponse } from "@/lib/types"
+import { authenticatedApiFetch } from "@/lib/api-client"
+import { setEnrollmentStatusAction } from "@/app/dashboard/admin/actions"
+import { PageHeader } from "@/components/ui/page-header"
+import { Card, CardContent } from "@/components/ui/card"
+import { SubmitButton } from "@/components/submit-button"
+
+export const dynamic = "force-dynamic"
+export default async function AdminEnrollmentsPage() {
+  const { enrollments } =
+    await authenticatedApiFetch<AdminEnrollmentListResponse>(
+      "/admin/enrollments",
+      { cache: "no-store" }
+    )
+  return (
+    <>
+      <PageHeader
+        eyebrow="Admin dashboard · Access"
+        title="Enrollment management"
+        lede="See every student-course access record and revoke or reactivate access when needed."
+      />
+      <Card className="mt-8">
+        <CardContent>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[680px] text-left text-sm">
+              <thead className="border-b border-border text-muted-foreground">
+                <tr>
+                  <th className="py-3">Student</th>
+                  <th>Course</th>
+                  <th>Status</th>
+                  <th>Enrolled</th>
+                  <th />
+                </tr>
+              </thead>
+              <tbody>
+                {enrollments.map((item) => (
+                  <tr className="border-b border-border/60" key={item.id}>
+                    <td className="py-4">
+                      {item.studentName || item.studentEmail}
+                      <br />
+                      <span className="text-xs text-muted-foreground">
+                        {item.studentEmail}
+                      </span>
+                    </td>
+                    <td>{item.courseTitle}</td>
+                    <td className="capitalize">{item.status}</td>
+                    <td>{new Date(item.enrolledAt).toLocaleDateString()}</td>
+                    <td>
+                      <form action={setEnrollmentStatusAction}>
+                        <input
+                          name="enrollmentId"
+                          type="hidden"
+                          value={item.id}
+                        />
+                        <input
+                          name="action"
+                          type="hidden"
+                          value={
+                            item.status === "active" ? "revoke" : "activate"
+                          }
+                        />
+                        <SubmitButton pendingLabel="..." variant="outline">
+                          {item.status === "active" ? "Revoke" : "Reactivate"}
+                        </SubmitButton>
+                      </form>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {enrollments.length === 0 && (
+              <p className="py-6 text-sm text-muted-foreground">
+                No enrollments found.
+              </p>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    </>
+  )
+}
