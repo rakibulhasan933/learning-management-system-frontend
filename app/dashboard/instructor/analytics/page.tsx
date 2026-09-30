@@ -14,26 +14,26 @@ export default async function InstructorAnalyticsPage() {
       { cache: "no-store" }
     )
   return (
-    <div className="space-y-8">
+    <div className="instructor-page instructor-analytics-page space-y-8">
       <PageHeader
-        eyebrow="Instructor dashboard"
-        lede="Track enrollment, completion, and course learning performance."
-        title="Analytics"
+        eyebrow="ইন্সট্রাক্টর ড্যাশবোর্ড"
+        lede="এনরোলমেন্ট, সম্পন্নের হার এবং কোর্সের শেখার ফলাফল বিশ্লেষণ করুন।"
+        title="অ্যানালিটিক্স"
       />
       <div className="grid gap-3 sm:grid-cols-3">
         <StatTile
-          label="Active students"
+          label="সক্রিয় শিক্ষার্থী"
           value={overview.totals.activeEnrollmentCount}
         />
         <StatTile
-          label="Completion rate"
+          label="সম্পন্নের হার"
           value={`${overview.totals.completionRate}%`}
         />
-        <StatTile label="Courses" value={overview.totals.courseCount} />
+        <StatTile label="কোর্স" value={overview.totals.courseCount} />
       </div>
       <Card>
         <CardContent>
-          <h2 className="font-heading text-2xl">Course performance</h2>
+          <h2 className="font-heading text-2xl">কোর্সের ফলাফল</h2>
           <div className="mt-5 grid gap-3">
             {overview.courses.map((course) => (
               <div
@@ -43,12 +43,12 @@ export default async function InstructorAnalyticsPage() {
                 <div>
                   <p>{course.title}</p>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    {course.enrollmentCount} enrollments ·{" "}
-                    {course.totalLectureCount} lectures
+                    {course.enrollmentCount} এনরোলমেন্ট ·{" "}
+                    {course.totalLectureCount} টি লেকচার
                   </p>
                 </div>
                 <span className="font-mono text-sm text-primary">
-                  {course.completionRate}% complete
+                  {course.completionRate}% সম্পন্ন
                 </span>
               </div>
             ))}

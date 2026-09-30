@@ -46,8 +46,8 @@ export default async function EditInstructorCoursePage({
   ])
 
   return (
-    <main className="min-h-screen bg-background text-foreground">
-      <section className="mx-auto grid max-w-5xl gap-5">
+    <main className="instructor-course-editor min-h-screen bg-background text-foreground">
+      <section className="mx-auto grid w-full max-w-7xl gap-6 px-4 py-6 sm:px-6 lg:px-10">
         <div className="space-y-3">
           <ProgressThread />
           <Link
@@ -94,9 +94,7 @@ export default async function EditInstructorCoursePage({
                 >
                   <input name="courseId" type="hidden" value={course.id} />
                   <p className="text-sm text-muted-foreground">
-                    Delete this course draft and its sections. Use this only for
-                    courses that should be permanently removed. This action
-                    cannot be undone.
+                    Delete this course draft and its sections. Use this only for courses that should be permanently removed. This action cannot be undone.
                   </p>
                   <SubmitButton
                     className="w-full sm:w-fit"

@@ -130,7 +130,7 @@ export function CourseWorkspaceStepper({ courseId }: { courseId: string }) {
             disabled={activeIndex === steps.length - 1}
             onClick={() => openStep(activeIndex + 1)}
           >
-            Next
+Next
             <ChevronRight className="size-4" />
           </Button>
         </div>

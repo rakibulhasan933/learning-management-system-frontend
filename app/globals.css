@@ -667,6 +667,32 @@
 .courses-hero > * { position: relative; z-index: 1; }
 .course-trust-pill { border: 1px solid color-mix(in srgb, var(--primary) 25%, var(--border)); border-radius: 999px; padding: .55rem .8rem; background: color-mix(in srgb, var(--background) 32%, transparent); }
 .dashboard-shell { background-image: linear-gradient(to bottom, color-mix(in srgb, var(--primary) 3%, transparent), transparent 32rem); }
+.instructor-page { position: relative; }
+.instructor-course-workspace, .instructor-course-editor { position: relative; }
+.instructor-course-workspace::before, .instructor-course-editor::before { position: absolute; top: -4rem; right: -3rem; width: 17rem; height: 17rem; border: 1px solid color-mix(in srgb, var(--primary) 17%, transparent); border-radius: 50%; content: ""; pointer-events: none; box-shadow: 0 0 0 2rem color-mix(in srgb, var(--primary) 4%, transparent), 0 0 0 5rem color-mix(in srgb, var(--primary) 2%, transparent); }
+.instructor-course-workspace > *, .instructor-course-editor > * { position: relative; z-index: 1; }
+.instructor-course-workspace h1, .instructor-course-editor h1 { max-width: 24ch; text-wrap: balance; }
+.instructor-course-editor > section { isolation: isolate; }
+.instructor-course-editor .course-edit-workspace { display: grid; gap: 1rem; }
+.instructor-course-editor [role="tablist"] { position: sticky; top: 5rem; z-index: 10; backdrop-filter: blur(14px); }
+.instructor-course-editor .ProseMirror, .instructor-course-editor textarea, .instructor-course-editor input { font-size: .95rem; }
+@media (min-width: 1024px) { .instructor-course-editor .course-edit-workspace { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 640px) { .instructor-course-editor > section { padding-top: 1rem; } .instructor-course-editor [role="tablist"] { position: static; } }
+.instructor-course-workspace { width: 100%; max-width: 80rem; margin-inline: auto; padding-inline: clamp(1rem, 3vw, 2.5rem); }
+.instructor-course-workspace section, .instructor-course-editor section { border-color: color-mix(in srgb, var(--primary) 16%, var(--border)); }
+.instructor-course-workspace section { box-shadow: 0 28px 70px -52px rgb(0 0 0 / .9), inset 0 1px 0 rgb(255 255 255 / .04); }
+@media (max-width: 640px) { .instructor-course-workspace { padding-inline: 1rem; } }
+.instructor-course-workspace [aria-labelledby="course-steps-title"] > div:last-child, .instructor-course-editor [role="tablist"] { box-shadow: inset 0 1px 0 rgb(255 255 255 / .04), 0 24px 55px -42px rgb(0 0 0 / .85); }
+.instructor-course-editor .rounded-3xl { border-color: color-mix(in srgb, var(--primary) 18%, var(--border)); box-shadow: 0 24px 60px -48px rgb(0 0 0 / .9); }
+@media (max-width: 640px) { .instructor-course-workspace::before, .instructor-course-editor::before { width: 10rem; height: 10rem; top: -2rem; right: -5rem; } }
+.instructor-page::before { position: absolute; top: -5rem; right: -4rem; width: 18rem; height: 18rem; border: 1px solid color-mix(in srgb, var(--primary) 17%, transparent); border-radius: 50%; content: ""; pointer-events: none; box-shadow: 0 0 0 2rem color-mix(in srgb, var(--primary) 4%, transparent), 0 0 0 5rem color-mix(in srgb, var(--primary) 2%, transparent); }
+.instructor-page > * { position: relative; z-index: 1; }
+.instructor-page [data-slot="card"], .instructor-page .interactive-card { border-color: color-mix(in srgb, var(--primary) 15%, var(--border)); background: color-mix(in srgb, var(--card) 88%, transparent); box-shadow: inset 0 1px 0 rgb(255 255 255 / .04); transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease; }
+.instructor-page [data-slot="card"]:hover, .instructor-page .interactive-card:hover { transform: translateY(-3px); border-color: color-mix(in srgb, var(--primary) 40%, var(--border)); box-shadow: 0 20px 45px -34px rgb(0 0 0 / .9); }
+.instructor-page h1, .instructor-page h2 { text-wrap: balance; }
+.instructor-courses-page > div.mt-12 { margin-top: 2rem; }
+@media (max-width: 640px) { .instructor-page::before { width: 11rem; height: 11rem; top: -2rem; right: -5rem; } .instructor-page { padding-bottom: 1rem; } }
+@media (prefers-reduced-motion: reduce) { .instructor-page [data-slot="card"], .instructor-page .interactive-card { transition: none; } .instructor-page [data-slot="card"]:hover, .instructor-page .interactive-card:hover { transform: none; } }
 .dashboard-shell header { box-shadow: 0 12px 34px -30px rgb(0 0 0 / .9); }
 .dashboard-shell aside { background: color-mix(in srgb, var(--card) 78%, transparent); }
 .dashboard-shell main, .dashboard-shell [role="main"] { animation: dashboard-enter .45s ease both; }

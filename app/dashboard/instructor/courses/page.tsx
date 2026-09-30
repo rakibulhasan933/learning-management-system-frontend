@@ -18,21 +18,21 @@ export default async function InstructorCoursesPage() {
   )
 
   return (
-    <>
+    <div className="instructor-page instructor-courses-page">
       <PageHeader
         action={
           <Button asChild>
             <Link href="/dashboard/instructor/courses/new">
               <Plus className="size-3.5" />
-              Create course
+              নতুন কোর্স তৈরি করুন
             </Link>
           </Button>
         }
-        eyebrow="Instructor courses"
+        eyebrow="ইন্সট্রাক্টর · কোর্স"
         lede={`${data.courses.length} ${
           data.courses.length === 1 ? "course" : "courses"
         } in your catalog. Open one to edit its outline, lectures, and pricing.`}
-        title="Manage your courses"
+        title="আপনার কোর্স পরিচালনা করুন"
       />
 
       {data.courses.length === 0 ? (
@@ -41,14 +41,14 @@ export default async function InstructorCoursesPage() {
             <Button asChild variant="outline">
               <Link href="/dashboard/instructor/courses/new">
                 <Plus className="size-3.5" />
-                Create course
+                নতুন কোর্স তৈরি করুন
               </Link>
             </Button>
           }
           className="mt-12"
-          description="Create your first draft to start building."
+          description="আপনার প্রথম ড্রাফট তৈরি করে শেখানো শুরু করুন।"
           icon={<BookOpen />}
-          title="No courses yet"
+          title="এখনও কোনো কোর্স নেই"
         />
       ) : (
         <div className="mt-12 grid gap-4">
@@ -84,6 +84,6 @@ export default async function InstructorCoursesPage() {
           ))}
         </div>
       )}
-    </>
+    </div>
   )
 }

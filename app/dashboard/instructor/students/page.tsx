@@ -26,11 +26,11 @@ export default async function InstructorStudentsPage() {
   )
 
   return (
-    <div className="space-y-8">
+    <div className="instructor-page instructor-students-page space-y-8">
       <PageHeader
-        eyebrow="Instructor dashboard"
-        lede="See enrolled students, progress, enrollment status, and last activity."
-        title="Students"
+        eyebrow="ইন্সট্রাক্টর ড্যাশবোর্ড"
+        lede="এনরোল করা শিক্ষার্থী, অগ্রগতি, এনরোলমেন্টের অবস্থা এবং সর্বশেষ কার্যক্রম দেখুন।"
+        title="শিক্ষার্থীরা"
       />
       <div className="grid gap-5">
         {groups.map(({ course, response }) => (
@@ -44,13 +44,13 @@ export default async function InstructorStudentsPage() {
                   <h2 className="mt-1 font-heading text-2xl">{course.title}</h2>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  {response.metrics.completionRate}% average completion
+                  {response.metrics.completionRate}% গড় সম্পন্নের হার
                 </p>
               </div>
               <div className="mt-5 grid gap-2">
                 {response.students.length === 0 ? (
                   <p className="text-sm text-muted-foreground">
-                    No enrolled students yet.
+                    এখনও কোনো শিক্ষার্থী এনরোল করেনি।
                   </p>
                 ) : (
                   response.students.map((student) => (
@@ -70,7 +70,7 @@ export default async function InstructorStudentsPage() {
                       <span className="text-xs text-muted-foreground">
                         {student.lastWatchedAt
                           ? formatDateTime(student.lastWatchedAt)
-                          : "No activity yet"}
+                          : "এখনও কোনো কার্যক্রম নেই"}
                       </span>
                     </div>
                   ))
