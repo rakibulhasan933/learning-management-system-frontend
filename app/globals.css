@@ -671,6 +671,12 @@
 }
 
 /* Bangladesh-first LMS marketplace surfaces */
+.payment-checkout { background: radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--primary) 9%, #f1f5f9), #f1f5f9 42%); }
+.payment-card { box-shadow: 0 30px 80px -42px rgb(15 23 42 / .45), 0 0 0 1px rgb(15 23 42 / .05); }
+.payment-card form > div[style] { position: relative; }
+.payment-card form > div[style]::before { position: absolute; top: -4rem; right: -4rem; width: 12rem; height: 12rem; border: 1px solid rgb(255 255 255 / .2); border-radius: 50%; content: ""; pointer-events: none; }
+.payment-card form > div[style] > * { position: relative; z-index: 1; }
+.payment-card input:focus { box-shadow: 0 0 0 4px rgb(255 255 255 / .22); }
 .courses-page { position: relative; isolation: isolate; }
 .courses-page::before { position: fixed; top: 8rem; left: 50%; width: 42rem; height: 42rem; border: 1px solid color-mix(in srgb, var(--primary) 7%, transparent); border-radius: 50%; content: ""; pointer-events: none; transform: translateX(8%); box-shadow: 0 0 0 3rem color-mix(in srgb, var(--primary) 2%, transparent), 0 0 0 8rem color-mix(in srgb, var(--primary) 1%, transparent); }
 .courses-page > section { position: relative; z-index: 1; }
