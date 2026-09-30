@@ -23,6 +23,7 @@ function FloatingInput({
   id,
   label,
   type,
+  autoComplete,
   ...props
 }: FloatingInputProps) {
   const inputId = React.useId()
@@ -51,14 +52,6 @@ function FloatingInput({
         id={resolvedId}
         placeholder=" "
         type={resolvedType}
-        autoComplete={
-          props.autoComplete ??
-          (isPassword
-            ? "current-password"
-            : type === "email"
-              ? "email"
-              : undefined)
-        }
         className={cn(
           "peer h-12 rounded-2xl border-border bg-input/20 px-2 text-base text-foreground placeholder:text-transparent focus-visible:border-primary focus-visible:ring-[3px] focus-visible:ring-primary/20 md:text-sm",
           icon && "pl-11",
@@ -68,6 +61,14 @@ function FloatingInput({
           className
         )}
         {...props}
+        autoComplete={
+          autoComplete ??
+          (isPassword
+            ? "current-password"
+            : type === "email"
+              ? "email"
+              : undefined)
+        }
       />
 
       <Label
