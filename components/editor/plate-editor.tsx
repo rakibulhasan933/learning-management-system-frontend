@@ -28,7 +28,7 @@ export function PlateEditor() {
 
 const value = normalizeStaticValue([
   {
-    children: [{ text: 'Welcome to the Plate Playground!' }],
+    children: [{ text: 'Introduction to Web Development' }],
     type: 'h1',
   },
   {
