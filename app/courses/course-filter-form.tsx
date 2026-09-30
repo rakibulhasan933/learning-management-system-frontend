@@ -27,11 +27,11 @@ interface CourseFilterFormProps {
 }
 
 const levelOptions: Array<{ label: string; value: CourseLevel | "" }> = [
-  { label: "Any level", value: "" },
-  { label: "Beginner", value: "beginner" },
-  { label: "Intermediate", value: "intermediate" },
-  { label: "Advanced", value: "advanced" },
-  { label: "All levels", value: "all_levels" },
+  { label: "যেকোনো স্তর", value: "" },
+  { label: "শুরুর স্তর", value: "beginner" },
+  { label: "মাঝারি স্তর", value: "intermediate" },
+  { label: "অ্যাডভান্সড", value: "advanced" },
+  { label: "সব স্তর", value: "all_levels" },
 ]
 
 export function CourseFilterForm({ defaults, categories }: CourseFilterFormProps) {
@@ -69,21 +69,21 @@ export function CourseFilterForm({ defaults, categories }: CourseFilterFormProps
         <form className="grid gap-3" onSubmit={handleSubmit}>
           <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
             <SlidersHorizontal className="size-3.5 text-primary" />
-            Refine the catalog
+            কোর্স খুঁজে নিন
           </div>
           <div className="relative">
             <Search className="pointer-events-none absolute top-1/2 left-3 size-3.5 -translate-y-1/2 text-muted-foreground" />
             <FloatingInput
               className="h-10 pl-9 text-sm"
               defaultValue={defaults.q}
-              label="Search courses"
+              label="কোর্স খুঁজুন"
               name="q"
             />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <Select defaultValue={defaults.level ?? ""} name="level">
               <SelectTrigger className="h-10 w-full text-sm">
-                <SelectValue placeholder="Any level" />
+                <SelectValue placeholder="যেকোনো স্তর" />
               </SelectTrigger>
               <SelectContent>
                 {levelOptions.map((option) => (
@@ -95,10 +95,10 @@ export function CourseFilterForm({ defaults, categories }: CourseFilterFormProps
             </Select>
             <Select defaultValue={defaults.category ?? "all"} name="category">
               <SelectTrigger className="h-10 w-full text-sm">
-                <SelectValue placeholder="Any category" />
+                <SelectValue placeholder="যেকোনো ক্যাটাগরি" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Any category</SelectItem>
+                <SelectItem value="all">যেকোনো ক্যাটাগরি</SelectItem>
                 {categories.map((category) => (
                   <SelectItem key={category} value={category}>
                     {category.replaceAll("-", " ")}
@@ -110,7 +110,7 @@ export function CourseFilterForm({ defaults, categories }: CourseFilterFormProps
           <FloatingInput
             className="h-10 text-sm"
             defaultValue={defaults.maxPrice}
-            label="Maximum price"
+            label="সর্বোচ্চ মূল্য"
             min="0"
             name="maxPrice"
             type="number"
@@ -122,7 +122,7 @@ export function CourseFilterForm({ defaults, categories }: CourseFilterFormProps
             type="submit"
           >
             {isPending ? <Loader2 className="size-4 animate-spin" /> : null}
-            {isPending ? "Applying filters..." : "Apply filters"}
+            {isPending ? "ফিল্টার প্রয়োগ হচ্ছে..." : "ফিল্টার দেখুন"}
           </Button>
         </form>
       </CardContent>

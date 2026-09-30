@@ -72,6 +72,7 @@ export default async function CoursesPage({ searchParams }: CoursesPageProps) {
               <h1 className="mt-3 font-heading text-4xl leading-[1.05] tracking-tight sm:text-5xl">
                 শিখুন আজ, এগিয়ে থাকুন আগামীকাল
               </h1>
+              <div className="mt-4 flex items-center gap-2 text-sm text-primary"><span className="size-2 rounded-full bg-primary shadow-[0_0_0_5px_color-mix(in_srgb,var(--primary)_12%,transparent)]" /> নতুন ব্যাচে ভর্তি চলছে</div>
               <p className="mt-5 max-w-xl text-base leading-7 text-muted-foreground">
                 বাংলায় সাজানো, মেন্টর-গাইডেড কোর্সে নিজের ক্যারিয়ারকে পরের স্তরে নিয়ে যান।
                 {" "}{data.pagination.total}টি যাচাই করা কোর্স আপনার অপেক্ষায়।
@@ -103,11 +104,11 @@ export default async function CoursesPage({ searchParams }: CoursesPageProps) {
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Sparkles className="size-4 text-primary" />
               <span>
-                Showing {data.courses.length} of {data.pagination.total} courses
+                {data.pagination.total}টির মধ্যে {data.courses.length}টি কোর্স দেখানো হচ্ছে
               </span>
             </div>
             <span className="font-mono text-xs text-muted-foreground">
-              Page {data.pagination.page} / {Math.max(data.pagination.totalPages, 1)}
+              পৃষ্ঠা {data.pagination.page} / {Math.max(data.pagination.totalPages, 1)}
             </span>
           </div>
 
