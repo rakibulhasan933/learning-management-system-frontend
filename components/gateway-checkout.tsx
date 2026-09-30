@@ -67,21 +67,25 @@ export default function GatewayCheckout({
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-100 px-3 py-6 sm:px-4">
-      <div className="w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-xl">
-        <div className="border-b border-slate-100 px-5 py-5 text-center">
-          <span
-            className="text-2xl font-extrabold tracking-tight"
-            style={{ color: details.accent }}
-          >
-            Pay-Confirm
-          </span>
-          <p className="mt-1 text-xs text-slate-400">
-            Secure {details.name} checkout
-          </p>
+    <main className="payment-checkout flex min-h-screen items-center justify-center bg-slate-100 px-3 py-8 sm:px-4">
+      <div className="payment-card w-full max-w-lg overflow-hidden rounded-3xl bg-white shadow-xl">
+        <div className="border-b border-slate-100 px-5 py-6 sm:px-8">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <span className="text-xl font-extrabold tracking-tight" style={{ color: details.accent }}>Pay-Confirm</span>
+              <p className="mt-1 text-xs text-slate-400">Secure manual payment verification</p>
+            </div>
+            <span className="rounded-full px-3 py-1 text-xs font-semibold" style={{ backgroundColor: `${details.accent}15`, color: details.accent }}>{details.name}</span>
+          </div>
+          <div className="mt-6 grid grid-cols-2 gap-2" aria-label="Checkout progress">
+            {["Your number", "Verify payment"].map((label, index) => {
+              const active = step === index + 1
+              return <div className="flex items-center gap-2 text-xs font-medium" key={label} style={{ color: active ? details.accent : "#94a3b8" }}><span className="flex size-6 items-center justify-center rounded-full text-[11px]" style={{ backgroundColor: active ? details.accent : "#f1f5f9", color: active ? "white" : "#94a3b8" }}>{index + 1}</span>{label}</div>
+            })}
+          </div>
         </div>
 
-        <div className="flex items-center justify-between gap-3 px-5 py-4 sm:px-6">
+        <div className="flex items-center justify-between gap-4 border-b border-slate-100 px-5 py-5 sm:px-8">
           <div className="min-w-0">
             <p className="truncate text-sm font-semibold text-slate-900">
               {packageName || "Course enrollment"}
@@ -89,7 +93,7 @@ export default function GatewayCheckout({
             <p className="truncate text-xs text-slate-400">Order: {orderId}</p>
             <p className="truncate text-xs text-slate-400">{customerEmail}</p>
           </div>
-          <p className="text-2xl font-bold whitespace-nowrap text-slate-900">
+          <p className="text-2xl font-bold whitespace-nowrap text-slate-900 sm:text-3xl">
             ৳{Number(amount || 0).toFixed(2)}
           </p>
         </div>
@@ -218,7 +222,7 @@ export default function GatewayCheckout({
           </div>
         </form>
 
-        <div className="border-t border-slate-100 px-4 py-4 text-center">
+        <div className="border-t border-slate-100 px-5 py-5 text-center sm:px-8">
           <p className="flex items-center justify-center gap-1.5 text-sm font-medium text-slate-500">
             <Phone className="size-3.5" /> Secure payment verification
           </p>
