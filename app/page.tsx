@@ -32,8 +32,8 @@ export default async function Page() {
 
   return <PublicShell variant="home">
     <main className="folio-home">
-      <section className="folio-home-hero"><div className="folio-home-wrap folio-home-hero-grid"><div>
-        <span className="folio-home-tag">বাংলাদেশের শিক্ষার্থীদের জন্য</span>
+      <section className="folio-home-hero"><div className="folio-home-wrap folio-home-hero-grid"><div className="folio-hero-copy">
+        <span className="folio-home-tag"><span className="folio-live-dot" /> বাংলাদেশের শিক্ষার্থীদের জন্য</span>
         <h1>শিখুন গুছিয়ে, পেমেন্ট করুন নিজের মোবাইল ব্যাংকিং থেকে।</h1>
         <p className="folio-home-lead">সাজানো কোর্স, bKash ও Nagad এ সহজ পেমেন্ট, আর সুরক্ষিত ভিডিও ক্লাস। প্রতিটি এনরোলমেন্টের একটি যাচাইকৃত রেকর্ড থাকে।</p>
         <div className="folio-home-cta"><Link className="folio-home-btn folio-home-btn-primary" href={dashboardPath}>{ctaLabel}</Link><Link className="folio-home-btn" href="/courses">কোর্স দেখুন</Link></div>

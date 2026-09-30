@@ -63,16 +63,14 @@ export default async function CoursesPage({ searchParams }: CoursesPageProps) {
 
   return (
     <PublicShell>
-      <main className="px-4 py-8 sm:px-6 sm:py-12">
+      <main className="courses-page px-4 py-8 sm:px-6 sm:py-12">
         <section className="mx-auto max-w-6xl">
           <ProgressThread className="mb-8" />
           <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-end">
             <div>
-              <p className="font-mono text-xs tracking-wide text-muted-foreground">
-                Course catalog
-              </p>
+              <p className="eyebrow">কিউরেটেড লার্নিং লাইব্রেরি</p>
               <h1 className="mt-3 font-heading text-4xl leading-[1.05] tracking-tight sm:text-5xl">
-                Find your next course
+                যে দক্ষতা আপনার পরের দরজা খুলবে
               </h1>
               <p className="mt-5 max-w-xl text-base leading-7 text-muted-foreground">
                 {data.pagination.total} published{" "}

@@ -10,6 +10,7 @@ import {
 import "@uploadthing/react/styles.css"
 import "./globals.css"
 import { Toaster } from "@/components/ui/sonner"
+import { BackgroundRipple } from "@/components/background-ripple"
 
 // English / Latin fonts (unchanged)
 const inter = Inter({
@@ -92,7 +93,8 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-screen font-sans antialiased">
-        {children}
+        <BackgroundRipple />
+        <div className="relative z-10">{children}</div>
         <Toaster position="bottom-right" />
       </body>
     </html>

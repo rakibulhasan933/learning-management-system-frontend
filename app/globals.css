@@ -303,6 +303,22 @@
 @media (min-width: 960px) { .folio-home-hero-grid { grid-template-columns: 1fr 420px; gap: 72px; padding-block: 96px; } .folio-card-grid-four { grid-template-columns: repeat(4, 1fr); } .folio-card-grid-three { grid-template-columns: repeat(3, 1fr); } }
 @media (max-width: 639px) { .folio-home-wrap { width: min(100% - 32px, 1120px); } .folio-home-btn { padding-inline: 18px; } .folio-order-card { margin-top: 12px; } }
 
+/* Premium catalog and motion language */
+.folio-hero-copy { animation: hero-enter 800ms cubic-bezier(.22, 1, .36, 1) both; }
+.folio-order-card { box-shadow: 0 32px 80px -44px rgb(0 0 0 / .9), inset 0 1px 0 rgb(255 255 255 / .05); }
+.folio-live-dot { display: inline-block; width: .45rem; height: .45rem; margin-right: .35rem; border-radius: 50%; background: var(--home-primary); box-shadow: 0 0 0 .25rem color-mix(in srgb, var(--home-primary) 16%, transparent); animation: live-pulse 2s ease-in-out infinite; }
+.folio-card, .folio-course-card { transition: transform 220ms ease, border-color 220ms ease, background-color 220ms ease; }
+.folio-card:hover, .folio-course-card:hover { transform: translateY(-4px); border-color: color-mix(in srgb, var(--home-primary) 70%, var(--home-line)); }
+.courses-page { position: relative; }
+.courses-page > section > .grid:first-of-type { padding: clamp(1.25rem, 4vw, 3rem); border: 1px solid var(--border); border-radius: 1.5rem; background: color-mix(in srgb, var(--card) 80%, transparent); box-shadow: inset 0 1px 0 rgb(255 255 255 / .04), 0 30px 80px -56px rgb(0 0 0 / .9); }
+.courses-page h1 { max-width: 12ch; font-size: clamp(2.5rem, 6vw, 5rem); font-weight: 600; letter-spacing: -.055em; }
+.courses-page .interactive-card { border-color: color-mix(in srgb, var(--foreground) 12%, transparent); background: color-mix(in srgb, var(--card) 86%, transparent); box-shadow: inset 0 1px 0 rgb(255 255 255 / .035); }
+.courses-page .interactive-card:hover { transform: translateY(-5px); }
+@keyframes hero-enter { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+@keyframes live-pulse { 0%, 100% { opacity: .7; } 50% { opacity: 1; box-shadow: 0 0 0 .4rem color-mix(in srgb, var(--home-primary) 10%, transparent); } }
+@media (prefers-reduced-motion: reduce) { .folio-hero-copy, .folio-live-dot { animation: none; } .folio-card:hover, .folio-course-card:hover, .courses-page .interactive-card:hover { transform: none; } }
+
+
 @layer components {
 
   /*
@@ -529,6 +545,33 @@
 }
 
 /* ===== Append this to the END of globals.css ===== */
+
+.background-ripple {
+  --ripple-x: 50vw;
+  --ripple-y: 30vh;
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.72;
+  background-image:
+    radial-gradient(circle at var(--ripple-x) var(--ripple-y), color-mix(in srgb, var(--primary) 14%, transparent) 0, transparent 12rem),
+    linear-gradient(to right, color-mix(in srgb, var(--foreground) 5%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--foreground) 5%, transparent) 1px, transparent 1px);
+  background-size: auto, 64px 64px, 64px 64px;
+  mask-image: linear-gradient(to bottom, black 0%, black 72%, transparent 100%);
+  transition: background-position 700ms ease;
+}
+.background-ripple::after {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at var(--ripple-x) var(--ripple-y), transparent 0 5rem, color-mix(in srgb, var(--primary) 10%, transparent) 5.1rem 5.2rem, transparent 5.3rem 11rem, color-mix(in srgb, var(--primary) 6%, transparent) 11.1rem 11.2rem, transparent 11.3rem);
+  content: "";
+  opacity: 0.65;
+  animation: ripple-breathe 5s ease-in-out infinite;
+}
+@keyframes ripple-breathe { 0%, 100% { transform: scale(.96); opacity: .45; } 50% { transform: scale(1.04); opacity: .85; } }
+@media (prefers-reduced-motion: reduce) { .background-ripple::after { animation: none; } }
 
 @layer components {
   .eyebrow {
