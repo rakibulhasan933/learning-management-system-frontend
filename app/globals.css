@@ -249,7 +249,15 @@
 
 .folio-home-header { background: color-mix(in srgb, #0d1512 94%, transparent) !important; border-color: var(--home-line) !important; }
 .folio-home-header > span { background: #ef6a72; }
-.folio-home-header .text-muted-foreground, .folio-home-header .interactive-link { color: var(--home-muted) !important; }
+.folio-home-header .text-muted-foreground, .folio-home-header .interactive-link { color: var(--home-fg) !important; }
+.site-header-nav-link, header nav .interactive-link { color: var(--foreground) !important; opacity: .86; font-weight: 500; }
+.site-header-nav-link:hover, header nav .interactive-link:hover { color: var(--primary) !important; opacity: 1; }
+.folio-home-header nav .interactive-link { color: var(--home-fg) !important; }
+@media (min-width: 768px) {
+  header > div > nav.hidden { display: flex !important; }
+  header > div > nav.hidden a { color: var(--foreground) !important; }
+  .folio-home-header > div > nav.hidden a { color: var(--home-fg) !important; }
+}
 .folio-home-header .bg-card, .folio-home-header details > div { background: var(--home-card) !important; }
 .folio-home-header .text-foreground { color: var(--home-fg) !important; }
 .folio-home-footer { background: var(--home-card) !important; border-color: var(--home-line) !important; }

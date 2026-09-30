@@ -43,7 +43,7 @@ export async function SiteHeader({ variant = "default" }: { variant?: "default" 
         <nav className="hidden items-center gap-8 text-sm md:flex">
           {navItems.map((item) => (
             <Link
-              className="interactive-link text-muted-foreground"
+              className="site-header-nav-link interactive-link"
               href={item.href}
               key={item.href}
             >
@@ -52,7 +52,7 @@ export async function SiteHeader({ variant = "default" }: { variant?: "default" 
           ))}
           {profile ? (
             <Link
-              className="interactive-link text-muted-foreground"
+              className="site-header-nav-link interactive-link"
               href={dashboardPath ?? "/dashboard/student"}
             >
               Dashboard
