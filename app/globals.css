@@ -256,6 +256,8 @@
 @media (min-width: 768px) {
   header > div > nav.hidden { display: flex !important; }
   header > div > nav.hidden a { color: var(--foreground) !important; }
+  .site-header-actions { display: flex !important; }
+  .site-header-actions a { color: var(--foreground) !important; }
   .folio-home-header > div > nav.hidden a { color: var(--home-fg) !important; }
 }
 .folio-home-header .bg-card, .folio-home-header details > div { background: var(--home-card) !important; }
