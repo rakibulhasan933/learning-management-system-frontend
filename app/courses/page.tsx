@@ -65,7 +65,7 @@ export default async function CoursesPage({ searchParams }: CoursesPageProps) {
     <PublicShell>
       <main className="courses-page px-4 py-8 sm:px-6 sm:py-12">
         <section className="mx-auto max-w-6xl">
-          <ProgressThread className="mb-8" />
+          <div className="course-page-kicker mb-8"><ProgressThread /></div>
           <div className="courses-hero grid gap-8 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-end">
             <div>
               <p className="eyebrow">বাংলাদেশের স্কিল-ফার্স্ট লার্নিং প্ল্যাটফর্ম</p>
@@ -100,7 +100,7 @@ export default async function CoursesPage({ searchParams }: CoursesPageProps) {
             />
           </div>
 
-          <div className="mt-12 flex items-center justify-between gap-4 border-y border-border py-4">
+          <div className="course-results-bar mt-12 flex items-center justify-between gap-4 border-y border-border py-4">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Sparkles className="size-4 text-primary" />
               <span>
@@ -112,10 +112,10 @@ export default async function CoursesPage({ searchParams }: CoursesPageProps) {
             </span>
           </div>
 
-          <div className="mt-6 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+          <div className="course-grid mt-6 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
             {data.courses.map((course) => (
               <Link
-                className="group interactive-card flex flex-col overflow-hidden rounded-2xl bg-card ring-1 ring-foreground/10 transition-colors hover:ring-primary/50"
+                className="course-card group interactive-card flex flex-col overflow-hidden rounded-2xl bg-card ring-1 ring-foreground/10 transition-colors hover:ring-primary/50"
                 href={`/courses/${course.slug}`}
                 key={course.id}
               >

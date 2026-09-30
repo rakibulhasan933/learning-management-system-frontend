@@ -329,7 +329,16 @@
 .courses-page { position: relative; }
 .courses-page > section > .grid:first-of-type { padding: clamp(1.25rem, 4vw, 3rem); border: 1px solid var(--border); border-radius: 1.5rem; background: color-mix(in srgb, var(--card) 80%, transparent); box-shadow: inset 0 1px 0 rgb(255 255 255 / .04), 0 30px 80px -56px rgb(0 0 0 / .9); }
 .courses-page h1 { max-width: 15ch; font-size: clamp(2.15rem, 4.8vw, 4.25rem); font-weight: 600; letter-spacing: -.04em; line-height: 1.18; text-wrap: balance; }
-.courses-page .interactive-card { border-color: color-mix(in srgb, var(--foreground) 12%, transparent); background: color-mix(in srgb, var(--card) 86%, transparent); box-shadow: inset 0 1px 0 rgb(255 255 255 / .035); }
+.courses-page .interactive-card { border-color: color-mix(in srgb, var(--foreground) 12%, transparent); background: color-mix(in srgb, var(--card) 86%, transparent); box-shadow: inset 0 1px 0 rgb(255 255 255 / .035), 0 18px 50px -42px rgb(0 0 0 / .9); transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease; }
+.courses-page .course-card { min-height: 100%; }
+.courses-page .course-card > div:first-child { background: linear-gradient(135deg, color-mix(in srgb, var(--primary) 10%, var(--background)), var(--background)); }
+.courses-page .course-card h2 { text-wrap: balance; }
+.courses-page .course-results-bar { border-color: color-mix(in srgb, var(--primary) 16%, var(--border)); }
+.courses-page .course-results-bar + .course-grid { animation: courses-grid-enter .45s ease both; }
+.courses-page form [data-slot="card"] { border-color: color-mix(in srgb, var(--primary) 22%, var(--border)); background: color-mix(in srgb, var(--card) 92%, transparent); box-shadow: 0 24px 60px -46px rgb(0 0 0 / .9); }
+@keyframes courses-grid-enter { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@media (max-width: 640px) { .courses-page::before { width: 24rem; height: 24rem; transform: translateX(-10%); } .courses-page .course-results-bar { align-items: flex-start; flex-direction: column; } }
+@media (prefers-reduced-motion: reduce) { .courses-page .course-results-bar + .course-grid { animation: none; } .courses-page .interactive-card { transition: none; } }
 .courses-page .interactive-card:hover { transform: translateY(-5px); }
 @keyframes hero-enter { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
 @keyframes live-pulse { 0%, 100% { opacity: .7; } 50% { opacity: 1; box-shadow: 0 0 0 .4rem color-mix(in srgb, var(--home-primary) 10%, transparent); } }
@@ -662,7 +671,12 @@
 }
 
 /* Bangladesh-first LMS marketplace surfaces */
-.courses-hero { position: relative; overflow: hidden; padding: clamp(1.25rem, 4vw, 3rem); border: 1px solid color-mix(in srgb, var(--primary) 22%, var(--border)); border-radius: 1.5rem; background: linear-gradient(135deg, color-mix(in srgb, var(--primary) 8%, var(--card)), color-mix(in srgb, var(--card) 85%, transparent)); box-shadow: 0 32px 90px -60px rgb(0 0 0 / .8), inset 0 1px 0 rgb(255 255 255 / .05); }
+.courses-page { position: relative; isolation: isolate; }
+.courses-page::before { position: fixed; top: 8rem; left: 50%; width: 42rem; height: 42rem; border: 1px solid color-mix(in srgb, var(--primary) 7%, transparent); border-radius: 50%; content: ""; pointer-events: none; transform: translateX(8%); box-shadow: 0 0 0 3rem color-mix(in srgb, var(--primary) 2%, transparent), 0 0 0 8rem color-mix(in srgb, var(--primary) 1%, transparent); }
+.courses-page > section { position: relative; z-index: 1; }
+.courses-page .course-page-kicker { display: flex; align-items: center; justify-content: center; }
+.courses-page .course-page-kicker > * { width: min(100%, 32rem); }
+.courses-hero { position: relative; overflow: hidden; padding: clamp(1.5rem, 5vw, 4rem); border: 1px solid color-mix(in srgb, var(--primary) 22%, var(--border)); border-radius: 1.5rem; background: linear-gradient(135deg, color-mix(in srgb, var(--primary) 8%, var(--card)), color-mix(in srgb, var(--card) 85%, transparent)); box-shadow: 0 32px 90px -60px rgb(0 0 0 / .8), inset 0 1px 0 rgb(255 255 255 / .05); }
 .courses-hero::after { position: absolute; right: -5rem; bottom: -9rem; width: 21rem; height: 21rem; border: 1px solid color-mix(in srgb, var(--primary) 24%, transparent); border-radius: 50%; content: ""; box-shadow: 0 0 0 2rem color-mix(in srgb, var(--primary) 5%, transparent), 0 0 0 5rem color-mix(in srgb, var(--primary) 3%, transparent); pointer-events: none; }
 .courses-hero > * { position: relative; z-index: 1; }
 .course-trust-pill { border: 1px solid color-mix(in srgb, var(--primary) 25%, var(--border)); border-radius: 999px; padding: .55rem .8rem; background: color-mix(in srgb, var(--background) 32%, transparent); }
