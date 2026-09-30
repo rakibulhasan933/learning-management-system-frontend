@@ -42,7 +42,7 @@ function enrollmentIsOpen(course: CourseDetailDto) {
 }
 
 function formatEnrollmentDate(value: string | null) {
-  if (!value) return "No closing date"
+  if (!value) return "সমাপ্তির তারিখ নেই"
   return new Intl.DateTimeFormat("en-GB", {
     dateStyle: "medium",
     timeStyle: "short",
@@ -122,7 +122,7 @@ async function getEnrollmentStatus(slug: string) {
 }
 
 function formatPrice(currency: string, price: string) {
-  return Number(price) === 0 ? "Free" : `${currency} ${price}`
+  return Number(price) === 0 ? "ফ্রি" : `${currency === "BDT" ? "৳" : currency} ${Number(price).toLocaleString("bn-BD")}`
 }
 
 function formatDuration(totalSeconds: number) {
@@ -133,7 +133,7 @@ function formatDuration(totalSeconds: number) {
   const hours = Math.floor(totalSeconds / 3600)
   const minutes = Math.round((totalSeconds % 3600) / 60)
 
-  return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`
+  return hours > 0 ? `${hours} ঘণ্টা ${minutes} মিনিট` : `${minutes} মিনিট`
 }
 
 export default async function CourseDetailPage({
@@ -221,14 +221,14 @@ export default async function CourseDetailPage({
             </p>
             {course.instructorName ? (
               <p className="mt-4 text-sm text-muted-foreground">
-                Taught by{" "}
+                মেন্টর: {" "}
                 <span className="text-foreground">{course.instructorName}</span>
               </p>
             ) : null}
 
             <div className="mt-12 space-y-5">
               <h2 className="font-heading text-2xl tracking-tight">
-                What you will learn
+                এই কোর্সে যা শিখবেন
               </h2>
               <MarkdownContent
                 className="max-w-2xl"
@@ -246,7 +246,7 @@ export default async function CourseDetailPage({
             <div className="mt-12 space-y-4">
               <div className="flex flex-wrap items-baseline justify-between gap-3">
                 <h2 className="font-heading text-2xl tracking-tight">
-                  Course outline
+                  কোর্সের আউটলাইন
                 </h2>
                 <span className="font-mono text-xs text-muted-foreground">
                   {course.sections.length} milestones · {totalModules} modules
