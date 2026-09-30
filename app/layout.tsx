@@ -87,6 +87,7 @@ export default function RootLayout({
   return (
     <html
       lang="bn"
+      data-scroll-behavior="smooth"
       className={`dark ${inter.variable} ${fraunces.variable} ${ibmPlexMono.variable} ${bnSans.variable} ${bnSerif.variable}`}
       suppressHydrationWarning
     >

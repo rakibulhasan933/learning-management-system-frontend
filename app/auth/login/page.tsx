@@ -16,9 +16,9 @@ interface LoginPageProps {
 }
 
 const assurances = [
-  "Verified payments",
-  "Secure video",
-  "Saved progress",
+  "যাচাই করা পেমেন্ট",
+  "সুরক্ষিত ভিডিও",
+  "সেভ থাকা অগ্রগতি",
 ] as const
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
@@ -34,9 +34,9 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   if (profile) redirect(getDashboardPath(profile.role))
 
   return (
-    <main className="grid min-h-screen bg-background text-foreground lg:grid-cols-[minmax(0,1fr)_520px]">
+    <main className="auth-page grid min-h-screen bg-background text-foreground lg:grid-cols-[minmax(0,1fr)_520px]">
       {/* LEFT: brand panel */}
-      <section className="relative hidden flex-col justify-between overflow-hidden border-r border-border px-14 py-12 lg:flex">
+      <section className="auth-brand-panel relative hidden flex-col justify-between overflow-hidden border-r border-border px-14 py-12 lg:flex">
         <div
           aria-hidden
           className="hairline-grid pointer-events-none absolute inset-0"
@@ -47,21 +47,20 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         </div>
 
         <div className="relative max-w-lg">
-          <p className="eyebrow">Student · Instructor · Admin</p>
+          <p className="eyebrow">শিক্ষার্থী · ইন্সট্রাক্টর · অ্যাডমিন</p>
           <h1 className="mt-6 font-heading text-6xl leading-[1.04] font-light tracking-[-0.03em]">
-            Pick up where you
-            <span className="text-primary italic"> left the lesson.</span>
+            যেখানে থেমেছিলেন,
+            <span className="text-primary italic"> সেখান থেকেই শুরু করুন।</span>
           </h1>
           <ProgressThread className="mt-8 w-20" />
           <p className="mt-6 max-w-md text-base leading-7 text-muted-foreground">
-            Sign in to continue a course, review payments, or open the
-            workspace for your role.
+            কোর্স চালিয়ে যান, পেমেন্টের অবস্থা দেখুন, অথবা আপনার workspace খুলুন।
           </p>
 
           {/* Sample resume card */}
           <div className="surface-raised relative mt-12 max-w-sm rounded-2xl p-5">
             <div className="flex items-center justify-between">
-              <p className="eyebrow">Continue</p>
+              <p className="eyebrow">চালিয়ে যান</p>
               <span className="font-mono text-xs tabular-nums text-muted-foreground">
                 68%
               </span>
@@ -70,7 +69,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
               Advanced web systems
             </p>
             <p className="mt-1 text-sm text-muted-foreground">
-              Lesson 3 · Queues and workers
+              ক্লাস ৩ · কিউ ও ওয়ার্কার
             </p>
             <ProgressThread className="mt-5 w-full" value={68} />
             <VerifiedSeal className="absolute -top-5 -right-5 size-16 rotate-[8deg] rounded-full bg-background" />
@@ -88,29 +87,29 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
       </section>
 
       {/* RIGHT: form */}
-      <section className="flex flex-col justify-center px-4 py-12 sm:px-10">
+      <section className="auth-form-panel flex flex-col justify-center px-4 py-12 sm:px-10">
         <div className="mx-auto w-full max-w-md">
           <div className="mb-10 lg:hidden">
             <BrandMark />
           </div>
 
           <div className="mb-8">
-            <p className="eyebrow">Welcome back</p>
+            <p className="eyebrow">আবার স্বাগতম</p>
             <h2 className="mt-4 font-heading text-4xl font-light tracking-[-0.02em]">
-              Sign in
+              লগইন করুন
             </h2>
             <ProgressThread className="mt-5 w-12" />
             <p className="mt-5 text-sm leading-6 text-muted-foreground">
-              Verified courses, tracked progress.
+              আপনার কোর্স ও শেখার অগ্রগতি এক জায়গায় রাখুন।
             </p>
           </div>
 
           <LoginForm next={params.next} />
 
           <p className="mt-8 text-center text-sm text-muted-foreground">
-            New here?{" "}
+            নতুন?{" "}
             <Link className="interactive-link text-primary" href="/auth/signup">
-              Create an account
+              অ্যাকাউন্ট খুলুন
             </Link>
           </p>
         </div>

@@ -10,9 +10,9 @@ import { ProgressThread } from "@/components/ui/progress-thread"
 import { SignupForm } from "./signup-form"
 
 const path = [
-  { code: "01", title: "Create your account", done: true },
-  { code: "02", title: "Verify your email", done: false },
-  { code: "03", title: "Open your first course", done: false },
+  { code: "০১", title: "অ্যাকাউন্ট খুলুন", done: true },
+  { code: "০২", title: "ইমেইল যাচাই করুন", done: false },
+  { code: "০৩", title: "প্রথম কোর্স খুলুন", done: false },
 ] as const
 
 export default async function SignupPage() {
@@ -27,9 +27,9 @@ export default async function SignupPage() {
   if (profile) redirect(getDashboardPath(profile.role))
 
   return (
-    <main className="grid min-h-screen bg-background text-foreground lg:grid-cols-[minmax(0,1fr)_520px]">
+    <main className="auth-page grid min-h-screen bg-background text-foreground lg:grid-cols-[minmax(0,1fr)_520px]">
       {/* LEFT: brand panel */}
-      <section className="relative hidden flex-col justify-between overflow-hidden border-r border-border px-14 py-12 lg:flex">
+      <section className="auth-brand-panel relative hidden flex-col justify-between overflow-hidden border-r border-border px-14 py-12 lg:flex">
         <div
           aria-hidden
           className="hairline-grid pointer-events-none absolute inset-0"
@@ -40,20 +40,19 @@ export default async function SignupPage() {
         </div>
 
         <div className="relative max-w-lg">
-          <p className="eyebrow">Start as a student</p>
+          <p className="eyebrow">শিক্ষার্থী হিসেবে শুরু করুন</p>
           <h1 className="mt-6 font-heading text-6xl leading-[1.04] font-light tracking-[-0.03em]">
-            Create an account and
-            <span className="text-primary italic"> open your first course.</span>
+            অ্যাকাউন্ট খুলে
+            <span className="text-primary italic"> প্রথম কোর্স শুরু করুন।</span>
           </h1>
           <ProgressThread className="mt-8 w-20" />
           <p className="mt-6 max-w-md text-base leading-7 text-muted-foreground">
-            New accounts start as students. An admin can grant instructor
-            access after verification.
+            নতুন অ্যাকাউন্ট শিক্ষার্থী হিসেবে শুরু হয়। যাচাইয়ের পর অ্যাডমিন ইন্সট্রাক্টর access দিতে পারেন।
           </p>
 
           {/* Path card */}
           <div className="surface-raised relative mt-12 max-w-sm rounded-2xl p-5">
-            <p className="eyebrow">Your path</p>
+            <p className="eyebrow">আপনার পথ</p>
             <ol className="mt-5 space-y-4">
               {path.map((step) => (
                 <li className="flex items-center gap-4" key={step.code}>
@@ -79,34 +78,34 @@ export default async function SignupPage() {
         </div>
 
         <p className="relative font-mono text-[11px] tracking-[0.14em] text-muted-foreground uppercase">
-          Folio LMS · Verified enrollment
+          Folio LMS · যাচাই করা এনরোলমেন্ট
         </p>
       </section>
 
       {/* RIGHT: form */}
-      <section className="flex flex-col justify-center px-4 py-12 sm:px-10">
+      <section className="auth-form-panel flex flex-col justify-center px-4 py-12 sm:px-10">
         <div className="mx-auto w-full max-w-md">
           <div className="mb-10 lg:hidden">
             <BrandMark />
           </div>
 
           <div className="mb-8">
-            <p className="eyebrow">Get started</p>
+            <p className="eyebrow">শুরু করুন</p>
             <h2 className="mt-4 font-heading text-4xl font-light tracking-[-0.02em]">
-              Create your account
+              আপনার অ্যাকাউন্ট খুলুন
             </h2>
             <ProgressThread className="mt-5 w-12" />
             <p className="mt-5 text-sm leading-6 text-muted-foreground">
-              New accounts start as students.
+              নতুন অ্যাকাউন্ট শিক্ষার্থী হিসেবে শুরু হয়।
             </p>
           </div>
 
           <SignupForm />
 
           <p className="mt-8 text-center text-sm text-muted-foreground">
-            Already have an account?{" "}
+            আগে থেকেই অ্যাকাউন্ট আছে?{" "}
             <Link className="interactive-link text-primary" href="/auth/login">
-              Sign in
+              লগইন করুন
             </Link>
           </p>
         </div>

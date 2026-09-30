@@ -98,7 +98,7 @@ export function SignupForm() {
             {...register("fullName")}
             error={getErrorMessage(errors, "fullName", serverState)}
             icon={<User />}
-            label="Full name"
+            label="পুরো নাম"
             autoComplete="name"
           />
 
@@ -106,7 +106,7 @@ export function SignupForm() {
             {...register("email")}
             error={getErrorMessage(errors, "email", serverState)}
             icon={<Mail />}
-            label="Email"
+            label="ইমেইল"
             autoComplete="email"
             type="email"
           />
@@ -115,21 +115,20 @@ export function SignupForm() {
             {...register("password")}
             error={getErrorMessage(errors, "password", serverState)}
             icon={<Lock />}
-            label="Password"
+            label="পাসওয়ার্ড"
             autoComplete="new-password"
             type="password"
           />
 
-          <p className="font-mono text-[11px] leading-5 text-muted-foreground">
-            Use at least 8 characters. We&apos;ll email you a link to verify
-            your account.
+          <p className="text-sm leading-6 text-muted-foreground">
+            কমপক্ষে ৮টি অক্ষর ব্যবহার করুন। অ্যাকাউন্ট যাচাই করার জন্য আপনার ইমেইলে একটি লিংক পাঠানো হবে।
           </p>
 
           <SubmitButton
             className="h-11 w-full gap-2"
-            pendingLabel="Creating account..."
+            pendingLabel="অ্যাকাউন্ট তৈরি হচ্ছে..."
           >
-            Create account
+            অ্যাকাউন্ট খুলুন
           </SubmitButton>
         </form>
       </CardContent>

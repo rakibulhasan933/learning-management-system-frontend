@@ -96,10 +96,10 @@ export function LoginForm({ next }: LoginFormProps) {
                 <input name="email" type="hidden" value={activeEmail} />
                 <SubmitButton
                   className="w-full gap-2"
-                  pendingLabel="Resending..."
+                  pendingLabel="পাঠানো হচ্ছে..."
                   variant="outline"
                 >
-                  Resend verification email
+                  যাচাই ইমেইল আবার পাঠান
                 </SubmitButton>
               </form>
             ) : null}
@@ -118,7 +118,7 @@ export function LoginForm({ next }: LoginFormProps) {
             {...register("email")}
             error={getErrorMessage(errors, "email", serverState)}
             icon={<Mail />}
-            label="Email"
+            label="ইমেইল"
             autoComplete="email"
             autoFocus
             type="email"
@@ -128,25 +128,25 @@ export function LoginForm({ next }: LoginFormProps) {
             {...register("password")}
             error={getErrorMessage(errors, "password", serverState)}
             icon={<Lock />}
-            label="Password"
+            label="পাসওয়ার্ড"
             autoComplete="current-password"
             type="password"
           />
 
           <div className="flex justify-end">
             <Link
-              className="interactive-link text-xs text-muted-foreground"
+              className="interactive-link text-sm text-muted-foreground"
               href="/auth/reset-password"
             >
-              Forgot password?
+              পাসওয়ার্ড ভুলে গেছেন?
             </Link>
           </div>
 
           <SubmitButton
             className="h-11 w-full gap-2"
-            pendingLabel="Signing in..."
+            pendingLabel="লগইন হচ্ছে..."
           >
-            Sign in
+            লগইন করুন
           </SubmitButton>
         </form>
 
@@ -162,7 +162,7 @@ export function LoginForm({ next }: LoginFormProps) {
           <input name="next" type="hidden" value={next ?? ""} />
           <SubmitButton className="h-11 gap-3" variant="outline">
             <GoogleIcon className="h-4 w-4" />
-            Continue with Google
+            Google দিয়ে চালিয়ে যান
           </SubmitButton>
         </form>
       </CardContent>
