@@ -671,8 +671,17 @@
 .instructor-course-workspace, .instructor-course-editor { position: relative; }
 .instructor-course-workspace::before, .instructor-course-editor::before { position: absolute; top: -4rem; right: -3rem; width: 17rem; height: 17rem; border: 1px solid color-mix(in srgb, var(--primary) 17%, transparent); border-radius: 50%; content: ""; pointer-events: none; box-shadow: 0 0 0 2rem color-mix(in srgb, var(--primary) 4%, transparent), 0 0 0 5rem color-mix(in srgb, var(--primary) 2%, transparent); }
 .instructor-course-workspace > *, .instructor-course-editor > * { position: relative; z-index: 1; }
-.instructor-course-workspace h1, .instructor-course-editor h1 { max-width: 18ch; text-wrap: balance; }
+.instructor-course-workspace h1, .instructor-course-editor h1 { max-width: 24ch; text-wrap: balance; }
+.instructor-course-editor > section { isolation: isolate; }
+.instructor-course-editor .course-edit-workspace { display: grid; gap: 1rem; }
+.instructor-course-editor [role="tablist"] { position: sticky; top: 5rem; z-index: 10; backdrop-filter: blur(14px); }
+.instructor-course-editor .ProseMirror, .instructor-course-editor textarea, .instructor-course-editor input { font-size: .95rem; }
+@media (min-width: 1024px) { .instructor-course-editor .course-edit-workspace { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 640px) { .instructor-course-editor > section { padding-top: 1rem; } .instructor-course-editor [role="tablist"] { position: static; } }
+.instructor-course-workspace { width: 100%; max-width: 80rem; margin-inline: auto; padding-inline: clamp(1rem, 3vw, 2.5rem); }
 .instructor-course-workspace section, .instructor-course-editor section { border-color: color-mix(in srgb, var(--primary) 16%, var(--border)); }
+.instructor-course-workspace section { box-shadow: 0 28px 70px -52px rgb(0 0 0 / .9), inset 0 1px 0 rgb(255 255 255 / .04); }
+@media (max-width: 640px) { .instructor-course-workspace { padding-inline: 1rem; } }
 .instructor-course-workspace [aria-labelledby="course-steps-title"] > div:last-child, .instructor-course-editor [role="tablist"] { box-shadow: inset 0 1px 0 rgb(255 255 255 / .04), 0 24px 55px -42px rgb(0 0 0 / .85); }
 .instructor-course-editor .rounded-3xl { border-color: color-mix(in srgb, var(--primary) 18%, var(--border)); box-shadow: 0 24px 60px -48px rgb(0 0 0 / .9); }
 @media (max-width: 640px) { .instructor-course-workspace::before, .instructor-course-editor::before { width: 10rem; height: 10rem; top: -2rem; right: -5rem; } }

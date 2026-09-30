@@ -47,7 +47,7 @@ export default async function EditInstructorCoursePage({
 
   return (
     <main className="instructor-course-editor min-h-screen bg-background text-foreground">
-      <section className="mx-auto grid max-w-5xl gap-5">
+      <section className="mx-auto grid w-full max-w-7xl gap-6 px-4 py-6 sm:px-6 lg:px-10">
         <div className="space-y-3">
           <ProgressThread />
           <Link
@@ -55,10 +55,10 @@ export default async function EditInstructorCoursePage({
             href="/dashboard/instructor/courses"
           >
             <ArrowLeft className="h-3 w-3" />
-            কোর্স তালিকায় ফিরুন
+            Back to courses
           </Link>
           <p className="font-mono text-sm text-muted-foreground">
-            সম্পাদনা হচ্ছে · {course.slug}
+            Editing {course.slug}
           </p>
           <h1 className="font-heading text-3xl tracking-tight sm:text-4xl">
             {course.title}
@@ -76,7 +76,7 @@ export default async function EditInstructorCoursePage({
             <CourseForm
               action={updateInstructorCourseAction}
               course={course}
-              submitLabel="পরিবর্তন সংরক্ষণ করুন"
+              submitLabel="Save changes"
             />
           }
           settings={
@@ -85,7 +85,7 @@ export default async function EditInstructorCoursePage({
                 <div className="flex items-center gap-2">
                   <AlertTriangle className="h-4 w-4 text-destructive" />
                   <h3 className="font-heading text-sm font-medium text-destructive">
-                    সতর্কতা অঞ্চল
+                    Danger zone
                   </h3>
                 </div>
                 <form
@@ -94,16 +94,14 @@ export default async function EditInstructorCoursePage({
                 >
                   <input name="courseId" type="hidden" value={course.id} />
                   <p className="text-sm text-muted-foreground">
-                    Delete this course draft and its sections. Use this only for
-                    courses that should be permanently removed. This action
-                    cannot be undone.
+                    Delete this course draft and its sections. Use this only for courses that should be permanently removed. This action cannot be undone.
                   </p>
                   <SubmitButton
                     className="w-full sm:w-fit"
                     pendingLabel="Deleting course..."
                     variant="destructive"
                   >
-                    কোর্স মুছে ফেলুন
+                    Delete course
                   </SubmitButton>
                 </form>
               </CardContent>
