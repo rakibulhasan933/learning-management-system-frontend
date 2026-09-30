@@ -31,19 +31,19 @@ export default async function StudentDashboardPage() {
   const activeCourse = orders.orders.find((order) => order.status === "paid")
 
   return (
-    <div className="space-y-8">
+    <div className="student-dashboard-page space-y-8">
       <PageHeader
         action={
           <Button asChild variant="outline">
             <Link href="/dashboard/student/classes">
-              View my classes <ArrowRight />
+              আমার ক্লাস দেখুন <ArrowRight />
             </Link>
           </Button>
         }
         className="text-left"
-        eyebrow="Student dashboard"
+        eyebrow="শিক্ষার্থী ড্যাশবোর্ড"
         lede={`Welcome back, ${profile.fullName?.trim() || profile.email}. Your learning progress at a glance.`}
-        title="Your overview"
+        title="আপনার শেখার সারাংশ"
       />
 
       <section
@@ -51,17 +51,17 @@ export default async function StudentDashboardPage() {
         className="grid grid-cols-2 gap-3 lg:grid-cols-4"
       >
         <Metric
-          label="Completion"
+          label="সম্পন্ন"
           note={`${analytics.completedLectures}/${analytics.totalLectures} lectures`}
           value={`${analytics.completionPercentage}%`}
         />
         <Metric
-          label="Watch time"
+          label="দেখার সময়"
           note="Across all classes"
           value={formatDuration(analytics.watchTimeSeconds) ?? "0m"}
         />
         <Metric
-          label="Quiz average"
+          label="কুইজ গড়"
           note={`${analytics.quizAttempts} attempts`}
           value={`${analytics.quizAveragePercentage}%`}
         />
@@ -80,15 +80,14 @@ export default async function StudentDashboardPage() {
               <div className="mb-6 flex items-center gap-3">
                 <span className="h-px w-10 bg-primary" />
                 <p className="font-mono text-xs text-muted-foreground">
-                  Continue learning
+                  শেখা চালিয়ে যান
                 </p>
               </div>
               <h2 className="max-w-xl font-heading text-3xl font-normal tracking-tight sm:text-4xl">
                 Pick up where you left off
               </h2>
               <p className="mt-3 max-w-xl text-sm leading-6 text-muted-foreground">
-                Your lectures, assessments, and course materials are organized
-                inside My classes.
+                আপনার লেকচার, মূল্যায়ন এবং কোর্সের উপকরণগুলো আমার ক্লাসে গুছিয়ে রাখা আছে।
               </p>
             </div>
             {activeCourse ? (
@@ -102,7 +101,7 @@ export default async function StudentDashboardPage() {
               <Button asChild className="w-fit">
                 <Link href="/courses">
                   <BookOpen />
-                  Browse courses
+                  কোর্স দেখুন
                 </Link>
               </Button>
             )}

@@ -17,15 +17,15 @@ export default async function StudentAnalyticsPage() {
   const analytics =
     await authenticatedApiFetch<StudentAnalyticsResponse>("/student/analytics")
   return (
-    <>
+    <div className="student-analytics-page">
       <PageHeader
-        eyebrow="Student dashboard · Analytics"
-        lede="See your learning rhythm, course progress, and assessment performance."
-        title="Learning analytics"
+        eyebrow="শিক্ষার্থী ড্যাশবোর্ড · অ্যানালিটিক্স"
+        lede="আপনার শেখার ছন্দ, কোর্সের অগ্রগতি এবং মূল্যায়নের ফলাফল দেখুন।"
+        title="শেখার অগ্রগতি"
       />
       <div className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-4">
         <Metric
-          label="Completion"
+          label="সম্পন্ন"
           note={`${analytics.completedLectures}/${analytics.totalLectures} lectures`}
           value={`${analytics.completionPercentage}%`}
         />
@@ -53,7 +53,7 @@ export default async function StudentAnalyticsPage() {
               Last 7 days
             </p>
             <h2 className="mt-1 font-heading text-xl">
-              Weekly learning activity
+              সাপ্তাহিক শেখার কার্যক্রম
             </h2>
             <div className="mt-4">
               <WeeklyActivityChart data={analytics.weeklyActivity} />
@@ -63,7 +63,7 @@ export default async function StudentAnalyticsPage() {
         <Card size="sm">
           <CardContent>
             <p className="font-mono text-xs text-muted-foreground">By course</p>
-            <h2 className="mt-1 font-heading text-xl">Course progress</h2>
+            <h2 className="mt-1 font-heading text-xl">কোর্সের অগ্রগতি</h2>
             <div className="mt-5 grid gap-4">
               {analytics.courses.map((course) => (
                 <div key={course.courseId}>
@@ -93,7 +93,7 @@ export default async function StudentAnalyticsPage() {
           <p className="font-mono text-xs text-muted-foreground">
             Assessment results
           </p>
-          <h2 className="mt-1 font-heading text-xl">Quiz performance</h2>
+          <h2 className="mt-1 font-heading text-xl">কুইজের ফলাফল</h2>
           {analytics.quizPerformance.length ? (
             <div className="mt-4">
               <QuizPerformanceChart data={analytics.quizPerformance} />
@@ -122,7 +122,7 @@ export default async function StudentAnalyticsPage() {
           value={`${analytics.assignmentsPending}`}
         />
       </div>
-    </>
+    </div>
   )
 }
 

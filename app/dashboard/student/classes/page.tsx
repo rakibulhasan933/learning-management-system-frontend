@@ -19,18 +19,18 @@ export default async function StudentClassesPage() {
   const courses = response.orders.filter((order) => order.status === "paid")
 
   return (
-    <>
+    <div className="student-classes-page">
       <PageHeader
-        eyebrow="Student dashboard · My classes"
-        lede="All your active courses, course materials, and learning progress in one place."
-        title="My classes"
+        eyebrow="শিক্ষার্থী ড্যাশবোর্ড · আমার ক্লাস"
+        lede="আপনার সক্রিয় কোর্স, উপকরণ এবং শেখার অগ্রগতি এক জায়গায় দেখুন।"
+        title="আমার ক্লাস"
       />
       {courses.length === 0 ? (
         <div className="mt-10">
           <EmptyState
             action={
               <Button asChild>
-                <Link href="/courses">Browse courses</Link>
+                <Link href="/courses">কোর্স দেখুন</Link>
               </Button>
             }
             description="Verified enrollments will appear here."
@@ -67,7 +67,7 @@ export default async function StudentClassesPage() {
                 <Button asChild className="mt-auto w-full">
                   <Link href={`/learn/${course.courseId}`}>
                     <PlayCircle />
-                    Continue learning
+                    শেখা চালিয়ে যান
                   </Link>
                 </Button>
               </CardContent>
@@ -75,6 +75,6 @@ export default async function StudentClassesPage() {
           ))}
         </div>
       )}
-    </>
+    </div>
   )
 }
