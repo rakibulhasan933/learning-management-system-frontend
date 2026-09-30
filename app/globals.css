@@ -651,6 +651,20 @@
   }
 }
 
+/* Bangladesh-first LMS marketplace surfaces */
+.courses-hero { position: relative; overflow: hidden; padding: clamp(1.25rem, 4vw, 3rem); border: 1px solid color-mix(in srgb, var(--primary) 22%, var(--border)); border-radius: 1.5rem; background: linear-gradient(135deg, color-mix(in srgb, var(--primary) 8%, var(--card)), color-mix(in srgb, var(--card) 85%, transparent)); box-shadow: 0 32px 90px -60px rgb(0 0 0 / .8), inset 0 1px 0 rgb(255 255 255 / .05); }
+.courses-hero::after { position: absolute; right: -5rem; bottom: -9rem; width: 21rem; height: 21rem; border: 1px solid color-mix(in srgb, var(--primary) 24%, transparent); border-radius: 50%; content: ""; box-shadow: 0 0 0 2rem color-mix(in srgb, var(--primary) 5%, transparent), 0 0 0 5rem color-mix(in srgb, var(--primary) 3%, transparent); pointer-events: none; }
+.courses-hero > * { position: relative; z-index: 1; }
+.course-trust-pill { border: 1px solid color-mix(in srgb, var(--primary) 25%, var(--border)); border-radius: 999px; padding: .55rem .8rem; background: color-mix(in srgb, var(--background) 32%, transparent); }
+.dashboard-shell { background-image: linear-gradient(to bottom, color-mix(in srgb, var(--primary) 3%, transparent), transparent 32rem); }
+.dashboard-shell header { box-shadow: 0 12px 34px -30px rgb(0 0 0 / .9); }
+.dashboard-shell aside { background: color-mix(in srgb, var(--card) 78%, transparent); }
+.dashboard-shell main, .dashboard-shell [role="main"] { animation: dashboard-enter .45s ease both; }
+.dashboard-shell .rounded-xl, .dashboard-shell .rounded-2xl { box-shadow: inset 0 1px 0 rgb(255 255 255 / .035); }
+@keyframes dashboard-enter { from { opacity: .2; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .dashboard-shell main, .dashboard-shell [role="main"] { animation: none; } }
+
+
 /* ===== Also fix these in globals.css ===== */
 /* 1. In @theme inline, replace the two circular font lines:
       --font-mono: var(--font-mono-src);

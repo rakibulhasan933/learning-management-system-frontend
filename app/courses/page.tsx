@@ -66,17 +66,21 @@ export default async function CoursesPage({ searchParams }: CoursesPageProps) {
       <main className="courses-page px-4 py-8 sm:px-6 sm:py-12">
         <section className="mx-auto max-w-6xl">
           <ProgressThread className="mb-8" />
-          <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-end">
+          <div className="courses-hero grid gap-8 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-end">
             <div>
-              <p className="eyebrow">কিউরেটেড লার্নিং লাইব্রেরি</p>
+              <p className="eyebrow">বাংলাদেশের স্কিল-ফার্স্ট লার্নিং প্ল্যাটফর্ম</p>
               <h1 className="mt-3 font-heading text-4xl leading-[1.05] tracking-tight sm:text-5xl">
-                যে দক্ষতা আপনার পরের দরজা খুলবে
+                শিখুন আজ, এগিয়ে থাকুন আগামীকাল
               </h1>
               <p className="mt-5 max-w-xl text-base leading-7 text-muted-foreground">
-                {data.pagination.total} published{" "}
-                {data.pagination.total === 1 ? "course" : "courses"}, each with
-                a full outline and verified enrollment.
+                বাংলায় সাজানো, মেন্টর-গাইডেড কোর্সে নিজের ক্যারিয়ারকে পরের স্তরে নিয়ে যান।
+                {" "}{data.pagination.total}টি যাচাই করা কোর্স আপনার অপেক্ষায়।
               </p>
+              <div className="mt-7 flex flex-wrap gap-3 text-xs text-muted-foreground">
+                <span className="course-trust-pill">ক্যারিয়ার-রেডি স্কিল</span>
+                <span className="course-trust-pill">বাংলাদেশি মেন্টর</span>
+                <span className="course-trust-pill">সার্টিফিকেটসহ</span>
+              </div>
             </div>
             <CourseFilterForm
               defaults={{

@@ -315,7 +315,7 @@ export function DashboardShell({ children, profile }: DashboardShellProps) {
   }, [sidebarCollapsed])
 
   return (
-    <div className="flex h-screen flex-col overflow-hidden bg-background text-foreground">
+    <div className="dashboard-shell flex h-screen flex-col overflow-hidden bg-background text-foreground">
       <header className="fixed inset-x-0 top-0 z-40 flex h-16 items-center justify-between gap-4 border-b border-border bg-background/92 px-4 backdrop-blur-md sm:px-6">
         <div className="flex min-w-0 items-center gap-3">
           <Button
@@ -329,7 +329,7 @@ export function DashboardShell({ children, profile }: DashboardShellProps) {
             <Menu className="size-4" />
             <span className="sr-only">Open sidebar menu</span>
           </Button>
-          <BrandMark href={getDashboardPath(profile.role)} size="sm" />
+          <BrandMark className="text-xl" />
           <span className="hidden border-l border-border pl-3 font-mono text-[11px] text-muted-foreground sm:inline">
             {profile.role} workspace
           </span>
