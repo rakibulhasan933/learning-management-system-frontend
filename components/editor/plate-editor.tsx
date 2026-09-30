@@ -6,7 +6,6 @@ import { normalizeStaticValue } from 'platejs';
 import { Plate, usePlateEditor } from 'platejs/react';
 
 import { EditorKit } from '@/components/editor/editor-kit';
-import { SettingsDialog } from '@/components/editor/settings-dialog';
 import { Editor, EditorContainer } from '@/components/ui/editor';
 
 export function PlateEditor() {
@@ -21,7 +20,6 @@ export function PlateEditor() {
         <Editor variant="demo" />
       </EditorContainer>
 
-      <SettingsDialog />
     </Plate>
   );
 }
@@ -147,43 +145,6 @@ const value = normalizeStaticValue([
   //   },
   //   type: 'p',
   // },
-  // AI Section
-  {
-    children: [{ text: 'AI-Powered Editing' }],
-    type: 'h2',
-  },
-  {
-    children: [
-      { text: 'Boost your productivity with integrated ' },
-      {
-        children: [{ text: 'AI SDK' }],
-        type: 'a',
-        url: '/docs/ai',
-      },
-      { text: '. Press ' },
-      { kbd: true, text: '⌘+J' },
-      { text: ' or ' },
-      { kbd: true, text: 'Space' },
-      { text: ' in an empty line to:' },
-    ],
-    type: 'p',
-  },
-  {
-    children: [
-      { text: 'Generate content (continue writing, summarize, explain)' },
-    ],
-    indent: 1,
-    listStyleType: 'disc',
-    type: 'p',
-  },
-  {
-    children: [
-      { text: 'Edit existing text (improve, fix grammar, change tone)' },
-    ],
-    indent: 1,
-    listStyleType: 'disc',
-    type: 'p',
-  },
   // Core Features Section (Combined)
   {
     children: [{ text: 'Rich Content Editing' }],
@@ -366,29 +327,6 @@ const value = normalizeStaticValue([
               { children: [{ bold: true, text: 'Tiptap' }], type: 'p' },
             ],
             type: 'th',
-          },
-        ],
-        type: 'tr',
-      },
-      {
-        children: [
-          {
-            children: [{ children: [{ text: 'AI' }], type: 'p' }],
-            type: 'td',
-          },
-          {
-            children: [
-              {
-                attributes: { align: 'center' },
-                children: [{ text: '✅' }],
-                type: 'p',
-              },
-            ],
-            type: 'td',
-          },
-          {
-            children: [{ children: [{ text: 'Paid Extension' }], type: 'p' }],
-            type: 'td',
           },
         ],
         type: 'tr',
