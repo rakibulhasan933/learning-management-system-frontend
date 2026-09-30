@@ -46,7 +46,7 @@ export default async function EditInstructorCoursePage({
   ])
 
   return (
-    <main className="min-h-screen bg-background text-foreground">
+    <main className="instructor-course-editor min-h-screen bg-background text-foreground">
       <section className="mx-auto grid max-w-5xl gap-5">
         <div className="space-y-3">
           <ProgressThread />
@@ -55,10 +55,10 @@ export default async function EditInstructorCoursePage({
             href="/dashboard/instructor/courses"
           >
             <ArrowLeft className="h-3 w-3" />
-            Back to courses
+            কোর্স তালিকায় ফিরুন
           </Link>
           <p className="font-mono text-sm text-muted-foreground">
-            Editing {course.slug}
+            সম্পাদনা হচ্ছে · {course.slug}
           </p>
           <h1 className="font-heading text-3xl tracking-tight sm:text-4xl">
             {course.title}
@@ -76,7 +76,7 @@ export default async function EditInstructorCoursePage({
             <CourseForm
               action={updateInstructorCourseAction}
               course={course}
-              submitLabel="Save changes"
+              submitLabel="পরিবর্তন সংরক্ষণ করুন"
             />
           }
           settings={
@@ -85,7 +85,7 @@ export default async function EditInstructorCoursePage({
                 <div className="flex items-center gap-2">
                   <AlertTriangle className="h-4 w-4 text-destructive" />
                   <h3 className="font-heading text-sm font-medium text-destructive">
-                    Danger zone
+                    সতর্কতা অঞ্চল
                   </h3>
                 </div>
                 <form
@@ -103,7 +103,7 @@ export default async function EditInstructorCoursePage({
                     pendingLabel="Deleting course..."
                     variant="destructive"
                   >
-                    Delete course
+                    কোর্স মুছে ফেলুন
                   </SubmitButton>
                 </form>
               </CardContent>

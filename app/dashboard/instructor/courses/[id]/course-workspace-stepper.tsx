@@ -18,38 +18,38 @@ const steps = [
   {
     number: "01",
     icon: BookOpen,
-    title: "Course details",
+    title: "কোর্সের তথ্য",
     description:
-      "Update title, thumbnail, description, price, and publish status.",
+      "শিরোনাম, থাম্বনেইল, বিবরণ, মূল্য ও প্রকাশের অবস্থা আপডেট করুন।",
     path: "edit?step=details",
-    action: "Open details",
+    action: "তথ্য খুলুন",
   },
   {
     number: "02",
     icon: Layers3,
-    title: "Build course content",
+    title: "কোর্সের কনটেন্ট তৈরি করুন",
     description:
       "Create milestones and modules. Each module can contain multiple videos, PDFs, quizzes, and assignments.",
     path: "edit?step=content",
-    action: "Open builder",
+    action: "বিল্ডার খুলুন",
   },
   {
     number: "03",
     icon: Users,
-    title: "Student progress",
+    title: "শিক্ষার্থীর অগ্রগতি",
     description:
       "Review enrollments, completion progress, and the latest learning activity.",
     path: "students",
-    action: "View students",
+    action: "শিক্ষার্থী দেখুন",
   },
   {
     number: "04",
     icon: Settings2,
-    title: "Course settings",
+    title: "কোর্স সেটিংস",
     description:
       "Manage course actions and the danger zone from one separate workspace.",
     path: "edit?step=settings",
-    action: "Open settings",
+    action: "সেটিংস খুলুন",
   },
 ] as const
 
@@ -69,12 +69,12 @@ export function CourseWorkspaceStepper({ courseId }: { courseId: string }) {
   return (
     <section className="grid gap-4" aria-labelledby="course-steps-title">
       <div>
-        <p className="font-mono text-xs text-muted-foreground">Next steps</p>
+        <p className="font-mono text-xs text-muted-foreground">পরবর্তী ধাপ</p>
         <h2
           className="mt-2 font-heading text-2xl tracking-tight"
           id="course-steps-title"
         >
-          Manage this course step by step
+          ধাপে ধাপে এই কোর্স পরিচালনা করুন
         </h2>
       </div>
 
@@ -121,16 +121,16 @@ export function CourseWorkspaceStepper({ courseId }: { courseId: string }) {
             variant="outline"
           >
             <ChevronLeft className="size-4" />
-            Previous
+            আগের ধাপ
           </Button>
           <span className="font-mono text-xs text-muted-foreground">
-            Choose a step to continue
+            চালিয়ে যেতে একটি ধাপ বেছে নিন
           </span>
           <Button
             disabled={activeIndex === steps.length - 1}
             onClick={() => openStep(activeIndex + 1)}
           >
-            Next
+পরের ধাপ
             <ChevronRight className="size-4" />
           </Button>
         </div>

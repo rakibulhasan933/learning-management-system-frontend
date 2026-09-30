@@ -668,6 +668,14 @@
 .course-trust-pill { border: 1px solid color-mix(in srgb, var(--primary) 25%, var(--border)); border-radius: 999px; padding: .55rem .8rem; background: color-mix(in srgb, var(--background) 32%, transparent); }
 .dashboard-shell { background-image: linear-gradient(to bottom, color-mix(in srgb, var(--primary) 3%, transparent), transparent 32rem); }
 .instructor-page { position: relative; }
+.instructor-course-workspace, .instructor-course-editor { position: relative; }
+.instructor-course-workspace::before, .instructor-course-editor::before { position: absolute; top: -4rem; right: -3rem; width: 17rem; height: 17rem; border: 1px solid color-mix(in srgb, var(--primary) 17%, transparent); border-radius: 50%; content: ""; pointer-events: none; box-shadow: 0 0 0 2rem color-mix(in srgb, var(--primary) 4%, transparent), 0 0 0 5rem color-mix(in srgb, var(--primary) 2%, transparent); }
+.instructor-course-workspace > *, .instructor-course-editor > * { position: relative; z-index: 1; }
+.instructor-course-workspace h1, .instructor-course-editor h1 { max-width: 18ch; text-wrap: balance; }
+.instructor-course-workspace section, .instructor-course-editor section { border-color: color-mix(in srgb, var(--primary) 16%, var(--border)); }
+.instructor-course-workspace [aria-labelledby="course-steps-title"] > div:last-child, .instructor-course-editor [role="tablist"] { box-shadow: inset 0 1px 0 rgb(255 255 255 / .04), 0 24px 55px -42px rgb(0 0 0 / .85); }
+.instructor-course-editor .rounded-3xl { border-color: color-mix(in srgb, var(--primary) 18%, var(--border)); box-shadow: 0 24px 60px -48px rgb(0 0 0 / .9); }
+@media (max-width: 640px) { .instructor-course-workspace::before, .instructor-course-editor::before { width: 10rem; height: 10rem; top: -2rem; right: -5rem; } }
 .instructor-page::before { position: absolute; top: -5rem; right: -4rem; width: 18rem; height: 18rem; border: 1px solid color-mix(in srgb, var(--primary) 17%, transparent); border-radius: 50%; content: ""; pointer-events: none; box-shadow: 0 0 0 2rem color-mix(in srgb, var(--primary) 4%, transparent), 0 0 0 5rem color-mix(in srgb, var(--primary) 2%, transparent); }
 .instructor-page > * { position: relative; z-index: 1; }
 .instructor-page [data-slot="card"], .instructor-page .interactive-card { border-color: color-mix(in srgb, var(--primary) 15%, var(--border)); background: color-mix(in srgb, var(--card) 88%, transparent); box-shadow: inset 0 1px 0 rgb(255 255 255 / .04); transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease; }

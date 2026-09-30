@@ -24,15 +24,15 @@ export default async function InstructorCourseWorkspacePage({
   )
 
   return (
-    <div className="grid gap-8">
+    <div className="instructor-course-workspace grid gap-8">
       <PageHeader
         action={
           <Button asChild variant="outline">
-            <Link href="/dashboard/instructor/courses">All courses</Link>
+            <Link href="/dashboard/instructor/courses">সব কোর্স</Link>
           </Button>
         }
-        eyebrow="Course workspace"
-        lede="Work through one clear step at a time. Choose a workspace below to continue."
+        eyebrow="কোর্স ওয়ার্কস্পেস"
+        lede="একটি একটি করে ধাপ সম্পন্ন করুন। নিচের ওয়ার্কস্পেস থেকে কাজ শুরু করুন।"
         title={course.title}
       />
 
