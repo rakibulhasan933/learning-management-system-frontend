@@ -121,6 +121,19 @@ export default async function AdminCoursesPage() {
                       </div>
                     </div>
                     <div className="flex items-start gap-2">
+                      <Tag className="mt-0.5 size-3.5 shrink-0 text-muted-foreground" />
+                      <div>
+                        <dt className="text-xs tracking-wide text-muted-foreground">
+                          Category
+                        </dt>
+                        <dd className="font-mono text-foreground">
+                          {categoryResponse.categories.find(
+                            (category) => category.slug === course.category
+                          )?.name ?? course.category ?? "No category"}
+                        </dd>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-2">
                       <Coins className="mt-0.5 size-3.5 shrink-0 text-muted-foreground" />
                       <div>
                         <dt className="text-xs tracking-wide text-muted-foreground">
@@ -177,13 +190,19 @@ export default async function AdminCoursesPage() {
                   >
                     <input name="courseId" type="hidden" value={course.id} />
                     <select
-                      className="h-10 min-w-0 flex-1 rounded-xl border border-input bg-input/30 px-2 text-xs"
+                      className="h-10 min-w-0 flex-1 rounded-xl border border-input bg-input/30 px-2 text-xs text-foreground [&>option]:bg-card [&>option]:text-foreground"
                       defaultValue={course.category ?? ""}
                       name="category"
                     >
-                      <option value="">No category</option>
+                      <option className="bg-card text-foreground" value="">
+                        No category
+                      </option>
                       {categoryResponse.categories.map((category) => (
-                        <option key={category.id} value={category.slug}>
+                        <option
+                          className="bg-card text-foreground"
+                          key={category.id}
+                          value={category.slug}
+                        >
                           {category.name}
                         </option>
                       ))}

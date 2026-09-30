@@ -1,7 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { Check, Copy, Phone } from "lucide-react"
+import { useFormStatus } from "react-dom"
+import { Check, Copy, Loader2, Phone } from "lucide-react"
 
 import { submitPaymentProofAction } from "@/app/courses/[slug]/enroll/actions"
 import { SubmitButton } from "@/components/submit-button"
@@ -15,6 +16,32 @@ const gatewayDetails = {
 } as const
 
 type Gateway = keyof typeof gatewayDetails
+
+function PaymentProcessingOverlay() {
+  const { pending } = useFormStatus()
+
+  if (!pending) return null
+
+  return (
+    <div
+      aria-live="polite"
+      className="fixed inset-0 z-50 flex min-h-screen items-center justify-center bg-slate-950/75 px-5 backdrop-blur-sm"
+      role="status"
+    >
+      <div className="w-full max-w-sm rounded-3xl border border-white/15 bg-white p-8 text-center shadow-2xl">
+        <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-slate-100 text-slate-700">
+          <Loader2 className="size-8 animate-spin" />
+        </div>
+        <h2 className="mt-6 text-xl font-bold text-slate-900">
+          আপনার payment যাচাই করা হচ্ছে
+        </h2>
+        <p className="mt-2 text-sm leading-6 text-slate-500">
+          অনুগ্রহ করে অপেক্ষা করুন। Payment gateway থেকে তথ্য যাচাই করা হচ্ছে।
+        </p>
+      </div>
+    </div>
+  )
+}
 
 type GatewayCheckoutProps = {
   amount: string
@@ -67,8 +94,8 @@ export default function GatewayCheckout({
   }
 
   return (
-    <main className="payment-checkout flex min-h-screen items-center justify-center bg-slate-100 px-3 py-8 sm:px-4">
-      <div className="payment-card w-full max-w-lg overflow-hidden rounded-3xl bg-white shadow-xl">
+    <main className="payment-checkout flex min-h-screen items-center justify-center bg-slate-100 px-3 py-8 text-slate-900 sm:px-4">
+      <div className="payment-card w-full max-w-lg overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl">
         <div className="border-b border-slate-100 px-5 py-6 sm:px-8">
           <div className="flex items-center justify-between gap-4">
             <div>
@@ -159,7 +186,7 @@ export default function GatewayCheckout({
                   </div>
                   <Button
                     aria-label="Copy receiver number"
-                    className="size-10 shrink-0 text-slate-700"
+                    className="size-10 shrink-0 text-slate-700 hover:bg-slate-100 hover:text-slate-900"
                     onClick={copyReceiverNumber}
                     type="button"
                     variant="ghost"
@@ -195,6 +222,7 @@ export default function GatewayCheckout({
 
           <div className="grid grid-cols-2 gap-3 p-4">
             <Button
+              className="border-slate-300 bg-white text-slate-700 hover:border-slate-400 hover:bg-slate-50 hover:text-slate-900"
               onClick={() => (step === 1 ? history.back() : setStep(1))}
               type="button"
               variant="outline"
@@ -203,6 +231,7 @@ export default function GatewayCheckout({
             </Button>
             {step === 1 ? (
               <Button
+                className="text-white hover:text-white"
                 disabled={!validPhone}
                 onClick={proceed}
                 style={{ backgroundColor: details.accent }}
@@ -212,14 +241,16 @@ export default function GatewayCheckout({
               </Button>
             ) : (
               <SubmitButton
+                className="text-white hover:text-white"
                 disabled={!validTransaction}
-                pendingLabel="Verifying payment…"
+                pendingLabel="আপনার payment যাচাই করা হচ্ছে…"
                 style={{ backgroundColor: details.accent }}
               >
                 Verify payment
               </SubmitButton>
             )}
           </div>
+          <PaymentProcessingOverlay />
         </form>
 
         <div className="border-t border-slate-100 px-5 py-5 text-center sm:px-8">

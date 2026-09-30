@@ -72,7 +72,10 @@ export function CouponSettingsForm({ value }: { value: string }) {
 
   function renderRows(items: Array<{ coupon: Coupon; index: number }>) {
     return items.map(({ coupon, index }) => (
-      <div className="grid gap-2 rounded-xl border border-border bg-background p-3 sm:grid-cols-[1fr_140px_110px_130px_180px_auto_auto]" key={index}>
+      <div
+        className="grid gap-3 rounded-2xl border border-border bg-background/70 p-4 shadow-sm transition-colors hover:border-primary/30 sm:grid-cols-2 lg:grid-cols-[1.35fr_1fr_0.8fr_1fr] xl:grid-cols-[1.4fr_1fr_0.8fr_1fr_0.9fr_1.35fr_auto_auto]"
+        key={index}
+      >
         <Input
           aria-label="Coupon code"
           onChange={(event) => update(index, { code: event.target.value })}
@@ -120,7 +123,7 @@ export function CouponSettingsForm({ value }: { value: string }) {
           type="number"
           value={coupon.limit}
         />
-        <label className="flex items-center gap-2 whitespace-nowrap px-2 text-xs text-muted-foreground">
+        <label className="flex items-center gap-2 whitespace-nowrap rounded-xl border border-border px-3 text-xs text-muted-foreground">
           <input
             checked={!coupon.limit}
             onChange={(event) =>
@@ -137,13 +140,14 @@ export function CouponSettingsForm({ value }: { value: string }) {
           value={coupon.expiresAt}
         />
         <Button
+          className="w-full"
           onClick={() => update(index, { enabled: !coupon.enabled })}
           type="button"
           variant="outline"
         >
           {coupon.enabled ? "Disable" : "Enable"}
         </Button>
-        <Button onClick={() => remove(index)} type="button" variant="ghost">
+        <Button className="w-full" onClick={() => remove(index)} type="button" variant="ghost">
           Remove
         </Button>
       </div>
@@ -185,20 +189,30 @@ export function CouponSettingsForm({ value }: { value: string }) {
     >
       <input ref={hiddenValue} name="payment_coupons" type="hidden" />
 
-      <div className="grid gap-5">
+      <div className="grid gap-7">
         <section className="grid gap-3">
-          <div className="flex items-center justify-between">
-            <h3 className="font-heading text-lg">Active coupons ({activeCoupons.length})</h3>
-            <span className="text-xs text-secondary">Available to students</span>
+          <div className="flex flex-wrap items-end justify-between gap-2 border-b border-border pb-3">
+            <div>
+              <h3 className="font-heading text-lg">Active coupons</h3>
+              <p className="mt-1 text-xs text-muted-foreground">Available to students at checkout.</p>
+            </div>
+            <span className="rounded-full bg-secondary/10 px-2.5 py-1 font-mono text-xs text-secondary">
+              {activeCoupons.length} active
+            </span>
           </div>
           {renderRows(activeCoupons.slice((activePage - 1) * pageSize, activePage * pageSize))}
           {activeCoupons.length === 0 ? <p className="text-sm text-muted-foreground">No active coupons.</p> : null}
           {renderPagination(activeCoupons.length, activePage, setActivePage)}
         </section>
-        <section className="grid gap-3 border-t border-border pt-5">
-          <div className="flex items-center justify-between">
-            <h3 className="font-heading text-lg text-muted-foreground">Disabled coupons ({disabledCoupons.length})</h3>
-            <span className="text-xs text-muted-foreground">Not available to students</span>
+        <section className="grid gap-3 border-t border-border pt-6">
+          <div className="flex flex-wrap items-end justify-between gap-2 border-b border-border pb-3">
+            <div>
+              <h3 className="font-heading text-lg text-muted-foreground">Disabled coupons</h3>
+              <p className="mt-1 text-xs text-muted-foreground">Keep old campaigns for reporting without making them redeemable.</p>
+            </div>
+            <span className="rounded-full bg-muted px-2.5 py-1 font-mono text-xs text-muted-foreground">
+              {disabledCoupons.length} disabled
+            </span>
           </div>
           {renderRows(disabledCoupons.slice((disabledPage - 1) * pageSize, disabledPage * pageSize))}
           {disabledCoupons.length === 0 ? <p className="text-sm text-muted-foreground">No disabled coupons.</p> : null}
@@ -206,7 +220,7 @@ export function CouponSettingsForm({ value }: { value: string }) {
         </section>
       </div>
 
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="flex flex-wrap items-center gap-3 border-t border-border pt-5">
         <Button
           onClick={() =>
             setCoupons((current) => [

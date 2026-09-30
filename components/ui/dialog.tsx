@@ -1,9 +1,9 @@
 "use client"
 
 import * as React from "react"
+import { cn } from "cn"
 import { Dialog as DialogPrimitive } from "radix-ui"
 
-import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { Cancel01Icon } from "@hugeicons/core-free-icons"
@@ -69,15 +69,16 @@ function DialogContent({
       >
         {children}
         {showCloseButton && (
-          <Button
-            variant="ghost"
-            className="absolute top-4 right-4"
-            size="icon-sm"
-            render={<DialogPrimitive.Close data-slot="dialog-close" />}
-          >
-            <HugeiconsIcon icon={Cancel01Icon} strokeWidth={2} />
-            <span className="sr-only">Close</span>
-          </Button>
+          <DialogPrimitive.Close data-slot="dialog-close" asChild>
+            <Button
+              variant="ghost"
+              className="absolute top-4 right-4"
+              size="icon-sm"
+            >
+              <HugeiconsIcon icon={Cancel01Icon} strokeWidth={2} />
+              <span className="sr-only">Close</span>
+            </Button>
+          </DialogPrimitive.Close>
         )}
       </DialogPrimitive.Content>
     </DialogPortal>
@@ -113,12 +114,9 @@ function DialogFooter({
     >
       {children}
       {showCloseButton && (
-        <Button
-          variant="outline"
-          render={<DialogPrimitive.Close data-slot="dialog-close" />}
-        >
-          Close
-        </Button>
+        <DialogPrimitive.Close asChild>
+          <Button variant="outline">Close</Button>
+        </DialogPrimitive.Close>
       )}
     </div>
   )

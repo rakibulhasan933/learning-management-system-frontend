@@ -37,7 +37,7 @@ function PageHeader({
   return (
     <header
       data-slot="page-header"
-      className={cn("w-full", className)}
+      className={cn("w-full text-left", className)}
       {...props}
     >
       {thread ? (
@@ -48,7 +48,7 @@ function PageHeader({
 
       <div
         className={cn(
-          "flex flex-col gap-5",
+          "flex flex-col items-start gap-5 text-left",
           action && "sm:flex-row sm:items-end sm:justify-between sm:gap-8"
         )}
       >

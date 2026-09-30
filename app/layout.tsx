@@ -10,6 +10,7 @@ import {
 import "@uploadthing/react/styles.css"
 import "./globals.css"
 import { Toaster } from "@/components/ui/sonner"
+import { TooltipProvider } from "@/components/ui/tooltip"
 import { BackgroundRipple } from "@/components/background-ripple"
 
 // English / Latin fonts (unchanged)
@@ -93,8 +94,10 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-screen font-sans antialiased">
-        <BackgroundRipple />
-        <div className="relative z-10">{children}</div>
+        <TooltipProvider>
+          <BackgroundRipple />
+          <div className="relative z-10">{children}</div>
+        </TooltipProvider>
         <Toaster position="bottom-right" />
       </body>
     </html>

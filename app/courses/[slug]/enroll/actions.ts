@@ -144,5 +144,7 @@ export async function submitPaymentProofAction(formData: FormData) {
 
   revalidatePath("/dashboard/student")
   revalidatePath(`/learn/${paidOrder.courseId}`)
-  redirect("/dashboard/student")
+  redirect(
+    `/payment/success?course=${encodeURIComponent(paidOrder.courseTitle)}`
+  )
 }
