@@ -33,9 +33,9 @@ export default async function StudentClassesPage() {
                 <Link href="/courses">কোর্স দেখুন</Link>
               </Button>
             }
-            description="Verified enrollments will appear here."
+            description="যাচাই করা এনরোলমেন্ট এখানে দেখা যাবে।"
             icon={<BookOpen />}
-            title="No active classes yet"
+            title="এখনও কোনো সক্রিয় ক্লাস নেই"
           />
         </div>
       ) : (
@@ -59,7 +59,7 @@ export default async function StudentClassesPage() {
               </div>
               <CardContent className="flex min-h-40 flex-col">
                 <p className="font-mono text-xs text-muted-foreground">
-                  Enrolled {formatDate(course.createdAt)}
+                  এনরোল করা হয়েছে {formatDate(course.createdAt)}
                 </p>
                 <h2 className="mt-2 font-heading text-xl leading-snug">
                   {course.courseTitle}

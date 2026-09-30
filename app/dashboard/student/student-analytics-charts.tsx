@@ -50,12 +50,12 @@ export function WeeklyActivityChart({
           />
           <Tooltip
             contentStyle={tooltipStyle}
-            formatter={(value) => [`${value} min`, "Watch time"]}
+            formatter={(value) => [`${value} মিনিট`, "দেখার সময়"]}
           />
           <Line
             dataKey="minutes"
             dot={{ fill: "var(--primary)", r: 3, strokeWidth: 0 }}
-            name="Watch time"
+            name="দেখার সময়"
             stroke="var(--primary)"
             strokeWidth={2}
             type="monotone"
@@ -96,12 +96,12 @@ export function QuizPerformanceChart({
           />
           <Tooltip
             contentStyle={tooltipStyle}
-            formatter={(value) => [`${value}%`, "Score"]}
+            formatter={(value) => [`${value}%`, "স্কোর"]}
           />
           <Bar
             dataKey="percentage"
             fill="var(--secondary)"
-            name="Score"
+            name="স্কোর"
             radius={[4, 4, 0, 0]}
           />
         </BarChart>

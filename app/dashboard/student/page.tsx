@@ -42,33 +42,33 @@ export default async function StudentDashboardPage() {
         }
         className="text-left"
         eyebrow="শিক্ষার্থী ড্যাশবোর্ড"
-        lede={`Welcome back, ${profile.fullName?.trim() || profile.email}. Your learning progress at a glance.`}
+        lede={`স্বাগতম, ${profile.fullName?.trim() || profile.email}। এক নজরে আপনার শেখার অগ্রগতি দেখুন।`}
         title="আপনার শেখার সারাংশ"
       />
 
       <section
-        aria-label="Learning summary"
+        aria-label="শেখার সারাংশ"
         className="grid grid-cols-2 gap-3 lg:grid-cols-4"
       >
         <Metric
           label="সম্পন্ন"
-          note={`${analytics.completedLectures}/${analytics.totalLectures} lectures`}
+          note={`${analytics.completedLectures}/${analytics.totalLectures}টি লেকচার`}
           value={`${analytics.completionPercentage}%`}
         />
         <Metric
           label="দেখার সময়"
-          note="Across all classes"
+          note="সব ক্লাস মিলিয়ে"
           value={formatDuration(analytics.watchTimeSeconds) ?? "0m"}
         />
         <Metric
           label="কুইজ গড়"
-          note={`${analytics.quizAttempts} attempts`}
+          note={`${analytics.quizAttempts}টি চেষ্টা`}
           value={`${analytics.quizAveragePercentage}%`}
         />
         <Metric
           icon={<Flame className="size-4 text-primary" />}
-          label="Streak"
-          note="Active learning days"
+          label="শেখার ধারাবাহিকতা"
+          note="সক্রিয় শেখার দিন"
           value={`${analytics.learningStreakDays}d`}
         />
       </section>
@@ -84,7 +84,7 @@ export default async function StudentDashboardPage() {
                 </p>
               </div>
               <h2 className="max-w-xl font-heading text-3xl font-normal tracking-tight sm:text-4xl">
-                Pick up where you left off
+                যেখান থেকে থেমেছিলেন, সেখান থেকেই শুরু করুন
               </h2>
               <p className="mt-3 max-w-xl text-sm leading-6 text-muted-foreground">
                 আপনার লেকচার, মূল্যায়ন এবং কোর্সের উপকরণগুলো আমার ক্লাসে গুছিয়ে রাখা আছে।
@@ -94,7 +94,7 @@ export default async function StudentDashboardPage() {
               <Button asChild className="w-fit">
                 <Link href={`/learn/${activeCourse.courseId}`}>
                   <PlayCircle />
-                  Continue {activeCourse.courseTitle}
+                  {activeCourse.courseTitle} চালিয়ে যান
                 </Link>
               </Button>
             ) : (
@@ -113,15 +113,15 @@ export default async function StudentDashboardPage() {
             <div className="flex items-center gap-3">
               <BarChart3 className="size-4 text-primary" />
               <p className="font-mono text-xs text-muted-foreground">
-                Quick access
+                দ্রুত অ্যাক্সেস
               </p>
             </div>
             <div className="mt-6 grid gap-3">
               <QuickLink href="/dashboard/student/analytics">
-                Open analytics
+                অ্যানালিটিক্স দেখুন
               </QuickLink>
               <QuickLink href="/dashboard/student/orders">
-                View payment status
+                পেমেন্টের অবস্থা দেখুন
               </QuickLink>
             </div>
           </CardContent>
@@ -131,7 +131,7 @@ export default async function StudentDashboardPage() {
       <div className="flex items-center gap-3 text-xs text-muted-foreground">
         <Target className="size-4 text-primary" />
         <span>
-          Keep a steady pace and return to your next unfinished lecture.
+          নিয়মিত শেখার অভ্যাস রাখুন এবং অসম্পন্ন পরবর্তী লেকচারে ফিরে আসুন।
         </span>
       </div>
     </div>
