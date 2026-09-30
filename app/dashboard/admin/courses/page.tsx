@@ -149,7 +149,7 @@ export default async function AdminCoursesPage() {
                   <form action={updateCourseEnrollmentSettingsAction} className="grid gap-2 rounded-xl border border-border bg-background p-3">
                     <input name="courseId" type="hidden" value={course.id} />
                     <label className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <input defaultChecked={course.enrollmentEnabled} name="enrollmentEnabled" type="checkbox" />
+                      <input defaultChecked={course.enrollmentEnabled !== false} name="enrollmentEnabled" type="checkbox" />
                       Enrollment open
                     </label>
                     <input

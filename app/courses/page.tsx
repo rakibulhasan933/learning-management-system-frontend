@@ -40,7 +40,7 @@ function formatPrice(currency: string, price: string) {
 
 function enrollmentIsOpen(course: CourseListResponse["courses"][number]) {
   return (
-    course.enrollmentEnabled &&
+    course.enrollmentEnabled !== false &&
     (!course.enrollmentEndsAt || new Date(course.enrollmentEndsAt) > new Date())
   )
 }

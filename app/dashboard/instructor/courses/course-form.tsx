@@ -35,11 +35,18 @@ import { cn } from "@/lib/utils"
 interface CourseFormProps {
   action: (formData: FormData) => Promise<void>
   course?: InstructorCourseDto
+  existingSlugs?: string[]
   submitLabel: string
 }
 
-export function CourseForm({ action, course, submitLabel }: CourseFormProps) {
+export function CourseForm({
+  action,
+  course,
+  existingSlugs = [],
+  submitLabel,
+}: CourseFormProps) {
   const [step, setStep] = useState(1)
+  const [slug, setSlug] = useState(course?.slug ?? "")
   const steps = [
     { label: "Basics", note: "Title and description" },
     { label: "Pricing", note: "Category and price" },
@@ -110,9 +117,19 @@ export function CourseForm({ action, course, submitLabel }: CourseFormProps) {
                     defaultValue={course?.slug}
                     label="Slug"
                     name="slug"
+                    onChange={(event) => setSlug(event.target.value)}
                     pattern="[a-z0-9]+(-[a-z0-9]+)*"
                     required
                   />
+                  {existingSlugs.some(
+                    (existingSlug) =>
+                      existingSlug.toLowerCase() === slug.trim().toLowerCase() &&
+                      existingSlug.toLowerCase() !== course?.slug.toLowerCase()
+                  ) ? (
+                    <p className="mt-1.5 pl-1 text-xs text-destructive">
+                      This slug is already in use. Choose a different one.
+                    </p>
+                  ) : null}
                   <p className="mt-1.5 pl-1 text-xs text-muted-foreground">
                     Lowercase letters, numbers, and hyphens only — e.g.{" "}
                     <span className="font-mono">intro-to-react</span>
@@ -278,6 +295,11 @@ export function CourseForm({ action, course, submitLabel }: CourseFormProps) {
 
       <SubmitButton
         className="w-full sm:w-fit sm:px-8"
+        disabled={existingSlugs.some(
+          (existingSlug) =>
+            existingSlug.toLowerCase() === slug.trim().toLowerCase() &&
+            existingSlug.toLowerCase() !== course?.slug.toLowerCase()
+        )}
         pendingLabel={`${submitLabel}...`}
       >
         {submitLabel}

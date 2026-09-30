@@ -36,7 +36,7 @@ export const dynamic = "force-dynamic"
 
 function enrollmentIsOpen(course: CourseDetailDto) {
   return (
-    course.enrollmentEnabled &&
+    course.enrollmentEnabled !== false &&
     (!course.enrollmentEndsAt || new Date(course.enrollmentEndsAt) > new Date())
   )
 }

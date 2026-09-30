@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 import type {
   InstructorCourseDto,
+  InstructorCourseListResponse,
   InstructorAssignmentDto,
   InstructorLectureMaterialUploadResponse,
   InstructorLectureDto,
@@ -97,6 +98,16 @@ function getLecturePayload(formData: FormData) {
 }
 
 export async function createInstructorCourseAction(formData: FormData) {
+  const slug = getRequiredString(formData, "slug")
+  const existing = await authenticatedApiFetch<InstructorCourseListResponse>(
+    "/instructor/courses",
+    { cache: "no-store" }
+  )
+
+  if (existing.courses.some((course) => course.slug.toLowerCase() === slug.toLowerCase())) {
+    throw new Error(`The slug "${slug}" is already in use. Choose a different slug.`)
+  }
+
   const course = await authenticatedApiFetch<InstructorCourseDto>(
     "/instructor/courses",
     {

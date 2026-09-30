@@ -1,6 +1,8 @@
 import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
+import type { InstructorCourseListResponse } from "@/lib/types"
 
+import { authenticatedApiFetch } from "@/lib/api-client"
 import { Button } from "@/components/ui/button"
 import { ProgressThread } from "@/components/ui/progress-thread"
 
@@ -10,6 +12,21 @@ import { CourseForm } from "../course-form"
 export const dynamic = "force-dynamic"
 
 export default function NewInstructorCoursePage() {
+  const dataPromise = authenticatedApiFetch<InstructorCourseListResponse>(
+    "/instructor/courses",
+    { cache: "no-store" }
+  )
+
+  return <NewInstructorCourseForm dataPromise={dataPromise} />
+}
+
+async function NewInstructorCourseForm({
+  dataPromise,
+}: {
+  dataPromise: Promise<InstructorCourseListResponse>
+}) {
+  const data = await dataPromise
+
   return (
     <main className="w-full text-left text-foreground">
       <section className="w-full max-w-4xl">
@@ -40,6 +57,7 @@ export default function NewInstructorCoursePage() {
         <div className="mt-7">
           <CourseForm
             action={createInstructorCourseAction}
+            existingSlugs={data.courses.map((course) => course.slug)}
             submitLabel="Create course"
           />
         </div>
