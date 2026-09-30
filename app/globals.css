@@ -249,7 +249,17 @@
 
 .folio-home-header { background: color-mix(in srgb, #0d1512 94%, transparent) !important; border-color: var(--home-line) !important; }
 .folio-home-header > span { background: #ef6a72; }
-.folio-home-header .text-muted-foreground, .folio-home-header .interactive-link { color: var(--home-muted) !important; }
+.folio-home-header .text-muted-foreground, .folio-home-header .interactive-link { color: var(--home-fg) !important; }
+.site-header-nav-link, header nav .interactive-link { color: var(--foreground) !important; opacity: .86; font-weight: 500; }
+.site-header-nav-link:hover, header nav .interactive-link:hover { color: var(--primary) !important; opacity: 1; }
+.folio-home-header nav .interactive-link { color: var(--home-fg) !important; }
+@media (min-width: 768px) {
+  header > div > nav.hidden { display: flex !important; }
+  header > div > nav.hidden a { color: var(--foreground) !important; }
+  .site-header-actions { display: flex !important; }
+  .site-header-actions a { color: var(--foreground) !important; }
+  .folio-home-header > div > nav.hidden a { color: var(--home-fg) !important; }
+}
 .folio-home-header .bg-card, .folio-home-header details > div { background: var(--home-card) !important; }
 .folio-home-header .text-foreground { color: var(--home-fg) !important; }
 .folio-home-footer { background: var(--home-card) !important; border-color: var(--home-line) !important; }
@@ -297,11 +307,34 @@
 .auth-brand-panel::after { position: absolute; right: 9%; bottom: 12%; width: 9rem; height: 9rem; border: 1px solid color-mix(in srgb, var(--primary) 22%, transparent); border-radius: 50%; content: ""; pointer-events: none; }
 .auth-form-panel { background: color-mix(in srgb, var(--background) 92%, var(--card)); }
 .auth-form-panel > div { position: relative; z-index: 1; }
+.auth-brand-panel { display: none; background: linear-gradient(135deg, color-mix(in srgb, var(--card) 94%, var(--primary)), var(--card)); }
+@media (min-width: 768px) { .auth-brand-panel { display: flex; } }
+.auth-brand-panel::before { position: absolute; top: 18%; right: 12%; width: 18rem; height: 18rem; border: 1px solid color-mix(in srgb, var(--primary) 18%, transparent); border-radius: 50%; content: ""; pointer-events: none; box-shadow: 0 0 0 2rem color-mix(in srgb, var(--primary) 4%, transparent), 0 0 0 5rem color-mix(in srgb, var(--primary) 2%, transparent); }
+.auth-brand-panel h1 { max-width: 9ch; text-wrap: balance; }
+@media (max-width: 767px) { .auth-page::before { inset: 12px; } .auth-form-panel { min-height: 100svh; } }
+@media (min-width: 768px) and (max-width: 1100px) { .auth-brand-panel h1 { font-size: clamp(2.8rem, 5vw, 4.5rem); } .auth-brand-panel .surface-raised { margin-top: 2rem; } }
+
 @media (min-width: 640px) { .folio-card-grid-four { grid-template-columns: repeat(2, 1fr); } .folio-card-grid-three { grid-template-columns: repeat(2, 1fr); } }
 @media (min-width: 720px) { .folio-stats .folio-home-wrap { grid-template-columns: repeat(3, 1fr); } .folio-steps { grid-template-columns: repeat(4, 1fr); } }
 @media (min-width: 900px) { .folio-faq { grid-template-columns: .85fr 1.15fr; } }
 @media (min-width: 960px) { .folio-home-hero-grid { grid-template-columns: 1fr 420px; gap: 72px; padding-block: 96px; } .folio-card-grid-four { grid-template-columns: repeat(4, 1fr); } .folio-card-grid-three { grid-template-columns: repeat(3, 1fr); } }
 @media (max-width: 639px) { .folio-home-wrap { width: min(100% - 32px, 1120px); } .folio-home-btn { padding-inline: 18px; } .folio-order-card { margin-top: 12px; } }
+
+/* Premium catalog and motion language */
+.folio-hero-copy { animation: hero-enter 800ms cubic-bezier(.22, 1, .36, 1) both; }
+.folio-order-card { box-shadow: 0 32px 80px -44px rgb(0 0 0 / .9), inset 0 1px 0 rgb(255 255 255 / .05); }
+.folio-live-dot { display: inline-block; width: .45rem; height: .45rem; margin-right: .35rem; border-radius: 50%; background: var(--home-primary); box-shadow: 0 0 0 .25rem color-mix(in srgb, var(--home-primary) 16%, transparent); animation: live-pulse 2s ease-in-out infinite; }
+.folio-card, .folio-course-card { transition: transform 220ms ease, border-color 220ms ease, background-color 220ms ease; }
+.folio-card:hover, .folio-course-card:hover { transform: translateY(-4px); border-color: color-mix(in srgb, var(--home-primary) 70%, var(--home-line)); }
+.courses-page { position: relative; }
+.courses-page > section > .grid:first-of-type { padding: clamp(1.25rem, 4vw, 3rem); border: 1px solid var(--border); border-radius: 1.5rem; background: color-mix(in srgb, var(--card) 80%, transparent); box-shadow: inset 0 1px 0 rgb(255 255 255 / .04), 0 30px 80px -56px rgb(0 0 0 / .9); }
+.courses-page h1 { max-width: 12ch; font-size: clamp(2.5rem, 6vw, 5rem); font-weight: 600; letter-spacing: -.055em; }
+.courses-page .interactive-card { border-color: color-mix(in srgb, var(--foreground) 12%, transparent); background: color-mix(in srgb, var(--card) 86%, transparent); box-shadow: inset 0 1px 0 rgb(255 255 255 / .035); }
+.courses-page .interactive-card:hover { transform: translateY(-5px); }
+@keyframes hero-enter { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+@keyframes live-pulse { 0%, 100% { opacity: .7; } 50% { opacity: 1; box-shadow: 0 0 0 .4rem color-mix(in srgb, var(--home-primary) 10%, transparent); } }
+@media (prefers-reduced-motion: reduce) { .folio-hero-copy, .folio-live-dot { animation: none; } .folio-card:hover, .folio-course-card:hover, .courses-page .interactive-card:hover { transform: none; } }
+
 
 @layer components {
 
@@ -530,6 +563,33 @@
 
 /* ===== Append this to the END of globals.css ===== */
 
+.background-ripple {
+  --ripple-x: 50vw;
+  --ripple-y: 30vh;
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.72;
+  background-image:
+    radial-gradient(circle at var(--ripple-x) var(--ripple-y), color-mix(in srgb, var(--primary) 14%, transparent) 0, transparent 12rem),
+    linear-gradient(to right, color-mix(in srgb, var(--foreground) 5%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--foreground) 5%, transparent) 1px, transparent 1px);
+  background-size: auto, 64px 64px, 64px 64px;
+  mask-image: linear-gradient(to bottom, black 0%, black 72%, transparent 100%);
+  transition: background-position 700ms ease;
+}
+.background-ripple::after {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at var(--ripple-x) var(--ripple-y), transparent 0 5rem, color-mix(in srgb, var(--primary) 10%, transparent) 5.1rem 5.2rem, transparent 5.3rem 11rem, color-mix(in srgb, var(--primary) 6%, transparent) 11.1rem 11.2rem, transparent 11.3rem);
+  content: "";
+  opacity: 0.65;
+  animation: ripple-breathe 5s ease-in-out infinite;
+}
+@keyframes ripple-breathe { 0%, 100% { transform: scale(.96); opacity: .45; } 50% { transform: scale(1.04); opacity: .85; } }
+@media (prefers-reduced-motion: reduce) { .background-ripple::after { animation: none; } }
+
 @layer components {
   .eyebrow {
     display: inline-flex;
@@ -600,6 +660,20 @@
     animation: none;
   }
 }
+
+/* Bangladesh-first LMS marketplace surfaces */
+.courses-hero { position: relative; overflow: hidden; padding: clamp(1.25rem, 4vw, 3rem); border: 1px solid color-mix(in srgb, var(--primary) 22%, var(--border)); border-radius: 1.5rem; background: linear-gradient(135deg, color-mix(in srgb, var(--primary) 8%, var(--card)), color-mix(in srgb, var(--card) 85%, transparent)); box-shadow: 0 32px 90px -60px rgb(0 0 0 / .8), inset 0 1px 0 rgb(255 255 255 / .05); }
+.courses-hero::after { position: absolute; right: -5rem; bottom: -9rem; width: 21rem; height: 21rem; border: 1px solid color-mix(in srgb, var(--primary) 24%, transparent); border-radius: 50%; content: ""; box-shadow: 0 0 0 2rem color-mix(in srgb, var(--primary) 5%, transparent), 0 0 0 5rem color-mix(in srgb, var(--primary) 3%, transparent); pointer-events: none; }
+.courses-hero > * { position: relative; z-index: 1; }
+.course-trust-pill { border: 1px solid color-mix(in srgb, var(--primary) 25%, var(--border)); border-radius: 999px; padding: .55rem .8rem; background: color-mix(in srgb, var(--background) 32%, transparent); }
+.dashboard-shell { background-image: linear-gradient(to bottom, color-mix(in srgb, var(--primary) 3%, transparent), transparent 32rem); }
+.dashboard-shell header { box-shadow: 0 12px 34px -30px rgb(0 0 0 / .9); }
+.dashboard-shell aside { background: color-mix(in srgb, var(--card) 78%, transparent); }
+.dashboard-shell main, .dashboard-shell [role="main"] { animation: dashboard-enter .45s ease both; }
+.dashboard-shell .rounded-xl, .dashboard-shell .rounded-2xl { box-shadow: inset 0 1px 0 rgb(255 255 255 / .035); }
+@keyframes dashboard-enter { from { opacity: .2; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .dashboard-shell main, .dashboard-shell [role="main"] { animation: none; } }
+
 
 /* ===== Also fix these in globals.css ===== */
 /* 1. In @theme inline, replace the two circular font lines:

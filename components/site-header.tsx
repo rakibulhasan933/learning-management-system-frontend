@@ -43,7 +43,7 @@ export async function SiteHeader({ variant = "default" }: { variant?: "default" 
         <nav className="hidden items-center gap-8 text-sm md:flex">
           {navItems.map((item) => (
             <Link
-              className="interactive-link text-muted-foreground"
+              className="site-header-nav-link interactive-link"
               href={item.href}
               key={item.href}
             >
@@ -52,7 +52,7 @@ export async function SiteHeader({ variant = "default" }: { variant?: "default" 
           ))}
           {profile ? (
             <Link
-              className="interactive-link text-muted-foreground"
+              className="site-header-nav-link interactive-link"
               href={dashboardPath ?? "/dashboard/student"}
             >
               Dashboard
@@ -61,7 +61,7 @@ export async function SiteHeader({ variant = "default" }: { variant?: "default" 
         </nav>
 
         <div className="flex items-center gap-2 sm:gap-3">
-          <div className="hidden items-center gap-3 md:flex">
+          <div className="site-header-actions hidden items-center gap-3 md:flex">
             {profile ? (
               <Button asChild variant="outline">
                 <Link
@@ -88,12 +88,9 @@ export async function SiteHeader({ variant = "default" }: { variant?: "default" 
               </Button>
             ) : (
               <>
-                <Link
-                  className="interactive-link text-sm text-muted-foreground"
-                  href="/auth/login"
-                >
-                  লগইন
-                </Link>
+                <Button asChild variant="outline">
+                  <Link href="/auth/login">লগইন</Link>
+                </Button>
                 <Button asChild>
                   <Link href="/auth/signup">অ্যাকাউন্ট খুলুন</Link>
                 </Button>

@@ -8,31 +8,31 @@ import { Card, CardContent } from "@/components/ui/card"
 import { ProgressThread } from "@/components/ui/progress-thread"
 
 export const metadata: Metadata = {
-  title: "Frequently asked questions",
+  title: "সাধারণ জিজ্ঞাসা",
   description:
     "Answers about courses, payments, verification and learning on Folio.",
 }
 
 const questions = [
   [
-    "How does enrollment work?",
-    "Choose a published course, create an order and complete the payment instructions. Access is activated only after the payment is successfully verified.",
+    "এনরোলমেন্ট কীভাবে কাজ করে?",
+    "প্রকাশিত কোর্স বেছে অর্ডার তৈরি করুন এবং পেমেন্টের নির্দেশনা অনুসরণ করুন। পেমেন্ট সফলভাবে যাচাই হলেই ক্লাসে প্রবেশাধিকার চালু হবে।",
   ],
   [
-    "When do I get course access?",
-    "Paid course access is not opened while payment is pending. After successful verification, the order becomes paid, enrollment becomes active and you can continue to the learning page.",
+    "কখন কোর্সে প্রবেশ করতে পারব?",
+    "পেমেন্ট যাচাই চলাকালীন পেইড কোর্স খোলা হবে না। সফল যাচাইয়ের পর অর্ডার Paid হবে, এনরোলমেন্ট চালু হবে এবং লার্নিং পেজে যেতে পারবেন।",
   ],
   [
-    "Can I use a coupon?",
-    "If a coupon is active, enter it during checkout. The discounted amount is recorded on the order before payment.",
+    "কুপন ব্যবহার করতে পারব?",
+    "কুপন সক্রিয় থাকলে চেকআউটের সময় সেটি দিন। পেমেন্টের আগে অর্ডারে ছাড়ের পরিমাণ দেখানো হবে।",
   ],
   [
-    "Where are course videos stored?",
-    "Videos are delivered through signed, time-limited storage URLs and include a learner email watermark. PDFs and other materials use the configured file storage.",
+    "কোর্সের ভিডিও কোথায় থাকে?",
+    "ভিডিও সময়সীমাবদ্ধ নিরাপদ লিংকের মাধ্যমে দেখানো হয় এবং শিক্ষার্থীর ইমেইল ওয়াটারমার্ক থাকে। PDF ও অন্যান্য উপকরণ নির্ধারিত ফাইল স্টোরেজে থাকে।",
   ],
   [
-    "How can I contact support?",
-    "Use the contact page and include your email, course name and order/reference code so the team can investigate quickly.",
+    "সাপোর্টে কীভাবে যোগাযোগ করব?",
+    "যোগাযোগ পেজে আপনার ইমেইল, কোর্সের নাম এবং অর্ডার/রেফারেন্স কোড দিন, তাহলে টিম দ্রুত সহায়তা করতে পারবে।",
   ],
 ] as const
 
@@ -41,12 +41,12 @@ export default function FaqPage() {
     <PublicShell>
       <section className="mx-auto max-w-4xl px-4 py-14 sm:px-6 sm:py-20">
         <ProgressThread className="mb-8 w-24" />
-        <p className="font-mono text-xs text-muted-foreground">Support · FAQ</p>
+        <p className="font-mono text-xs text-muted-foreground">সাপোর্ট · জিজ্ঞাসা</p>
         <h1 className="mt-3 font-heading text-4xl tracking-tight sm:text-5xl">
-          Answers before you begin.
+          শুরু করার আগে জেনে নিন।
         </h1>
         <p className="mt-5 max-w-2xl text-base leading-7 text-muted-foreground">
-          A quick guide to verified payments, course access and secure learning.
+          যাচাইকৃত পেমেন্ট, কোর্স অ্যাক্সেস ও নিরাপদ শেখার সহজ নির্দেশিকা।
         </p>
         <div className="mt-12 grid gap-3">
           {questions.map(([question, answer]) => (
@@ -66,7 +66,7 @@ export default function FaqPage() {
           ))}
         </div>
         <Button asChild className="mt-10" variant="outline">
-          <Link href="/contact">Still need help? Contact us</Link>
+          <Link href="/contact">আরও সাহায্য দরকার? যোগাযোগ করুন</Link>
         </Button>
       </section>
     </PublicShell>

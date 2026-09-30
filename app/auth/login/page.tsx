@@ -34,9 +34,9 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   if (profile) redirect(getDashboardPath(profile.role))
 
   return (
-    <main className="auth-page grid min-h-screen bg-background text-foreground lg:grid-cols-[minmax(0,1fr)_520px]">
+    <main className="auth-page grid min-h-screen bg-background text-foreground md:grid-cols-[minmax(0,1fr)_minmax(420px,520px)]">
       {/* LEFT: brand panel */}
-      <section className="auth-brand-panel relative hidden flex-col justify-between overflow-hidden border-r border-border px-14 py-12 lg:flex">
+      <section className="auth-brand-panel relative hidden min-h-[520px] flex-col justify-between overflow-hidden border-r border-border px-8 py-10 md:flex md:px-10 lg:px-14 lg:py-12">
         <div
           aria-hidden
           className="hairline-grid pointer-events-none absolute inset-0"
@@ -89,7 +89,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
       {/* RIGHT: form */}
       <section className="auth-form-panel flex flex-col justify-center px-4 py-12 sm:px-10">
         <div className="mx-auto w-full max-w-md">
-          <div className="mb-10 lg:hidden">
+          <div className="mb-10 md:hidden">
             <BrandMark />
           </div>
 
