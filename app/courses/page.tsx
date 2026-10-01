@@ -1,4 +1,4 @@
-import Image from "next/image"
+import { ProgressiveImage } from "@/components/progressive-image"
 import Link from "next/link"
 import { ArrowRight, CalendarDays, ImageIcon, Sparkles } from "lucide-react"
 import type { CourseLevel, CourseListResponse } from "@/lib/types"
@@ -113,7 +113,7 @@ export default async function CoursesPage({ searchParams }: CoursesPageProps) {
           </div>
 
           <div className="course-grid mt-6 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-            {data.courses.map((course) => (
+            {data.courses.map((course, index) => (
               <Link
                 className="course-card group interactive-card flex flex-col overflow-hidden rounded-2xl bg-card ring-1 ring-foreground/10 transition-colors hover:ring-primary/50"
                 href={`/courses/${course.slug}`}
@@ -121,10 +121,11 @@ export default async function CoursesPage({ searchParams }: CoursesPageProps) {
               >
                 <div className="relative aspect-video w-full overflow-hidden bg-background">
                   {course.thumbnailUrl ? (
-                    <Image
+                    <ProgressiveImage
                       alt={course.title}
                       className="object-cover"
                       fill
+                      priority={index === 0}
                       sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
                       src={course.thumbnailUrl}
                     />

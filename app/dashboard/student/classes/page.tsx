@@ -40,7 +40,7 @@ export default async function StudentClassesPage() {
         </div>
       ) : (
         <div className="mt-10 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-          {courses.map((course) => (
+          {courses.map((course, index) => (
             <Card className="overflow-hidden" key={course.id}>
               <div className="relative aspect-[16/9] bg-card">
                 {course.thumbnailUrl ? (
@@ -48,6 +48,7 @@ export default async function StudentClassesPage() {
                     alt={course.courseTitle}
                     className="object-cover"
                     fill
+                    priority={index === 0}
                     sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 33vw"
                     src={course.thumbnailUrl}
                   />

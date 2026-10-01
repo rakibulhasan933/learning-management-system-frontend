@@ -95,6 +95,7 @@ export default async function CourseCheckoutPage({
                     alt={course.title}
                     className="object-cover"
                     fill
+                    priority
                     sizes="360px"
                     src={course.thumbnailUrl}
                   />

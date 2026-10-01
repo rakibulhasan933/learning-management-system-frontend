@@ -702,6 +702,20 @@
 .instructor-course-editor .course-edit-workspace { display: grid; gap: 1rem; }
 .instructor-course-editor [role="tablist"] { position: sticky; top: 5rem; z-index: 10; backdrop-filter: blur(14px); }
 .instructor-course-editor .ProseMirror, .instructor-course-editor textarea, .instructor-course-editor input { font-size: .95rem; }
+.tiptap-editor .ProseMirror { min-height: inherit; outline: none; color: var(--foreground); line-height: 1.7; }
+.tiptap-editor .ProseMirror p.is-editor-empty:first-child::before { float: left; height: 0; color: var(--muted-foreground); content: attr(data-placeholder); pointer-events: none; }
+.tiptap-editor .ProseMirror h1, .tiptap-editor .ProseMirror h2, .tiptap-editor .ProseMirror h3 { margin: 1rem 0 .5rem; font-family: var(--font-heading); font-weight: 600; line-height: 1.25; }
+.tiptap-editor .ProseMirror h2 { font-size: 1.35rem; }
+.tiptap-editor .ProseMirror h1 { font-size: 1.75rem; }
+.tiptap-editor .ProseMirror h3 { font-size: 1.15rem; }
+.tiptap-editor .ProseMirror h4 { font-size: 1rem; }
+.tiptap-editor .ProseMirror ul, .tiptap-editor .ProseMirror ol { padding-left: 1.5rem; }
+.tiptap-editor .ProseMirror ul { list-style: disc; }
+.tiptap-editor .ProseMirror ol { list-style: decimal; }
+.tiptap-editor .ProseMirror blockquote { margin: 1rem 0; border-left: 3px solid var(--primary); padding-left: 1rem; color: var(--muted-foreground); }
+.tiptap-editor .ProseMirror pre { margin: 1rem 0; overflow-x: auto; border-radius: .75rem; background: var(--muted); padding: .85rem 1rem; font-family: var(--font-mono); font-size: .85rem; }
+.tiptap-editor .ProseMirror code { border-radius: .35rem; background: var(--muted); padding: .15rem .3rem; font-family: var(--font-mono); font-size: .9em; }
+.tiptap-editor .ProseMirror pre code { background: transparent; padding: 0; }
 @media (min-width: 1024px) { .instructor-course-editor .course-edit-workspace { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 640px) { .instructor-course-editor > section { padding-top: 1rem; } .instructor-course-editor [role="tablist"] { position: static; } }
 .instructor-course-workspace { width: 100%; max-width: 80rem; margin-inline: auto; padding-inline: clamp(1rem, 3vw, 2.5rem); }

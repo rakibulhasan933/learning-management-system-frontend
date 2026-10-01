@@ -15,6 +15,7 @@ import {
   updateInstructorCourseAction,
 } from "../../actions"
 import { CourseForm } from "../../course-form"
+import { ActionToastForm } from "@/components/action-toast-form"
 import { CourseEditWorkspace } from "./course-edit-workspace"
 import { MilestoneModuleBuilder } from "../../milestone-module-builder-v2"
 
@@ -88,7 +89,7 @@ export default async function EditInstructorCoursePage({
                     Danger zone
                   </h3>
                 </div>
-                <form
+                <ActionToastForm
                   action={deleteInstructorCourseAction}
                   className="grid gap-3"
                 >
@@ -103,7 +104,7 @@ export default async function EditInstructorCoursePage({
                   >
                     Delete course
                   </SubmitButton>
-                </form>
+                </ActionToastForm>
               </CardContent>
             </Card>
           }

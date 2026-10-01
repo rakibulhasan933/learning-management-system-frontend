@@ -50,7 +50,7 @@ export type MessageDataPart = {
 
 export type Chat = UseChatHelpers<ChatMessage>;
 
-export type ChatMessage = UIMessage<{}, MessageDataPart>;
+export type ChatMessage = UIMessage<unknown, MessageDataPart>;
 
 function createChatTransport({
   api,

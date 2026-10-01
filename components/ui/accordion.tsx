@@ -93,6 +93,7 @@ function AccordionContent({
     <AccordionPrimitive.Content
       data-slot="accordion-content"
       className="overflow-hidden px-4 text-sm data-open:animate-accordion-down data-closed:animate-accordion-up"
+      forceMount={_keepMounted ? true : undefined}
       {...props}
     >
       <div

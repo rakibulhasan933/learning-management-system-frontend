@@ -35,6 +35,7 @@ import { QuizBuilder } from "./quiz-builder"
 import { VideoUploadControl } from "./video-upload-control"
 
 import { SubmitButton } from "@/components/submit-button"
+import { ActionToastForm } from "@/components/action-toast-form"
 
 interface CourseOutlineEditorProps {
   courseId: string
@@ -209,11 +210,11 @@ function LectureAccordionItem({
           >
             Edit
           </Button>
-          <form action={deleteInstructorLectureAction}>
+          <ActionToastForm action={deleteInstructorLectureAction}>
             <input name="courseId" type="hidden" value={courseId} />
             <input name="lectureId" type="hidden" value={lecture.id} />
             <ConfirmDeleteButton />
-          </form>
+          </ActionToastForm>
         </div>
       </div>
 
@@ -247,7 +248,7 @@ function LectureAccordionItem({
             ))}
           </div>
 
-          <form
+          <ActionToastForm
             action={updateInstructorLectureAction}
             className="grid gap-3 rounded-2xl border border-border/60 bg-background/40 p-3 md:grid-cols-4"
           >
@@ -379,7 +380,7 @@ function LectureAccordionItem({
                 Save
               </SubmitButton>
             </div>
-          </form>
+          </ActionToastForm>
 
           <div
             className={
@@ -494,17 +495,17 @@ function SectionAccordionItem({
           >
             Edit
           </Button>
-          <form action={deleteInstructorSectionAction}>
+          <ActionToastForm action={deleteInstructorSectionAction}>
             <input name="courseId" type="hidden" value={courseId} />
             <input name="sectionId" type="hidden" value={section.id} />
             <ConfirmDeleteButton />
-          </form>
+          </ActionToastForm>
         </div>
       </div>
 
       <AccordionContent keepMounted className="px-3 pb-3">
         <div className="grid gap-4 pt-3">
-          <form
+          <ActionToastForm
             action={updateInstructorSectionAction}
             className="grid gap-3 rounded-2xl border border-border/60 bg-background/40 p-3 md:grid-cols-[1fr_120px_120px]"
           >
@@ -551,7 +552,7 @@ function SectionAccordionItem({
             >
               Save milestone
             </SubmitButton>
-          </form>
+          </ActionToastForm>
 
           <div className="grid gap-2">
             <div className="flex items-center justify-between gap-3">
@@ -586,7 +587,7 @@ function SectionAccordionItem({
             </Accordion>
           </div>
 
-          <form
+          <ActionToastForm
             action={createInstructorLectureAction}
             className="grid gap-3 rounded-2xl border border-dashed border-border/60 bg-background/30 p-3 md:grid-cols-4"
           >
@@ -667,7 +668,7 @@ function SectionAccordionItem({
             >
               Add module
             </SubmitButton>
-          </form>
+          </ActionToastForm>
         </div>
       </AccordionContent>
     </AccordionItem>
@@ -694,7 +695,7 @@ export function CourseOutlineEditor({
         </p>
       </div>
 
-      <form
+      <ActionToastForm
         action={createInstructorSectionAction}
         className="grid gap-3 rounded-2xl border border-border/60 bg-card/70 p-4 md:grid-cols-[1fr_140px_160px]"
       >
@@ -737,7 +738,7 @@ export function CourseOutlineEditor({
         >
           Add milestone
         </SubmitButton>
-      </form>
+      </ActionToastForm>
 
       {outline.sections.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">

@@ -1,6 +1,7 @@
 import type { InstructorCourseStructureResponse } from "@/lib/types"
 
 import { SubmitButton } from "@/components/submit-button"
+import { ActionToastForm } from "@/components/action-toast-form"
 import { AssignmentBuilder } from "./assignment-builder"
 import {
   addInstructorModuleContentAction,
@@ -133,7 +134,7 @@ export function MilestoneModuleBuilder({
                         <p className="font-mono text-[10px] text-muted-foreground">
                           Module settings
                         </p>
-                        <form
+                        <ActionToastForm
                           action={updateInstructorModuleAction}
                           className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto]"
                         >
@@ -159,7 +160,7 @@ export function MilestoneModuleBuilder({
                           >
                             Save changes
                           </SubmitButton>
-                        </form>
+                        </ActionToastForm>
                         <div className="grid gap-2 border-t border-border/70 pt-3">
                           <div>
                             <p className="font-mono text-[10px] text-muted-foreground">
@@ -178,7 +179,7 @@ export function MilestoneModuleBuilder({
                             ).map((contentType) =>
                               contentType === "video" ||
                               !selectedContentTypes.includes(contentType) ? (
-                                <form
+                                <ActionToastForm
                                   action={addInstructorModuleContentAction}
                                   key={contentType}
                                 >
@@ -217,7 +218,7 @@ export function MilestoneModuleBuilder({
                                       ? "Add another video"
                                       : `Add ${contentTypeLabels[contentType]}`}
                                   </SubmitButton>
-                                </form>
+                                </ActionToastForm>
                               ) : (
                                 <div
                                   className="rounded-lg border border-primary/40 bg-primary/5 px-3 py-2 text-sm text-primary"
@@ -229,7 +230,7 @@ export function MilestoneModuleBuilder({
                             )}
                           </div>
                         </div>
-                        <form action={deleteInstructorModuleAction}>
+                        <ActionToastForm action={deleteInstructorModuleAction}>
                           <input
                             name="courseId"
                             type="hidden"
@@ -247,7 +248,7 @@ export function MilestoneModuleBuilder({
                           >
                             Delete module
                           </SubmitButton>
-                        </form>
+                        </ActionToastForm>
                       </div>
                       {selectedContentTypes.includes("video") ? (
                         <div className="grid gap-3">
@@ -284,7 +285,7 @@ export function MilestoneModuleBuilder({
                               />
                               <div className="flex flex-wrap gap-2">
                                 {!video.isPublished && video.videoRef ? (
-                                  <form action={publishInstructorVideoAction}>
+                                  <ActionToastForm action={publishInstructorVideoAction}>
                                     <input
                                       name="courseId"
                                       type="hidden"
@@ -298,9 +299,9 @@ export function MilestoneModuleBuilder({
                                     <SubmitButton pendingLabel="Publishing...">
                                       Publish video
                                     </SubmitButton>
-                                  </form>
+                                  </ActionToastForm>
                                 ) : null}
-                                <form action={deleteInstructorVideoAction}>
+                                <ActionToastForm action={deleteInstructorVideoAction}>
                                   <input
                                     name="courseId"
                                     type="hidden"
@@ -318,11 +319,11 @@ export function MilestoneModuleBuilder({
                                   >
                                     Delete video
                                   </SubmitButton>
-                                </form>
+                                </ActionToastForm>
                               </div>
                             </div>
                           ))}
-                          <form
+                          <ActionToastForm
                             action={createInstructorVideoAction}
                             className="grid gap-3 rounded-xl border border-dashed border-primary/50 bg-primary/5 p-4 sm:grid-cols-2"
                           >
@@ -380,7 +381,7 @@ export function MilestoneModuleBuilder({
                             >
                               Add video
                             </SubmitButton>
-                          </form>
+                          </ActionToastForm>
                         </div>
                       ) : null}
                       {selectedContentTypes.includes("pdf") ? (
@@ -432,7 +433,7 @@ export function MilestoneModuleBuilder({
               })}
             </div>
 
-            <form
+            <ActionToastForm
               action={createInstructorModuleAction}
               className="grid gap-3 rounded-2xl border border-dashed border-secondary/50 bg-secondary/5 p-4 sm:grid-cols-[minmax(0,1fr)_auto]"
             >
@@ -458,12 +459,12 @@ export function MilestoneModuleBuilder({
                 You can add Video, PDF, Quiz, or Assignment after creating the
                 module.
               </p>
-            </form>
+            </ActionToastForm>
           </div>
         </details>
       ))}
 
-      <form
+      <ActionToastForm
         action={createInstructorSectionAction}
         className="grid gap-4 rounded-3xl border border-dashed border-primary/60 bg-card p-5 sm:grid-cols-[minmax(0,1fr)_auto] sm:p-6"
       >
@@ -488,7 +489,7 @@ export function MilestoneModuleBuilder({
         >
           Create milestone
         </SubmitButton>
-      </form>
+      </ActionToastForm>
     </section>
   )
 }

@@ -1,6 +1,7 @@
 "use client"
 
-import { useState } from "react"
+import { useActionState, useEffect, useState } from "react"
+import { isRedirectError } from "next/dist/client/components/redirect-error"
 import {
   ArrowLeft,
   ArrowRight,
@@ -31,6 +32,7 @@ import {
 } from "@/components/ui/select"
 import { SubmitButton } from "@/components/submit-button"
 import { cn } from "@/lib/utils"
+import { toast } from "sonner"
 
 interface CourseFormProps {
   action: (formData: FormData) => Promise<void>
@@ -47,6 +49,24 @@ export function CourseForm({
 }: CourseFormProps) {
   const [step, setStep] = useState(1)
   const [slug, setSlug] = useState(course?.slug ?? "")
+  const [error, formAction, pending] = useActionState(
+    async (_previousError: string | null, formData: FormData) => {
+      try {
+        await action(formData)
+        return null
+      } catch (actionError) {
+        if (isRedirectError(actionError)) throw actionError
+        return actionError instanceof Error
+          ? actionError.message
+          : "Could not save the course. Please try again."
+      }
+    },
+    null
+  )
+
+  useEffect(() => {
+    if (error) toast.error("Could not save course", { description: error })
+  }, [error])
   const steps = [
     { label: "Basics", note: "Title and description" },
     { label: "Pricing", note: "Category and price" },
@@ -55,7 +75,7 @@ export function CourseForm({
   ]
 
   return (
-    <form action={action} className="grid gap-4">
+    <form action={formAction} className="grid gap-4">
       {course ? (
         <input name="courseId" type="hidden" value={course.id} />
       ) : null}
@@ -295,7 +315,7 @@ export function CourseForm({
 
       <SubmitButton
         className="w-full sm:w-fit sm:px-8"
-        disabled={existingSlugs.some(
+        disabled={pending || existingSlugs.some(
           (existingSlug) =>
             existingSlug.toLowerCase() === slug.trim().toLowerCase() &&
             existingSlug.toLowerCase() !== course?.slug.toLowerCase()

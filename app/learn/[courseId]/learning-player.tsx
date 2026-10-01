@@ -25,6 +25,7 @@ import { LecturePlayer } from "./lecture-player"
 import { QuizPanel } from "./quiz-panel"
 import { Button } from "@/components/ui/button"
 import { ProgressThread } from "@/components/ui/progress-thread"
+import { MarkdownContent } from "@/components/markdown-content"
 import { cn } from "@/lib/utils"
 
 interface LearningPlayerProps {
@@ -460,9 +461,11 @@ export function LearningPlayer({
                   {selectedLecture?.title ?? "No published modules"}
                 </h2>
                 {selectedLecture?.description ? (
-                  <p className="mt-3 text-sm leading-6 whitespace-pre-wrap text-muted-foreground">
+                  <MarkdownContent
+                    className="learning-description mt-3 text-sm text-muted-foreground"
+                  >
                     {selectedLecture.description}
-                  </p>
+                  </MarkdownContent>
                 ) : null}
                 {selectedProgress ? (
                   <p className="mt-3 font-mono text-xs text-muted-foreground">
