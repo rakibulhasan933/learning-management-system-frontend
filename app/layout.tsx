@@ -17,6 +17,7 @@ import { BackgroundRipple } from "@/components/background-ripple"
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-sans-src",
+  weight: ["400", "500", "600", "700"],
 })
 
 const fraunces = Fraunces({
@@ -36,13 +37,13 @@ const ibmPlexMono = IBM_Plex_Mono({
 const bnSans = Hind_Siliguri({
   subsets: ["bengali", "latin"],
   variable: "--font-bn-sans-src",
-  weight: ["300", "400", "500", "600"],
+  weight: ["300", "400", "500", "600", "700"],
 })
 
 const bnSerif = Noto_Serif_Bengali({
   subsets: ["bengali", "latin"],
   variable: "--font-bn-display-src",
-  weight: ["300", "400", "500"],
+  weight: ["300", "400", "500", "600", "700"],
 })
 
 export const metadata: Metadata = {
