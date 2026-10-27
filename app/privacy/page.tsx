@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 
 import { PublicShell } from "@/components/public-shell"
-import { ProgressThread } from "@workspace/ui/components/progress-thread"
+import { ProgressThread } from "@/components/ui/progress-thread"
 
 export const metadata: Metadata = {
   title: "Privacy policy",
