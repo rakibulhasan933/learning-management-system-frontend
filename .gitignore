@@ -18,6 +18,9 @@ coverage
 out/
 /BanglaBox/
 /backend-with-nestjs/
+.agents
+.claude
+skills-lock.json
 
 
 # production

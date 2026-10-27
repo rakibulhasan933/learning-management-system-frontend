@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 
 export default function ContactPage() {
   const email =
-    process.env.NEXT_PUBLIC_SUPPORT_EMAIL ?? "support@folio.example.com"
+    process.env.NEXT_PUBLIC_SUPPORT_EMAIL ?? "rakibulmd933@gmail.com"
 
   return (
     <PublicShell>

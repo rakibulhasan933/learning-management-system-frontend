@@ -317,6 +317,7 @@ export function DashboardShell({ children, profile }: DashboardShellProps) {
   return (
     <div className="dashboard-shell flex h-screen flex-col overflow-hidden bg-background text-foreground">
       <header className="fixed inset-x-0 top-0 z-40 flex h-16 items-center justify-between gap-4 border-b border-border bg-background/92 px-4 backdrop-blur-md sm:px-6">
+        <span aria-hidden className="absolute inset-x-0 top-0 h-px bg-primary" />
         <div className="flex min-w-0 items-center gap-3">
           <Button
             aria-label="Open navigation"
@@ -412,21 +413,26 @@ export function DashboardShell({ children, profile }: DashboardShellProps) {
               sidebarCollapsed ? "px-3" : "px-2 md:px-4 lg:px-5"
             )}
           >
-            <div className="space-y-4">
+            <div className="flex flex-col gap-4">
               <ProgressThread
                 className={cn(
                   "max-md:mx-auto max-md:w-10",
                   sidebarCollapsed ? "mx-auto w-10" : "w-24"
                 )}
               />
-              <div className="hidden">
+              <div
+                className={cn(
+                  "rounded-2xl border border-border bg-card/60 p-4",
+                  sidebarCollapsed && "md:border-transparent md:bg-transparent md:p-0"
+                )}
+              >
                 <div
                   className={cn(
                     "flex items-center gap-3",
                     sidebarCollapsed && "md:flex-col md:gap-3"
                   )}
                 >
-                  <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full border-2 border-primary/40 bg-card ring-2 ring-primary/10">
+                  <div className="relative flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-primary/40 bg-primary/10 text-sm text-primary ring-2 ring-primary/10">
                     {profile.avatarUrl ? (
                       <Image
                         alt={name}
@@ -436,7 +442,7 @@ export function DashboardShell({ children, profile }: DashboardShellProps) {
                         src={profile.avatarUrl}
                       />
                     ) : (
-                      <div className="flex h-full items-center justify-center bg-primary/10 font-heading text-sm text-primary">
+                      <div className="flex h-full w-full items-center justify-center font-heading text-sm text-primary">
                         {initials}
                       </div>
                     )}
@@ -447,7 +453,7 @@ export function DashboardShell({ children, profile }: DashboardShellProps) {
                     <p className="font-mono text-[11px] tracking-wide text-muted-foreground">
                       {profile.role} workspace
                     </p>
-                    <h2 className="mt-2 font-heading text-2xl font-normal tracking-tight">
+                    <h2 className="mt-1 font-heading text-xl font-normal tracking-tight">
                       {name}
                     </h2>
                     <p className="mt-1 text-sm break-words text-muted-foreground">
@@ -490,10 +496,7 @@ export function DashboardShell({ children, profile }: DashboardShellProps) {
             </div>
 
             <nav
-              className={cn(
-                "mt-8 space-y-2",
-                sidebarCollapsed && "md:space-y-3"
-              )}
+              className={cn("mt-6 flex flex-col gap-2", sidebarCollapsed && "md:gap-3")}
             >
               <DashboardNavLink
                 currentHash={currentHash}
@@ -506,10 +509,7 @@ export function DashboardShell({ children, profile }: DashboardShellProps) {
             </nav>
 
             <nav
-              className={cn(
-                "mt-8 space-y-2",
-                sidebarCollapsed && "md:space-y-3"
-              )}
+              className={cn("mt-6 flex flex-col gap-2", sidebarCollapsed && "md:gap-3")}
             >
               {navigation.map((item) => (
                 <DashboardNavLink
@@ -562,7 +562,7 @@ export function DashboardShell({ children, profile }: DashboardShellProps) {
             </SheetHeader>
 
             <div className="flex h-full flex-col px-5 py-6">
-              <nav className="space-y-2">
+              <nav className="flex flex-col gap-2">
                 <DashboardNavLink
                   currentHash={currentHash}
                   currentPathname={pathname}
