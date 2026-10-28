@@ -244,6 +244,82 @@
   }
 }
 
+/* Shared app-wide polish: keeps public pages and role workspaces visually consistent. */
+@layer components {
+  .dashboard-shell {
+    background-image: radial-gradient(circle at 100% 0%, color-mix(in srgb, var(--primary) 6%, transparent), transparent 28rem);
+  }
+
+  .dashboard-shell main h1,
+  .dashboard-shell main h2,
+  .dashboard-shell main h3,
+  .dashboard-shell [role="main"] h1,
+  .dashboard-shell [role="main"] h2,
+  .dashboard-shell [role="main"] h3 {
+    text-wrap: balance;
+  }
+
+  .dashboard-shell .surface-raised,
+  .dashboard-shell [class*="bg-card"]:not(header):not(aside) {
+    box-shadow: 0 16px 40px color-mix(in srgb, #000 18%, transparent);
+  }
+
+  .dashboard-shell table {
+    border-collapse: separate;
+    border-spacing: 0;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: 0.9rem;
+  }
+
+  .dashboard-shell th {
+    background: color-mix(in srgb, var(--card) 84%, var(--primary));
+    color: var(--muted-foreground);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .dashboard-shell tbody tr { transition: background-color 160ms ease; }
+  .dashboard-shell tbody tr:hover { background: color-mix(in srgb, var(--primary) 5%, transparent); }
+
+  .dashboard-shell input,
+  .dashboard-shell textarea,
+  .dashboard-shell select,
+  .auth-page input,
+  .auth-page textarea,
+  .auth-page select {
+    transition: border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
+  }
+
+  .dashboard-shell input:focus-visible,
+  .dashboard-shell textarea:focus-visible,
+  .dashboard-shell select:focus-visible,
+  .auth-page input:focus-visible,
+  .auth-page textarea:focus-visible,
+  .auth-page select:focus-visible {
+    border-color: var(--ring);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 18%, transparent);
+    outline: none;
+  }
+
+  .public-page {
+    background-image: radial-gradient(circle at 85% 5%, color-mix(in srgb, var(--primary) 7%, transparent), transparent 30rem);
+  }
+
+  .public-page > * { position: relative; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
 /* Homepage marketplace treatment: intentionally scoped so dashboards keep the dark system. */
 .folio-home-shell {
   --home-bg: #0D1117;
