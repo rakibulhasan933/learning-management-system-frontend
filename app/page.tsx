@@ -8,6 +8,8 @@ import { GsapScroll, Reveal, ScrambleText, TypeText } from "@/components/motion"
 import { authenticatedApiFetch, publicApiFetch } from "@/lib/api-client"
 import { getDashboardPath } from "@/lib/auth/dashboard"
 
+export const dynamic = "force-dynamic"
+
 const paymentMethods = [["bKash", "Send Money"], ["Nagad", "Send Money"], ["Rocket", "Send Money"], ["ব্যাংক ট্রান্সফার", ""]]
 const stats = [["১০০%", "হাতে যাচাই করা পেমেন্ট"], ["TrxID সহ রেকর্ড", "প্রতি এনরোলমেন্টে ১টি"], ["সুরক্ষিত", "ডাউনলোড-নিরাপদ ভিডিও ক্লাস"]]
 const categories = [["চাকরি ও BCS প্রস্তুতি", "সিলেবাস অনুযায়ী ক্লাস, মডেল টেস্ট ও প্রগ্রেস ট্র্যাকিং."], ["ভর্তি ও একাডেমিক", "HSC, বিশ্ববিদ্যালয় ভর্তি ও বিষয়ভিত্তিক কোর্স, ধাপে ধাপে সাজানো."], ["ব্যাংক ও সরকারি চাকরি", "ব্যাংক, প্রাইমারি ও অন্যান্য সরকারি চাকরির পরীক্ষার সিলেবাসভিত্তিক প্রস্তুতি."], ["ভাষা ও ক্যারিয়ার", "IELTS, স্পোকেন ইংলিশ, CV ও ইন্টারভিউ প্রস্তুতি."]]
@@ -24,12 +26,18 @@ function formatPrice(currency: string, price: string | number) {
 
 export default async function Page() {
   let profile: ProfileDto | null = null
-  try { profile = await authenticatedApiFetch<ProfileDto>("/auth/me", { cache: "no-store" }) } catch { /* anonymous visitor */ }
+  if (process.env.NEXT_PHASE !== "phase-production-build") {
+    try {
+      profile = await authenticatedApiFetch<ProfileDto>("/auth/me", { cache: "no-store" })
+    } catch { /* anonymous visitor */ }
+  }
   let featuredCourses: CourseListResponse["courses"] = []
-  try {
-    const response = await publicApiFetch<CourseListResponse>("/courses?page=1&pageSize=3", { next: { revalidate: 300 } })
-    featuredCourses = response.courses
-  } catch { /* catalog can be temporarily unavailable */ }
+  if (process.env.NEXT_PHASE !== "phase-production-build") {
+    try {
+      const response = await publicApiFetch<CourseListResponse>("/courses?page=1&pageSize=3", { next: { revalidate: 300 } })
+      featuredCourses = response.courses
+    } catch { /* catalog can be temporarily unavailable */ }
+  }
   const dashboardPath = profile ? getDashboardPath(profile.role) : "/auth/signup"
   const ctaLabel = profile ? "ড্যাশবোর্ডে যান" : "অ্যাকাউন্ট খুলুন"
 

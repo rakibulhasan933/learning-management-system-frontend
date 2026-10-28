@@ -3,6 +3,8 @@ import type { MetadataRoute } from "next"
 import { publicApiFetch } from "@/lib/api-client"
 import type { CourseListResponse } from "@/lib/types"
 
+export const dynamic = "force-dynamic"
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl =
     process.env.NEXT_PUBLIC_SITE_URL ?? "https://folio.example.com"
@@ -13,6 +15,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/contact`, changeFrequency: "monthly", priority: 0.4 },
     { url: `${baseUrl}/about`, changeFrequency: "monthly", priority: 0.5 },
   ]
+
+  if (process.env.NEXT_PHASE === "phase-production-build") {
+    return staticRoutes
+  }
 
   try {
     const response = await publicApiFetch<CourseListResponse>(

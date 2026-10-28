@@ -11,6 +11,14 @@ export { accessTokenCookieName, getBackendApiUrl, refreshTokenCookieName }
 
 const accessTokenMaxAgeSeconds = 15 * 60
 const refreshTokenMaxAgeSeconds = 30 * 24 * 60 * 60
+const apiRequestTimeoutMs = 10_000
+
+function withApiTimeout(init: RequestInit): RequestInit {
+  return {
+    ...init,
+    signal: init.signal ?? AbortSignal.timeout(apiRequestTimeoutMs),
+  }
+}
 
 export class ApiClientError extends Error {
   constructor(
@@ -47,7 +55,7 @@ export async function publicApiFetch<T>(
   init: RequestInit = {}
 ): Promise<T> {
   const response = await fetch(`${getBackendApiUrl()}${path}`, {
-    ...init,
+    ...withApiTimeout(init),
     headers: {
       Accept: "application/json",
       ...init.headers,
@@ -110,7 +118,7 @@ export async function authenticatedApiFetch<T>(
 
   const request = async (token: string) =>
     fetch(`${getBackendApiUrl()}${path}`, {
-      ...init,
+      ...withApiTimeout(init),
       headers: {
         Accept: "application/json",
         Authorization: `Bearer ${token}`,
@@ -138,7 +146,7 @@ export async function optionalAuthenticatedApiFetch<T>(
   const accessToken = await getAccessToken()
 
   const response = await fetch(`${getBackendApiUrl()}${path}`, {
-    ...init,
+    ...withApiTimeout(init),
     headers: {
       Accept: "application/json",
       ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
