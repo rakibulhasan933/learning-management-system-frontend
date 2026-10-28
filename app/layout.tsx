@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 import {
   Fraunces,
-  Hind_Siliguri,
+  Noto_Sans_Bengali,
   IBM_Plex_Mono,
   Inter,
   Noto_Serif_Bengali,
@@ -34,7 +34,7 @@ const ibmPlexMono = IBM_Plex_Mono({
 
 // Bengali fallbacks: Fraunces and Inter have no Bengali glyphs,
 // so Bengali text uses these automatically.
-const bnSans = Hind_Siliguri({
+const bnSans = Noto_Sans_Bengali({
   subsets: ["bengali", "latin"],
   variable: "--font-bn-sans-src",
   weight: ["300", "400", "500", "600", "700"],
