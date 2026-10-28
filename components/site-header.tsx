@@ -91,7 +91,7 @@ export async function SiteHeader({ variant = "default" }: { variant?: "default" 
                 <Button asChild variant="outline">
                   <Link href="/auth/login">লগইন</Link>
                 </Button>
-                <Button asChild>
+                <Button asChild className="bg-emerald-600 text-white shadow-[0_8px_24px_-12px_rgba(16,185,129,0.9)] hover:bg-emerald-500">
                   <Link href="/auth/signup">অ্যাকাউন্ট খুলুন</Link>
                 </Button>
               </>
