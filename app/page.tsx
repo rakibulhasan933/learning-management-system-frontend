@@ -4,7 +4,7 @@ import { ArrowUpRight, ShieldCheck } from "lucide-react"
 import type { CourseListResponse, ProfileDto } from "@/lib/types"
 
 import { PublicShell } from "@/components/public-shell"
-import { GsapScroll, GsapHeadline, Reveal, ScrambleText, TypeText } from "@/components/motion"
+import { GsapScroll, Reveal, ScrambleText, TypeText } from "@/components/motion"
 import { authenticatedApiFetch, publicApiFetch } from "@/lib/api-client"
 import { getDashboardPath } from "@/lib/auth/dashboard"
 
@@ -37,7 +37,7 @@ export default async function Page() {
     <main className="folio-home"><GsapScroll />
       <section className="folio-home-hero"><div className="folio-home-wrap folio-home-hero-grid"><div className="folio-hero-copy">
         <span className="folio-home-tag"><span className="folio-live-dot" /> BCS · ব্যাংক · সরকারি চাকরি · একাডেমিক</span>
-        <GsapHeadline>BCS ও চাকরির পরীক্ষার প্রস্তুতি, এক জায়গায় গুছিয়ে।</GsapHeadline>
+        <h1>BCS ও চাকরির পরীক্ষার প্রস্তুতি, এক জায়গায় গুছিয়ে।</h1>
         <p className="folio-home-lead">সিলেবাস অনুযায়ী ক্লাস, মডেল টেস্ট ও প্রোগ্রেস ট্র্যাকিং — BCS, ব্যাংক ও সরকারি চাকরির পরীক্ষা এবং একাডেমিক কোর্সের জন্য। bKash ও Nagad এ সহজ পেমেন্ট, যাচাইয়ের পর ক্লাস চালু।</p>
         <div className="folio-home-cta"><Link className="folio-home-btn folio-home-btn-primary" href={dashboardPath}>{ctaLabel}</Link><Link className="folio-home-btn" href="/courses">কোর্স দেখুন</Link></div>
         <p className="folio-home-note">পেমেন্ট করুন, TrxID জমা দিন, যাচাইয়ের পর ক্লাস চালু।</p><ScrambleText className="folio-mono-line" text="folio.learn() // bcs + bank + academic" /><TypeText className="folio-mono-line" text="bcs.tracks() / model-test / progress" /></div><Reveal delay={0.12} className="folio-order-card"><div className="folio-seal">যাচাই<br />সম্পন্ন</div><div className="folio-order-top"><span>ORD-482913</span><span className="folio-status">যাচাই সম্পন্ন</span></div><h2>BCS প্রিলিমিনারি — বাংলা ও গণিত</h2><ul className="folio-lesson-list"><li className="is-done">ক্লাস ১ · বাংলা ব্যাকরণ</li><li className="is-done">ক্লাস ২ · গণিতের শর্টকাট</li><li>ক্লাস ৩ · মডেল টেস্ট ১</li></ul><div className="folio-pay-box"><div><span>পেমেন্ট মাধ্যম</span><b>bKash</b></div><div><span>TrxID</span><code>9K4H2XQ7LM</code></div></div><div className="folio-order-stats"><div><small>অগ্রগতি</small><strong>৬৮%</strong><div className="folio-progress"><span /></div></div><div><small>পরিশোধিত</small><strong>৳৪,৫০০</strong></div></div></Reveal></div></section>

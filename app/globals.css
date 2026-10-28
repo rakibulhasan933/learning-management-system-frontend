@@ -144,9 +144,18 @@
 
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-bn-sans-src), var(--font-sans-src), ui-sans-serif, system-ui, sans-serif;
     font-synthesis: none;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
+  }
+
+  :where(h1, h2, h3, h4, h5, h6, button, input, textarea, select, option, label, th, td) {
+    font-family: var(--font-bn-sans-src), var(--font-sans-src), ui-sans-serif, system-ui, sans-serif;
+  }
+
+  :where(h1, h2, h3, h4, h5, h6) {
+    font-feature-settings: "kern" 1;
   }
 
   ::-webkit-scrollbar {
@@ -244,6 +253,82 @@
   }
 }
 
+/* Shared app-wide polish: keeps public pages and role workspaces visually consistent. */
+@layer components {
+  .dashboard-shell {
+    background-image: radial-gradient(circle at 100% 0%, color-mix(in srgb, var(--primary) 6%, transparent), transparent 28rem);
+  }
+
+  .dashboard-shell main h1,
+  .dashboard-shell main h2,
+  .dashboard-shell main h3,
+  .dashboard-shell [role="main"] h1,
+  .dashboard-shell [role="main"] h2,
+  .dashboard-shell [role="main"] h3 {
+    text-wrap: balance;
+  }
+
+  .dashboard-shell .surface-raised,
+  .dashboard-shell [class*="bg-card"]:not(header):not(aside) {
+    box-shadow: 0 16px 40px color-mix(in srgb, #000 18%, transparent);
+  }
+
+  .dashboard-shell table {
+    border-collapse: separate;
+    border-spacing: 0;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: 0.9rem;
+  }
+
+  .dashboard-shell th {
+    background: color-mix(in srgb, var(--card) 84%, var(--primary));
+    color: var(--muted-foreground);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .dashboard-shell tbody tr { transition: background-color 160ms ease; }
+  .dashboard-shell tbody tr:hover { background: color-mix(in srgb, var(--primary) 5%, transparent); }
+
+  .dashboard-shell input,
+  .dashboard-shell textarea,
+  .dashboard-shell select,
+  .auth-page input,
+  .auth-page textarea,
+  .auth-page select {
+    transition: border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
+  }
+
+  .dashboard-shell input:focus-visible,
+  .dashboard-shell textarea:focus-visible,
+  .dashboard-shell select:focus-visible,
+  .auth-page input:focus-visible,
+  .auth-page textarea:focus-visible,
+  .auth-page select:focus-visible {
+    border-color: var(--ring);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 18%, transparent);
+    outline: none;
+  }
+
+  .public-page {
+    background-image: radial-gradient(circle at 85% 5%, color-mix(in srgb, var(--primary) 7%, transparent), transparent 30rem);
+  }
+
+  .public-page > * { position: relative; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
 /* Homepage marketplace treatment: intentionally scoped so dashboards keep the dark system. */
 .folio-home-shell {
   --home-bg: #0D1117;
@@ -276,9 +361,9 @@
 .folio-home-footer { background: var(--home-card) !important; border-color: var(--home-line) !important; }
 .folio-home { position: relative; isolation: isolate; overflow: hidden; background: var(--home-bg); color: var(--home-fg); line-height: 1.85; }
 .folio-home::before { position: absolute; z-index: -1; inset: 24px; border: 1px solid color-mix(in srgb, var(--home-primary) 14%, transparent); opacity: .5; content: ""; pointer-events: none; }
-.folio-home-wrap { width: min(1120px, calc(100% - 40px)); margin-inline: auto; }
-.folio-home-hero { border-bottom: 1px solid var(--home-line); }
-.folio-home-hero-grid { display: grid; grid-template-columns: 1fr; gap: 48px; align-items: center; padding-block: 64px 72px; }
+.folio-home-wrap { width: min(1180px, calc(100% - 48px)); margin-inline: auto; }
+.folio-home-hero { position: relative; border-bottom: 1px solid var(--home-line); background: radial-gradient(circle at 78% 20%, rgb(63 185 80 / .08), transparent 32rem); }
+.folio-home-hero-grid { display: grid; grid-template-columns: 1fr; gap: 48px; align-items: center; padding-block: 76px 84px; }
 .folio-home h1 { margin: 0; max-width: 700px; font-size: clamp(2rem, 5.4vw, 3.625rem); line-height: 1.35; font-weight: 600; letter-spacing: -.01em; font-family: var(--font-heading); }
 .folio-home-hero-grid > div:first-child { min-width: 0; }
 .folio-home-tag { display: inline-block; margin-bottom: 22px; padding: 2px 14px; border-radius: 999px; background: var(--home-soft); color: var(--home-primary); font-size: .875rem; }
@@ -328,8 +413,10 @@
 @media (min-width: 640px) { .folio-card-grid-four { grid-template-columns: repeat(2, 1fr); } .folio-card-grid-three { grid-template-columns: repeat(2, 1fr); } }
 @media (min-width: 720px) { .folio-stats .folio-home-wrap { grid-template-columns: repeat(3, 1fr); } .folio-steps { grid-template-columns: repeat(4, 1fr); } }
 @media (min-width: 900px) { .folio-faq { grid-template-columns: .85fr 1.15fr; } }
-@media (min-width: 960px) { .folio-home-hero-grid { grid-template-columns: 1fr 420px; gap: 72px; padding-block: 96px; } .folio-card-grid-four { grid-template-columns: repeat(4, 1fr); } .folio-card-grid-three { grid-template-columns: repeat(3, 1fr); } }
-@media (max-width: 639px) { .folio-home-wrap { width: min(100% - 32px, 1120px); } .folio-home-btn { padding-inline: 18px; } .folio-order-card { margin-top: 12px; } }
+@media (min-width: 960px) { .folio-home-hero-grid { grid-template-columns: minmax(0, 1fr) 420px; gap: 96px; padding-block: 108px 116px; } .folio-card-grid-four { grid-template-columns: repeat(4, 1fr); } .folio-card-grid-three { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 639px) { .folio-home-wrap { width: min(100% - 32px, 1120px); } .folio-home-hero-grid { gap: 36px; padding-block: 52px 64px; } .folio-home-btn { width: 100%; padding-inline: 18px; } .folio-home-cta { gap: 10px; } .folio-order-card { margin-top: 12px; } .folio-seal { right: -4px; transform: scale(.86) rotate(8deg); } }
+.folio-home a:focus-visible, .folio-home summary:focus-visible { outline: 2px solid var(--home-primary); outline-offset: 4px; }
+@media (prefers-reduced-motion: reduce) { .folio-home *, .folio-home *::before, .folio-home *::after { scroll-behavior: auto !important; } }
 
 /* Premium catalog and motion language */
 .folio-hero-copy { animation: hero-enter 800ms cubic-bezier(.22, 1, .36, 1) both; }
