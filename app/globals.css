@@ -144,9 +144,18 @@
 
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-bn-sans-src), var(--font-sans-src), ui-sans-serif, system-ui, sans-serif;
     font-synthesis: none;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
+  }
+
+  :where(h1, h2, h3, h4, h5, h6, button, input, textarea, select, option, label, th, td) {
+    font-family: var(--font-bn-sans-src), var(--font-sans-src), ui-sans-serif, system-ui, sans-serif;
+  }
+
+  :where(h1, h2, h3, h4, h5, h6) {
+    font-feature-settings: "kern" 1;
   }
 
   ::-webkit-scrollbar {
