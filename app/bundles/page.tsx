@@ -66,7 +66,7 @@ export default async function BundlesPage({
             <MigrationNotice feature="বান্ডেল" />
           ) : loadError ? (
             <p className="mt-8 rounded-xl border border-border px-4 py-3 text-sm text-muted-foreground">
-              {loadError}
+              বান্ডেল তালিকা এখন লোড করা যাচ্ছে না। একটু পরে আবার চেষ্টা করুন।
             </p>
           ) : bundles.length === 0 ? (
             <EmptyState

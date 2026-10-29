@@ -35,7 +35,7 @@ function buildQuery(params: Awaited<CoursesPageProps["searchParams"]>) {
 }
 
 function formatPrice(currency: string, price: string) {
-  return Number(price) === 0 ? "Free" : `${currency} ${price}`
+  return Number(price) === 0 ? "ফ্রি" : `৳ ${Number(price).toLocaleString("bn-BD")}`
 }
 
 function enrollmentIsOpen(course: CourseListResponse["courses"][number]) {

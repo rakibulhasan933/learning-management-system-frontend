@@ -1,6 +1,7 @@
 import { Suspense } from "react"
 import Image from "next/image"
 import Link from "next/link"
+import { notFound } from "next/navigation"
 import { cookies } from "next/headers"
 import type { Metadata } from "next"
 import {
@@ -20,6 +21,7 @@ import type {
 
 import {
   accessTokenCookieName,
+  ApiClientError,
   getBackendApiUrl,
   optionalAuthenticatedApiFetch,
   publicApiFetch,
@@ -146,33 +148,49 @@ export default async function CourseDetailPage({
 }: CourseDetailPageProps) {
   const { slug } = await params
   const { error } = await searchParams
-  const [course, viewerEmail, enrollmentStatus] = await Promise.all([
-    publicApiFetch<CourseDetailDto>(`/courses/${slug}`, {
+  let course: CourseDetailDto
+  try {
+    course = await publicApiFetch<CourseDetailDto>(`/courses/${slug}`, {
       cache: "no-store",
-    }),
+    })
+  } catch (fetchError) {
+    if (fetchError instanceof ApiClientError && fetchError.status === 404) {
+      notFound()
+    }
+    throw fetchError
+  }
+
+  const [viewerEmail, enrollmentStatus] = await Promise.all([
     getOptionalViewerEmail(),
     getEnrollmentStatus(slug),
   ])
 
-  const sortedSections = [...course.sections].sort(
-    (a, b) => a.position - b.position
+  // Defensive: the page must never crash on an unexpected payload shape.
+  const sections = Array.isArray(course.sections) ? course.sections : []
+  const sortedSections = [...sections].sort(
+    (a, b) => (a.position ?? 0) - (b.position ?? 0)
   )
-  const totalModules = course.sections.reduce(
-    (sum, section) => sum + section.modules.length,
+  const totalModules = sections.reduce(
+    (sum, section) =>
+      sum + (Array.isArray(section.modules) ? section.modules.length : 0),
     0
   )
-  const totalLectures = course.sections.reduce(
-    (sum, section) => sum + section.lectures.length,
+  const totalLectures = sections.reduce(
+    (sum, section) =>
+      sum + (Array.isArray(section.lectures) ? section.lectures.length : 0),
     0
   )
   const totalDuration = formatDuration(
-    course.sections.reduce(
+    sections.reduce(
       (sum, section) =>
         sum +
-        section.modules.reduce(
-          (moduleSum, module) => moduleSum + module.durationSeconds,
-          0
-        ),
+        (Array.isArray(section.modules)
+          ? section.modules.reduce(
+              (moduleSum, module) =>
+                moduleSum + (module.durationSeconds ?? 0),
+              0
+            )
+          : 0),
       0
     )
   )
@@ -291,7 +309,7 @@ export default async function CourseDetailPage({
 
             <PreviewVideoPlayer
               learnerEmail={viewerEmail}
-              sections={course.sections}
+              sections={sections}
             />
 
             {sortedSections.length > 0 ? (
@@ -316,19 +334,23 @@ export default async function CourseDetailPage({
                       {section.title}
                     </h3>
                     <div className="space-y-0.5">
-                      {[...section.modules]
-                        .sort((a, b) => a.position - b.position)
+                      {(section.modules ?? [])
+                        .slice()
+                        .sort((a, b) => (a.position ?? 0) - (b.position ?? 0))
                         .map((module) => {
-                        const ContentIcon = module.contentTypes.includes(
+                        const contentTypes = Array.isArray(module.contentTypes)
+                          ? module.contentTypes
+                          : []
+                        const ContentIcon = contentTypes.includes(
                           "video"
                         )
                           ? PlayCircle
-                          : module.contentTypes.includes("pdf")
+                          : contentTypes.includes("pdf")
                             ? FileText
-                            : module.contentTypes.includes("quiz")
+                            : contentTypes.includes("quiz")
                               ? HelpCircle
                               : ClipboardCheck
-                        const contentLabel = module.contentTypes
+                        const contentLabel = contentTypes
                           .map((type) =>
                             type === "video"
                               ? module.videoCount === 1
@@ -348,7 +370,7 @@ export default async function CourseDetailPage({
                           >
                             <span className="flex min-w-0 items-center gap-2">
                               {isEnrolled ||
-                              module.contentTypes.includes("video") ? (
+                              contentTypes.includes("video") ? (
                                 <ContentIcon className="h-3.5 w-3.5 shrink-0 text-primary" />
                               ) : (
                                 <Lock className="h-3.5 w-3.5 shrink-0 text-muted-foreground/60" />
@@ -375,10 +397,11 @@ export default async function CourseDetailPage({
                     {/* Lessons are listed separately because the public
                         course payload returns lectures per milestone, not
                         grouped under a module. Order is position order. */}
-                    {section.lectures.length > 0 ? (
+                    {(section.lectures ?? []).length > 0 ? (
                       <div className="space-y-0.5 border-t border-border pt-3">
-                        {[...section.lectures]
-                          .sort((a, b) => a.position - b.position)
+                        {(section.lectures ?? [])
+                          .slice()
+                          .sort((a, b) => (a.position ?? 0) - (b.position ?? 0))
                           .map((lecture) => (
                             <div
                               className="flex items-center justify-between gap-3 rounded-lg px-2 py-2 text-sm text-muted-foreground"

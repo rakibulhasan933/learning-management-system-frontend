@@ -37,7 +37,7 @@ export function PreviewVideoPlayer({
   const previewLectures = useMemo(
     () =>
       sections
-        .flatMap((section) => section.lectures)
+    .flatMap((section) => section.lectures ?? [])
         .filter((lecture) => lecture.isPreview),
     [sections]
   )

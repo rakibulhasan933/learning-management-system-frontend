@@ -55,7 +55,7 @@ export async function SiteHeader({ variant = "default" }: { variant?: "default" 
               className="site-header-nav-link interactive-link"
               href={dashboardPath ?? "/dashboard/student"}
             >
-              Dashboard
+              ড্যাশবোর্ড
             </Link>
           ) : null}
         </nav>
@@ -120,7 +120,7 @@ export async function SiteHeader({ variant = "default" }: { variant?: "default" 
                 {profile ? (
                   <Button asChild className="justify-start" variant="ghost">
                     <Link href={dashboardPath ?? "/dashboard/student"}>
-                      Dashboard
+                      ড্যাশবোর্ড
                     </Link>
                   </Button>
                 ) : (

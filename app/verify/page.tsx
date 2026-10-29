@@ -7,8 +7,8 @@ import { publicApiFetch } from "@/lib/api-client"
 import { formatDate } from "@/lib/format"
 
 export const metadata: Metadata = {
-  title: "Verify certificate",
-  description: "Check whether a Folio certificate verification code is valid.",
+  title: "সার্টিফিকেট যাচাই",
+  description: "Folio সার্টিফিকেটের যাচাইকরণ কোড আসল কিনা দেখুন।",
 }
 
 export const dynamic = "force-dynamic"
@@ -63,9 +63,9 @@ export default async function VerifyCertificatePage({
     <PublicShell>
       <main className="mx-auto max-w-2xl px-4 py-14 sm:px-6 sm:py-20">
         <PageHeader
-          eyebrow="Certificates · Verification"
-          lede="Enter the verification code printed on a certificate to check whether it is genuine. No account details are shown for an invalid code."
-          title="Verify certificate"
+          eyebrow="সার্টিফিকেট · যাচাইকরণ"
+          lede="সার্টিফিকেটে ছাপা যাচাইকরণ কোডটি লিখে দেখুন সেটি আসল কিনা। ভুল কোডের জন্য কোনো অ্যাকাউন্টের তথ্য দেখানো হয় না।"
+          title="সার্টিফিকেট যাচাই"
         />
 
         <Card className="mt-10">
@@ -73,7 +73,7 @@ export default async function VerifyCertificatePage({
             <form action="/verify" className="grid gap-3" method="get">
               <label className="grid gap-1 text-sm" htmlFor="code">
                 <span className="text-muted-foreground">
-                  Verification code
+                  যাচাইকরণ কোড
                 </span>
                 <input
                   className="h-10 rounded-xl border border-input bg-input/30 px-3 font-mono"
@@ -87,27 +87,27 @@ export default async function VerifyCertificatePage({
                 className="h-10 rounded-xl bg-primary px-4 text-sm font-medium text-primary-foreground"
                 type="submit"
               >
-                Verify
+                যাচাই করুন
               </button>
             </form>
 
             {code && isValid ? (
               <div className="rounded-xl border border-border p-4">
                 <p className="text-sm font-medium text-primary">
-                  Valid certificate
+                  বৈধ সার্টিফিকেট
                 </p>
                 <dl className="mt-3 space-y-2 text-sm">
                   <div className="flex justify-between gap-4">
-                    <dt className="text-muted-foreground">Course</dt>
+                    <dt className="text-muted-foreground">কোর্স</dt>
                     <dd>{courseTitle}</dd>
                   </div>
                   <div className="flex justify-between gap-4">
-                    <dt className="text-muted-foreground">Student</dt>
+                    <dt className="text-muted-foreground">শিক্ষার্থী</dt>
                     <dd>{studentName}</dd>
                   </div>
                   {issuedAt ? (
                     <div className="flex justify-between gap-4">
-                      <dt className="text-muted-foreground">Issued</dt>
+                      <dt className="text-muted-foreground">ইস্যুর তারিখ</dt>
                       <dd>{formatDate(issuedAt)}</dd>
                     </div>
                   ) : null}
@@ -117,8 +117,7 @@ export default async function VerifyCertificatePage({
 
             {code && !isValid ? (
               <p className="rounded-xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
-                Invalid verification code. Please check the code and try
-                again.
+                অবৈধ যাচাইকরণ কোড। কোডটি ঠিক আছে কিনা দেখে আবার চেষ্টা করুন।
               </p>
             ) : null}
           </CardContent>
