@@ -234,69 +234,122 @@ const navigationByRole: Record<UserRole, DashboardNavItem[]> = {
     },
   ],
   student: [
-    { href: "/dashboard/student", icon: BookOpen, label: "Overview" },
+    { href: "/dashboard/student", icon: BookOpen, label: "ওভারভিউ" },
     {
       href: "/dashboard/student/classes",
       icon: GraduationCap,
-      label: "My classes",
+      label: "আমার ক্লাস",
     },
     {
       href: "/dashboard/student/analytics",
       icon: ChartColumn,
-      label: "Analytics",
+      label: "বিশ্লেষণ",
     },
-    { href: "/courses", icon: LibraryBig, label: "Browse courses" },
+    { href: "/courses", icon: LibraryBig, label: "কোর্স দেখুন" },
     {
       href: "/dashboard/student/certificates",
       icon: ScrollText,
-      label: "Certificates",
+      label: "সার্টিফিকেট",
     },
     {
       href: "/dashboard/student/orders",
       icon: BadgeDollarSign,
-      label: "Order/payment status",
+      label: "অর্ডার ও পেমেন্ট",
     },
     {
       href: "/dashboard/student/model-tests",
       icon: GraduationCap,
-      label: "Model tests",
+      label: "মডেল টেস্ট",
     },
     {
       href: "/dashboard/student/mistake-bank",
       icon: BookOpen,
-      label: "Mistake bank",
+      label: "ভুলের খাতা",
     },
     {
       href: "/dashboard/student/batches",
       icon: Users,
-      label: "Batches",
+      label: "ব্যাচ",
     },
     {
       href: "/dashboard/student/referrals",
       icon: Link2,
-      label: "Referrals",
+      label: "রেফারেল",
     },
     {
       href: "/dashboard/student/revision",
       icon: BookOpen,
-      label: "Revision",
+      label: "রিভিশন",
     },
     {
       href: "/dashboard/student/live-classes",
       icon: Video,
-      label: "Live classes",
+      label: "লাইভ ক্লাস",
     },
     {
       href: "/dashboard/student/notifications",
       icon: Bell,
-      label: "Notifications",
+      label: "নোটিফিকেশন",
     },
     {
       href: "/dashboard/student/messages",
       icon: MessageCircle,
-      label: "Messages",
+      label: "বার্তা",
     },
   ],
+}
+
+const dashboardCopyByRole: Record<
+  UserRole,
+  {
+    workspace: string
+    profile: string
+    openDashboard: string
+    signOut: string
+    signingOut: string
+    openNavigation: string
+    openSidebarMenu: string
+    openAccountMenu: string
+    expand: string
+    collapse: string
+  }
+> = {
+  admin: {
+    workspace: "Admin workspace",
+    profile: "Profile settings",
+    openDashboard: "Open dashboard",
+    signOut: "Sign out",
+    signingOut: "Signing out...",
+    openNavigation: "Open navigation",
+    openSidebarMenu: "Open sidebar menu",
+    openAccountMenu: "Open account menu",
+    expand: "Expand",
+    collapse: "Collapse",
+  },
+  instructor: {
+    workspace: "Instructor workspace",
+    profile: "Profile settings",
+    openDashboard: "Open dashboard",
+    signOut: "Sign out",
+    signingOut: "Signing out...",
+    openNavigation: "Open navigation",
+    openSidebarMenu: "Open sidebar menu",
+    openAccountMenu: "Open account menu",
+    expand: "Expand",
+    collapse: "Collapse",
+  },
+  student: {
+    workspace: "শিক্ষার্থী ড্যাশবোর্ড",
+    profile: "প্রোফাইল সেটিংস",
+    openDashboard: "ড্যাশবোর্ড খুলুন",
+    signOut: "সাইন আউট",
+    signingOut: "সাইন আউট হচ্ছে...",
+    openNavigation: "নেভিগেশন খুলুন",
+    openSidebarMenu: "সাইডবার মেনু খুলুন",
+    openAccountMenu: "অ্যাকাউন্ট মেনু খুলুন",
+    expand: "বড় করুন",
+    collapse: "ছোট করুন",
+  },
 }
 
 function splitHref(href: string) {
@@ -373,16 +426,22 @@ function DashboardNavLink({
   )
 }
 
-function SignOutForm({ collapsed = false }: { collapsed?: boolean }) {
+function SignOutForm({
+  collapsed = false,
+  copy,
+}: {
+  collapsed?: boolean
+  copy: (typeof dashboardCopyByRole)[UserRole]
+}) {
   return (
     <form action={signOutAction} className="mt-4">
       <SubmitButton
-        aria-label="Sign out"
+        aria-label={copy.signOut}
         className="w-full"
-        pendingLabel={collapsed ? "…" : "Signing out..."}
+        pendingLabel={collapsed ? "…" : copy.signingOut}
         variant="outline"
       >
-        <span className={cn(collapsed && "hidden")}>Sign out</span>
+        <span className={cn(collapsed && "hidden")}>{copy.signOut}</span>
         {collapsed ? <LogOut className="size-4" /> : null}
       </SubmitButton>
     </form>
@@ -401,6 +460,7 @@ export function DashboardShell({ children, profile }: DashboardShellProps) {
     return window.localStorage.getItem("dashboard-sidebar-collapsed") === "true"
   })
   const navigation = navigationByRole[profile.role]
+  const copy = dashboardCopyByRole[profile.role]
   const name = profile.fullName?.trim() || profile.email
   const initials = (
     profile.fullName?.trim()?.[0] ??
@@ -434,7 +494,7 @@ export function DashboardShell({ children, profile }: DashboardShellProps) {
         <span aria-hidden className="absolute inset-x-0 top-0 h-px bg-primary" />
         <div className="flex min-w-0 items-center gap-3">
           <Button
-            aria-label="Open navigation"
+            aria-label={copy.openNavigation}
             className="gap-2 md:hidden"
             onClick={() => setMobileOpen(true)}
             size="icon"
@@ -442,11 +502,11 @@ export function DashboardShell({ children, profile }: DashboardShellProps) {
             variant="outline"
           >
             <Menu className="size-4" />
-            <span className="sr-only">Open sidebar menu</span>
+            <span className="sr-only">{copy.openSidebarMenu}</span>
           </Button>
           <BrandMark className="text-xl" />
           <span className="hidden border-l border-border pl-3 font-mono text-[11px] text-muted-foreground sm:inline">
-            {profile.role} workspace
+            {copy.workspace}
           </span>
         </div>
 
@@ -461,7 +521,7 @@ export function DashboardShell({ children, profile }: DashboardShellProps) {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button
-                aria-label="Open account menu"
+                aria-label={copy.openAccountMenu}
                 className="relative flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-full border border-primary/50 bg-card text-sm text-primary ring-2 ring-primary/10 transition-colors outline-none hover:border-primary focus-visible:ring-2 focus-visible:ring-primary"
                 type="button"
               >
@@ -489,13 +549,13 @@ export function DashboardShell({ children, profile }: DashboardShellProps) {
               <DropdownMenuItem asChild>
                 <Link href={getDashboardPath(profile.role)}>
                   <BookOpen className="size-4" />
-                  Open dashboard
+                  {copy.openDashboard}
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link href="/dashboard/profile">
                   <UserRound className="size-4" />
-                  Profile settings
+                  {copy.profile}
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
@@ -566,7 +626,7 @@ export function DashboardShell({ children, profile }: DashboardShellProps) {
                     className={cn("min-w-0", sidebarCollapsed && "md:hidden")}
                   >
                     <p className="font-mono text-[11px] tracking-wide text-muted-foreground">
-                      {profile.role} workspace
+                      {copy.workspace}
                     </p>
                     <h2 className="mt-1 font-heading text-xl font-normal tracking-tight">
                       {name}
@@ -585,7 +645,7 @@ export function DashboardShell({ children, profile }: DashboardShellProps) {
               >
                 <Button
                   aria-label={
-                    sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"
+                    sidebarCollapsed ? copy.expand : copy.collapse
                   }
                   className="max-md:hidden"
                   onClick={() => setSidebarCollapsed((current) => !current)}
@@ -604,7 +664,7 @@ export function DashboardShell({ children, profile }: DashboardShellProps) {
                       sidebarCollapsed && "md:hidden"
                     )}
                   >
-                    {sidebarCollapsed ? "Expand" : "Collapse"}
+                    {sidebarCollapsed ? copy.expand : copy.collapse}
                   </span>
                 </Button>
               </div>
@@ -618,7 +678,7 @@ export function DashboardShell({ children, profile }: DashboardShellProps) {
                 currentPathname={pathname}
                 href="/dashboard/profile"
                 icon={UserRound}
-                label="Profile settings"
+                label={copy.profile}
                 collapsed={sidebarCollapsed}
               />
             </nav>
@@ -650,7 +710,7 @@ export function DashboardShell({ children, profile }: DashboardShellProps) {
                 >
                   {profile.email}
                 </p>
-                <SignOutForm collapsed={sidebarCollapsed} />
+                <SignOutForm collapsed={sidebarCollapsed} copy={copy} />
               </div>
             </div>
           </div>
@@ -665,7 +725,7 @@ export function DashboardShell({ children, profile }: DashboardShellProps) {
             <SheetHeader className="border-b border-border px-5 py-6">
               <SheetTitle className="text-left font-normal">
                 <span className="font-mono text-[11px] tracking-wide text-muted-foreground">
-                  {profile.role} workspace
+                  {copy.workspace}
                 </span>
                 <span className="mt-3 block font-heading text-2xl tracking-tight">
                   {name}
@@ -683,7 +743,7 @@ export function DashboardShell({ children, profile }: DashboardShellProps) {
                   currentPathname={pathname}
                   href="/dashboard/profile"
                   icon={UserRound}
-                  label="Profile settings"
+                  label={copy.profile}
                   onNavigate={() => setMobileOpen(false)}
                 />
                 {navigation.map((item) => (
@@ -704,7 +764,7 @@ export function DashboardShell({ children, profile }: DashboardShellProps) {
                   <p className="text-sm break-words text-muted-foreground">
                     {profile.email}
                   </p>
-                  <SignOutForm />
+                  <SignOutForm copy={copy} />
                 </div>
               </div>
             </div>
