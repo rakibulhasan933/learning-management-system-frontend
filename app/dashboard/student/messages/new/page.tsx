@@ -1,6 +1,6 @@
 import { PageHeader } from "@/components/ui/page-header"
 
-import { ComposeMessageForm } from "./compose-message-form"
+import { ComposeMessageForm } from "../compose-message-form"
 
 export const dynamic = "force-dynamic"
 

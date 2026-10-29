@@ -5,7 +5,7 @@ import type { MessageThreadDetailResponse } from "@/lib/types"
 import { ApiClientError, authenticatedApiFetch } from "@/lib/api-client"
 import { PageHeader } from "@/components/ui/page-header"
 
-import { ThreadView } from "../../messages/thread-view"
+import { ThreadView } from "../../../messages/thread-view"
 
 export const dynamic = "force-dynamic"
 

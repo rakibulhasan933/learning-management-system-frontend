@@ -20,7 +20,7 @@ const statusLabels: Record<string, string> = {
  * Decisions (approve/reject/process) are made by admins only.
  */
 export default async function InstructorRefundRequestsPage() {
-  let requests: InstructorRefundRequestListResponse["requests"] = []
+  let requests: InstructorRefundRequestListResponse["refunds"] = []
   let loadError: string | null = null
   try {
     const data =

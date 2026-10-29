@@ -163,7 +163,12 @@ export function PayInstalmentForm({
   instalmentId: string
 }) {
   return (
-    <form action={payInstalmentAction} className="mt-2 flex flex-wrap gap-2">
+    <form
+      action={async (formData) => {
+        await payInstalmentAction(formData)
+      }}
+      className="mt-2 flex flex-wrap gap-2"
+    >
       <input name="orderId" type="hidden" value={orderId} />
       <input name="instalmentId" type="hidden" value={instalmentId} />
       <Input

@@ -85,7 +85,9 @@ export function AttachQuestionForm({
 }) {
   return (
     <form
-      action={attachBankQuestionAction}
+      action={async (formData) => {
+        await attachBankQuestionAction(formData)
+      }}
       className="mt-2 flex gap-2"
     >
       <input name="questionId" type="hidden" value={questionId} />

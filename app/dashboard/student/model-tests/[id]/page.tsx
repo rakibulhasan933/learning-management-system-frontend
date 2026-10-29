@@ -10,7 +10,7 @@ import {
   isMigrationPendingError,
 } from "@/components/migration-notice"
 
-import { ModelTestAttemptClient } from "./attempt-client"
+import { ModelTestAttemptClient } from "../attempt-client"
 
 export const dynamic = "force-dynamic"
 

@@ -3,7 +3,7 @@ import type { NotificationListResponse } from "@/lib/types"
 import { authenticatedApiFetch } from "@/lib/api-client"
 import { PageHeader } from "@/components/ui/page-header"
 
-import { NotificationList } from "../notifications/notification-list"
+import { NotificationList } from "../../notifications/notification-list"
 
 export const dynamic = "force-dynamic"
 

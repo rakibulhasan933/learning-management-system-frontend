@@ -3,6 +3,7 @@ import { Download, Info } from "lucide-react"
 import type {
   AnalyticsCohortsResponse,
   AnalyticsFunnelResponse,
+  AnalyticsFunnelStepDto,
   AnalyticsRefundReasonsResponse,
   AnalyticsTeachersResponse,
 } from "@/lib/types"

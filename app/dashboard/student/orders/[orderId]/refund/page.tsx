@@ -30,7 +30,7 @@ export default async function OrderRefundPage({
   let order = null as
     | StudentOrderListResponse["orders"][number]
     | null
-  let requests: StudentRefundRequestListResponse["requests"] = []
+  let requests: StudentRefundRequestListResponse["refunds"] = []
   let loadError: string | null = null
 
   try {
