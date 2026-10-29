@@ -39,7 +39,11 @@ export default async function AdminCoursesPage() {
     }),
   ])
 
-  const total = response.courses.length
+  // The queue endpoint returns every listed course (including Published
+  // ones); the header must count only courses actually pending review.
+  const pendingTotal = response.courses.filter(
+    (course) => course.status === "pending_review"
+  ).length
 
   return (
     <>
@@ -60,14 +64,14 @@ export default async function AdminCoursesPage() {
       <div className="mt-12 grid gap-4 sm:max-w-xs">
         <StatTile
           hint={
-            total === 1
-              ? "course waiting on review"
-              : "courses waiting on review"
+            pendingTotal === 1
+              ? "course pending review"
+              : "courses pending review"
           }
           icon={<Clock />}
-          label="In the queue"
-          tone={total > 0 ? "primary" : "default"}
-          value={total}
+          label="Pending review"
+          tone={pendingTotal > 0 ? "primary" : "default"}
+          value={pendingTotal}
         />
       </div>
 

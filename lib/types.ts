@@ -94,6 +94,9 @@ export interface CourseSummaryDto {
   publishedAt: string | null
   enrollmentEnabled: boolean
   enrollmentEndsAt: string | null
+  /** Public rating summary, present on the course detail payload. */
+  averageRating?: number | null
+  reviewCount?: number
 }
 
 export interface CourseLectureSummaryDto {
@@ -905,4 +908,638 @@ export interface AnnouncementDto {
 
 export interface AnnouncementListResponse {
   announcements: AnnouncementDto[]
+}
+
+/* ---- Features 2-5: bundles / subscriptions / instalments / seller dashboard / question bank / model tests ---- */
+
+export interface BundleDto {
+  id: string
+  title: string
+  courseIds: string[]
+  price: string
+  originalPrice: string | null
+  currency: string
+  durationDays: number | null
+  instructorId: string
+  isPublished: boolean
+  description: string | null
+}
+
+export interface BundleListResponse {
+  bundles: BundleDto[]
+}
+
+export interface BundleOrderResponse {
+  bundleId: string
+  courseIds: string[]
+  order: {
+    id: string
+    amount: string
+    currency: string
+    referenceCode?: string
+    status: string
+  }
+  payVia: string
+}
+
+export interface SubscriptionResponse {
+  order: { id: string; amount: string; currency: string; status: string }
+  payVia: string
+  subscription: {
+    id: string
+    months: number
+    status: string
+    targetId: string
+    targetType: string
+    startsAt: string | null
+    expiresAt: string | null
+  }
+}
+
+export interface InstalmentDto {
+  id: string
+  amount: string
+  dueDate: string
+  paidAt: string | null
+  status: "pending" | "paid" | "overdue"
+  transactionId: string | null
+}
+
+export interface InstalmentScheduleResponse {
+  accessRule: string
+  instalments: InstalmentDto[]
+  orderAmount: string | null
+  orderId: string
+  paidTotal: string
+}
+
+export interface OrderBumpResponse {
+  orderId: string
+  courseId: string
+  courseTitle: string
+  newOrderAmount: string
+}
+
+export interface AbandonedCartDto {
+  id: string
+  items: Array<{ courseId?: string; bundleId?: string }>
+  recovered: boolean
+  recoveredAt: string | null
+  startedAt: string
+  studentEmail: string | null
+  studentName: string | null
+  userId: string
+}
+
+export interface AbandonedCartListResponse {
+  carts: AbandonedCartDto[]
+}
+
+export interface RefundEstimateResponse {
+  orderId: string
+  kind: string
+  eligible: boolean
+  estimatedAmount: number | string | null
+  rule: string
+}
+
+export interface SellerDashboardResponse {
+  sales: { total: number; paid: number; pending: number; refunded: number; rejected: number }
+  refundTotal: number
+  payoutBalance: {
+    availableBalance: number
+    reservedAmount: number
+    totalRevenue: number
+    pendingPayoutRequestCount: number
+  }
+  ordersByPaymentMethod: Array<{ paymentMethod: string; count: number; total: number }>
+  couponPerformance: Array<{ couponCode: string; uses: number; discountGiven: number; revenue: number }>
+  enrolmentsPerCourse: Array<{ courseId: string; courseTitle: string; enrolments: number; activeEnrolments: number }>
+  completionPerCourse: Array<{ courseId: string; courseTitle: string; completedEnrolments: number; completionRate: number }>
+  dropOffPerCourse: Array<{
+    courseId: string
+    courseTitle: string
+    dropOffLesson: { lectureId: string; lectureTitle: string; rateAfter: number; rateBefore: number } | null
+  }>
+  topicWeakness: {
+    note: string
+    source: string
+    quizzes: Array<{ quizId: string; quizTitle: string; courseId: string; courseTitle: string; attempts: number; averagePercentage: number | null }>
+  }
+  atRiskStudents: Array<{
+    courseId: string
+    courseTitle: string
+    enrolledAt: string
+    lastActivityAt: string
+    reason: string
+    studentEmail: string
+    studentName: string | null
+    userId: string
+  }>
+}
+
+export interface AnnouncementDraftResponse {
+  draft: { body: string; courseId: string | null; title: string }
+  note?: string
+  recipientCount: number
+  recipientsPreview: Array<{ email?: string; fullName?: string | null; userId?: string }>
+  sent: false
+}
+
+export interface QuestionBankOptionDto {
+  id: string
+  isCorrect: boolean
+  optionText: string
+  position: number
+}
+
+export interface QuestionBankQuestionDto {
+  id: string
+  questionText: string
+  subject: string | null
+  chapter: string | null
+  topic: string | null
+  difficulty: string
+  explanation: string | null
+  courseId: string | null
+  options: QuestionBankOptionDto[]
+}
+
+export interface QuestionBankListResponse {
+  questions: QuestionBankQuestionDto[]
+}
+
+export interface QuestionImportResponse {
+  attachedToTestId: string | null
+  errors: Array<{ line: number; reason: string }>
+  imported: number
+  skipped: number
+}
+
+export interface ModelTestDto {
+  id: string
+  title: string
+  courseId: string
+  durationMinutes: number
+  negativeMark: string | number
+  shuffleQuestions: boolean
+  maxAttempts: number
+  isPublished?: boolean
+  questionCount?: number
+}
+
+export interface ModelTestAttemptDto {
+  attemptId: string
+  durationMinutes: number
+  startedAt: string
+  expiresAt: string
+  testId: string
+  title: string
+  questions: Array<{
+    id: string
+    questionText: string
+    subject: string | null
+    chapter: string | null
+    topic: string | null
+    difficulty: string | null
+    options: Array<{ id: string; optionText: string }>
+  }>
+}
+
+export interface ModelTestSubmitResponse {
+  attemptId: string
+  score: number
+  totalQuestions: number
+  correctCount: number
+  wrongCount: number
+  blankCount: number
+  percentage: number
+  negativeMark: number
+  negativeMarkApplied: number
+  topicBreakdown: Record<string, { blank: number; correct: number; total: number; wrong: number }>
+  wrongQuestionIds: string[]
+  submittedLate: boolean
+  finishedInSeconds: number
+}
+
+export interface LeaderboardEntryDto {
+  rank: number
+  score: number
+  studentName: string | null
+  studentEmail?: string | null
+  userId: string
+  finishedInSeconds: number | null
+  submittedAt: string
+}
+
+export interface LeaderboardResponse {
+  testId: string
+  leaderboard: LeaderboardEntryDto[]
+  ownEntry?: LeaderboardEntryDto | null
+  ownRank?: number | null
+  tiebreak?: string
+}
+
+export interface TopicReportResponse {
+  testId: string
+  attemptsCount: number
+  topics: Array<{ topic: string; correct: number; wrong: number; blank: number; total: number; accuracy: number }>
+}
+
+export interface MistakeBankResponse {
+  questions: Array<QuestionBankQuestionDto & { sourceTestIds: string[] }>
+}
+
+/* ------------------------------------------------------------------ */
+/* Batch 4 — batches, affiliates, link-based live classes, revision.  */
+/* Shapes follow the backend API contract exactly where the contract  */
+/* fixes a shape; every other field is optional so a page never       */
+/* crashes on a field the backend does not return.                    */
+/* ------------------------------------------------------------------ */
+
+export interface BatchDto {
+  id: string
+  courseId?: string | null
+  courseTitle?: string | null
+  name: string
+  enrolmentStartAt?: string | null
+  enrolmentEndAt?: string | null
+  memberCount?: number | null
+  createdAt?: string | null
+}
+
+export interface BatchListResponse {
+  batches: BatchDto[]
+}
+
+export interface BatchMemberDto {
+  userId: string
+  fullName?: string | null
+  studentName?: string | null
+}
+
+export interface BatchDetailResponse {
+  batch?: BatchDto
+  members?: BatchMemberDto[]
+  id?: string
+  courseId?: string | null
+  courseTitle?: string | null
+  name?: string
+  enrolmentStartAt?: string | null
+  enrolmentEndAt?: string | null
+  memberCount?: number | null
+  createdAt?: string | null
+}
+
+export interface DripStatusItemDto {
+  milestoneId?: string | null
+  moduleId?: string | null
+  locked: boolean
+  unlocksAt?: string | null
+}
+
+export interface DripStatusResponse {
+  items: DripStatusItemDto[]
+}
+
+export interface BatchLeaderboardEntryDto {
+  userId: string
+  displayName?: string | null
+  studentName?: string | null
+  rank?: number | null
+  score?: number | string | null
+  progress?: number | string | null
+  /* Deliberately no email: a batch leaderboard never shows another
+     student's email address. */
+}
+
+export interface BatchLeaderboardResponse {
+  leaderboard?: BatchLeaderboardEntryDto[]
+  entries?: BatchLeaderboardEntryDto[]
+}
+
+export interface BatchAnnouncementResponse {
+  announcement?: { id?: string; title: string; body: string }
+  recipientCount: number
+  sent: boolean
+}
+
+export interface AffiliateLinkDto {
+  id: string
+  code: string
+  commissionType: "percent" | "flat"
+  commissionValue: string | number
+  scopeType?: string | null
+  scopeId?: string | null
+  isReferral?: boolean | null
+  clicks?: number | null
+  conversions?: number | null
+  earned?: string | number | null
+  createdAt?: string | null
+}
+
+export interface AffiliateLinkListResponse {
+  links: AffiliateLinkDto[]
+}
+
+export interface AffiliateDashboardResponse {
+  clicks?: number | null
+  conversions?: number | null
+  totalCommission?: string | number | null
+  pendingCommission?: string | number | null
+  paidCommission?: string | number | null
+  availableBalance?: string | number | null
+  earnings?: string | number | null
+  links?: AffiliateLinkDto[] | null
+}
+
+export interface AffiliatePayoutDto {
+  id: string
+  amount: string | number
+  note?: string | null
+  status: string
+  userId?: string | null
+  userName?: string | null
+  createdAt?: string | null
+  decidedAt?: string | null
+}
+
+export interface AffiliatePayoutListResponse {
+  payouts: AffiliatePayoutDto[]
+}
+
+export interface LiveClassDto {
+  id: string
+  courseId?: string | null
+  courseTitle?: string | null
+  batchId?: string | null
+  title: string
+  startsAt: string
+  endsAt?: string | null
+  meetingUrl: string
+  provider: "meet" | "zoom" | "other"
+  recordingUrl?: string | null
+  recordingTitle?: string | null
+  createdAt?: string | null
+}
+
+export interface LiveClassListResponse {
+  liveClasses: LiveClassDto[]
+}
+
+export interface LiveClassAttendanceDto {
+  userId: string
+  studentName?: string | null
+  present: boolean
+  markedAt?: string | null
+}
+
+export interface LiveClassAttendanceResponse {
+  attendance: LiveClassAttendanceDto[]
+}
+
+export interface FlashcardDto {
+  id: string
+  front: string
+  back: string
+  subject?: string | null
+  chapter?: string | null
+  topic?: string | null
+  dueAt?: string | null
+  nextReviewAt?: string | null
+}
+
+export interface FlashcardListResponse {
+  flashcards: FlashcardDto[]
+}
+
+export interface RevisionTodayResponse {
+  dueFlashcards: FlashcardDto[]
+  dueCount: number
+  weakTopicRecommendations: Array<
+    string | { topic?: string | null; reason?: string | null }
+  >
+}
+
+export interface BookmarkDto {
+  id: string
+  type: "question" | "lesson"
+  targetId: string
+  title?: string | null
+  createdAt?: string | null
+}
+
+export interface BookmarkListResponse {
+  bookmarks: BookmarkDto[]
+}
+
+export interface NoteDto {
+  id: string
+  lessonId?: string | null
+  questionId?: string | null
+  body: string
+  createdAt?: string | null
+  updatedAt?: string | null
+}
+
+export interface NoteListResponse {
+  notes: NoteDto[]
+}
+
+export interface RevisionSummaryResponse {
+  dueCount?: number | null
+  flashcardCount?: number | null
+  bookmarkCount?: number | null
+  noteCount?: number | null
+  weakTopics?: string[] | null
+}
+
+// --- Course reviews (public read, student write, teacher/admin reply) ---
+
+export interface CourseReviewReplyDto {
+  id: string
+  body: string
+  authorRole: string
+  authorName: string | null
+  createdAt: string
+}
+
+export interface CourseReviewDto {
+  id: string
+  rating: number
+  body: string | null
+  reviewerName: string
+  createdAt: string
+  replies: CourseReviewReplyDto[]
+}
+
+export interface CourseReviewsResponse {
+  averageRating: number | null
+  reviewCount: number
+  reviews: CourseReviewDto[]
+}
+
+export interface CourseMyReviewResponse {
+  review: CourseReviewDto | null
+  canReview: boolean
+}
+
+// --- Student refund requests ---
+
+export type RefundRequestStatus = RefundStatus
+
+export interface StudentRefundRequestDto {
+  id: string
+  orderId: string
+  courseTitle: string | null
+  amount: string
+  currency: string
+  reason: string
+  status: RefundRequestStatus
+  createdAt: string
+}
+
+export interface StudentRefundRequestListResponse {
+  refunds: StudentRefundRequestDto[]
+}
+
+export interface InstructorRefundRequestDto {
+  id: string
+  orderId: string
+  studentName: string
+  courseTitle: string
+  amount: string
+  currency: string
+  reason: string
+  status: RefundRequestStatus
+  createdAt: string
+}
+
+export interface InstructorRefundRequestListResponse {
+  refunds: InstructorRefundRequestDto[]
+}
+
+// --- Admin analytics ---
+
+export interface AnalyticsFunnelStepDto {
+  key: string
+  label: string
+  count: number
+  /** Fraction 0–1 from the previous step; computed client-side when absent. */
+  conversionRate?: number | null
+}
+
+export interface AnalyticsFunnelResponse {
+  signups: number
+  paidOrders: number
+  completedCourses: number
+  /** Percent 0–100 vs previous step. */
+  signupToPaidPct: number
+  /** Percent 0–100 vs previous step. */
+  paidToCompletedPct: number
+  note: string
+}
+
+export interface AnalyticsCohortDto {
+  month: string
+  enrolled: number
+  completedPct: number | null
+  refundPct: number | null
+}
+
+export interface AnalyticsCohortsResponse {
+  cohorts: AnalyticsCohortDto[]
+}
+
+export interface AnalyticsRefundReasonDto {
+  reason: string
+  count: number
+}
+
+export interface AnalyticsRefundReasonsResponse {
+  reasons: AnalyticsRefundReasonDto[]
+}
+
+export interface AnalyticsTeacherDto {
+  teacherId: string
+  teacherName: string
+  courseCount?: number | null
+  sales: number | string
+  completionPct: number | null
+  avgRating: number | null
+  refundPct: number | null
+}
+
+export interface AnalyticsTeachersResponse {
+  teachers: AnalyticsTeacherDto[]
+}
+
+/* ------------------------------------------------------------------ */
+/* Batch 6 — notification center + instructor↔student messaging.       */
+/* Shapes follow the backend API contract exactly.                     */
+/* ------------------------------------------------------------------ */
+
+/** GET /notifications/unread-count */
+export interface UnreadCountResponse {
+  unreadCount: number
+}
+
+/** POST /notifications/:id/read */
+export interface NotificationMarkReadResponse {
+  id: string
+  readAt: string
+}
+
+/** POST /notifications/read-all */
+export interface NotificationMarkAllReadResponse {
+  marked: number
+}
+
+export interface MessageThreadDto {
+  id: string
+  courseId: string
+  courseTitle: string
+  otherPartyName: string
+  otherPartyRole: string
+  subject: string
+  lastMessageAt: string
+  lastMessagePreview: string
+  unreadCount: number
+}
+
+/** GET /messages/threads */
+export interface MessageThreadListResponse {
+  threads: MessageThreadDto[]
+}
+
+export interface MessageDto {
+  id: string
+  senderId: string
+  senderRole: string
+  senderName: string
+  body: string
+  readAt: string | null
+  createdAt: string
+}
+
+/** GET /messages/threads/:id */
+export interface MessageThreadDetailResponse {
+  thread: MessageThreadDto
+  messages: MessageDto[]
+}
+
+/** POST /messages/threads {courseId, studentId?, subject, body} */
+export interface MessageThreadCreateResponse {
+  thread: MessageThreadDto
+}
+
+/** POST /messages/threads/:id/messages {body} */
+export interface MessageSendResponse {
+  message: MessageDto
+}
+
+/** POST /instructor/messages/broadcast {courseId?, batchId?, subject, body} */
+export interface MessageBroadcastResponse {
+  threadsCreated: number
+  notified: number
 }

@@ -1,3 +1,4 @@
+import { Suspense } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { cookies } from "next/headers"
@@ -9,6 +10,7 @@ import {
   FileText,
   HelpCircle,
   Lock,
+  MessageCircle,
   PlayCircle,
 } from "lucide-react"
 import type {
@@ -29,8 +31,10 @@ import { Card, CardContent } from "@/components/ui/card"
 import { ProgressThread } from "@/components/ui/progress-thread"
 
 import { PublicShell } from "@/components/public-shell"
+import { RefCapture } from "@/components/ref-capture"
 
 import { PreviewVideoPlayer } from "./preview-video-player"
+import { CourseReviewsSection } from "./reviews-section"
 
 export const dynamic = "force-dynamic"
 
@@ -150,8 +154,15 @@ export default async function CourseDetailPage({
     getEnrollmentStatus(slug),
   ])
 
+  const sortedSections = [...course.sections].sort(
+    (a, b) => a.position - b.position
+  )
   const totalModules = course.sections.reduce(
     (sum, section) => sum + section.modules.length,
+    0
+  )
+  const totalLectures = course.sections.reduce(
+    (sum, section) => sum + section.lectures.length,
     0
   )
   const totalDuration = formatDuration(
@@ -188,6 +199,9 @@ export default async function CourseDetailPage({
 
   return (
     <PublicShell>
+      <Suspense fallback={null}>
+        <RefCapture />
+      </Suspense>
       <main className="px-4 py-8 sm:px-6 sm:py-12">
         <script
           dangerouslySetInnerHTML={{ __html: JSON.stringify(courseJsonLd) }}
@@ -219,6 +233,43 @@ export default async function CourseDetailPage({
             <p className="mt-5 max-w-2xl text-base leading-7 text-muted-foreground">
               {course.shortDescription}
             </p>
+            {/* At-a-glance facts: only counts derived from the real course
+                payload. No enrolment count, seats, rating, or review figure
+                is shown here because the public course API returns none. */}
+            <p className="mt-4 font-mono text-xs text-muted-foreground">
+              {[
+                sortedSections.length > 0
+                  ? `${sortedSections.length} milestones`
+                  : null,
+                totalModules > 0 ? `${totalModules} modules` : null,
+                totalLectures > 0 ? `${totalLectures} lessons` : null,
+                totalDuration,
+              ]
+                .filter(Boolean)
+                .join(" · ")}
+            </p>
+            <div className="mt-4 flex flex-wrap gap-4 text-sm">
+              <a
+                className="text-primary underline-offset-4 hover:underline"
+                href="#curriculum"
+              >
+                কারিকুলাম দেখুন
+              </a>
+              {course.instructorName ? (
+                <a
+                  className="text-primary underline-offset-4 hover:underline"
+                  href="#instructor"
+                >
+                  মেন্টর
+                </a>
+              ) : null}
+              <a
+                className="text-primary underline-offset-4 hover:underline"
+                href="#reviews"
+              >
+                রিভিউ
+              </a>
+            </div>
             {course.instructorName ? (
               <p className="mt-4 text-sm text-muted-foreground">
                 মেন্টর: {" "}
@@ -243,17 +294,19 @@ export default async function CourseDetailPage({
               sections={course.sections}
             />
 
-            <div className="mt-12 space-y-4">
+            {sortedSections.length > 0 ? (
+            <div className="mt-12 scroll-mt-8 space-y-4" id="curriculum">
               <div className="flex flex-wrap items-baseline justify-between gap-3">
                 <h2 className="font-heading text-2xl tracking-tight">
                   কোর্সের আউটলাইন
                 </h2>
                 <span className="font-mono text-xs text-muted-foreground">
-                  {course.sections.length} milestones · {totalModules} modules
+                  {sortedSections.length} milestones · {totalModules} modules
+                  {totalLectures > 0 ? ` · ${totalLectures} lessons` : ""}
                   {totalDuration ? ` · ${totalDuration}` : ""}
                 </span>
               </div>
-              {course.sections.map((section) => (
+              {sortedSections.map((section) => (
                 <Card key={section.id} size="sm">
                   <CardContent className="space-y-3">
                     <p className="font-mono text-xs text-muted-foreground">
@@ -263,7 +316,9 @@ export default async function CourseDetailPage({
                       {section.title}
                     </h3>
                     <div className="space-y-0.5">
-                      {section.modules.map((module) => {
+                      {[...section.modules]
+                        .sort((a, b) => a.position - b.position)
+                        .map((module) => {
                         const ContentIcon = module.contentTypes.includes(
                           "video"
                         )
@@ -317,10 +372,80 @@ export default async function CourseDetailPage({
                         )
                       })}
                     </div>
+                    {/* Lessons are listed separately because the public
+                        course payload returns lectures per milestone, not
+                        grouped under a module. Order is position order. */}
+                    {section.lectures.length > 0 ? (
+                      <div className="space-y-0.5 border-t border-border pt-3">
+                        {[...section.lectures]
+                          .sort((a, b) => a.position - b.position)
+                          .map((lecture) => (
+                            <div
+                              className="flex items-center justify-between gap-3 rounded-lg px-2 py-2 text-sm text-muted-foreground"
+                              key={lecture.id}
+                            >
+                              <span className="flex min-w-0 items-center gap-2">
+                                {lecture.isPreview ? (
+                                  <PlayCircle className="h-3.5 w-3.5 shrink-0 text-primary" />
+                                ) : (
+                                  <Lock className="h-3.5 w-3.5 shrink-0 text-muted-foreground/60" />
+                                )}
+                                <span className="truncate">
+                                  {lecture.title}
+                                </span>
+                              </span>
+                              <span className="flex shrink-0 items-center gap-2">
+                                {lecture.durationSeconds ? (
+                                  <span className="font-mono text-xs text-muted-foreground/80">
+                                    {Math.round(lecture.durationSeconds / 60)}m
+                                  </span>
+                                ) : null}
+                                {lecture.isPreview ? (
+                                  <Badge
+                                    className="border-primary/40 bg-primary/10 font-mono text-[11px] text-primary"
+                                    variant="outline"
+                                  >
+                                    ফ্রি প্রিভিউ
+                                  </Badge>
+                                ) : null}
+                              </span>
+                            </div>
+                          ))}
+                      </div>
+                    ) : null}
                   </CardContent>
                 </Card>
               ))}
             </div>
+            ) : null}
+
+            {course.instructorName ? (
+              <section className="mt-12 scroll-mt-8 space-y-3" id="instructor">
+                <h2 className="font-heading text-2xl tracking-tight">
+                  মেন্টর
+                </h2>
+                <Card size="sm">
+                  <CardContent>
+                    <p className="text-base text-foreground">
+                      {course.instructorName}
+                    </p>
+                    {/* No bio or avatar block: the public course API returns
+                        only instructorName, so no bio, credential, or photo
+                        is shown or invented here. */}
+                  </CardContent>
+                </Card>
+              </section>
+            ) : null}
+
+            <section className="mt-12 scroll-mt-8 space-y-3" id="reviews">
+              <h2 className="font-heading text-2xl tracking-tight">রিভিউ</h2>
+              <CourseReviewsSection
+                courseId={course.id}
+                fallbackAverage={course.averageRating ?? null}
+                fallbackCount={course.reviewCount ?? 0}
+                slug={course.slug}
+              />
+            </section>
           </div>
 
           <aside className="h-fit lg:sticky lg:top-8">
@@ -346,16 +471,19 @@ export default async function CourseDetailPage({
                     {formatPrice(course.currency, course.price)}
                   </p>
                 </div>
-                <div className="flex items-start gap-2 rounded-xl border border-border bg-background px-3 py-2.5 text-sm text-muted-foreground">
-                  <CalendarDays className="mt-0.5 size-4 shrink-0 text-primary" />
-                  <span>
-                    {canEnroll
-                      ? course.enrollmentEndsAt
+                {/* Enrolment-end is shown ONLY when the API returns a real
+                    enrollmentEndsAt value. No seats/capacity block exists:
+                    the API returns no capacity field. */}
+                {course.enrollmentEndsAt ? (
+                  <div className="flex items-start gap-2 rounded-xl border border-border bg-background px-3 py-2.5 text-sm text-muted-foreground">
+                    <CalendarDays className="mt-0.5 size-4 shrink-0 text-primary" />
+                    <span>
+                      {new Date(course.enrollmentEndsAt) > new Date()
                         ? `Enrollment closes ${formatEnrollmentDate(course.enrollmentEndsAt)}`
-                        : "Enrollment is open with no closing date"
-                      : "Enrollment is currently closed"}
-                  </span>
-                </div>
+                        : `Enrollment ended ${formatEnrollmentDate(course.enrollmentEndsAt)}`}
+                    </span>
+                  </div>
+                ) : null}
 
                 {error ? (
                   <p
@@ -382,14 +510,22 @@ export default async function CourseDetailPage({
                         Continue learning
                       </Link>
                     </Button>
+                    <Button className="w-full" size="lg" variant="outline" asChild>
+                      <Link
+                        href={`/dashboard/student/messages/new?courseId=${course.id}&title=${encodeURIComponent(course.title)}`}
+                      >
+                        <MessageCircle className="size-4" />
+                        শিক্ষককে মেসেজ করুন
+                      </Link>
+                    </Button>
                   </div>
                 ) : pendingOrder ? (
                   <div className="space-y-3">
                     <div className="flex items-start gap-2 rounded-xl border border-primary/30 bg-primary/5 px-3 py-2.5 text-sm text-muted-foreground">
                       <Clock3 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
                       <p>
-                        Payment under review. Enrollment activates once an admin
-                        approves your proof.
+                        Payment under review. Enrollment activates once PayConfirm
+                        verifies your transaction.
                       </p>
                     </div>
                     <Button
@@ -455,6 +591,11 @@ export default async function CourseDetailPage({
                     </Button>
                   </div>
                 )}
+                <Button className="mt-3 w-full" size="lg" variant="outline" asChild>
+                  <Link href="/bundles">
+                    একাধিক কোর্স একসাথে চাইলে বান্ডেল দেখুন
+                  </Link>
+                </Button>
               </CardContent>
             </Card>
           </aside>

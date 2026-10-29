@@ -11,6 +11,7 @@ import {
 import { CouponCheckoutForm } from "./coupon-checkout-form"
 import { Card, CardContent } from "@/components/ui/card"
 import { ProgressThread } from "@/components/ui/progress-thread"
+import { AbandonedCartRecorder } from "@/components/abandoned-cart-recorder"
 
 export const dynamic = "force-dynamic"
 
@@ -54,6 +55,7 @@ export default async function CourseCheckoutPage({
 
   return (
     <main className="min-h-screen bg-background px-4 py-8 text-foreground sm:px-6 sm:py-12">
+      <AbandonedCartRecorder courseId={course.id} />
       <section className="mx-auto max-w-5xl">
         <ProgressThread className="mb-8" />
         <Link

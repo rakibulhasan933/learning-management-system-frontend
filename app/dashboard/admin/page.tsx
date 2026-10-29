@@ -59,7 +59,7 @@ export default async function AdminDashboardPage() {
     <>
       <PageHeader
         eyebrow="Admin dashboard"
-        lede="Manage users, review submitted courses, monitor revenue, and process manual payments from one place."
+        lede="Manage users, review submitted courses, monitor revenue, and process PayConfirm-verified payments from one place."
         title="Platform control center"
       />
 
@@ -72,7 +72,7 @@ export default async function AdminDashboardPage() {
           value={formatCurrency(totals.paidRevenue)}
         />
         <StatTile
-          hint={`${totals.pendingOrders} awaiting review`}
+          hint={`${totals.pendingOrders} awaiting PayConfirm verification`}
           icon={<CreditCard />}
           label="Pending revenue"
           value={formatCurrency(totals.pendingRevenue)}

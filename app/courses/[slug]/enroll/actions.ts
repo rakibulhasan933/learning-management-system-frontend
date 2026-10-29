@@ -8,6 +8,7 @@ import type {
 } from "@/lib/types"
 
 import { ApiClientError, authenticatedApiFetch } from "@/lib/api-client"
+import { attributeAffiliateOrderAction } from "@/app/dashboard/instructor/affiliates/actions"
 
 function getRequiredString(formData: FormData, key: string) {
   const value = formData.get(key)
@@ -39,6 +40,7 @@ export async function createEnrollmentOrderAction(formData: FormData) {
   const courseId = getRequiredString(formData, "courseId")
   const slug = getRequiredString(formData, "slug")
   const couponCode = getOptionalString(formData, "couponCode")
+  const refCode = getOptionalString(formData, "refCode")
   let orderId: string
   let orderStatus: PaymentOrderDto["status"]
 
@@ -57,6 +59,13 @@ export async function createEnrollmentOrderAction(formData: FormData) {
     revalidatePath("/dashboard/student")
     orderId = response.order.id
     orderStatus = response.order.status
+
+    // Best-effort referral attribution only. It never throws and never
+    // changes the order, the redirect, or the PayConfirm flow: if the
+    // attribute call fails, the order still stands.
+    if (refCode) {
+      await attributeAffiliateOrderAction(refCode, orderId)
+    }
   } catch (error) {
     if (error instanceof ApiClientError && error.status === 401) {
       redirectToLogin(slug)

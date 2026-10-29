@@ -12,6 +12,7 @@ import {
   ChartColumn,
   Clipboard,
   GraduationCap,
+  Landmark,
   LibraryBig,
   RotateCcw,
   Settings2,
@@ -21,6 +22,7 @@ import {
   TicketPercent,
   Megaphone,
   MessageCircle,
+  Link2,
   LogOut,
   Menu,
   PanelLeftClose,
@@ -28,12 +30,14 @@ import {
   ScrollText,
   UserRound,
   Users,
+  Video,
 } from "lucide-react"
 import type { ProfileDto, UserRole } from "@/lib/types"
 
 import { signOutAction } from "@/app/auth/actions"
 import { SubmitButton } from "@/components/submit-button"
 import { BrandMark } from "@/components/brand-mark"
+import { NotificationBell } from "@/components/notification-bell"
 import { getDashboardPath } from "@/lib/auth/dashboard"
 import { cn } from "@/lib/utils"
 import {
@@ -85,9 +89,19 @@ const navigationByRole: Record<UserRole, DashboardNavItem[]> = {
       label: "Instructor payouts",
     },
     {
+      href: "/dashboard/admin/affiliate-payouts",
+      icon: BadgeDollarSign,
+      label: "Affiliate payouts",
+    },
+    {
       href: "/dashboard/admin/revenue",
       icon: ChartColumn,
       label: "Revenue overview",
+    },
+    {
+      href: "/dashboard/admin/analytics",
+      icon: ChartColumn,
+      label: "Analytics",
     },
     {
       href: "/dashboard/admin/announcements",
@@ -118,6 +132,11 @@ const navigationByRole: Record<UserRole, DashboardNavItem[]> = {
       href: "/dashboard/admin/reports",
       icon: Download,
       label: "Reports export",
+    },
+    {
+      href: "/dashboard/admin/notifications",
+      icon: Bell,
+      label: "Notifications",
     },
   ],
   instructor: [
@@ -158,6 +177,61 @@ const navigationByRole: Record<UserRole, DashboardNavItem[]> = {
       icon: Bell,
       label: "Notifications",
     },
+    {
+      href: "/dashboard/instructor/messages",
+      icon: MessageCircle,
+      label: "Messages",
+    },
+    {
+      href: "/dashboard/instructor/payouts",
+      icon: Landmark,
+      label: "Payouts",
+    },
+    {
+      href: "/dashboard/instructor/refund-requests",
+      icon: RotateCcw,
+      label: "Refund requests",
+    },
+    {
+      href: "/dashboard/instructor/bundles",
+      icon: LibraryBig,
+      label: "Bundles",
+    },
+    {
+      href: "/dashboard/instructor/seller-dashboard",
+      icon: BadgeDollarSign,
+      label: "Seller dashboard",
+    },
+    {
+      href: "/dashboard/instructor/question-bank",
+      icon: Clipboard,
+      label: "Question bank",
+    },
+    {
+      href: "/dashboard/instructor/model-tests",
+      icon: GraduationCap,
+      label: "Model tests",
+    },
+    {
+      href: "/dashboard/instructor/abandoned-carts",
+      icon: Download,
+      label: "Abandoned carts",
+    },
+    {
+      href: "/dashboard/instructor/batches",
+      icon: Users,
+      label: "Batches",
+    },
+    {
+      href: "/dashboard/instructor/affiliates",
+      icon: BadgeDollarSign,
+      label: "Affiliates",
+    },
+    {
+      href: "/dashboard/instructor/live-classes",
+      icon: Video,
+      label: "Live classes",
+    },
   ],
   student: [
     { href: "/dashboard/student", icon: BookOpen, label: "Overview" },
@@ -181,6 +255,46 @@ const navigationByRole: Record<UserRole, DashboardNavItem[]> = {
       href: "/dashboard/student/orders",
       icon: BadgeDollarSign,
       label: "Order/payment status",
+    },
+    {
+      href: "/dashboard/student/model-tests",
+      icon: GraduationCap,
+      label: "Model tests",
+    },
+    {
+      href: "/dashboard/student/mistake-bank",
+      icon: BookOpen,
+      label: "Mistake bank",
+    },
+    {
+      href: "/dashboard/student/batches",
+      icon: Users,
+      label: "Batches",
+    },
+    {
+      href: "/dashboard/student/referrals",
+      icon: Link2,
+      label: "Referrals",
+    },
+    {
+      href: "/dashboard/student/revision",
+      icon: BookOpen,
+      label: "Revision",
+    },
+    {
+      href: "/dashboard/student/live-classes",
+      icon: Video,
+      label: "Live classes",
+    },
+    {
+      href: "/dashboard/student/notifications",
+      icon: Bell,
+      label: "Notifications",
+    },
+    {
+      href: "/dashboard/student/messages",
+      icon: MessageCircle,
+      label: "Messages",
     },
   ],
 }
@@ -337,6 +451,7 @@ export function DashboardShell({ children, profile }: DashboardShellProps) {
         </div>
 
         <div className="flex min-w-0 items-center gap-3">
+          <NotificationBell role={profile.role} />
           <div className="hidden text-right sm:block">
             <p className="truncate text-sm text-foreground">{name}</p>
             <p className="truncate text-xs text-muted-foreground">

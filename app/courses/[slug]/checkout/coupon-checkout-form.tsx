@@ -1,11 +1,12 @@
 "use client"
 
-import { useState, useTransition } from "react"
+import { useEffect, useState, useTransition } from "react"
 
 import {
   createEnrollmentOrderAction,
   previewCouponAction,
 } from "@/app/courses/[slug]/enroll/actions"
+import { REF_STORAGE_KEY } from "@/components/ref-capture"
 import { SubmitButton } from "@/components/submit-button"
 import { Button } from "@/components/ui/button"
 import { FloatingInput } from "@/components/ui/floating-input"
@@ -33,6 +34,18 @@ export function CouponCheckoutForm({
   })
   const [message, setMessage] = useState("")
   const [isApplying, startApplying] = useTransition()
+  // Referral code captured from ?ref= on the course/bundle page. It is
+  // sent only as a hidden field so the order can be attributed
+  // best-effort after creation; it never changes pricing or the flow.
+  const [refCode, setRefCode] = useState("")
+
+  useEffect(() => {
+    try {
+      setRefCode(window.localStorage.getItem(REF_STORAGE_KEY) ?? "")
+    } catch {
+      setRefCode("")
+    }
+  }, [])
 
   function applyCoupon() {
     if (!couponCode.trim()) {
@@ -67,6 +80,7 @@ export function CouponCheckoutForm({
     >
       <input name="courseId" type="hidden" value={courseId} />
       <input name="slug" type="hidden" value={slug} />
+      <input name="refCode" type="hidden" value={refCode} />
       <input
         name="couponCode"
         type="hidden"

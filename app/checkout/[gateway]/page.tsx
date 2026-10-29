@@ -2,6 +2,7 @@ import { notFound, redirect } from "next/navigation"
 import type { PaymentInstructionsResponse, ProfileDto } from "@/lib/types"
 
 import GatewayCheckout from "@/components/gateway-checkout"
+import { AbandonedCartRecorder } from "@/components/abandoned-cart-recorder"
 import { ApiClientError, authenticatedApiFetch } from "@/lib/api-client"
 
 const gateways = ["bkash", "nagad", "rocket"] as const
@@ -59,7 +60,9 @@ export default async function GatewayCheckoutPage({
   }
 
   return (
-    <GatewayCheckout
+    <>
+      <AbandonedCartRecorder courseId={order.courseId} />
+      <GatewayCheckout
       amount={order.amount}
       customerEmail={profile.email}
       error={query.error}
@@ -68,6 +71,7 @@ export default async function GatewayCheckoutPage({
       packageName={order.courseTitle}
       receiverNumber={receiverNumber}
       slug={order.courseSlug}
-    />
+      />
+    </>
   )
 }

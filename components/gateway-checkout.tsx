@@ -100,7 +100,7 @@ export default function GatewayCheckout({
           <div className="flex items-center justify-between gap-4">
             <div>
               <span className="text-xl font-extrabold tracking-tight" style={{ color: details.accent }}>Pay-Confirm</span>
-              <p className="mt-1 text-xs text-slate-400">Secure manual payment verification</p>
+              <p className="mt-1 text-xs text-slate-400">Secure automatic payment verification via PayConfirm</p>
             </div>
             <span className="rounded-full px-3 py-1 text-xs font-semibold" style={{ backgroundColor: `${details.accent}15`, color: details.accent }}>{details.name}</span>
           </div>

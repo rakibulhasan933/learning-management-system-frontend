@@ -33,8 +33,9 @@ export default function PrivacyPage() {
               password credentials, profile information, course enrollment,
               learning progress, quiz and assignment submissions, certificate
               records, and support messages. If you submit payment proof on the
-              web platform, we may also process the transaction information and
-              screenshot you provide for manual verification.
+              web platform, we may also process the sender number and
+              transaction ID you provide for automatic verification via
+              PayConfirm.
             </p>
           </section>
           <section>

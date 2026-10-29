@@ -1,8 +1,9 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
+import { redirect } from "next/navigation"
 
-import { authenticatedApiFetch } from "@/lib/api-client"
+import { ApiClientError, authenticatedApiFetch } from "@/lib/api-client"
 
 function getRequiredString(formData: FormData, key: string) {
   const value = formData.get(key)
@@ -31,17 +32,34 @@ export async function requestInstructorPayoutAction(formData: FormData) {
   const currency = getOptionalString(formData, "currency") ?? "BDT"
   const note = getOptionalString(formData, "note")
 
-  await authenticatedApiFetch("/instructor/payouts", {
-    body: JSON.stringify({
-      amount,
-      currency,
-      note,
-    }),
-    headers: {
-      "Content-Type": "application/json",
-    },
-    method: "POST",
-  })
+  // If the backend still rejects instructor payouts (e.g. 403 while the
+  // endpoint is being enabled), send the instructor back to the payouts
+  // page with a plain error instead of crashing on an uncaught throw.
+  let failure: string | null = null
+  try {
+    await authenticatedApiFetch("/instructor/payouts", {
+      body: JSON.stringify({
+        amount,
+        currency,
+        note,
+      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      method: "POST",
+    })
+  } catch (error) {
+    failure =
+      error instanceof ApiClientError
+        ? error.message
+        : "Payout request failed."
+  }
+
+  if (failure) {
+    redirect(
+      `/dashboard/instructor/payouts?error=${encodeURIComponent(failure)}`
+    )
+  }
 
   revalidatePath("/dashboard/instructor")
   revalidatePath("/dashboard/instructor/payouts")

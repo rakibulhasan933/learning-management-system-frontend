@@ -1,3 +1,4 @@
+import Link from "next/link"
 import { Award, FileCheck } from "lucide-react"
 import type { CertificateListResponse } from "@/lib/types"
 
@@ -43,6 +44,12 @@ export default async function StudentCertificatesPage() {
                       {certificate.verificationCode} ·{" "}
                       {formatDate(certificate.issuedAt)}
                     </p>
+                    <Link
+                      className="mt-1 inline-block text-xs text-primary underline underline-offset-4"
+                      href={`/verify?code=${encodeURIComponent(certificate.verificationCode)}`}
+                    >
+                      Verify certificate
+                    </Link>
                   </div>
                 </div>
                 <form action={downloadCertificateAction}>
