@@ -11,16 +11,23 @@ const footerLinks = [
   { href: "/contact", label: "যোগাযোগ" },
 ] as const
 
-export function SiteFooter({ variant = "default" }: { variant?: "default" | "home" }) {
+export function SiteFooter({
+  variant = "default",
+}: {
+  variant?: "default" | "home"
+}) {
   return (
-    <footer className={`mt-auto border-t border-border bg-card/60 ${variant === "home" ? "folio-home-footer" : ""}`}>
+    <footer
+      className={`mt-auto border-t border-border bg-card/60 ${variant === "home" ? "folio-home-footer" : ""}`}
+    >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <ProgressThread className="w-full" />
 
         <div className="flex flex-col items-center gap-8 py-12 text-center sm:py-16">
           <BrandMark />
           <p className="max-w-md text-sm leading-6 text-muted-foreground">
-            গোছানো কোর্স, যাচাইকৃত এনরোলমেন্ট, আর শেখার জন্য মনোযোগী একটি জায়গা।
+            গোছানো কোর্স, যাচাইকৃত এনরোলমেন্ট, আর শেখার জন্য মনোযোগী একটি
+            জায়গা।
           </p>
 
           <ProgressThread className="w-16" />

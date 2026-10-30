@@ -5,18 +5,20 @@ import Link from "next/link"
 import { Star } from "lucide-react"
 
 import type { CourseReviewDto } from "@/lib/types"
-import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
 
-import {
-  createCourseReviewAction,
-  updateCourseReviewAction,
-} from "./actions"
+import { createCourseReviewAction, updateCourseReviewAction } from "./actions"
 
 type ReviewFormState =
   | { kind: "anonymous" }
   | { kind: "logged-in"; canReview: boolean; review: CourseReviewDto | null }
+
+const box = "rounded-xl border border-[#343943] bg-[#1B1F29] p-5"
+const btnBrass =
+  "inline-flex min-h-12 items-center justify-center rounded-lg bg-[#C9A15A] px-5 font-semibold text-[#12151C] transition-colors hover:bg-[#A88A4A] disabled:cursor-not-allowed disabled:opacity-60"
+const btnLine =
+  "inline-flex min-h-12 items-center justify-center rounded-lg border border-[#343943] px-5 font-semibold transition-colors hover:border-[#C9A15A] disabled:cursor-not-allowed disabled:opacity-60"
 
 function StarInput({
   disabled,
@@ -37,7 +39,7 @@ function StarInput({
         <button
           aria-checked={value === star}
           aria-label={`${star} স্টার`}
-          className="rounded p-1 transition-colors hover:bg-accent disabled:opacity-60"
+          className="rounded-md p-1.5 transition-colors hover:bg-white/5 disabled:opacity-60"
           disabled={disabled}
           key={star}
           onClick={() => onChange(star)}
@@ -45,11 +47,12 @@ function StarInput({
           type="button"
         >
           <Star
+            aria-hidden
             className={cn(
-              "size-7",
+              "size-8",
               star <= value
-                ? "fill-primary text-primary"
-                : "fill-transparent text-muted-foreground"
+                ? "fill-[#C9A15A] text-[#C9A15A]"
+                : "fill-transparent text-[#5b5e66]"
             )}
           />
         </button>
@@ -60,8 +63,7 @@ function StarInput({
 
 /**
  * Review form for a logged-in student. Stars are mandatory: the form cannot
- * be submitted with text alone. When the student already has a review, the
- * form is prefilled as an edit form.
+ * be submitted with text alone. An existing review is prefilled as an edit.
  */
 export function ReviewForm({
   courseId,
@@ -81,16 +83,16 @@ export function ReviewForm({
 
   if (state.kind === "anonymous") {
     return (
-      <div className="rounded-xl border border-border bg-background px-4 py-3 text-sm text-muted-foreground">
+      <p className={`${box} text-[#A3A5AE]`}>
         রিভিউ দিতে{" "}
         <Link
-          className="text-primary underline-offset-4 hover:underline"
+          className="text-[#C9A15A] underline underline-offset-4"
           href={`/auth/login?next=${encodeURIComponent(`/courses/${slug}`)}`}
         >
           লগইন করুন
         </Link>
         ।
-      </div>
+      </p>
     )
   }
 
@@ -98,7 +100,7 @@ export function ReviewForm({
 
   if (!state.canReview && !existing) {
     return (
-      <p className="rounded-xl border border-border bg-background px-4 py-3 text-sm text-muted-foreground">
+      <p className={`${box} text-[#A3A5AE]`}>
         শুধুমাত্র এই কোর্সে এনরোল করা শিক্ষার্থীরা রিভিউ দিতে পারে।
       </p>
     )
@@ -106,36 +108,34 @@ export function ReviewForm({
 
   if (existing && !editing) {
     return (
-      <div className="space-y-3 rounded-xl border border-border bg-background p-4">
-        <p className="font-mono text-xs text-muted-foreground">আপনার রিভিউ</p>
+      <div className={`${box} space-y-3`}>
+        <p className="text-sm text-[#A3A5AE]">আপনার রিভিউ</p>
         <div className="flex items-center gap-1">
           {[1, 2, 3, 4, 5].map((star) => (
             <Star
+              aria-hidden
               className={cn(
-                "size-4",
+                "size-5",
                 star <= existing.rating
-                  ? "fill-primary text-primary"
-                  : "fill-transparent text-muted-foreground"
+                  ? "fill-[#C9A15A] text-[#C9A15A]"
+                  : "fill-transparent text-[#5b5e66]"
               )}
               key={star}
             />
           ))}
         </div>
-        {existing.body ? (
-          <p className="text-sm leading-6">{existing.body}</p>
-        ) : null}
-        <Button
+        {existing.body ? <p>{existing.body}</p> : null}
+        <button
+          className={btnLine}
           onClick={() => {
             setRating(existing.rating)
             setBody(existing.body ?? "")
             setEditing(true)
           }}
-          size="sm"
           type="button"
-          variant="outline"
         >
           রিভিউ সম্পাদনা করুন
-        </Button>
+        </button>
       </div>
     )
   }
@@ -144,7 +144,7 @@ export function ReviewForm({
 
   return (
     <form
-      className="space-y-4 rounded-xl border border-border bg-background p-4"
+      className={`${box} space-y-5`}
       onSubmit={async (event) => {
         event.preventDefault()
         setError(null)
@@ -167,31 +167,30 @@ export function ReviewForm({
           setEditing(false)
         } catch (caught) {
           setError(
-            caught instanceof Error ? caught.message : "রিভিউ জমা দেওয়া যায়নি।"
+            caught instanceof Error
+              ? caught.message
+              : "রিভিউ জমা দেওয়া যায়নি।"
           )
         } finally {
           setPending(false)
         }
       }}
     >
-      <p className="font-mono text-xs text-muted-foreground">
+      <p className="text-sm text-[#A3A5AE]">
         {isEdit ? "আপনার রিভিউ সম্পাদনা করুন" : "আপনার রিভিউ লিখুন"}
       </p>
       <div className="space-y-1">
-        <p className="text-sm font-medium">
-          রেটিং <span className="text-destructive">*</span>
+        <p className="font-medium">
+          রেটিং <span className="text-[#E58A81]">*</span>
         </p>
-        <StarInput
-          disabled={pending}
-          onChange={setRating}
-          value={rating}
-        />
+        <StarInput disabled={pending} onChange={setRating} value={rating} />
       </div>
-      <div className="space-y-1">
-        <label className="text-sm font-medium" htmlFor="review-body">
+      <div className="space-y-1.5">
+        <label className="font-medium" htmlFor="review-body">
           মন্তব্য (ঐচ্ছিক)
         </label>
         <Textarea
+          className="border-[#343943] bg-[#12151C] text-[#F2EFE7]"
           disabled={pending}
           id="review-body"
           onChange={(event) => setBody(event.target.value)}
@@ -201,28 +200,32 @@ export function ReviewForm({
         />
       </div>
       {error ? (
-        <p className="text-sm text-destructive" role="alert">
+        <p className="text-sm text-[#E58A81]" role="alert">
           {error}
         </p>
       ) : null}
       {saved ? (
-        <p className="text-sm text-muted-foreground" role="status">
+        <p className="text-sm text-[#7FB8A8]" role="status">
           রিভিউ সংরক্ষিত হয়েছে।
         </p>
       ) : null}
-      <div className="flex gap-2">
-        <Button disabled={pending} type="submit">
-          {pending ? "জমা হচ্ছে…" : isEdit ? "রিভিউ আপডেট করুন" : "রিভিউ জমা দিন"}
-        </Button>
+      <div className="flex flex-wrap gap-2">
+        <button className={btnBrass} disabled={pending} type="submit">
+          {pending
+            ? "জমা হচ্ছে…"
+            : isEdit
+              ? "রিভিউ আপডেট করুন"
+              : "রিভিউ জমা দিন"}
+        </button>
         {isEdit ? (
-          <Button
+          <button
+            className={btnLine}
             disabled={pending}
             onClick={() => setEditing(false)}
             type="button"
-            variant="ghost"
           >
             বাতিল
-          </Button>
+          </button>
         ) : null}
       </div>
     </form>

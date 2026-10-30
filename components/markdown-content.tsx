@@ -30,10 +30,7 @@ export function MarkdownContent({
     <div className={cn("markdown-renderer", className)}>
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
-        rehypePlugins={[
-          rehypeRaw,
-          [rehypeSanitize, markdownSanitizeSchema],
-        ]}
+        rehypePlugins={[rehypeRaw, [rehypeSanitize, markdownSanitizeSchema]]}
       >
         {content}
       </ReactMarkdown>

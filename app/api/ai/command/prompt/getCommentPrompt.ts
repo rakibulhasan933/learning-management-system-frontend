@@ -1,26 +1,26 @@
-import type { ChatMessage } from '@/components/editor/use-chat';
-import type { SlateEditor } from 'platejs';
+import type { ChatMessage } from "@/components/editor/use-chat"
+import type { SlateEditor } from "platejs"
 
-import { getMarkdown } from '@platejs/ai';
-import dedent from 'dedent';
+import { getMarkdown } from "@platejs/ai"
+import dedent from "dedent"
 
 import {
   buildStructuredPrompt,
   formatTextFromMessages,
   getLastUserInstruction,
-} from '../utils';
+} from "../utils"
 
 export function getCommentPrompt(
   editor: SlateEditor,
   {
     messages,
   }: {
-    messages: ChatMessage[];
+    messages: ChatMessage[]
   }
 ) {
   const selectingMarkdown = getMarkdown(editor, {
-    type: 'blockWithBlockId',
-  });
+    type: "blockWithBlockId",
+  })
 
   return buildStructuredPrompt({
     context: selectingMarkdown,
@@ -172,5 +172,5 @@ export function getCommentPrompt(
         - content: the original document fragment that needs commenting.
         - comments: a brief comment or explanation for that fragment.
     `,
-  });
+  })
 }

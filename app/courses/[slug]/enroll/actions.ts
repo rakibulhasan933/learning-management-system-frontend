@@ -2,10 +2,7 @@
 
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
-import type {
-  PaymentInstructionsResponse,
-  PaymentOrderDto,
-} from "@/lib/types"
+import type { PaymentInstructionsResponse, PaymentOrderDto } from "@/lib/types"
 
 import { ApiClientError, authenticatedApiFetch } from "@/lib/api-client"
 import { attributeAffiliateOrderAction } from "@/app/dashboard/instructor/affiliates/actions"

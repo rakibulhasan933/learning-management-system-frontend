@@ -1,3 +1,4 @@
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap");
 @import "tailwindcss";
 
 @plugin "tailwind-scrollbar-hide";
@@ -16,8 +17,8 @@
      first previously made even English text render in Hind Siliguri, so the
      premium Fraunces headings never actually appeared. */
   --font-sans: var(--font-sans-src), var(--font-bn-sans-src), ui-sans-serif, system-ui, sans-serif;
-  --font-heading: var(--font-display-src), var(--font-bn-display-src), serif;
-  --font-mono: var(--font-mono-src), var(--font-bn-sans-src), ui-monospace, monospace;
+  --font-heading: var(--font-display-src), var(--font-bn-display-src), Georgia, serif;
+  --font-mono: var(--font-mono-src), ui-monospace, monospace;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -64,76 +65,76 @@
   --font-sans-src: Inter, ui-sans-serif, system-ui, sans-serif;
   --font-display-src: Fraunces, Georgia, serif;
   --font-mono-src: "IBM Plex Mono", ui-monospace, monospace;
-  --font-bn-sans-src: "Noto Sans Bengali", sans-serif;
-  --font-bn-display-src: "Noto Serif Bengali", serif;
-  --background: #12151C;
-  --foreground: #F2EFE7;
-  --card: #1B1F29;
-  --card-foreground: #F2EFE7;
-  --popover: #1B1F29;
-  --popover-foreground: #F2EFE7;
-  --primary: #C9A15A;
-  --primary-foreground: #12151C;
-  --secondary: #222733;
-  --secondary-foreground: #F2EFE7;
-  --muted: #1B1F29;
-  --muted-foreground: #A7AAB5;
-  --accent: #222733;
-  --accent-foreground: #F2EFE7;
-  --destructive: #E26D5A;
-  --border: color-mix(in srgb, #F2EFE7 14%, transparent);
-  --input: color-mix(in srgb, #F2EFE7 18%, transparent);
-  --ring: #C9A15A;
-  --chart-1: #C9A15A;
-  --chart-2: #3F7A6B;
-  --chart-3: #A7AAB5;
-  --chart-4: #F2EFE7;
-  --chart-5: #1B1F29;
+  --font-bn-sans-src: var(--font-hind-siliguri), "Hind Siliguri", sans-serif;
+  --font-bn-display-src: var(--font-bn-sans-src), sans-serif;
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  --chart-1: oklch(0.87 0 0);
+  --chart-2: oklch(0.556 0 0);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
   --radius: 0.625rem;
-  --sidebar: #1B1F29;
-  --sidebar-foreground: #F2EFE7;
-  --sidebar-primary: #C9A15A;
-  --sidebar-primary-foreground: #12151C;
-  --sidebar-accent: #222733;
-  --sidebar-accent-foreground: #F2EFE7;
-  --sidebar-border: color-mix(in srgb, #F2EFE7 14%, transparent);
-  --sidebar-ring: #C9A15A;
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
   --highlight: oklch(0.852 0.199 91.936);
   --brand: oklch(0.623 0.214 259.815);
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
 }
 
 .dark {
-  --background: #12151C;
-  --foreground: #F2EFE7;
-  --card: #1B1F29;
-  --card-foreground: #F2EFE7;
-  --popover: #1B1F29;
-  --popover-foreground: #F2EFE7;
-  --primary: #C9A15A;
-  --primary-foreground: #12151C;
-  --secondary: #222733;
-  --secondary-foreground: #F2EFE7;
-  --muted: #1B1F29;
-  --muted-foreground: #A7AAB5;
-  --accent: #222733;
-  --accent-foreground: #F2EFE7;
-  --destructive: #E26D5A;
-  --border: color-mix(in srgb, #F2EFE7 14%, transparent);
-  --input: color-mix(in srgb, #F2EFE7 18%, transparent);
-  --ring: #C9A15A;
-  --chart-1: #C9A15A;
-  --chart-2: #3F7A6B;
-  --chart-3: #A7AAB5;
-  --chart-4: #F2EFE7;
-  --chart-5: #1B1F29;
-  --sidebar: #1B1F29;
-  --sidebar-foreground: #F2EFE7;
-  --sidebar-primary: #C9A15A;
-  --sidebar-primary-foreground: #12151C;
-  --sidebar-accent: #222733;
-  --sidebar-accent-foreground: #F2EFE7;
-  --sidebar-border: color-mix(in srgb, #F2EFE7 14%, transparent);
-  --sidebar-ring: #C9A15A;
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+  --chart-1: oklch(0.87 0 0);
+  --chart-2: oklch(0.556 0 0);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.556 0 0);
   --highlight: oklch(0.852 0.199 91.936);
   --brand: oklch(0.623 0.214 259.815);
 }
@@ -145,18 +146,29 @@
 
   html {
     scroll-behavior: smooth;
+    @apply font-sans;
   }
 
   body {
     @apply bg-background text-foreground;
-    font-family: var(--font-bn-sans-src), var(--font-sans-src), ui-sans-serif, system-ui, sans-serif;
+    font-family: var(--font-sans);
+    line-height: 1.75;
     font-synthesis: none;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
   }
 
   :where(h1, h2, h3, h4, h5, h6, button, input, textarea, select, option, label, th, td) {
-    font-family: var(--font-bn-sans-src), var(--font-sans-src), ui-sans-serif, system-ui, sans-serif;
+    font-family: var(--font-sans);
+  }
+
+  :lang(bn) :where(p, li, label, button, input, textarea, select, option) {
+    line-height: 1.85;
+  }
+
+  :lang(bn) :where(h1, h2, h3, h4, h5, h6) {
+    letter-spacing: 0;
+    word-spacing: 0.02em;
   }
 
   :where(h1, h2, h3, h4, h5, h6) {
@@ -185,6 +197,11 @@
   ::selection {
     background: color-mix(in srgb, var(--primary) 32%, transparent);
     color: var(--foreground);
+  }
+
+  :where(a, button, input, textarea, select, summary):focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 3px;
   }
 
   /*
@@ -336,20 +353,20 @@
 
 /* Homepage marketplace treatment: intentionally scoped so dashboards keep the dark system. */
 .folio-home-shell {
-  --home-bg: #0D1117;
-  --home-card: #161B22;
-  --home-fg: #E6EDF3;
-  --home-muted: #8B949E;
-  --home-line: #30363D;
-  --home-primary: #3FB950;
-  --home-soft: #21262D;
+  --home-bg: #12151C;
+  --home-card: #1B1F29;
+  --home-fg: #F2EFE7;
+  --home-muted: #A3A5AE;
+  --home-line: #343943;
+  --home-primary: #C9A15A;
+  --home-soft: #20252F;
   background: var(--home-bg);
   color: var(--home-fg);
-  font-family: var(--font-bn-sans-src), "Noto Sans Bengali", sans-serif;
+  font-family: var(--font-sans);
 }
 
-.folio-home-header { background: color-mix(in srgb, #0D1117 94%, transparent) !important; border-color: var(--home-line) !important; }
-.folio-home-header > span { background: #3FB950; }
+.folio-home-header { background: color-mix(in srgb, #12151C 94%, transparent) !important; border-color: var(--home-line) !important; }
+.folio-home-header > span { background: #C9A15A; }
 .folio-home-header .text-muted-foreground, .folio-home-header .interactive-link { color: var(--home-fg) !important; }
 .site-header-nav-link, header nav .interactive-link { color: var(--foreground) !important; opacity: .86; font-weight: 500; }
 .site-header-nav-link:hover, header nav .interactive-link:hover { color: var(--primary) !important; opacity: 1; }
@@ -1035,7 +1052,6 @@
 .folio-pain-label, .folio-pain-solution-label { font-size: 0.8125rem; letter-spacing: 0.08em; text-transform: uppercase; }
 .folio-pain-solution-label { margin-top: 14px !important; color: var(--home-primary) !important; }
 
-
 /* GitHub Universe style, home only: mono green code labels, masked hero reveal, typing cursor, ticker. */
 .folio-home-section small, .folio-faq > div:first-child > small { font-family: var(--font-mono); color: var(--home-primary); letter-spacing: .04em; }
 .folio-hero-title { position: relative; overflow: hidden; }
@@ -1050,3 +1066,231 @@
 .folio-ticker-track b { color: var(--home-primary); font-weight: 700; }
 @keyframes folio-ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 @media (prefers-reduced-motion: reduce) { .folio-ticker-track { animation: none; } .folio-cursor { animation: none; } }
+
+/* Folio editorial premium pass: quiet surfaces, brass utility, sharper hierarchy. */
+.folio-home-shell .folio-home {
+  background: var(--home-bg);
+  background-image: none;
+}
+.folio-home-shell .folio-home::before {
+  inset: 0;
+  border: 0;
+  background: none;
+  opacity: 0;
+}
+.folio-home-shell .folio-home-hero {
+  background: var(--home-bg);
+}
+.folio-home-shell .folio-home-wrap { width: min(1240px, calc(100% - 64px)); }
+.folio-home-shell .folio-home-hero-grid {
+  gap: clamp(3rem, 9vw, 9rem);
+  padding-block: clamp(5rem, 10vw, 9rem) clamp(5rem, 11vw, 10rem);
+}
+.folio-home-shell .folio-home-tag {
+  margin-bottom: 1.75rem;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--home-primary);
+  font-family: var(--font-mono);
+  font-size: .7rem;
+  letter-spacing: .08em;
+}
+.folio-home-shell .folio-home-tag::after {
+  display: inline-block;
+  width: 2rem;
+  height: 1px;
+  margin-left: .8rem;
+  background: var(--home-primary);
+  content: "";
+  vertical-align: middle;
+}
+.folio-home-shell .folio-home h1 {
+  max-width: 12ch;
+  font-size: clamp(2.8rem, 7vw, 6.25rem);
+  letter-spacing: -.045em;
+  line-height: 1.03;
+}
+.folio-home-shell .folio-home :where(h1, h2, h3):lang(bn) {
+  line-height: 1.35;
+  letter-spacing: 0;
+}
+.folio-home-shell .folio-home p,
+.folio-home-shell .folio-home li,
+.folio-home-shell .folio-home button,
+.folio-home-shell .folio-home a {
+  line-height: 1.85;
+}
+.folio-home-shell .folio-home-lead {
+  max-width: 38rem;
+  margin-top: 1.75rem;
+  color: color-mix(in srgb, var(--home-fg) 72%, var(--home-muted));
+  font-size: clamp(1rem, 1.5vw, 1.2rem);
+  line-height: 1.8;
+}
+.folio-home-shell .folio-home-cta { margin-top: 2.25rem; }
+.folio-home-shell .folio-home-btn {
+  height: 3.25rem;
+  border-radius: .35rem;
+  padding-inline: 1.35rem;
+  font-size: .92rem;
+  transition: background-color .2s ease, border-color .2s ease, color .2s ease, transform .2s ease;
+}
+.folio-home-shell .folio-home-btn:hover { transform: translateY(-2px); }
+.folio-home-shell .folio-home-btn-primary { color: #12151C; }
+.folio-home-shell .folio-home-note { max-width: 36rem; margin-top: 1.25rem; font-size: .8rem; }
+.folio-home-shell .folio-order-card {
+  border-radius: .45rem;
+  border-color: color-mix(in srgb, var(--home-primary) 38%, var(--home-line));
+  background: color-mix(in srgb, var(--home-card) 92%, var(--home-bg));
+  box-shadow: 0 30px 70px -44px rgb(0 0 0 / .9), inset 0 1px 0 rgb(255 255 255 / .06);
+}
+.folio-home-shell .folio-seal {
+  width: 4.5rem;
+  height: 4.5rem;
+  border-width: 1px;
+  border-color: var(--home-bg);
+  border-radius: .35rem;
+  background: var(--home-primary);
+  color: #12151C;
+  font-family: var(--font-mono);
+  font-size: .62rem;
+  transform: rotate(3deg);
+}
+.folio-home-shell .folio-status { border-radius: .25rem; }
+.folio-home-shell .folio-pay-box,
+.folio-home-shell .folio-chip,
+.folio-home-shell .folio-card,
+.folio-home-shell .folio-course-card,
+.folio-home-shell .folio-faq details { border-radius: .35rem; }
+.folio-home-shell .folio-pay-box { background: var(--home-bg); }
+.folio-home-shell .folio-course-thumb-0 { background: #315B54; }
+.folio-home-shell .folio-course-thumb-1 { background: #3E596A; }
+.folio-home-shell .folio-course-thumb-2 { background: #6F5144; }
+.folio-home-shell .folio-card:hover,
+.folio-home-shell .folio-course-card:hover { transform: translateY(-3px); }
+.folio-home-shell .folio-home-final { text-align: left; }
+.folio-home-shell .folio-home-final h2 { max-width: 12ch; margin-inline: 0; font-size: clamp(2rem, 4vw, 4rem); letter-spacing: -.035em; }
+.folio-home-shell .folio-home-final p { margin-inline: 0; }
+.folio-home-shell .folio-home-final .folio-home-cta { justify-content: flex-start; }
+@media (max-width: 639px) {
+  .folio-home-shell .folio-home-wrap { width: min(100% - 32px, 1120px); }
+  .folio-home-shell .folio-home h1 { max-width: 11ch; font-size: clamp(2.65rem, 14vw, 4.5rem); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .folio-home-shell .folio-home-btn:hover,
+  .folio-home-shell .folio-card:hover,
+  .folio-home-shell .folio-course-card:hover { transform: none; }
+}
+
+/* Homepage composition: an exam-prep desk, not a generic SaaS hero. */
+.folio-home-v2 .folio-home-hero {
+  min-height: min(48rem, calc(100svh - 4.5rem));
+  display: grid;
+  align-items: center;
+  overflow: hidden;
+}
+.folio-home-v2 .folio-home-hero::after {
+  position: absolute;
+  top: 10%;
+  right: -10rem;
+  width: 32rem;
+  height: 32rem;
+  border: 1px solid color-mix(in srgb, var(--home-primary) 22%, transparent);
+  border-radius: 50%;
+  content: "";
+  pointer-events: none;
+}
+.folio-home-v2 .folio-home-hero-grid {
+  position: relative;
+  z-index: 1;
+  grid-template-columns: minmax(0, 1.15fr) minmax(21rem, .85fr);
+}
+.folio-home-v2 .folio-hero-copy {
+  position: relative;
+  padding-left: clamp(0rem, 4vw, 4rem);
+}
+.folio-home-v2 .folio-hero-copy::before {
+  position: absolute;
+  top: .25rem;
+  bottom: .25rem;
+  left: 0;
+  width: 1px;
+  background: var(--home-primary);
+  content: "";
+  opacity: .8;
+}
+.folio-home-v2 .folio-hero-copy::after {
+  position: absolute;
+  top: .25rem;
+  left: -2px;
+  width: 5px;
+  height: 5rem;
+  background: var(--home-primary);
+  content: "";
+}
+.folio-home-v2 .folio-home-tag { margin-bottom: 1.5rem; }
+.folio-home-v2 .folio-home h1 {
+  max-width: 11ch;
+  font-size: clamp(3.1rem, 7.2vw, 7rem);
+  font-family: var(--font-bn-sans-src);
+  font-weight: 600;
+  letter-spacing: -.025em;
+  line-height: 1.27;
+  text-wrap: balance;
+}
+.folio-home-v2 .folio-home-lead { max-width: 34rem; }
+.folio-home-v2 .folio-order-card {
+  transform: rotate(1.5deg);
+  transition: transform .35s ease, border-color .35s ease;
+}
+.folio-home-v2 .folio-order-card:hover {
+  transform: rotate(0deg) translateY(-6px);
+  border-color: var(--home-primary);
+}
+.folio-home-v2 .folio-order-top span:first-child,
+.folio-home-v2 .folio-pay-box code,
+.folio-home-v2 .folio-order-stats strong { font-family: var(--font-mono); }
+.folio-home-v2 .folio-payment-strip { border-top: 2px solid var(--home-primary); }
+.folio-home-v2 .folio-stats .folio-home-wrap { border-top: 1px solid var(--home-line); }
+.folio-home-v2 .folio-stats b { font-family: var(--font-mono); font-size: clamp(1.5rem, 3vw, 2.4rem); }
+.folio-home-v2 .folio-home-section { position: relative; }
+.folio-home-v2 .folio-home-section:nth-of-type(odd) { background: color-mix(in srgb, var(--home-card) 35%, var(--home-bg)); }
+.folio-home-v2 .folio-section-heading { align-items: flex-start; }
+.folio-home-v2 .folio-section-heading h2 { max-width: 13ch; font-size: clamp(2rem, 4.2vw, 4rem); line-height: 1.18; }
+.folio-home-v2 :where(h2, h3, p, li, a, button) { font-family: var(--font-bn-sans-src), var(--font-sans-src), sans-serif; }
+.folio-home-v2 .folio-section-heading h2,
+.folio-home-v2 .folio-home-final h2,
+.folio-home-v2 .folio-order-card h2 { font-weight: 600; letter-spacing: -.015em; line-height: 1.42; }
+.folio-home-v2 .folio-home-lead,
+.folio-home-v2 .folio-card p,
+.folio-home-v2 .folio-course-body p,
+.folio-home-v2 .folio-steps p { font-size: 1.02rem; line-height: 1.95; }
+.folio-home-v2 .folio-home-note,
+.folio-home-v2 .folio-order-top,
+.folio-home-v2 .folio-pay-box code,
+.folio-home-v2 .folio-mono-line,
+.folio-home-v2 .folio-ticker-track span { font-family: var(--font-mono); }
+.folio-home-v2 .folio-card-grid { gap: 1px; background: var(--home-line); border: 1px solid var(--home-line); }
+.folio-home-v2 .folio-card { min-height: 13rem; border: 0; border-radius: 0; background: var(--home-card); }
+.folio-home-v2 .folio-card:hover { background: color-mix(in srgb, var(--home-primary) 8%, var(--home-card)); }
+.folio-home-v2 .folio-card h3 { max-width: 15ch; font-size: 1.35rem; }
+.folio-home-v2 .folio-course-card { border-radius: 0; }
+.folio-home-v2 .folio-course-thumb { min-height: 14rem; }
+.folio-home-v2 .folio-course-body { padding: 1.5rem; }
+.folio-home-v2 .folio-course-footer strong { font-family: var(--font-mono); }
+@media (max-width: 959px) {
+  .folio-home-v2 .folio-home-hero { min-height: auto; }
+  .folio-home-v2 .folio-home-hero-grid { grid-template-columns: 1fr; }
+  .folio-home-v2 .folio-order-card { max-width: 32rem; margin-inline: auto; }
+}
+@media (max-width: 639px) {
+  .folio-home-v2 .folio-hero-copy { padding-left: 1.25rem; }
+  .folio-home-v2 .folio-home h1 { font-size: clamp(2.8rem, 14vw, 4.8rem); }
+  .folio-home-v2 .folio-home-hero::after { top: 35%; right: -18rem; width: 28rem; height: 28rem; }
+  .folio-home-v2 .folio-section-heading h2 { max-width: 15ch; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .folio-home-v2 .folio-order-card,
+  .folio-home-v2 .folio-order-card:hover { transform: none; }
+}

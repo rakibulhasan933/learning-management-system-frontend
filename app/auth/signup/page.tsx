@@ -47,7 +47,8 @@ export default async function SignupPage() {
           </h1>
           <ProgressThread className="mt-8 w-20" />
           <p className="mt-6 max-w-md text-base leading-7 text-muted-foreground">
-            নতুন অ্যাকাউন্ট শিক্ষার্থী হিসেবে শুরু হয়। যাচাইয়ের পর অ্যাডমিন ইন্সট্রাক্টর access দিতে পারেন।
+            নতুন অ্যাকাউন্ট শিক্ষার্থী হিসেবে শুরু হয়। যাচাইয়ের পর অ্যাডমিন
+            ইন্সট্রাক্টর access দিতে পারেন।
           </p>
 
           {/* Path card */}
@@ -57,16 +58,18 @@ export default async function SignupPage() {
               {path.map((step) => (
                 <li className="flex items-center gap-4" key={step.code}>
                   <span
-                    className={`flex size-7 shrink-0 items-center justify-center rounded-full font-mono text-[11px] ring-1 ${step.done
-                      ? "bg-primary text-primary-foreground ring-primary"
-                      : "text-muted-foreground ring-foreground/20"
-                      }`}
+                    className={`flex size-7 shrink-0 items-center justify-center rounded-full font-mono text-[11px] ring-1 ${
+                      step.done
+                        ? "bg-primary text-primary-foreground ring-primary"
+                        : "text-muted-foreground ring-foreground/20"
+                    }`}
                   >
                     {step.code}
                   </span>
                   <span
-                    className={`text-sm ${step.done ? "text-foreground" : "text-muted-foreground"
-                      }`}
+                    className={`text-sm ${
+                      step.done ? "text-foreground" : "text-muted-foreground"
+                    }`}
                   >
                     {step.title}
                   </span>

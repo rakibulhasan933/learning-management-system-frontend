@@ -1,7 +1,6 @@
 "use client"
 
 import { useEffect, useMemo, useRef, useState, useTransition } from "react"
-import { Button } from "@/components/ui/button"
 import { Loader2, Pause, Play } from "lucide-react"
 import type { CourseDetailDto } from "@/lib/types"
 
@@ -20,14 +19,13 @@ function getWatermarkPosition() {
 }
 
 function formatDuration(seconds: number | null) {
-  if (!seconds) {
-    return ""
-  }
-
+  if (!seconds) return ""
   const minutes = Math.floor(seconds / 60)
   const remainingSeconds = seconds % 60
-
-  return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`
+  return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`.replace(
+    /[0-9]/g,
+    (d) => "০১২৩৪৫৬৭৮৯"[Number(d)]
+  )
 }
 
 export function PreviewVideoPlayer({
@@ -37,7 +35,7 @@ export function PreviewVideoPlayer({
   const previewLectures = useMemo(
     () =>
       sections
-    .flatMap((section) => section.lectures ?? [])
+        .flatMap((section) => section.lectures ?? [])
         .filter((lecture) => lecture.isPreview),
     [sections]
   )
@@ -58,23 +56,18 @@ export function PreviewVideoPlayer({
   )
 
   useEffect(() => {
-    if (!selectedLectureId) {
-      return
-    }
+    if (!selectedLectureId) return
 
     startTransition(async () => {
       try {
         const response = await getLectureVideoUrlAction(selectedLectureId)
-
         setVideoUrl(response.url)
         setMessage(null)
         setIsPlaying(false)
       } catch (error) {
         setVideoUrl(null)
         setMessage(
-          error instanceof Error
-            ? error.message
-            : "Preview could not be loaded."
+          error instanceof Error ? error.message : "প্রিভিউ লোড করা যায়নি।"
         )
       }
     })
@@ -103,10 +96,7 @@ export function PreviewVideoPlayer({
 
   function togglePlayback() {
     const video = videoRef.current
-
-    if (!video) {
-      return
-    }
+    if (!video) return
 
     if (video.paused) {
       void video.play()
@@ -117,21 +107,18 @@ export function PreviewVideoPlayer({
     }
   }
 
-  if (previewLectures.length === 0) {
-    return null
-  }
+  if (previewLectures.length === 0) return null
 
   return (
-    <section className="mt-10 overflow-hidden rounded-xl border border-border bg-card">
-      <div className="grid gap-2 border-b border-border p-4">
-        <p className="font-mono text-xs text-muted-foreground sm:text-sm">
-          Free preview
-        </p>
-        <h2 className="font-heading text-xl sm:text-2xl">
+    <section className="mt-12 overflow-hidden rounded-xl border border-[#343943] bg-[#1B1F29]">
+      <div className="border-b border-[#343943] p-4 sm:px-6">
+        <p className="text-sm text-[#7FB8A8]">ফ্রি প্রিভিউ</p>
+        <h2 className="text-xl leading-[1.5] font-semibold sm:text-2xl">
           {selectedLecture?.title}
         </h2>
       </div>
-      <div className="relative aspect-video bg-background">
+
+      <div className="relative aspect-video bg-[#0B0D12]">
         {videoUrl ? (
           <video
             ref={videoRef}
@@ -144,11 +131,14 @@ export function PreviewVideoPlayer({
             src={videoUrl}
           />
         ) : (
-          <div className="flex h-full flex-col items-center justify-center gap-2 px-6 text-center text-sm text-muted-foreground">
+          <div className="flex h-full flex-col items-center justify-center gap-2 px-6 text-center text-sm text-[#A3A5AE]">
             {isPending ? (
               <>
-                <Loader2 className="h-5 w-5 animate-spin text-primary" />
-                Preparing preview...
+                <Loader2
+                  aria-hidden
+                  className="size-5 animate-spin text-[#C9A15A]"
+                />
+                প্রিভিউ তৈরি হচ্ছে...
               </>
             ) : (
               message
@@ -156,7 +146,7 @@ export function PreviewVideoPlayer({
           </div>
         )}
         <div
-          className="pointer-events-none absolute max-w-[72%] font-mono text-[11px] break-words text-foreground opacity-20 sm:text-sm"
+          className="pointer-events-none absolute max-w-[72%] text-[11px] break-words text-white opacity-20 sm:text-sm"
           style={{
             left: watermarkPosition.left,
             top: watermarkPosition.top,
@@ -166,60 +156,66 @@ export function PreviewVideoPlayer({
           {learnerEmail ?? "free preview"}
         </div>
       </div>
-      <div className="grid gap-3 border-t border-border p-4">
-        <Button
-          className="w-full sm:w-fit"
+
+      <div className="grid gap-4 border-t border-[#343943] p-4 sm:px-6">
+        <button
+          className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-lg bg-[#C9A15A] px-5 font-semibold text-[#12151C] transition-colors hover:bg-[#A88A4A] disabled:cursor-not-allowed disabled:opacity-50 sm:w-fit"
           disabled={!videoUrl || isPending}
           onClick={togglePlayback}
           type="button"
         >
           {isPending ? (
             <>
-              <Loader2 className="size-3.5 animate-spin" />
-              Preparing...
+              <Loader2 aria-hidden className="size-4 animate-spin" />
+              তৈরি হচ্ছে...
             </>
           ) : isPlaying ? (
             <>
-              <Pause className="size-3.5" />
-              Pause
+              <Pause aria-hidden className="size-4" />
+              থামান
             </>
           ) : (
             <>
-              <Play className="size-3.5" />
-              Play
+              <Play aria-hidden className="size-4" />
+              চালান
             </>
           )}
-        </Button>
-        <div className="grid gap-2">
-          {previewLectures.map((lecture) => (
-            <Button
-              className={`h-auto w-full justify-start rounded-xl border px-3 py-2 text-left text-sm ${
-                lecture.id === selectedLectureId
-                  ? "border-primary bg-primary/10 text-foreground"
-                  : "border-border text-muted-foreground hover:bg-background"
-              }`}
-              disabled={isPending}
-              key={lecture.id}
-              onClick={() => {
-                setSelectedLectureId(lecture.id)
-                setVideoUrl(null)
-                setMessage(null)
-                setIsPlaying(false)
-              }}
-              type="button"
-              variant="ghost"
-            >
-              <span className="grid gap-1">
-                <span className="truncate">{lecture.title}</span>
-                {lecture.durationSeconds ? (
-                  <span className="font-mono text-xs">
-                    {formatDuration(lecture.durationSeconds)}
-                  </span>
-                ) : null}
-              </span>
-            </Button>
-          ))}
-        </div>
+        </button>
+
+        {previewLectures.length > 1 ? (
+          <ul className="grid gap-2">
+            {previewLectures.map((lecture) => {
+              const active = lecture.id === selectedLectureId
+              return (
+                <li key={lecture.id}>
+                  <button
+                    aria-pressed={active}
+                    className={`flex w-full items-center justify-between gap-3 rounded-lg border px-3.5 py-2.5 text-left text-[0.95rem] transition-colors disabled:cursor-not-allowed ${
+                      active
+                        ? "border-[#C9A15A] bg-[#C9A15A]/10 text-[#F2EFE7]"
+                        : "border-[#343943] text-[#A3A5AE] hover:border-[#C9A15A]"
+                    }`}
+                    disabled={isPending}
+                    onClick={() => {
+                      setSelectedLectureId(lecture.id)
+                      setVideoUrl(null)
+                      setMessage(null)
+                      setIsPlaying(false)
+                    }}
+                    type="button"
+                  >
+                    <span className="truncate">{lecture.title}</span>
+                    {lecture.durationSeconds ? (
+                      <span className="shrink-0 text-sm">
+                        {formatDuration(lecture.durationSeconds)}
+                      </span>
+                    ) : null}
+                  </button>
+                </li>
+              )
+            })}
+          </ul>
+        ) : null}
       </div>
     </section>
   )

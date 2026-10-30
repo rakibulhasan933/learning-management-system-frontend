@@ -15,12 +15,7 @@ export default function AdminReportsPage() {
       <Card className="mt-8 max-w-2xl">
         <CardContent className="grid gap-3">
           {reports.map((report) => (
-            <Button
-              asChild
-              className="justify-between"
-              key={report}
-              variant="outline"
-            >
+            <Button className="justify-between" key={report} variant="outline">
               <Link href={`/api/admin/reports/${report}`} download>
                 {report.charAt(0).toUpperCase() + report.slice(1)} CSV{" "}
                 <span>↓</span>

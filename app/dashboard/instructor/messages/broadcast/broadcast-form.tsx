@@ -184,7 +184,10 @@ export function BroadcastForm({
       )}
 
       <div className="space-y-1.5">
-        <Label className="text-sm text-muted-foreground" htmlFor="broadcast-subject">
+        <Label
+          className="text-sm text-muted-foreground"
+          htmlFor="broadcast-subject"
+        >
           বিষয় <span className="text-destructive">*</span>
         </Label>
         <Input
@@ -198,7 +201,10 @@ export function BroadcastForm({
       </div>
 
       <div className="space-y-1.5">
-        <Label className="text-sm text-muted-foreground" htmlFor="broadcast-body">
+        <Label
+          className="text-sm text-muted-foreground"
+          htmlFor="broadcast-body"
+        >
           মেসেজ <span className="text-destructive">*</span>
         </Label>
         <Textarea

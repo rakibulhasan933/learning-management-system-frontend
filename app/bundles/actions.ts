@@ -2,10 +2,7 @@
 
 import { redirect } from "next/navigation"
 
-import type {
-  BundleOrderResponse,
-  SubscriptionResponse,
-} from "@/lib/types"
+import type { BundleOrderResponse, SubscriptionResponse } from "@/lib/types"
 import { ApiClientError, authenticatedApiFetch } from "@/lib/api-client"
 import { attributeAffiliateOrderAction } from "@/app/dashboard/instructor/affiliates/actions"
 

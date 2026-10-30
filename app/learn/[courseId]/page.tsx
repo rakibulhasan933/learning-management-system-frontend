@@ -44,7 +44,7 @@ export default async function LearnPage({ params }: LearnPageProps) {
               {payload.course.title}
             </h1>
           </div>
-          <Button className="w-fit" asChild variant="outline">
+          <Button className="w-fit" variant="outline">
             <Link href="/dashboard/student">
               <ArrowLeft className="size-3.5" />
               Dashboard

@@ -50,8 +50,10 @@ export function GsapScroll() {
       // Sections and cards, in order, like a polished marketing page:
       // fade up on scroll, staggered within each grid.
       gsap.utils
-        .toArray<HTMLElement>(".folio-home-section, .folio-stats, .folio-payment-strip")
-        .forEach(section => {
+        .toArray<HTMLElement>(
+          ".folio-home-section, .folio-stats, .folio-payment-strip"
+        )
+        .forEach((section) => {
           gsap.from(section, {
             opacity: 0,
             y: 28,
@@ -61,7 +63,9 @@ export function GsapScroll() {
           })
         })
       gsap.utils
-        .toArray<HTMLElement>(".folio-card, .folio-course-card, .folio-steps li")
+        .toArray<HTMLElement>(
+          ".folio-card, .folio-course-card, .folio-steps li"
+        )
         .forEach((card, index) => {
           gsap.from(card, {
             opacity: 0,
@@ -89,11 +93,20 @@ export function GsapScroll() {
  */
 const SCRAMBLE_CHARS = "!<>-_\\/[]{}=+*^?#0123456789abcdefghijklmnopqrstuvwxyz"
 
-export function ScrambleText({ text, className }: { text: string; className?: string }) {
+export function ScrambleText({
+  text,
+  className,
+}: {
+  text: string
+  className?: string
+}) {
   const reduce = useReducedMotion()
   const [shown, setShown] = useState(text)
   useEffect(() => {
-    if (reduce) { setShown(text); return }
+    if (reduce) {
+      setShown(text)
+      return
+    }
     let frame = 0
     const total = text.length * 3
     const id = window.setInterval(() => {
@@ -101,29 +114,43 @@ export function ScrambleText({ text, className }: { text: string; className?: st
       const settled = Math.floor((frame / total) * text.length)
       let out = ""
       for (let i = 0; i < text.length; i += 1) {
-        out += i < settled || text[i] === " " ? text[i] : SCRAMBLE_CHARS[Math.floor(Math.random() * SCRAMBLE_CHARS.length)]
+        out +=
+          i < settled || text[i] === " "
+            ? text[i]
+            : SCRAMBLE_CHARS[Math.floor(Math.random() * SCRAMBLE_CHARS.length)]
       }
       setShown(out)
-      if (frame >= total) { window.clearInterval(id); setShown(text) }
+      if (frame >= total) {
+        window.clearInterval(id)
+        setShown(text)
+      }
     }, 30)
     return () => window.clearInterval(id)
   }, [text, reduce])
   return <span className={className}>{shown}</span>
 }
 
-export function TypeText({ text, className }: { text: string; className?: string }) {
+export function TypeText({
+  text,
+  className,
+}: {
+  text: string
+  className?: string
+}) {
   const reduce = useReducedMotion()
   const [count, setCount] = useState(reduce ? text.length : 0)
   useEffect(() => {
     if (reduce) return
     if (count >= text.length) return
-    const id = window.setTimeout(() => setCount(c => c + 1), 45)
+    const id = window.setTimeout(() => setCount((c) => c + 1), 45)
     return () => window.clearTimeout(id)
   }, [count, text, reduce])
   return (
     <span className={className}>
       {text.slice(0, count)}
-      <span className="folio-cursor" aria-hidden>▌</span>
+      <span className="folio-cursor" aria-hidden>
+        ▌
+      </span>
     </span>
   )
 }
@@ -145,9 +172,20 @@ export function GsapHeadline({ children }: { children: ReactNode }) {
     if (reduce) return
     if (!titleRef.current || !maskRef.current) return
     const tl = gsap.timeline({ defaults: { ease: "power4.inOut" } })
-    tl.fromTo(titleRef.current, { opacity: 0 }, { opacity: 1, duration: 0.2 }, 0)
-      .fromTo(maskRef.current, { scaleX: 1 }, { scaleX: 0, duration: 1.4, transformOrigin: "right center" }, 0.2)
-    return () => { tl.kill() }
+    tl.fromTo(
+      titleRef.current,
+      { opacity: 0 },
+      { opacity: 1, duration: 0.2 },
+      0
+    ).fromTo(
+      maskRef.current,
+      { scaleX: 1 },
+      { scaleX: 0, duration: 1.4, transformOrigin: "right center" },
+      0.2
+    )
+    return () => {
+      tl.kill()
+    }
   }, [reduce])
   if (reduce) return <h1>{children}</h1>
   return (

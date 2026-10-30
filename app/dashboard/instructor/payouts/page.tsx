@@ -53,8 +53,8 @@ export default async function InstructorPayoutsPage({
 
       {loadError ? (
         <p className="mt-8 rounded-xl border border-border bg-background px-4 py-3 text-sm text-muted-foreground">
-          Payout history could not be loaded: {loadError} You can still
-          submit a request below.
+          Payout history could not be loaded: {loadError} You can still submit a
+          request below.
         </p>
       ) : null}
 
@@ -94,9 +94,7 @@ export default async function InstructorPayoutsPage({
             </label>
             <input name="currency" type="hidden" value="BDT" />
             <label className="grid gap-1 text-sm">
-              <span className="text-muted-foreground">
-                Note (optional)
-              </span>
+              <span className="text-muted-foreground">Note (optional)</span>
               <textarea
                 className="min-h-20 rounded-xl border border-input bg-input/30 px-3 py-2"
                 name="note"
@@ -132,9 +130,7 @@ export default async function InstructorPayoutsPage({
                 <p className="text-sm text-muted-foreground">
                   {payout.status} · {formatDate(payout.createdAt)}
                 </p>
-                {payout.note ? (
-                  <p className="text-sm">{payout.note}</p>
-                ) : null}
+                {payout.note ? <p className="text-sm">{payout.note}</p> : null}
                 {payout.rejectionReason ? (
                   <p className="text-sm text-destructive">
                     Rejected: {payout.rejectionReason}

@@ -1,10 +1,10 @@
-'use client';
+"use client"
 
-import * as React from 'react';
+import * as React from "react"
 
-import type { DropdownMenuProps } from '@radix-ui/react-dropdown-menu';
+import type { DropdownMenuProps } from "@radix-ui/react-dropdown-menu"
 
-import { TablePlugin, useTableMergeState } from '@platejs/table/react';
+import { TablePlugin, useTableMergeState } from "@platejs/table/react"
 import {
   ArrowDown,
   ArrowLeft,
@@ -16,9 +16,9 @@ import {
   Trash2Icon,
   Ungroup,
   XIcon,
-} from 'lucide-react';
-import { KEYS } from 'platejs';
-import { useEditorPlugin, useEditorSelector } from 'platejs/react';
+} from "lucide-react"
+import { KEYS } from "platejs"
+import { useEditorPlugin, useEditorSelector } from "platejs/react"
 
 import {
   DropdownMenu,
@@ -29,24 +29,24 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { cn } from '@/lib/utils';
+} from "@/components/ui/dropdown-menu"
+import { cn } from "@/lib/utils"
 
-import { ToolbarButton } from './toolbar';
+import { ToolbarButton } from "./toolbar"
 
 export function TableToolbarButton(props: DropdownMenuProps) {
   const tableSelected = useEditorSelector(
     (editor) => editor.api.some({ match: { type: KEYS.table } }),
     []
-  );
+  )
 
-  const { editor, tf } = useEditorPlugin(TablePlugin);
-  const [open, setOpen] = React.useState(false);
-  const mergeState = useTableMergeState();
+  const { editor, tf } = useEditorPlugin(TablePlugin)
+  const [open, setOpen] = React.useState(false)
+  const mergeState = useTableMergeState()
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen} modal={false} {...props}>
-      <DropdownMenuTrigger asChild>
+      <DropdownMenuTrigger>
         <ToolbarButton pressed={open} tooltip="Table" isDropdown>
           <Table />
         </ToolbarButton>
@@ -80,8 +80,8 @@ export function TableToolbarButton(props: DropdownMenuProps) {
                 className="min-w-[180px]"
                 disabled={!mergeState.canMerge}
                 onSelect={() => {
-                  tf.table.merge();
-                  editor.tf.focus();
+                  tf.table.merge()
+                  editor.tf.focus()
                 }}
               >
                 <Combine />
@@ -91,8 +91,8 @@ export function TableToolbarButton(props: DropdownMenuProps) {
                 className="min-w-[180px]"
                 disabled={!mergeState.canSplit}
                 onSelect={() => {
-                  tf.table.split();
-                  editor.tf.focus();
+                  tf.table.split()
+                  editor.tf.focus()
                 }}
               >
                 <Ungroup />
@@ -114,8 +114,8 @@ export function TableToolbarButton(props: DropdownMenuProps) {
                 className="min-w-[180px]"
                 disabled={!tableSelected}
                 onSelect={() => {
-                  tf.insert.tableRow({ before: true });
-                  editor.tf.focus();
+                  tf.insert.tableRow({ before: true })
+                  editor.tf.focus()
                 }}
               >
                 <ArrowUp />
@@ -125,8 +125,8 @@ export function TableToolbarButton(props: DropdownMenuProps) {
                 className="min-w-[180px]"
                 disabled={!tableSelected}
                 onSelect={() => {
-                  tf.insert.tableRow();
-                  editor.tf.focus();
+                  tf.insert.tableRow()
+                  editor.tf.focus()
                 }}
               >
                 <ArrowDown />
@@ -136,8 +136,8 @@ export function TableToolbarButton(props: DropdownMenuProps) {
                 className="min-w-[180px]"
                 disabled={!tableSelected}
                 onSelect={() => {
-                  tf.remove.tableRow();
-                  editor.tf.focus();
+                  tf.remove.tableRow()
+                  editor.tf.focus()
                 }}
               >
                 <XIcon />
@@ -159,8 +159,8 @@ export function TableToolbarButton(props: DropdownMenuProps) {
                 className="min-w-[180px]"
                 disabled={!tableSelected}
                 onSelect={() => {
-                  tf.insert.tableColumn({ before: true });
-                  editor.tf.focus();
+                  tf.insert.tableColumn({ before: true })
+                  editor.tf.focus()
                 }}
               >
                 <ArrowLeft />
@@ -170,8 +170,8 @@ export function TableToolbarButton(props: DropdownMenuProps) {
                 className="min-w-[180px]"
                 disabled={!tableSelected}
                 onSelect={() => {
-                  tf.insert.tableColumn();
-                  editor.tf.focus();
+                  tf.insert.tableColumn()
+                  editor.tf.focus()
                 }}
               >
                 <ArrowRight />
@@ -181,8 +181,8 @@ export function TableToolbarButton(props: DropdownMenuProps) {
                 className="min-w-[180px]"
                 disabled={!tableSelected}
                 onSelect={() => {
-                  tf.remove.tableColumn();
-                  editor.tf.focus();
+                  tf.remove.tableColumn()
+                  editor.tf.focus()
                 }}
               >
                 <XIcon />
@@ -195,8 +195,8 @@ export function TableToolbarButton(props: DropdownMenuProps) {
             className="min-w-[180px]"
             disabled={!tableSelected}
             onSelect={() => {
-              tf.remove.table();
-              editor.tf.focus();
+              tf.remove.table()
+              editor.tf.focus()
             }}
           >
             <Trash2Icon />
@@ -205,39 +205,39 @@ export function TableToolbarButton(props: DropdownMenuProps) {
         </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>
-  );
+  )
 }
 
 function TablePicker() {
-  const { editor, tf } = useEditorPlugin(TablePlugin);
+  const { editor, tf } = useEditorPlugin(TablePlugin)
 
   const [tablePicker, setTablePicker] = React.useState({
     grid: Array.from({ length: 8 }, () => Array.from({ length: 8 }).fill(0)),
     size: { colCount: 0, rowCount: 0 },
-  });
+  })
 
   const onCellMove = (rowIndex: number, colIndex: number) => {
-    const newGrid = [...tablePicker.grid];
+    const newGrid = [...tablePicker.grid]
 
     for (let i = 0; i < newGrid.length; i++) {
       for (let j = 0; j < newGrid[i].length; j++) {
         newGrid[i][j] =
-          i >= 0 && i <= rowIndex && j >= 0 && j <= colIndex ? 1 : 0;
+          i >= 0 && i <= rowIndex && j >= 0 && j <= colIndex ? 1 : 0
       }
     }
 
     setTablePicker({
       grid: newGrid,
       size: { colCount: colIndex + 1, rowCount: rowIndex + 1 },
-    });
-  };
+    })
+  }
 
   return (
     <div
-      className="flex! m-0 flex-col p-0"
+      className="m-0 flex! flex-col p-0"
       onClick={() => {
-        tf.insert.table(tablePicker.size, { select: true });
-        editor.tf.focus();
+        tf.insert.table(tablePicker.size, { select: true })
+        editor.tf.focus()
       }}
       role="button"
     >
@@ -247,20 +247,20 @@ function TablePicker() {
             <div
               key={`(${rowIndex},${columIndex})`}
               className={cn(
-                'col-span-1 size-3 border border-solid bg-secondary',
-                !!value && 'border-current'
+                "col-span-1 size-3 border border-solid bg-secondary",
+                !!value && "border-current"
               )}
               onMouseMove={() => {
-                onCellMove(rowIndex, columIndex);
+                onCellMove(rowIndex, columIndex)
               }}
             />
           ))
         )}
       </div>
 
-      <div className="text-center text-current text-xs">
+      <div className="text-center text-xs text-current">
         {tablePicker.size.rowCount} x {tablePicker.size.colCount}
       </div>
     </div>
-  );
+  )
 }

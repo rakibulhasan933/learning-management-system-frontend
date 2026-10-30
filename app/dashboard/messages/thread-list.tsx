@@ -73,7 +73,9 @@ export function ThreadList({
                 </span>
                 <div className="min-w-0">
                   <p className="flex flex-wrap items-center gap-2">
-                    <span className="truncate font-medium">{thread.subject}</span>
+                    <span className="truncate font-medium">
+                      {thread.subject}
+                    </span>
                     {thread.unreadCount > 0 ? (
                       <span className="flex min-h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-[11px] font-semibold text-primary-foreground tabular-nums">
                         {thread.unreadCount > 99 ? "99+" : thread.unreadCount}

@@ -3,39 +3,39 @@ import type {
   TInlineSuggestionData,
   TSuggestionData,
   TSuggestionText,
-} from 'platejs';
+} from "platejs"
 
-import { BaseSuggestionPlugin } from '@platejs/suggestion';
-import { KEYS, TextApi } from 'platejs';
+import { BaseSuggestionPlugin } from "@platejs/suggestion"
+import { KEYS, TextApi } from "platejs"
 
 import {
   SuggestionLeafStatic,
   VoidRemoveSuggestionOverlayStatic,
-} from '@/components/ui/suggestion-node-static';
+} from "@/components/ui/suggestion-node-static"
 
 const INLINE_SUGGESTION_TARGET_PLUGINS = [
   KEYS.date,
   KEYS.inlineEquation,
   KEYS.link,
   KEYS.mention,
-];
+]
 
 function getInlineSuggestionData(editor: any, element: TElement) {
-  const suggestionApi = editor.getApi(BaseSuggestionPlugin).suggestion;
+  const suggestionApi = editor.getApi(BaseSuggestionPlugin).suggestion
   const data = suggestionApi.suggestionData(element) as
     | TSuggestionData
     | TInlineSuggestionData
-    | undefined;
+    | undefined
 
-  if (data) return data;
-  if (typeof suggestionApi.dataList !== 'function') return;
+  if (data) return data
+  if (typeof suggestionApi.dataList !== "function") return
 
   for (const child of element.children) {
-    if (!TextApi.isText(child)) continue;
+    if (!TextApi.isText(child)) continue
 
-    const childData = suggestionApi.dataList(child as TSuggestionText).at(-1);
+    const childData = suggestionApi.dataList(child as TSuggestionText).at(-1)
 
-    if (childData) return childData;
+    if (childData) return childData
   }
 }
 
@@ -44,19 +44,19 @@ export const BaseSuggestionKit = [
     inject: {
       isElement: true,
       nodeProps: {
-        nodeKey: '',
-        styleKey: 'cssText',
+        nodeKey: "",
+        styleKey: "cssText",
         transformProps: ({ editor, element, props }) => {
-          if (!element) return props;
+          if (!element) return props
 
-          const suggestionData = getInlineSuggestionData(editor, element);
+          const suggestionData = getInlineSuggestionData(editor, element)
 
-          if (!suggestionData) return props;
+          if (!suggestionData) return props
 
           return {
             ...props,
-            'data-inline-suggestion': suggestionData.type,
-          };
+            "data-inline-suggestion": suggestionData.type,
+          }
         },
         transformStyle: () => ({}) as CSSStyleDeclaration,
       },
@@ -67,4 +67,4 @@ export const BaseSuggestionKit = [
       node: SuggestionLeafStatic as any,
     },
   }),
-];
+]

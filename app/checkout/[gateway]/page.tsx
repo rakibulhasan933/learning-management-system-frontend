@@ -63,14 +63,14 @@ export default async function GatewayCheckoutPage({
     <>
       <AbandonedCartRecorder courseId={order.courseId} />
       <GatewayCheckout
-      amount={order.amount}
-      customerEmail={profile.email}
-      error={query.error}
-      gateway={gateway as "bkash" | "nagad" | "rocket"}
-      orderId={order.id}
-      packageName={order.courseTitle}
-      receiverNumber={receiverNumber}
-      slug={order.courseSlug}
+        amount={order.amount}
+        customerEmail={profile.email}
+        error={query.error}
+        gateway={gateway as "bkash" | "nagad" | "rocket"}
+        orderId={order.id}
+        packageName={order.courseTitle}
+        receiverNumber={receiverNumber}
+        slug={order.courseSlug}
       />
     </>
   )

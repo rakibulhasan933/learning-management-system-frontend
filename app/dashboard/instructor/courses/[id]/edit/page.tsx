@@ -95,7 +95,9 @@ export default async function EditInstructorCoursePage({
                 >
                   <input name="courseId" type="hidden" value={course.id} />
                   <p className="text-sm text-muted-foreground">
-                    Delete this course draft and its sections. Use this only for courses that should be permanently removed. This action cannot be undone.
+                    Delete this course draft and its sections. Use this only for
+                    courses that should be permanently removed. This action
+                    cannot be undone.
                   </p>
                   <SubmitButton
                     className="w-full sm:w-fit"

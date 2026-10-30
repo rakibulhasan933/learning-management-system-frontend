@@ -27,7 +27,7 @@ export default async function InstructorCourseWorkspacePage({
     <div className="instructor-course-workspace grid gap-8">
       <PageHeader
         action={
-          <Button asChild variant="outline">
+          <Button variant="outline">
             <Link href="/dashboard/instructor/courses">সব কোর্স</Link>
           </Button>
         }

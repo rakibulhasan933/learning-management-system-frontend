@@ -53,11 +53,10 @@ export default async function InstructorLiveClassesPage({
   }
 
   try {
-    const response =
-      await authenticatedApiFetch<InstructorCourseListResponse>(
-        "/instructor/courses",
-        { cache: "no-store" }
-      )
+    const response = await authenticatedApiFetch<InstructorCourseListResponse>(
+      "/instructor/courses",
+      { cache: "no-store" }
+    )
     courses = response.courses
   } catch {
     courses = []
@@ -75,14 +74,14 @@ export default async function InstructorLiveClassesPage({
 
   if (selectedClassId) {
     try {
-      const response =
-        await authenticatedApiFetch<
-          LiveClassAttendanceResponse | LiveClassAttendanceResponse["attendance"]
-        >(
-          `/instructor/live-classes/${selectedClassId}/attendance`,
-          { cache: "no-store" }
-        )
-      attendance = Array.isArray(response) ? response : (response.attendance ?? [])
+      const response = await authenticatedApiFetch<
+        LiveClassAttendanceResponse | LiveClassAttendanceResponse["attendance"]
+      >(`/instructor/live-classes/${selectedClassId}/attendance`, {
+        cache: "no-store",
+      })
+      attendance = Array.isArray(response)
+        ? response
+        : (response.attendance ?? [])
     } catch (error) {
       if (isMigrationPendingError(error)) migrationPending = true
     }
@@ -96,9 +95,7 @@ export default async function InstructorLiveClassesPage({
         title="লাইভ ক্লাস"
       />
 
-      {migrationPending ? (
-        <MigrationNotice feature="লাইভ ক্লাস" />
-      ) : null}
+      {migrationPending ? <MigrationNotice feature="লাইভ ক্লাস" /> : null}
       {loadError ? (
         <p className="rounded-xl border border-border px-4 py-3 text-sm text-muted-foreground">
           {loadError}
@@ -110,8 +107,7 @@ export default async function InstructorLiveClassesPage({
           <h2 className="font-heading text-xl">নতুন লাইভ ক্লাস শিডিউল করুন</h2>
           {courses.length === 0 ? (
             <p className="mt-2 text-sm text-muted-foreground">
-              প্রথমে একটি কোর্স তৈরি করুন, তারপর লাইভ ক্লাস শিডিউল করতে
-              পারবেন।
+              প্রথমে একটি কোর্স তৈরি করুন, তারপর লাইভ ক্লাস শিডিউল করতে পারবেন।
             </p>
           ) : (
             <form action={createLiveClassAction} className="mt-4 space-y-4">
@@ -202,8 +198,8 @@ export default async function InstructorLiveClassesPage({
           <CardContent className="space-y-2">
             <h2 className="font-heading text-xl">উপস্থিতি তালিকা</h2>
             <p className="text-sm text-muted-foreground">
-              শুধু শিক্ষকের মার্ক করা উপস্থিতি — লিংকে ক্লিক করলেই উপস্থিতি
-              ধরা হয় না।
+              শুধু শিক্ষকের মার্ক করা উপস্থিতি — লিংকে ক্লিক করলেই উপস্থিতি ধরা
+              হয় না।
             </p>
             {attendance.length === 0 ? (
               <p className="text-sm text-muted-foreground">
@@ -258,7 +254,7 @@ export default async function InstructorLiveClassesPage({
                     ) : null}
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    <Button asChild variant="outline">
+                    <Button variant="outline">
                       <a
                         href={liveClass.meetingUrl}
                         rel="noreferrer"
@@ -267,7 +263,7 @@ export default async function InstructorLiveClassesPage({
                         Join লিংক
                       </a>
                     </Button>
-                    <Button asChild variant="outline">
+                    <Button variant="outline">
                       <Link
                         href={`/dashboard/instructor/live-classes?classId=${liveClass.id}`}
                       >
@@ -281,7 +277,11 @@ export default async function InstructorLiveClassesPage({
                   action={addLiveClassRecordingAction}
                   className="grid gap-3 rounded-xl border border-border p-4 sm:grid-cols-[minmax(0,1fr)_240px_auto]"
                 >
-                  <input name="liveClassId" type="hidden" value={liveClass.id} />
+                  <input
+                    name="liveClassId"
+                    type="hidden"
+                    value={liveClass.id}
+                  />
                   <div className="space-y-2">
                     <Label htmlFor={`rec-url-${liveClass.id}`}>
                       রেকর্ডিং URL (লিংক মাত্র — রেকর্ডিং সার্ভার নয়)
@@ -309,7 +309,11 @@ export default async function InstructorLiveClassesPage({
                   action={markLiveClassAttendanceAction}
                   className="grid gap-3 rounded-xl border border-border p-4 sm:grid-cols-[minmax(0,1fr)_160px_auto]"
                 >
-                  <input name="liveClassId" type="hidden" value={liveClass.id} />
+                  <input
+                    name="liveClassId"
+                    type="hidden"
+                    value={liveClass.id}
+                  />
                   <div className="space-y-2">
                     <Label htmlFor={`att-user-${liveClass.id}`}>
                       শিক্ষার্থীর ইউজার আইডি
@@ -339,8 +343,8 @@ export default async function InstructorLiveClassesPage({
                   </div>
                 </form>
                 <p className="text-xs text-muted-foreground">
-                  লিংকে ক্লিক করলেই উপস্থিতি ধরা হয় না — উপস্থিতি শুধু
-                  শিক্ষকের মার্ক করা।
+                  লিংকে ক্লিক করলেই উপস্থিতি ধরা হয় না — উপস্থিতি শুধু শিক্ষকের
+                  মার্ক করা।
                 </p>
               </CardContent>
             </Card>

@@ -30,7 +30,7 @@ export default function Error({
             <RefreshCcw className="size-4" />
             Try again
           </Button>
-          <Button asChild variant="outline">
+          <Button variant="outline">
             <Link href="/">Back home</Link>
           </Button>
         </div>

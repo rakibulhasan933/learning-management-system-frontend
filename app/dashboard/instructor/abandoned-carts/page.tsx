@@ -16,11 +16,10 @@ export default async function InstructorAbandonedCartsPage() {
   let migrationPending = false
   let loadError: string | null = null
   try {
-    const response =
-      await authenticatedApiFetch<AbandonedCartListResponse>(
-        "/instructor/abandoned-carts",
-        { cache: "no-store" }
-      )
+    const response = await authenticatedApiFetch<AbandonedCartListResponse>(
+      "/instructor/abandoned-carts",
+      { cache: "no-store" }
+    )
     carts = response.carts
   } catch (error) {
     if (isMigrationPendingError(error)) {
@@ -68,8 +67,7 @@ export default async function InstructorAbandonedCartsPage() {
                   আইটেম:{" "}
                   {cart.items
                     .map(
-                      (item) =>
-                        item.courseId ?? item.bundleId ?? "অজানা আইটেম"
+                      (item) => item.courseId ?? item.bundleId ?? "অজানা আইটেম"
                     )
                     .join(", ")}
                 </p>

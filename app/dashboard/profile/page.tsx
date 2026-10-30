@@ -1,9 +1,7 @@
-import Image from "next/image"
 import type { ProfileDto } from "@/lib/types"
 
 import { ImageUploadControl } from "@/components/image-upload-control"
 import { authenticatedApiFetch } from "@/lib/api-client"
-import { Card, CardContent } from "@/components/ui/card"
 import { FloatingInput } from "@/components/ui/floating-input"
 import { PageHeader } from "@/components/ui/page-header"
 import { SubmitButton } from "@/components/submit-button"
@@ -13,103 +11,136 @@ import { updateProfileAction } from "./actions"
 
 export const dynamic = "force-dynamic"
 
+// Students see Bangla, like the rest of their workspace. Staff keep English.
+const copyByLanguage = {
+  en: {
+    eyebrow: "Profile settings",
+    title: "Account details",
+    lede: "Your name and photo, as other people see them on the platform.",
+    unnamed: "Unnamed account",
+    avatar: "Photo",
+    avatarDesc: "Shown next to your activity.",
+    avatarButton: "Upload photo",
+    avatarHelp: "JPG, PNG, or WEBP, up to 4 MB.",
+    nameLabel: "Display name",
+    nameDesc: "The name other people see.",
+    namePlaceholder: "Your name",
+    account: "Account",
+    accountDesc: "Email and role can't be changed on this page.",
+    save: "Save changes",
+    saving: "Saving changes...",
+    upload: {
+      empty: "No photo yet.",
+      uploading: "Uploading...",
+      ready: "Ready",
+      done: "Photo uploaded. Save changes to keep it.",
+      noUrl: "Upload completed, but no URL was returned.",
+    },
+  },
+  bn: {
+    eyebrow: "প্রোফাইল সেটিংস",
+    title: "অ্যাকাউন্টের তথ্য",
+    lede: "প্ল্যাটফর্মে অন্যরা আপনার যে নাম ও ছবি দেখেন, এখান থেকে বদলান।",
+    unnamed: "নামহীন অ্যাকাউন্ট",
+    avatar: "ছবি",
+    avatarDesc: "আপনার কাজের পাশে দেখানো হয়।",
+    avatarButton: "ছবি আপলোড করুন",
+    avatarHelp: "JPG, PNG বা WEBP, সর্বোচ্চ ৪ MB।",
+    nameLabel: "প্রদর্শনের নাম",
+    nameDesc: "অন্যরা এই নামে আপনাকে দেখবে।",
+    namePlaceholder: "আপনার নাম",
+    account: "অ্যাকাউন্ট",
+    accountDesc: "ইমেইল ও রোল এই পাতা থেকে বদলানো যায় না।",
+    save: "পরিবর্তন সংরক্ষণ করুন",
+    saving: "সংরক্ষণ হচ্ছে...",
+    upload: {
+      empty: "এখনো ছবি নেই।",
+      uploading: "আপলোড হচ্ছে...",
+      ready: "প্রস্তুত",
+      done: "ছবি আপলোড হয়েছে। রাখতে হলে পরিবর্তন সংরক্ষণ করুন।",
+      noUrl: "আপলোড শেষ হয়েছে, কিন্তু কোনো URL পাওয়া যায়নি।",
+    },
+  },
+} as const
+
+function Row({
+  title,
+  description,
+  children,
+}: {
+  title: string
+  description: string
+  children: React.ReactNode
+}) {
+  return (
+    <div className="grid gap-4 p-5 sm:grid-cols-[13rem_minmax(0,1fr)] sm:gap-8 sm:p-6">
+      <div>
+        <h2 className="font-medium">{title}</h2>
+        <p className="mt-1 text-sm text-muted-foreground">{description}</p>
+      </div>
+      <div className="min-w-0">{children}</div>
+    </div>
+  )
+}
+
 export default async function DashboardProfilePage() {
   const profile = await authenticatedApiFetch<ProfileDto>("/auth/me", {
     cache: "no-store",
   })
-
-  const initials = profile.fullName?.trim()?.[0] ?? profile.email[0] ?? "U"
+  const t = copyByLanguage[profile.role === "student" ? "bn" : "en"]
 
   return (
     <>
-      <PageHeader
-        eyebrow="Profile settings"
-        lede="Update your display name and avatar. Avatar images are uploaded through UploadThing and saved to your backend-owned profile record."
-        title="Account details"
-      />
+      <PageHeader eyebrow={t.eyebrow} lede={t.lede} title={t.title} />
 
-      <div className="mt-12 grid gap-5 lg:grid-cols-[280px_minmax(0,1fr)] lg:items-start">
-        {/* Identity card */}
-        <Card className="overflow-hidden">
-          <CardContent className="p-0">
-            <div className="flex flex-col items-center gap-4 bg-gradient-to-b from-primary/5 to-transparent px-6 pt-8 pb-6">
-              <div className="group relative aspect-square w-32 overflow-hidden rounded-full bg-background ring-2 ring-primary/30 transition-all duration-300 hover:ring-primary/60 sm:w-40">
-                {profile.avatarUrl ? (
-                  <Image
-                    alt={profile.fullName ?? profile.email}
-                    className="object-cover"
-                    fill
-                    sizes="160px"
-                    src={profile.avatarUrl}
-                  />
-                ) : (
-                  <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/15 to-primary/5 font-heading text-4xl text-primary">
-                    {initials.toUpperCase()}
-                  </div>
-                )}
-              </div>
+      <form
+        action={updateProfileAction}
+        className="mt-8 max-w-3xl overflow-hidden rounded-xl border border-border bg-card"
+      >
+        <div className="divide-y divide-border">
+          <Row description={t.avatarDesc} title={t.avatar}>
+            <ImageUploadControl
+              buttonLabel={t.avatarButton}
+              currentUrl={profile.avatarUrl}
+              helpText={t.avatarHelp}
+              inputName="avatarUrl"
+              label={t.avatar}
+              labels={t.upload}
+              purpose="avatar"
+              showFormatHint={false}
+            />
+          </Row>
 
-              <div className="text-center">
-                <p className="font-heading text-lg tracking-tight">
-                  {profile.fullName ?? "Unnamed account"}
+          <Row description={t.nameDesc} title={t.nameLabel}>
+            <FloatingInput
+              defaultValue={profile.fullName ?? ""}
+              label={t.nameLabel}
+              name="fullName"
+              placeholder={t.namePlaceholder}
+            />
+          </Row>
+
+          <Row description={t.accountDesc} title={t.account}>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="min-w-0">
+                <p className="font-medium break-words">
+                  {profile.fullName ?? t.unnamed}
                 </p>
-                <p className="mt-0.5 font-mono text-xs break-words text-muted-foreground">
+                <p className="text-sm break-words text-muted-foreground">
                   {profile.email}
                 </p>
               </div>
-
               <UserRolePill role={profile.role} />
             </div>
-          </CardContent>
-        </Card>
+          </Row>
+        </div>
 
-        {/* Editable form */}
-        <Card>
-          <CardContent>
-            <form action={updateProfileAction} className="grid gap-6">
-              <div>
-                <p className="font-mono text-xs tracking-wide text-muted-foreground">
-                  Public identity
-                </p>
-                <h2 className="mt-2 font-heading text-2xl tracking-tight">
-                  Name and avatar
-                </h2>
-                <p className="mt-2 max-w-md text-sm leading-6 text-muted-foreground">
-                  This is what other people on the platform see next to your
-                  activity.
-                </p>
-              </div>
-
-              <div className="grid gap-5 border-t border-border pt-6">
-                <FloatingInput
-                  defaultValue={profile.fullName ?? ""}
-                  label="Display name"
-                  name="fullName"
-                  placeholder="Your name"
-                />
-
-                <ImageUploadControl
-                  buttonLabel="Upload avatar"
-                  currentUrl={profile.avatarUrl}
-                  helpText="Upload a JPG, PNG, or WEBP image up to 4 MB. The image is linked to your profile."
-                  inputName="avatarUrl"
-                  label="Avatar image"
-                  purpose="avatar"
-                />
-              </div>
-
-              <div className="flex flex-wrap items-center gap-3 border-t border-border pt-5">
-                <SubmitButton
-                  className="w-full sm:w-fit"
-                  pendingLabel="Saving changes..."
-                >
-                  Save changes
-                </SubmitButton>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
-      </div>
+        <div className="flex border-t border-border bg-background/40 px-5 py-4 sm:justify-end sm:px-6">
+          <SubmitButton className="w-full sm:w-fit" pendingLabel={t.saving}>
+            {t.save}
+          </SubmitButton>
+        </div>
+      </form>
     </>
   )
 }

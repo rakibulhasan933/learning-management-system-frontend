@@ -38,19 +38,22 @@ export default function PaymentSuccessPage({
         <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-secondary/15 text-secondary ring-8 ring-secondary/5">
           <CheckCircle2 className="size-9" />
         </div>
-        <p className="mt-7 font-mono text-xs uppercase tracking-[0.2em] text-secondary">
+        <p className="mt-7 font-mono text-xs tracking-[0.2em] text-secondary uppercase">
           Payment verified
         </p>
         <h1 className="mt-3 font-heading text-3xl tracking-tight">
           Payment successful
         </h1>
         <p className="mt-4 text-sm leading-6 text-muted-foreground">
-          Your payment for <span className="font-medium text-foreground">{course}</span> was verified successfully. Your enrollment is now active.
+          Your payment for{" "}
+          <span className="font-medium text-foreground">{course}</span> was
+          verified successfully. Your enrollment is now active.
         </p>
         <div className="mt-7 rounded-2xl bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
-          Taking you to your dashboard in <span className="font-mono text-foreground">{seconds}s</span>…
+          Taking you to your dashboard in{" "}
+          <span className="font-mono text-foreground">{seconds}s</span>…
         </div>
-        <Button asChild className="mt-5 w-full gap-2">
+        <Button className="mt-5 w-full gap-2">
           <Link href="/dashboard/student">
             <LayoutDashboard className="size-4" />
             Open dashboard now

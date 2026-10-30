@@ -76,7 +76,6 @@ export default async function VerifyPage({ searchParams }: VerifyPageProps) {
               <Button
                 className="w-full"
                 variant={verified ? "default" : "outline"}
-                asChild
               >
                 <Link href="/auth/login">Back to sign in</Link>
               </Button>

@@ -82,7 +82,9 @@ export default async function InstructorModelTestDetailPage({
           <div className="grid gap-4 lg:grid-cols-2">
             <Card>
               <CardContent className="space-y-2">
-                <h2 className="font-heading text-xl">লিডারবোর্ড (পূর্ণ তালিকা)</h2>
+                <h2 className="font-heading text-xl">
+                  লিডারবোর্ড (পূর্ণ তালিকা)
+                </h2>
                 <p className="text-xs text-muted-foreground">
                   ক্রম: স্কোর বেশি → দ্রুত শেষ → আগে জমা।
                 </p>
@@ -94,8 +96,9 @@ export default async function InstructorModelTestDetailPage({
                   leaderboard.leaderboard.map((entry) => (
                     <p className="text-sm" key={entry.userId}>
                       {entry.rank}. {entry.studentName ?? "নাম নেই"}
-                      {entry.studentEmail ? ` · ${entry.studentEmail}` : ""} ·{" "}
-                      {entry.score} পয়েন্ট
+                      {entry.studentEmail
+                        ? ` · ${entry.studentEmail}`
+                        : ""} · {entry.score} পয়েন্ট
                     </p>
                   ))
                 )}
@@ -115,8 +118,8 @@ export default async function InstructorModelTestDetailPage({
                     </p>
                     {report.topics.map((topic) => (
                       <p className="text-sm" key={topic.topic}>
-                        {topic.topic}: সঠিক {topic.correct} · ভুল {topic.wrong} ·
-                        ফাঁকা {topic.blank} · নির্ভুলতা {topic.accuracy}%
+                        {topic.topic}: সঠিক {topic.correct} · ভুল {topic.wrong}{" "}
+                        · ফাঁকা {topic.blank} · নির্ভুলতা {topic.accuracy}%
                       </p>
                     ))}
                   </>

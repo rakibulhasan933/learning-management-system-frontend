@@ -25,7 +25,11 @@ const navItems = [
   { href: "/contact", label: "যোগাযোগ" },
 ] as const
 
-export async function SiteHeader({ variant = "default" }: { variant?: "default" | "home" }) {
+export async function SiteHeader({
+  variant = "default",
+}: {
+  variant?: "default" | "home"
+}) {
   const profile = await getPublicProfile()
   const initials = (
     profile?.fullName?.trim()?.[0] ??
@@ -35,7 +39,9 @@ export async function SiteHeader({ variant = "default" }: { variant?: "default" 
   const dashboardPath = profile ? getDashboardPath(profile.role) : null
 
   return (
-    <header className={`sticky top-0 z-40 border-b border-border bg-background/92 backdrop-blur-md ${variant === "home" ? "folio-home-header" : ""}`}>
+    <header
+      className={`sticky top-0 z-40 border-b border-border bg-background/92 backdrop-blur-md ${variant === "home" ? "folio-home-header" : ""}`}
+    >
       <span aria-hidden className="block h-px w-full bg-primary" />
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3.5 sm:px-6 lg:px-8">
         <BrandMark />
@@ -63,11 +69,11 @@ export async function SiteHeader({ variant = "default" }: { variant?: "default" 
         <div className="flex items-center gap-2 sm:gap-3">
           <div className="site-header-actions hidden items-center gap-3 md:flex">
             {profile ? (
-              <Button asChild variant="outline">
-                <Link
-                  className="inline-flex items-center gap-2"
-                  href={dashboardPath ?? "/dashboard/profile"}
-                >
+              <Button
+                variant="outline"
+                render={<Link href={dashboardPath ?? "/dashboard/profile"} />}
+              >
+                <span className="inline-flex items-center gap-2">
                   <span className="relative size-7 overflow-hidden rounded-full bg-card ring-1 ring-primary/50">
                     {profile.avatarUrl ? (
                       <Image
@@ -84,15 +90,15 @@ export async function SiteHeader({ variant = "default" }: { variant?: "default" 
                     )}
                   </span>
                   <span>অ্যাকাউন্ট</span>
-                </Link>
+                </span>
               </Button>
             ) : (
               <>
-                <Button asChild variant="outline">
-                  <Link href="/auth/login">লগইন</Link>
+                <Button variant="outline" render={<Link href="/auth/login" />}>
+                  লগইন
                 </Button>
-                <Button asChild className="bg-emerald-600 text-white shadow-[0_8px_24px_-12px_rgba(16,185,129,0.9)] hover:bg-emerald-500">
-                  <Link href="/auth/signup">অ্যাকাউন্ট খুলুন</Link>
+                <Button render={<Link href="/auth/signup" />}>
+                  অ্যাকাউন্ট খুলুন
                 </Button>
               </>
             )}
@@ -109,27 +115,35 @@ export async function SiteHeader({ variant = "default" }: { variant?: "default" 
               <nav className="grid gap-1 text-sm">
                 {navItems.map((item) => (
                   <Button
-                    asChild
                     className="justify-start"
                     key={item.href}
                     variant="ghost"
+                    render={<Link href={item.href} />}
                   >
-                    <Link href={item.href}>{item.label}</Link>
+                    {item.label}
                   </Button>
                 ))}
                 {profile ? (
-                  <Button asChild className="justify-start" variant="ghost">
-                    <Link href={dashboardPath ?? "/dashboard/student"}>
-                      ড্যাশবোর্ড
-                    </Link>
+                  <Button
+                    className="justify-start"
+                    variant="ghost"
+                    render={
+                      <Link href={dashboardPath ?? "/dashboard/student"} />
+                    }
+                  >
+                    ড্যাশবোর্ড
                   </Button>
                 ) : (
                   <>
-                    <Button asChild className="justify-start" variant="ghost">
-                      <Link href="/auth/login">লগইন</Link>
+                    <Button
+                      className="justify-start"
+                      variant="ghost"
+                      render={<Link href="/auth/login" />}
+                    >
+                      লগইন
                     </Button>
-                    <Button asChild>
-                      <Link href="/auth/signup">অ্যাকাউন্ট খুলুন</Link>
+                    <Button render={<Link href="/auth/signup" />}>
+                      অ্যাকাউন্ট খুলুন
                     </Button>
                   </>
                 )}

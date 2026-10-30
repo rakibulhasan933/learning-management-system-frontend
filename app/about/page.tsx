@@ -36,13 +36,16 @@ export default function AboutPage() {
     <PublicShell>
       <section className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20">
         <ProgressThread className="mb-8 w-24" />
-        <p className="font-mono text-xs text-muted-foreground">আমাদের সম্পর্কে · ফোলিও</p>
+        <p className="font-mono text-xs text-muted-foreground">
+          আমাদের সম্পর্কে · ফোলিও
+        </p>
         <h1 className="mt-3 max-w-3xl font-heading text-4xl leading-[1.05] tracking-tight sm:text-5xl md:text-6xl">
           প্রথম ক্লিক থেকেই শেখার অভিজ্ঞতা হোক সহজ ও পরিষ্কার।
         </h1>
         <p className="mt-6 max-w-2xl text-base leading-7 text-muted-foreground">
-          ফোলিও এমন একটি লার্নিং প্ল্যাটফর্ম যেখানে মেন্টররা গুছিয়ে কোর্স তৈরি করেন,
-          শিক্ষার্থীরা নিজের অগ্রগতি দেখতে পান এবং প্রতিটি এনরোলমেন্টের নির্ভরযোগ্য রেকর্ড থাকে।
+          ফোলিও এমন একটি লার্নিং প্ল্যাটফর্ম যেখানে মেন্টররা গুছিয়ে কোর্স তৈরি
+          করেন, শিক্ষার্থীরা নিজের অগ্রগতি দেখতে পান এবং প্রতিটি এনরোলমেন্টের
+          নির্ভরযোগ্য রেকর্ড থাকে।
         </p>
         <div className="mt-14 grid gap-5 md:grid-cols-3">
           {principles.map(({ icon: Icon, title, body }) => (
@@ -69,17 +72,17 @@ export default function AboutPage() {
             </h2>
             <p className="mt-5 max-w-xl text-sm leading-7 text-muted-foreground">
               মেন্টররা ধাপ, মডিউল, ভিডিও, PDF, কুইজ ও অ্যাসাইনমেন্ট তৈরি করেন।
-              শিক্ষার্থীরা মনোযোগী লার্নিং প্লেয়ারের মাধ্যমে শেখেন, নিজের অগ্রগতি দেখেন
-              এবং শুধুমাত্র কেনা কোর্সেই প্রবেশাধিকার পান।
+              শিক্ষার্থীরা মনোযোগী লার্নিং প্লেয়ারের মাধ্যমে শেখেন, নিজের
+              অগ্রগতি দেখেন এবং শুধুমাত্র কেনা কোর্সেই প্রবেশাধিকার পান।
             </p>
           </div>
           <div className="rounded-2xl bg-card p-6 ring-1 ring-foreground/10">
             <p className="font-mono text-xs text-primary">ফোলিও ঘুরে দেখুন</p>
             <div className="mt-5 grid gap-3">
-              <Button asChild>
+              <Button>
                 <Link href="/courses">কোর্স দেখুন</Link>
               </Button>
-              <Button asChild variant="outline">
+              <Button variant="outline">
                 <Link href="/contact">সাপোর্টে যোগাযোগ</Link>
               </Button>
             </div>

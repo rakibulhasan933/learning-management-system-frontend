@@ -5,7 +5,12 @@ import { useState } from "react"
 
 import { cn } from "@/lib/utils"
 
-export function ProgressiveImage({ className, onError, onLoad, ...props }: ImageProps) {
+export function ProgressiveImage({
+  className,
+  onError,
+  onLoad,
+  ...props
+}: ImageProps) {
   const [loaded, setLoaded] = useState(false)
 
   return (

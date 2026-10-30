@@ -90,9 +90,9 @@ export default async function AdminRevenuePage() {
               activity, as recorded today.
             </p>
             <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">
-              Pending revenue and pending payments are orders awaiting
-              automatic PayConfirm verification — not an admin click. This
-              app has no per-order admin approval queue.
+              Pending revenue and pending payments are orders awaiting automatic
+              PayConfirm verification — not an admin click. This app has no
+              per-order admin approval queue.
             </p>
           </div>
           <Button className="w-fit" variant="outline">

@@ -1,8 +1,5 @@
 import Link from "next/link"
-import type {
-  BatchLeaderboardResponse,
-  DripStatusResponse,
-} from "@/lib/types"
+import type { BatchLeaderboardResponse, DripStatusResponse } from "@/lib/types"
 import { authenticatedApiFetch } from "@/lib/api-client"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -28,9 +25,7 @@ export default async function StudentBatchesPage({
   const params = (await searchParams) ?? {}
   const batchId = params.batchId?.trim() || null
   let dripItems: DripStatusResponse["items"] = []
-  let leaderboard: NonNullable<
-    BatchLeaderboardResponse["leaderboard"]
-  > = []
+  let leaderboard: NonNullable<BatchLeaderboardResponse["leaderboard"]> = []
   let migrationPending = false
   let loadError: string | null = null
 
@@ -68,18 +63,16 @@ export default async function StudentBatchesPage({
       <Card>
         <CardContent className="space-y-2 text-sm leading-6 text-muted-foreground">
           <p>
-            এই চুক্তিতে শিক্ষার্থীর ব্যাচ-তালিকার আলাদা এন্ডপয়েন্ট নেই, তাই
-            এই পাতা কোনো তালিকা অনুমান করে দেখায় না। শিক্ষকের দেওয়া
-            ব্যাচ আইডি দিয়ে যোগ দিন, তারপর একই আইডি দিয়ে drip ও
-            লিডারবোর্ড দেখুন। ব্যাচ-ডেডলাইন দেখার আলাদা GET এন্ডপয়েন্টও
-            চুক্তিতে নেই — ডেডলাইন শিক্ষক/কোর্স পাতা থেকে জানানো হবে।
+            এই চুক্তিতে শিক্ষার্থীর ব্যাচ-তালিকার আলাদা এন্ডপয়েন্ট নেই, তাই এই
+            পাতা কোনো তালিকা অনুমান করে দেখায় না। শিক্ষকের দেওয়া ব্যাচ আইডি
+            দিয়ে যোগ দিন, তারপর একই আইডি দিয়ে drip ও লিডারবোর্ড দেখুন।
+            ব্যাচ-ডেডলাইন দেখার আলাদা GET এন্ডপয়েন্টও চুক্তিতে নেই — ডেডলাইন
+            শিক্ষক/কোর্স পাতা থেকে জানানো হবে।
           </p>
         </CardContent>
       </Card>
 
-      {migrationPending ? (
-        <MigrationNotice feature="ব্যাচ" />
-      ) : null}
+      {migrationPending ? <MigrationNotice feature="ব্যাচ" /> : null}
       {loadError ? (
         <p className="rounded-xl border border-border px-4 py-3 text-sm text-muted-foreground">
           {loadError}
@@ -176,7 +169,7 @@ export default async function StudentBatchesPage({
         </>
       ) : null}
 
-      <Button asChild variant="outline">
+      <Button variant="outline">
         <Link href="/dashboard/student/classes">আমার ক্লাস</Link>
       </Button>
     </div>

@@ -28,7 +28,10 @@ export default async function AdminCouponsPage() {
     }),
   ])
   const activeCoupons = usage.coupons.filter((coupon) => coupon.active).length
-  const claims = usage.coupons.reduce((total, coupon) => total + coupon.claims, 0)
+  const claims = usage.coupons.reduce(
+    (total, coupon) => total + coupon.claims,
+    0
+  )
   const totalDiscount = usage.coupons.reduce(
     (total, coupon) => total + Number(coupon.totalDiscount),
     0
@@ -74,18 +77,20 @@ export default async function AdminCouponsPage() {
       <section className="mt-8 grid gap-5">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <p className="font-mono text-xs uppercase tracking-[0.18em] text-primary">
+            <p className="font-mono text-xs tracking-[0.18em] text-primary uppercase">
               Offer library
             </p>
             <h2 className="mt-2 font-heading text-2xl tracking-tight">
               Manage coupon codes
             </h2>
             <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-              Keep active offers visible and move old campaigns to the disabled list.
+              Keep active offers visible and move old campaigns to the disabled
+              list.
             </p>
           </div>
           <span className="rounded-full border border-border bg-card px-3 py-1.5 font-mono text-xs text-muted-foreground">
-            {usage.coupons.length} code{usage.coupons.length === 1 ? "" : "s"} tracked
+            {usage.coupons.length} code{usage.coupons.length === 1 ? "" : "s"}{" "}
+            tracked
           </span>
         </div>
         <Card className="overflow-hidden border-primary/20 bg-card/80 shadow-[0_20px_60px_-35px_rgba(214,164,72,0.45)]">
@@ -98,10 +103,12 @@ export default async function AdminCouponsPage() {
       <section className="mt-12 grid max-w-6xl gap-5">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <p className="font-mono text-xs uppercase tracking-[0.18em] text-secondary">
+            <p className="font-mono text-xs tracking-[0.18em] text-secondary uppercase">
               Redemption report
             </p>
-            <h2 className="mt-2 font-heading text-2xl tracking-tight">Coupon usage</h2>
+            <h2 className="mt-2 font-heading text-2xl tracking-tight">
+              Coupon usage
+            </h2>
             <p className="mt-1 text-sm text-muted-foreground">
               See how many students claimed each coupon and where it was used.
             </p>
@@ -115,9 +122,12 @@ export default async function AdminCouponsPage() {
           <Card className="border-dashed">
             <CardContent className="flex flex-col items-center justify-center p-10 text-center">
               <TicketPercent className="size-8 text-muted-foreground" />
-              <p className="mt-4 font-heading text-lg">No coupon activity yet</p>
+              <p className="mt-4 font-heading text-lg">
+                No coupon activity yet
+              </p>
               <p className="mt-1 max-w-sm text-sm text-muted-foreground">
-                Once a student uses a coupon on a paid order, its performance will appear here.
+                Once a student uses a coupon on a paid order, its performance
+                will appear here.
               </p>
             </CardContent>
           </Card>
@@ -131,18 +141,26 @@ export default async function AdminCouponsPage() {
                       <p className="font-mono text-lg font-semibold tracking-wide text-primary">
                         {coupon.code}
                       </p>
-                      <span className={`rounded-full px-2.5 py-1 text-[11px] font-medium ${coupon.active ? "bg-secondary/15 text-secondary" : "bg-muted text-muted-foreground"}`}>
+                      <span
+                        className={`rounded-full px-2.5 py-1 text-[11px] font-medium ${coupon.active ? "bg-secondary/15 text-secondary" : "bg-muted text-muted-foreground"}`}
+                      >
                         {coupon.active ? "Active" : "Disabled"}
                       </span>
                     </div>
                     <p className="mt-2 text-sm text-muted-foreground">
-                      {coupon.claims} claim{coupon.claims === 1 ? "" : "s"} · {coupon.limit ? `Limit ${coupon.limit}` : "Unlimited"}
+                      {coupon.claims} claim{coupon.claims === 1 ? "" : "s"} ·{" "}
+                      {coupon.limit ? `Limit ${coupon.limit}` : "Unlimited"}
                     </p>
                   </div>
                   <div className="text-left sm:text-right">
-                    <p className="font-mono text-lg text-foreground">{coupon.totalDiscount} BDT</p>
+                    <p className="font-mono text-lg text-foreground">
+                      {coupon.totalDiscount} BDT
+                    </p>
                     <p className="mt-1 text-xs text-muted-foreground">
-                      total discount{coupon.expiresAt ? ` · expires ${new Date(coupon.expiresAt).toLocaleDateString()}` : ""}
+                      total discount
+                      {coupon.expiresAt
+                        ? ` · expires ${new Date(coupon.expiresAt).toLocaleDateString()}`
+                        : ""}
                     </p>
                   </div>
                 </div>
@@ -158,14 +176,25 @@ export default async function AdminCouponsPage() {
                     </thead>
                     <tbody>
                       {coupon.students.map((student) => (
-                        <tr className="border-b border-border last:border-0 hover:bg-muted/20" key={student.orderId}>
+                        <tr
+                          className="border-b border-border last:border-0 hover:bg-muted/20"
+                          key={student.orderId}
+                        >
                           <td className="px-3 py-3">
                             <p>{student.fullName || "Unnamed student"}</p>
-                            <p className="text-xs text-muted-foreground">{student.email}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {student.email}
+                            </p>
                           </td>
-                          <td className="px-3 py-3 text-muted-foreground">{student.courseTitle}</td>
-                          <td className="px-3 py-3 font-mono text-primary">{student.discountAmount} BDT</td>
-                          <td className="px-3 py-3 capitalize text-muted-foreground">{student.status.replaceAll("_", " ")}</td>
+                          <td className="px-3 py-3 text-muted-foreground">
+                            {student.courseTitle}
+                          </td>
+                          <td className="px-3 py-3 font-mono text-primary">
+                            {student.discountAmount} BDT
+                          </td>
+                          <td className="px-3 py-3 text-muted-foreground capitalize">
+                            {student.status.replaceAll("_", " ")}
+                          </td>
                         </tr>
                       ))}
                     </tbody>

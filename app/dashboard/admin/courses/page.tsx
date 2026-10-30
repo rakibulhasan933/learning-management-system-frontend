@@ -49,7 +49,7 @@ export default async function AdminCoursesPage() {
     <>
       <PageHeader
         action={
-          <Button variant="outline" asChild>
+          <Button variant="outline">
             <Link href="/dashboard/admin">
               <ArrowLeft className="size-3.5" />
               Dashboard
@@ -133,7 +133,9 @@ export default async function AdminCoursesPage() {
                         <dd className="font-mono text-foreground">
                           {categoryResponse.categories.find(
                             (category) => category.slug === course.category
-                          )?.name ?? course.category ?? "No category"}
+                          )?.name ??
+                            course.category ??
+                            "No category"}
                         </dd>
                       </div>
                     </div>
@@ -163,10 +165,17 @@ export default async function AdminCoursesPage() {
                 </div>
 
                 <div className="flex flex-col gap-2 lg:justify-center">
-                  <form action={updateCourseEnrollmentSettingsAction} className="grid gap-2 rounded-xl border border-border bg-background p-3">
+                  <form
+                    action={updateCourseEnrollmentSettingsAction}
+                    className="grid gap-2 rounded-xl border border-border bg-background p-3"
+                  >
                     <input name="courseId" type="hidden" value={course.id} />
                     <label className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <input defaultChecked={course.enrollmentEnabled !== false} name="enrollmentEnabled" type="checkbox" />
+                      <input
+                        defaultChecked={course.enrollmentEnabled !== false}
+                        name="enrollmentEnabled"
+                        type="checkbox"
+                      />
                       Enrollment open
                     </label>
                     <input
@@ -182,7 +191,10 @@ export default async function AdminCoursesPage() {
                   {course.status === "pending_review" ? (
                     <form action={approveCourseAction}>
                       <input name="courseId" type="hidden" value={course.id} />
-                      <SubmitButton className="w-full" pendingLabel="Approving...">
+                      <SubmitButton
+                        className="w-full"
+                        pendingLabel="Approving..."
+                      >
                         <CheckCircle2 className="size-3.5" />
                         Approve
                       </SubmitButton>

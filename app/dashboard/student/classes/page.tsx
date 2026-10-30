@@ -29,7 +29,7 @@ export default async function StudentClassesPage() {
         <div className="mt-10">
           <EmptyState
             action={
-              <Button asChild>
+              <Button>
                 <Link href="/courses">কোর্স দেখুন</Link>
               </Button>
             }
@@ -65,7 +65,7 @@ export default async function StudentClassesPage() {
                 <h2 className="mt-2 font-heading text-xl leading-snug">
                   {course.courseTitle}
                 </h2>
-                <Button asChild className="mt-auto w-full">
+                <Button className="mt-auto w-full">
                   <Link href={`/learn/${course.courseId}`}>
                     <PlayCircle />
                     শেখা চালিয়ে যান

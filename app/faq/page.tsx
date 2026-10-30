@@ -41,7 +41,9 @@ export default function FaqPage() {
     <PublicShell>
       <section className="mx-auto max-w-4xl px-4 py-14 sm:px-6 sm:py-20">
         <ProgressThread className="mb-8 w-24" />
-        <p className="font-mono text-xs text-muted-foreground">সাপোর্ট · জিজ্ঞাসা</p>
+        <p className="font-mono text-xs text-muted-foreground">
+          সাপোর্ট · জিজ্ঞাসা
+        </p>
         <h1 className="mt-3 font-heading text-4xl tracking-tight sm:text-5xl">
           শুরু করার আগে জেনে নিন।
         </h1>
@@ -65,7 +67,7 @@ export default function FaqPage() {
             </Card>
           ))}
         </div>
-        <Button asChild className="mt-10" variant="outline">
+        <Button className="mt-10" variant="outline">
           <Link href="/contact">আরও সাহায্য দরকার? যোগাযোগ করুন</Link>
         </Button>
       </section>

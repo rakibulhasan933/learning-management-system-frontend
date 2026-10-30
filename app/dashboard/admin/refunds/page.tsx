@@ -132,7 +132,10 @@ export default async function AdminRefundsPage() {
                                     : "process"
                                 }
                               />
-                              <SubmitButton pendingLabel="..." variant="outline">
+                              <SubmitButton
+                                pendingLabel="..."
+                                variant="outline"
+                              >
                                 {refund.status === "requested"
                                   ? "অনুমোদন"
                                   : "প্রসেস সম্পন্ন"}
@@ -144,7 +147,11 @@ export default async function AdminRefundsPage() {
                                 type="hidden"
                                 value={refund.id}
                               />
-                              <input name="action" type="hidden" value="reject" />
+                              <input
+                                name="action"
+                                type="hidden"
+                                value="reject"
+                              />
                               <SubmitButton pendingLabel="..." variant="ghost">
                                 বাতিল
                               </SubmitButton>

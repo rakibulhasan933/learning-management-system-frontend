@@ -6,28 +6,28 @@ import Link from "next/link"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
 import {
+  Activity,
   BadgeDollarSign,
   Bell,
   BookOpen,
   ChartColumn,
   Clipboard,
+  Download,
   GraduationCap,
   Landmark,
-  LibraryBig,
-  RotateCcw,
-  Settings2,
-  Tags,
-  Activity,
-  Download,
-  TicketPercent,
-  Megaphone,
-  MessageCircle,
   Link2,
+  LibraryBig,
   LogOut,
+  Megaphone,
   Menu,
+  MessageCircle,
   PanelLeftClose,
   PanelLeftOpen,
+  RotateCcw,
   ScrollText,
+  Settings2,
+  Tags,
+  TicketPercent,
   UserRound,
   Users,
   Video,
@@ -55,7 +55,6 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
-import { ProgressThread } from "@/components/ui/progress-thread"
 
 type DashboardNavItem = {
   icon: typeof BookOpen
@@ -63,238 +62,145 @@ type DashboardNavItem = {
   label: string
 }
 
+type DashboardNavGroup = { title: string; items: DashboardNavItem[] }
+
 type DashboardShellProps = {
   children: ReactNode
   profile: ProfileDto
 }
 
-const navigationByRole: Record<UserRole, DashboardNavItem[]> = {
+const item = (
+  href: string,
+  icon: DashboardNavItem["icon"],
+  label: string
+): DashboardNavItem => ({ href, icon, label })
+
+// Items are grouped by the job they do, so long role menus stay scannable.
+const navigationByRole: Record<UserRole, DashboardNavGroup[]> = {
   admin: [
-    { href: "/dashboard/admin/users", icon: Users, label: "User management" },
     {
-      href: "/dashboard/admin/courses",
-      icon: LibraryBig,
-      label: "Course approval",
-    },
-    { href: "/dashboard/admin/categories", icon: Tags, label: "Categories" },
-    {
-      href: "/dashboard/admin/enrollments",
-      icon: GraduationCap,
-      label: "Enrollments",
-    },
-    { href: "/dashboard/admin/refunds", icon: RotateCcw, label: "Refunds" },
-    {
-      href: "/dashboard/admin/payouts",
-      icon: BadgeDollarSign,
-      label: "Instructor payouts",
+      title: "People & content",
+      items: [
+        item("/dashboard/admin/users", Users, "User management"),
+        item("/dashboard/admin/courses", LibraryBig, "Course approval"),
+        item("/dashboard/admin/categories", Tags, "Categories"),
+        item("/dashboard/admin/enrollments", GraduationCap, "Enrollments"),
+      ],
     },
     {
-      href: "/dashboard/admin/affiliate-payouts",
-      icon: BadgeDollarSign,
-      label: "Affiliate payouts",
+      title: "Money",
+      items: [
+        item("/dashboard/admin/revenue", ChartColumn, "Revenue overview"),
+        item("/dashboard/admin/refunds", RotateCcw, "Refunds"),
+        item("/dashboard/admin/payouts", BadgeDollarSign, "Instructor payouts"),
+        item(
+          "/dashboard/admin/affiliate-payouts",
+          BadgeDollarSign,
+          "Affiliate payouts"
+        ),
+        item("/dashboard/admin/coupons", TicketPercent, "Coupon settings"),
+      ],
     },
     {
-      href: "/dashboard/admin/revenue",
-      icon: ChartColumn,
-      label: "Revenue overview",
+      title: "Insight",
+      items: [
+        item("/dashboard/admin/analytics", ChartColumn, "Analytics"),
+        item("/dashboard/admin/reports", Download, "Reports export"),
+        item("/dashboard/admin/health", Activity, "Platform health"),
+        item("/dashboard/admin/audit-logs", ScrollText, "Audit log"),
+      ],
     },
     {
-      href: "/dashboard/admin/analytics",
-      icon: ChartColumn,
-      label: "Analytics",
-    },
-    {
-      href: "/dashboard/admin/announcements",
-      icon: Megaphone,
-      label: "Announcements",
-    },
-    {
-      href: "/dashboard/admin/audit-logs",
-      icon: ScrollText,
-      label: "Audit log",
-    },
-    {
-      href: "/dashboard/admin/settings",
-      icon: Settings2,
-      label: "Site settings",
-    },
-    {
-      href: "/dashboard/admin/coupons",
-      icon: TicketPercent,
-      label: "Coupon settings",
-    },
-    {
-      href: "/dashboard/admin/health",
-      icon: Activity,
-      label: "Platform health",
-    },
-    {
-      href: "/dashboard/admin/reports",
-      icon: Download,
-      label: "Reports export",
-    },
-    {
-      href: "/dashboard/admin/notifications",
-      icon: Bell,
-      label: "Notifications",
+      title: "Platform",
+      items: [
+        item("/dashboard/admin/announcements", Megaphone, "Announcements"),
+        item("/dashboard/admin/notifications", Bell, "Notifications"),
+        item("/dashboard/admin/settings", Settings2, "Site settings"),
+      ],
     },
   ],
   instructor: [
-    { href: "/dashboard/instructor", icon: ChartColumn, label: "Overview" },
     {
-      href: "/dashboard/instructor/courses",
-      icon: BookOpen,
-      label: "My courses",
+      title: "Teach",
+      items: [
+        item("/dashboard/instructor", ChartColumn, "Overview"),
+        item("/dashboard/instructor/courses", BookOpen, "My courses"),
+        item(
+          "/dashboard/instructor/courses/new",
+          GraduationCap,
+          "Course builder"
+        ),
+        item("/dashboard/instructor/question-bank", Clipboard, "Question bank"),
+        item("/dashboard/instructor/model-tests", GraduationCap, "Model tests"),
+        item("/dashboard/instructor/live-classes", Video, "Live classes"),
+        item("/dashboard/instructor/batches", Users, "Batches"),
+      ],
     },
     {
-      href: "/dashboard/instructor/courses/new",
-      icon: GraduationCap,
-      label: "Course builder",
-    },
-    { href: "/dashboard/instructor/students", icon: Users, label: "Students" },
-    {
-      href: "/dashboard/instructor/analytics",
-      icon: ChartColumn,
-      label: "Analytics",
-    },
-    {
-      href: "/dashboard/instructor/quiz-results",
-      icon: Clipboard,
-      label: "Quiz results",
+      title: "Students",
+      items: [
+        item("/dashboard/instructor/students", Users, "Students"),
+        item("/dashboard/instructor/quiz-results", Clipboard, "Quiz results"),
+        item("/dashboard/instructor/discussions", MessageCircle, "Discussions"),
+        item("/dashboard/instructor/messages", MessageCircle, "Messages"),
+        item("/dashboard/instructor/announcements", Megaphone, "Announcements"),
+        item("/dashboard/instructor/notifications", Bell, "Notifications"),
+      ],
     },
     {
-      href: "/dashboard/instructor/discussions",
-      icon: MessageCircle,
-      label: "Discussions",
-    },
-    {
-      href: "/dashboard/instructor/announcements",
-      icon: Megaphone,
-      label: "Announcements",
-    },
-    {
-      href: "/dashboard/instructor/notifications",
-      icon: Bell,
-      label: "Notifications",
-    },
-    {
-      href: "/dashboard/instructor/messages",
-      icon: MessageCircle,
-      label: "Messages",
-    },
-    {
-      href: "/dashboard/instructor/payouts",
-      icon: Landmark,
-      label: "Payouts",
-    },
-    {
-      href: "/dashboard/instructor/refund-requests",
-      icon: RotateCcw,
-      label: "Refund requests",
-    },
-    {
-      href: "/dashboard/instructor/bundles",
-      icon: LibraryBig,
-      label: "Bundles",
-    },
-    {
-      href: "/dashboard/instructor/seller-dashboard",
-      icon: BadgeDollarSign,
-      label: "Seller dashboard",
-    },
-    {
-      href: "/dashboard/instructor/question-bank",
-      icon: Clipboard,
-      label: "Question bank",
-    },
-    {
-      href: "/dashboard/instructor/model-tests",
-      icon: GraduationCap,
-      label: "Model tests",
-    },
-    {
-      href: "/dashboard/instructor/abandoned-carts",
-      icon: Download,
-      label: "Abandoned carts",
-    },
-    {
-      href: "/dashboard/instructor/batches",
-      icon: Users,
-      label: "Batches",
-    },
-    {
-      href: "/dashboard/instructor/affiliates",
-      icon: BadgeDollarSign,
-      label: "Affiliates",
-    },
-    {
-      href: "/dashboard/instructor/live-classes",
-      icon: Video,
-      label: "Live classes",
+      title: "Sales",
+      items: [
+        item(
+          "/dashboard/instructor/seller-dashboard",
+          BadgeDollarSign,
+          "Seller dashboard"
+        ),
+        item("/dashboard/instructor/analytics", ChartColumn, "Analytics"),
+        item("/dashboard/instructor/bundles", LibraryBig, "Bundles"),
+        item("/dashboard/instructor/affiliates", BadgeDollarSign, "Affiliates"),
+        item(
+          "/dashboard/instructor/abandoned-carts",
+          Download,
+          "Abandoned carts"
+        ),
+        item("/dashboard/instructor/payouts", Landmark, "Payouts"),
+        item(
+          "/dashboard/instructor/refund-requests",
+          RotateCcw,
+          "Refund requests"
+        ),
+      ],
     },
   ],
   student: [
-    { href: "/dashboard/student", icon: BookOpen, label: "ওভারভিউ" },
     {
-      href: "/dashboard/student/classes",
-      icon: GraduationCap,
-      label: "আমার ক্লাস",
+      title: "শেখা",
+      items: [
+        item("/dashboard/student", BookOpen, "ওভারভিউ"),
+        item("/dashboard/student/classes", GraduationCap, "আমার ক্লাস"),
+        item("/dashboard/student/live-classes", Video, "লাইভ ক্লাস"),
+        item("/dashboard/student/batches", Users, "ব্যাচ"),
+        item("/courses", LibraryBig, "কোর্স দেখুন"),
+      ],
     },
     {
-      href: "/dashboard/student/analytics",
-      icon: ChartColumn,
-      label: "বিশ্লেষণ",
-    },
-    { href: "/courses", icon: LibraryBig, label: "কোর্স দেখুন" },
-    {
-      href: "/dashboard/student/certificates",
-      icon: ScrollText,
-      label: "সার্টিফিকেট",
+      title: "অনুশীলন",
+      items: [
+        item("/dashboard/student/model-tests", GraduationCap, "মডেল টেস্ট"),
+        item("/dashboard/student/mistake-bank", BookOpen, "ভুলের খাতা"),
+        item("/dashboard/student/revision", BookOpen, "রিভিশন"),
+        item("/dashboard/student/analytics", ChartColumn, "বিশ্লেষণ"),
+      ],
     },
     {
-      href: "/dashboard/student/orders",
-      icon: BadgeDollarSign,
-      label: "অর্ডার ও পেমেন্ট",
-    },
-    {
-      href: "/dashboard/student/model-tests",
-      icon: GraduationCap,
-      label: "মডেল টেস্ট",
-    },
-    {
-      href: "/dashboard/student/mistake-bank",
-      icon: BookOpen,
-      label: "ভুলের খাতা",
-    },
-    {
-      href: "/dashboard/student/batches",
-      icon: Users,
-      label: "ব্যাচ",
-    },
-    {
-      href: "/dashboard/student/referrals",
-      icon: Link2,
-      label: "রেফারেল",
-    },
-    {
-      href: "/dashboard/student/revision",
-      icon: BookOpen,
-      label: "রিভিশন",
-    },
-    {
-      href: "/dashboard/student/live-classes",
-      icon: Video,
-      label: "লাইভ ক্লাস",
-    },
-    {
-      href: "/dashboard/student/notifications",
-      icon: Bell,
-      label: "নোটিফিকেশন",
-    },
-    {
-      href: "/dashboard/student/messages",
-      icon: MessageCircle,
-      label: "বার্তা",
+      title: "অ্যাকাউন্ট",
+      items: [
+        item("/dashboard/student/orders", BadgeDollarSign, "অর্ডার ও পেমেন্ট"),
+        item("/dashboard/student/certificates", ScrollText, "সার্টিফিকেট"),
+        item("/dashboard/student/referrals", Link2, "রেফারেল"),
+        item("/dashboard/student/notifications", Bell, "নোটিফিকেশন"),
+        item("/dashboard/student/messages", MessageCircle, "বার্তা"),
+      ],
     },
   ],
 }
@@ -352,9 +258,10 @@ const dashboardCopyByRole: Record<
   },
 }
 
+type Copy = (typeof dashboardCopyByRole)[UserRole]
+
 function splitHref(href: string) {
   const [pathname, hash = ""] = href.split("#")
-
   return { hash: hash ? `#${hash}` : "", pathname }
 }
 
@@ -404,24 +311,21 @@ function DashboardNavLink({
     <Link
       aria-current={active ? "page" : undefined}
       aria-label={label}
-      title={label}
       className={cn(
-        "interactive-surface flex items-center gap-3 rounded-xl border border-transparent text-sm",
-        collapsed ? "justify-center px-0 py-3" : "justify-between px-4 py-3",
+        "flex items-center gap-3 rounded-lg py-2.5 text-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
+        collapsed ? "justify-center px-0" : "px-3",
         active
-          ? "border-primary/50 bg-card text-foreground hover:border-primary/70"
-          : "text-muted-foreground hover:border-border hover:text-foreground"
+          ? "bg-foreground/10 font-medium text-foreground"
+          : "text-muted-foreground hover:bg-foreground/5 hover:text-foreground"
       )}
       href={href}
       onClick={onNavigate}
+      title={label}
     >
-      <Icon className="h-4 w-4 shrink-0 text-inherit" />
+      <Icon className={cn("size-4 shrink-0", active && "text-primary")} />
       <span className={cn("min-w-0 truncate", collapsed && "hidden")}>
         {label}
       </span>
-      {active && !collapsed ? (
-        <span className="h-2 w-2 shrink-0 rounded-full bg-primary" />
-      ) : null}
     </Link>
   )
 }
@@ -431,10 +335,10 @@ function SignOutForm({
   copy,
 }: {
   collapsed?: boolean
-  copy: (typeof dashboardCopyByRole)[UserRole]
+  copy: Copy
 }) {
   return (
-    <form action={signOutAction} className="mt-4">
+    <form action={signOutAction}>
       <SubmitButton
         aria-label={copy.signOut}
         className="w-full"
@@ -448,18 +352,72 @@ function SignOutForm({
   )
 }
 
+/** One sidebar body, used by both the desktop rail and the mobile sheet. */
+function SidebarBody({
+  collapsed = false,
+  copy,
+  currentHash,
+  groups,
+  onNavigate,
+  pathname,
+}: {
+  collapsed?: boolean
+  copy: Copy
+  currentHash: string
+  groups: DashboardNavGroup[]
+  onNavigate?: () => void
+  pathname: string
+}) {
+  const link = (navItem: DashboardNavItem) => (
+    <DashboardNavLink
+      collapsed={collapsed}
+      currentHash={currentHash}
+      currentPathname={pathname}
+      key={navItem.href}
+      onNavigate={onNavigate}
+      {...navItem}
+    />
+  )
+
+  return (
+    <div className="flex min-h-full flex-col">
+      <nav aria-label={copy.workspace} className="flex-1">
+        {groups.map((group, index) => (
+          <div
+            className={cn(
+              "flex flex-col gap-0.5",
+              index > 0 && "mt-5",
+              collapsed && index > 0 && "mt-3 border-t border-border pt-3"
+            )}
+            key={group.title}
+          >
+            <p
+              className={cn(
+                "px-3 pb-1 text-xs text-muted-foreground",
+                collapsed && "hidden"
+              )}
+            >
+              {group.title}
+            </p>
+            {group.items.map(link)}
+          </div>
+        ))}
+      </nav>
+
+      <div className="mt-8 flex flex-col gap-3 border-t border-border pt-4">
+        {link(item("/dashboard/profile", UserRound, copy.profile))}
+        <SignOutForm collapsed={collapsed} copy={copy} />
+      </div>
+    </div>
+  )
+}
+
 export function DashboardShell({ children, profile }: DashboardShellProps) {
   const pathname = usePathname()
   const [currentHash, setCurrentHash] = useState("")
   const [mobileOpen, setMobileOpen] = useState(false)
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
-    if (typeof window === "undefined") {
-      return false
-    }
-
-    return window.localStorage.getItem("dashboard-sidebar-collapsed") === "true"
-  })
-  const navigation = navigationByRole[profile.role]
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+  const groups = navigationByRole[profile.role]
   const copy = dashboardCopyByRole[profile.role]
   const name = profile.fullName?.trim() || profile.email
   const initials = (
@@ -469,33 +427,37 @@ export function DashboardShell({ children, profile }: DashboardShellProps) {
   ).toUpperCase()
 
   useEffect(() => {
-    const updateHash = () => {
-      setCurrentHash(window.location.hash)
-    }
-
+    const updateHash = () => setCurrentHash(window.location.hash)
     updateHash()
     window.addEventListener("hashchange", updateHash)
-
-    return () => {
-      window.removeEventListener("hashchange", updateHash)
-    }
+    return () => window.removeEventListener("hashchange", updateHash)
   }, [])
 
+  // Read the saved choice after mount so server and client markup match.
   useEffect(() => {
-    window.localStorage.setItem(
-      "dashboard-sidebar-collapsed",
-      String(sidebarCollapsed)
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setSidebarCollapsed(
+      window.localStorage.getItem("dashboard-sidebar-collapsed") === "true"
     )
-  }, [sidebarCollapsed])
+  }, [])
+
+  function toggleSidebar() {
+    setSidebarCollapsed((current) => {
+      window.localStorage.setItem(
+        "dashboard-sidebar-collapsed",
+        String(!current)
+      )
+      return !current
+    })
+  }
 
   return (
     <div className="dashboard-shell flex h-screen flex-col overflow-hidden bg-background text-foreground">
-      <header className="fixed inset-x-0 top-0 z-40 flex h-16 items-center justify-between gap-4 border-b border-border bg-background/92 px-4 backdrop-blur-md sm:px-6">
-        <span aria-hidden className="absolute inset-x-0 top-0 h-px bg-primary" />
+      <header className="fixed inset-x-0 top-0 z-40 flex h-16 items-center justify-between gap-4 border-b border-border bg-background/95 px-4 backdrop-blur-md sm:px-6">
         <div className="flex min-w-0 items-center gap-3">
           <Button
             aria-label={copy.openNavigation}
-            className="gap-2 md:hidden"
+            className="md:hidden"
             onClick={() => setMobileOpen(true)}
             size="icon"
             type="button"
@@ -505,7 +467,7 @@ export function DashboardShell({ children, profile }: DashboardShellProps) {
             <span className="sr-only">{copy.openSidebarMenu}</span>
           </Button>
           <BrandMark className="text-xl" />
-          <span className="hidden border-l border-border pl-3 font-mono text-[11px] text-muted-foreground sm:inline">
+          <span className="hidden border-l border-border pl-3 text-sm text-muted-foreground sm:inline">
             {copy.workspace}
           </span>
         </div>
@@ -519,24 +481,26 @@ export function DashboardShell({ children, profile }: DashboardShellProps) {
             </p>
           </div>
           <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button
-                aria-label={copy.openAccountMenu}
-                className="relative flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-full border border-primary/50 bg-card text-sm text-primary ring-2 ring-primary/10 transition-colors outline-none hover:border-primary focus-visible:ring-2 focus-visible:ring-primary"
-                type="button"
-              >
-                {profile.avatarUrl ? (
-                  <Image
-                    alt={name}
-                    className="object-cover"
-                    fill
-                    sizes="36px"
-                    src={profile.avatarUrl}
-                  />
-                ) : (
-                  initials
-                )}
-              </button>
+            <DropdownMenuTrigger
+              render={
+                <button
+                  aria-label={copy.openAccountMenu}
+                  className="relative flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-full border border-border bg-card text-sm font-medium text-primary transition-colors outline-none hover:border-primary focus-visible:ring-2 focus-visible:ring-primary"
+                  type="button"
+                />
+              }
+            >
+              {profile.avatarUrl ? (
+                <Image
+                  alt={name}
+                  className="object-cover"
+                  fill
+                  sizes="40px"
+                  src={profile.avatarUrl}
+                />
+              ) : (
+                initials
+              )}
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuLabel className="font-normal">
@@ -546,27 +510,27 @@ export function DashboardShell({ children, profile }: DashboardShellProps) {
                 </p>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
+              <DropdownMenuItem>
                 <Link href={getDashboardPath(profile.role)}>
                   <BookOpen className="size-4" />
                   {copy.openDashboard}
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem asChild>
+              <DropdownMenuItem>
                 <Link href="/dashboard/profile">
                   <UserRound className="size-4" />
                   {copy.profile}
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem asChild variant="destructive">
+              <DropdownMenuItem variant="destructive">
                 <form action={signOutAction}>
                   <button
                     className="flex w-full items-center gap-2.5 text-left"
                     type="submit"
                   >
                     <LogOut className="size-4" />
-                    Sign out
+                    {copy.signOut}
                   </button>
                 </form>
               </DropdownMenuItem>
@@ -578,195 +542,74 @@ export function DashboardShell({ children, profile }: DashboardShellProps) {
       <div className="flex min-h-0 min-w-0 flex-1 pt-16">
         <aside
           className={cn(
-            "fixed top-16 bottom-0 left-0 z-30 hidden shrink-0 flex-col overflow-y-auto border-r border-border bg-card/35 transition-all duration-200 [-ms-overflow-style:none] [scrollbar-width:none] md:!flex [&::-webkit-scrollbar]:hidden",
-            sidebarCollapsed ? "md:w-24" : "md:w-72"
+            "fixed top-16 bottom-0 left-0 z-30 hidden shrink-0 flex-col overflow-y-auto border-r border-border bg-background transition-[width] duration-200 [-ms-overflow-style:none] [scrollbar-width:none] md:!flex [&::-webkit-scrollbar]:hidden",
+            sidebarCollapsed ? "md:w-20" : "md:w-64"
           )}
         >
           <div
             className={cn(
-              "flex min-h-full flex-col py-6 transition-all duration-200",
-              sidebarCollapsed ? "px-3" : "px-2 md:px-4 lg:px-5"
+              "flex flex-1 flex-col py-4",
+              sidebarCollapsed ? "px-3" : "px-4"
             )}
           >
-            <div className="flex flex-col gap-4">
-              <ProgressThread
-                className={cn(
-                  "max-md:mx-auto max-md:w-10",
-                  sidebarCollapsed ? "mx-auto w-10" : "w-24"
-                )}
-              />
-              <div
-                className={cn(
-                  "rounded-2xl border border-border bg-card/60 p-4",
-                  sidebarCollapsed && "md:border-transparent md:bg-transparent md:p-0"
-                )}
+            <div
+              className={cn(
+                "mb-4 flex",
+                sidebarCollapsed ? "justify-center" : "justify-end"
+              )}
+            >
+              <Button
+                aria-label={sidebarCollapsed ? copy.expand : copy.collapse}
+                onClick={toggleSidebar}
+                size={sidebarCollapsed ? "icon" : "sm"}
+                type="button"
+                variant="ghost"
               >
-                <div
-                  className={cn(
-                    "flex items-center gap-3",
-                    sidebarCollapsed && "md:flex-col md:gap-3"
-                  )}
-                >
-                  <div className="relative flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-primary/40 bg-primary/10 text-sm text-primary ring-2 ring-primary/10">
-                    {profile.avatarUrl ? (
-                      <Image
-                        alt={name}
-                        className="object-cover"
-                        fill
-                        sizes="48px"
-                        src={profile.avatarUrl}
-                      />
-                    ) : (
-                      <div className="flex h-full w-full items-center justify-center font-heading text-sm text-primary">
-                        {initials}
-                      </div>
-                    )}
-                  </div>
-                  <div
-                    className={cn("min-w-0", sidebarCollapsed && "md:hidden")}
-                  >
-                    <p className="font-mono text-[11px] tracking-wide text-muted-foreground">
-                      {copy.workspace}
-                    </p>
-                    <h2 className="mt-1 font-heading text-xl font-normal tracking-tight">
-                      {name}
-                    </h2>
-                    <p className="mt-1 text-sm break-words text-muted-foreground">
-                      {profile.email}
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div
-                className={cn(
-                  "flex justify-end",
-                  sidebarCollapsed && "md:justify-center"
-                )}
-              >
-                <Button
-                  aria-label={
-                    sidebarCollapsed ? copy.expand : copy.collapse
-                  }
-                  className="max-md:hidden"
-                  onClick={() => setSidebarCollapsed((current) => !current)}
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                >
-                  {sidebarCollapsed ? (
-                    <PanelLeftOpen className="size-4" />
-                  ) : (
+                {sidebarCollapsed ? (
+                  <PanelLeftOpen className="size-4" />
+                ) : (
+                  <>
                     <PanelLeftClose className="size-4" />
-                  )}
-                  <span
-                    className={cn(
-                      "max-md:hidden",
-                      sidebarCollapsed && "md:hidden"
-                    )}
-                  >
-                    {sidebarCollapsed ? copy.expand : copy.collapse}
-                  </span>
-                </Button>
-              </div>
+                    {copy.collapse}
+                  </>
+                )}
+              </Button>
             </div>
-
-            <nav
-              className={cn("mt-6 flex flex-col gap-2", sidebarCollapsed && "md:gap-3")}
-            >
-              <DashboardNavLink
-                currentHash={currentHash}
-                currentPathname={pathname}
-                href="/dashboard/profile"
-                icon={UserRound}
-                label={copy.profile}
-                collapsed={sidebarCollapsed}
-              />
-            </nav>
-
-            <nav
-              className={cn("mt-6 flex flex-col gap-2", sidebarCollapsed && "md:gap-3")}
-            >
-              {navigation.map((item) => (
-                <DashboardNavLink
-                  currentHash={currentHash}
-                  currentPathname={pathname}
-                  href={item.href}
-                  icon={item.icon}
-                  key={item.href}
-                  label={item.label}
-                  collapsed={sidebarCollapsed}
-                  onNavigate={() => setMobileOpen(false)}
-                />
-              ))}
-            </nav>
-
-            <div className="mt-auto pt-8">
-              <div className="border-t border-border pt-5">
-                <p
-                  className={cn(
-                    "truncate text-sm text-muted-foreground max-md:hidden",
-                    sidebarCollapsed && "md:hidden"
-                  )}
-                >
-                  {profile.email}
-                </p>
-                <SignOutForm collapsed={sidebarCollapsed} copy={copy} />
-              </div>
-            </div>
+            <SidebarBody
+              collapsed={sidebarCollapsed}
+              copy={copy}
+              currentHash={currentHash}
+              groups={groups}
+              pathname={pathname}
+            />
           </div>
         </aside>
 
         <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
           <SheetContent
             className="w-[min(88vw,20rem)] border-r border-border bg-background text-foreground"
-            side="left"
             showCloseButton
+            side="left"
           >
-            <SheetHeader className="border-b border-border px-5 py-6">
+            <SheetHeader className="border-b border-border px-5 py-5">
               <SheetTitle className="text-left font-normal">
-                <span className="font-mono text-[11px] tracking-wide text-muted-foreground">
+                <span className="text-sm text-muted-foreground">
                   {copy.workspace}
                 </span>
-                <span className="mt-3 block font-heading text-2xl tracking-tight">
-                  {name}
-                </span>
+                <span className="mt-1 block text-xl font-semibold">{name}</span>
               </SheetTitle>
               <p className="text-sm break-words text-muted-foreground">
                 {profile.email}
               </p>
             </SheetHeader>
-
-            <div className="flex h-full flex-col px-5 py-6">
-              <nav className="flex flex-col gap-2">
-                <DashboardNavLink
-                  currentHash={currentHash}
-                  currentPathname={pathname}
-                  href="/dashboard/profile"
-                  icon={UserRound}
-                  label={copy.profile}
-                  onNavigate={() => setMobileOpen(false)}
-                />
-                {navigation.map((item) => (
-                  <DashboardNavLink
-                    currentHash={currentHash}
-                    currentPathname={pathname}
-                    href={item.href}
-                    icon={item.icon}
-                    key={item.href}
-                    label={item.label}
-                    onNavigate={() => setMobileOpen(false)}
-                  />
-                ))}
-              </nav>
-
-              <div className="mt-auto pt-8">
-                <div className="border-t border-border pt-5">
-                  <p className="text-sm break-words text-muted-foreground">
-                    {profile.email}
-                  </p>
-                  <SignOutForm copy={copy} />
-                </div>
-              </div>
+            <div className="flex-1 overflow-y-auto px-4 py-5">
+              <SidebarBody
+                copy={copy}
+                currentHash={currentHash}
+                groups={groups}
+                onNavigate={() => setMobileOpen(false)}
+                pathname={pathname}
+              />
             </div>
           </SheetContent>
         </Sheet>
@@ -774,7 +617,7 @@ export function DashboardShell({ children, profile }: DashboardShellProps) {
         <div
           className={cn(
             "flex min-w-0 flex-1 flex-col overflow-y-auto transition-[margin] duration-200",
-            sidebarCollapsed ? "md:ml-24" : "md:ml-72"
+            sidebarCollapsed ? "md:ml-20" : "md:ml-64"
           )}
         >
           {/* The shell owns the container and padding so pages can't drift apart. */}

@@ -104,8 +104,14 @@ export async function createInstructorCourseAction(formData: FormData) {
     { cache: "no-store" }
   )
 
-  if (existing.courses.some((course) => course.slug.toLowerCase() === slug.toLowerCase())) {
-    throw new Error(`The slug "${slug}" is already in use. Choose a different slug.`)
+  if (
+    existing.courses.some(
+      (course) => course.slug.toLowerCase() === slug.toLowerCase()
+    )
+  ) {
+    throw new Error(
+      `The slug "${slug}" is already in use. Choose a different slug.`
+    )
   }
 
   const course = await authenticatedApiFetch<InstructorCourseDto>(

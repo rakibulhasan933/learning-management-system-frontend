@@ -2,10 +2,7 @@ import { Suspense } from "react"
 import Link from "next/link"
 
 import type { BundleListResponse } from "@/lib/types"
-import {
-  ApiClientError,
-  publicApiFetch,
-} from "@/lib/api-client"
+import { ApiClientError, publicApiFetch } from "@/lib/api-client"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { EmptyState } from "@/components/ui/empty-state"
@@ -109,7 +106,7 @@ export default async function BundlesPage({
             </div>
           )}
           <div className="mt-8">
-            <Button asChild variant="outline">
+            <Button variant="outline">
               <Link href="/courses">একক কোর্স দেখুন</Link>
             </Button>
           </div>

@@ -45,7 +45,8 @@ export async function createFlashcardAction(formData: FormData) {
     formData,
     "questionBankQuestionId"
   )
-  if (questionBankQuestionId) body.questionBankQuestionId = questionBankQuestionId
+  if (questionBankQuestionId)
+    body.questionBankQuestionId = questionBankQuestionId
 
   await authenticatedApiFetch("/student/flashcards", {
     body: JSON.stringify(body),

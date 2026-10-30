@@ -29,7 +29,11 @@ export async function createModelTestAction(formData: FormData) {
   if (typeof courseId !== "string" || courseId.trim().length === 0) {
     throw new Error("Pick one of your own courses.")
   }
-  if (!Number.isInteger(durationMinutes) || durationMinutes < 1 || durationMinutes > 600) {
+  if (
+    !Number.isInteger(durationMinutes) ||
+    durationMinutes < 1 ||
+    durationMinutes > 600
+  ) {
     throw new Error("Duration must be between 1 and 600 minutes.")
   }
   const negativeMark =

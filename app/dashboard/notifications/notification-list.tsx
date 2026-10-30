@@ -62,7 +62,9 @@ export function NotificationList({
         setUnreadCount((current) => Math.max(0, current - 1))
       } catch (caught) {
         setError(
-          caught instanceof Error ? caught.message : "পড়া হিসেবে চিহ্নিত করা যায়নি।"
+          caught instanceof Error
+            ? caught.message
+            : "পড়া হিসেবে চিহ্নিত করা যায়নি।"
         )
         setMarkingId(null)
         return
@@ -89,7 +91,9 @@ export function NotificationList({
       setUnreadCount(0)
     } catch (caught) {
       setError(
-        caught instanceof Error ? caught.message : "সব পড়া হিসেবে চিহ্নিত করা যায়নি।"
+        caught instanceof Error
+          ? caught.message
+          : "সব পড়া হিসেবে চিহ্নিত করা যায়নি।"
       )
     } finally {
       setMarkingAll(false)
@@ -166,9 +170,7 @@ export function NotificationList({
                     </p>
                   </div>
                   {notification.href ? (
-                    <span className="shrink-0 text-sm text-primary">
-                      খুলুন
-                    </span>
+                    <span className="shrink-0 text-sm text-primary">খুলুন</span>
                   ) : null}
                 </button>
               )

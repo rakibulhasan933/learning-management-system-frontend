@@ -1,20 +1,20 @@
-import { CalloutElementDocx } from '@/components/ui/callout-node-static';
+import { CalloutElementDocx } from "@/components/ui/callout-node-static"
 import {
   CodeBlockElementDocx,
   CodeLineElementDocx,
   CodeSyntaxLeafDocx,
-} from '@/components/ui/code-block-node-static';
+} from "@/components/ui/code-block-node-static"
 import {
   ColumnElementDocx,
   ColumnGroupElementDocx,
-} from '@/components/ui/column-node-static';
+} from "@/components/ui/column-node-static"
 import {
   EquationElementDocx,
   InlineEquationElementDocx,
-} from '@/components/ui/equation-node-static';
-import { TocElementDocx } from '@/components/ui/toc-node-static';
-import { DocxExportPlugin } from '@platejs/docx-io';
-import { KEYS } from 'platejs';
+} from "@/components/ui/equation-node-static"
+import { TocElementDocx } from "@/components/ui/toc-node-static"
+import { DocxExportPlugin } from "@platejs/docx-io"
+import { KEYS } from "platejs"
 
 /**
  * Editor kit for DOCX export.
@@ -45,4 +45,4 @@ export const DocxExportKit = [
       },
     },
   }),
-];
+]

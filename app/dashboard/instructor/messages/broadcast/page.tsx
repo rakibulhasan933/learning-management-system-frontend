@@ -12,10 +12,11 @@ import { BroadcastForm } from "./broadcast-form"
 export const dynamic = "force-dynamic"
 
 export default async function InstructorBroadcastPage() {
-  const coursesResponse = await authenticatedApiFetch<InstructorCourseListResponse>(
-    "/instructor/courses",
-    { cache: "no-store" }
-  )
+  const coursesResponse =
+    await authenticatedApiFetch<InstructorCourseListResponse>(
+      "/instructor/courses",
+      { cache: "no-store" }
+    )
   let batches: BatchListResponse["batches"] = []
 
   try {
@@ -35,10 +36,7 @@ export default async function InstructorBroadcastPage() {
         lede="একটি কোর্স বা ব্যাচের সব শিক্ষার্থীকে একসাথে মেসেজ পাঠান। প্রত্যেকের জন্য আলাদা কথোপকথন তৈরি হয়।"
         title="সবাইকে মেসেজ পাঠান"
       />
-      <BroadcastForm
-        batches={batches}
-        courses={coursesResponse.courses}
-      />
+      <BroadcastForm batches={batches} courses={coursesResponse.courses} />
     </div>
   )
 }

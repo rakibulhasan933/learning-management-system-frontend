@@ -4,6 +4,15 @@ import "./globals.css"
 import { Toaster } from "@/components/ui/sonner"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { BackgroundRipple } from "@/components/background-ripple"
+import { cn } from "@/lib/utils"
+import { Hind_Siliguri } from "next/font/google"
+
+const hindSiliguri = Hind_Siliguri({
+  subsets: ["bengali", "latin"],
+  variable: "--font-hind-siliguri",
+  display: "swap",
+  weight: ["400", "500", "600", "700"],
+})
 
 export const metadata: Metadata = {
   metadataBase: new URL(
@@ -50,7 +59,7 @@ export default function RootLayout({
     <html
       lang="bn"
       data-scroll-behavior="smooth"
-      className="dark"
+      className={cn("dark", "font-sans", hindSiliguri.variable)}
       suppressHydrationWarning
     >
       <body className="min-h-screen font-sans antialiased">

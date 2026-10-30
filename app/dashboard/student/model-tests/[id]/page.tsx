@@ -1,7 +1,4 @@
-import type {
-  LeaderboardResponse,
-  ModelTestDto,
-} from "@/lib/types"
+import type { LeaderboardResponse, ModelTestDto } from "@/lib/types"
 import { authenticatedApiFetch } from "@/lib/api-client"
 import { Card, CardContent } from "@/components/ui/card"
 import { PageHeader } from "@/components/ui/page-header"
@@ -74,8 +71,8 @@ export default async function StudentModelTestDetailPage({
             <CardContent className="space-y-2">
               <h2 className="font-heading text-xl">লিডারবোর্ড</h2>
               <p className="text-xs text-muted-foreground">
-                ক্রম: স্কোর বেশি → দ্রুত শেষ → আগে জমা। শিক্ষার্থীদের
-                ইমেইল দেখানো হয় না।
+                ক্রম: স্কোর বেশি → দ্রুত শেষ → আগে জমা। শিক্ষার্থীদের ইমেইল
+                দেখানো হয় না।
               </p>
               {!leaderboard || leaderboard.leaderboard.length === 0 ? (
                 <p className="text-sm text-muted-foreground">

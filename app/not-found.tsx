@@ -24,13 +24,13 @@ export default function NotFound() {
           workspace and continue.
         </p>
         <div className="mt-9 flex flex-wrap gap-3">
-          <Button asChild>
+          <Button>
             <Link href="/">
               <ArrowLeft className="size-4" />
               Back home
             </Link>
           </Button>
-          <Button asChild variant="outline">
+          <Button variant="outline">
             <Link href="/courses">
               <Search className="size-4" />
               Browse courses

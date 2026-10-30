@@ -461,9 +461,7 @@ export function LearningPlayer({
                   {selectedLecture?.title ?? "No published modules"}
                 </h2>
                 {selectedLecture?.description ? (
-                  <MarkdownContent
-                    className="learning-description mt-3 text-sm text-muted-foreground"
-                  >
+                  <MarkdownContent className="learning-description mt-3 text-sm text-muted-foreground">
                     {selectedLecture.description}
                   </MarkdownContent>
                 ) : null}

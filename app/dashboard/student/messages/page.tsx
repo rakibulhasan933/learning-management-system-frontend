@@ -44,7 +44,7 @@ export default async function StudentMessagesPage() {
           />
           <p className="text-sm text-muted-foreground">
             কোনো কোর্সের শিক্ষককে সরাসরি মেসেজ করতে চান?{" "}
-            <Button asChild size="sm" variant="link">
+            <Button size="sm" variant="link">
               <Link href="/courses">কোর্স ব্রাউজ করুন</Link>
             </Button>
           </p>

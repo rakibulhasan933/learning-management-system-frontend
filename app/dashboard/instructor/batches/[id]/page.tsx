@@ -40,9 +40,7 @@ export default async function InstructorBatchDetailPage({
   let batch: BatchDto | null = null
   let members: NonNullable<BatchDetailResponse["members"]> = []
   let dripItems: DripStatusResponse["items"] = []
-  let leaderboard: NonNullable<
-    BatchLeaderboardResponse["leaderboard"]
-  > = []
+  let leaderboard: NonNullable<BatchLeaderboardResponse["leaderboard"]> = []
   let migrationPending = false
   let loadError: string | null = null
 
@@ -102,9 +100,7 @@ export default async function InstructorBatchDetailPage({
           ইমেইল/SMS পাঠানো হয়েছে বলে দাবি করা হচ্ছে না।
         </p>
       ) : null}
-      {migrationPending ? (
-        <MigrationNotice feature="ব্যাচ বিস্তারিত" />
-      ) : null}
+      {migrationPending ? <MigrationNotice feature="ব্যাচ বিস্তারিত" /> : null}
       {loadError ? (
         <p className="rounded-xl border border-border px-4 py-3 text-sm text-muted-foreground">
           {loadError}
@@ -123,7 +119,7 @@ export default async function InstructorBatchDetailPage({
                 ? ` · শেষ ${formatDateTime(batch.enrolmentEndAt)}`
                 : ""}
             </p>
-            <Button asChild className="mt-4" variant="outline">
+            <Button className="mt-4" variant="outline">
               <Link href="/dashboard/instructor/batches">সব ব্যাচ</Link>
             </Button>
           </CardContent>
@@ -166,7 +162,9 @@ export default async function InstructorBatchDetailPage({
               <input name="batchId" type="hidden" value={id} />
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="drip-milestone">মাইলস্টোন আইডি (ঐচ্ছিক)</Label>
+                  <Label htmlFor="drip-milestone">
+                    মাইলস্টোন আইডি (ঐচ্ছিক)
+                  </Label>
                   <Input id="drip-milestone" name="milestoneId" />
                 </div>
                 <div className="space-y-2">
@@ -189,7 +187,12 @@ export default async function InstructorBatchDetailPage({
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="drip-days">রিলিজ দিন (আপেক্ষিক হলে)</Label>
-                  <Input id="drip-days" min={0} name="releaseDays" type="number" />
+                  <Input
+                    id="drip-days"
+                    min={0}
+                    name="releaseDays"
+                    type="number"
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="drip-at">রিলিজ তারিখ (নির্দিষ্ট হলে)</Label>
@@ -206,7 +209,10 @@ export default async function InstructorBatchDetailPage({
                 </p>
               ) : (
                 dripItems.map((item, index) => (
-                  <p className="text-sm" key={`${item.milestoneId ?? ""}-${item.moduleId ?? ""}-${index}`}>
+                  <p
+                    className="text-sm"
+                    key={`${item.milestoneId ?? ""}-${item.moduleId ?? ""}-${index}`}
+                  >
                     {item.milestoneId ?? item.moduleId ?? "আইটেম"}:{" "}
                     {item.locked
                       ? `লক করা${item.unlocksAt ? ` · খুলবে ${formatDateTime(item.unlocksAt)}` : ""}`
@@ -224,8 +230,8 @@ export default async function InstructorBatchDetailPage({
           <CardContent>
             <h2 className="font-heading text-xl">ডেডলাইন যোগ করুন</h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              latePenaltyPercent শিক্ষক সেট না করলে ডিফল্ট ০ — অর্থাৎ দেরিতে
-              জমা দিলেও নম্বর কাটা হবে না।
+              latePenaltyPercent শিক্ষক সেট না করলে ডিফল্ট ০ — অর্থাৎ দেরিতে জমা
+              দিলেও নম্বর কাটা হবে না।
             </p>
             <form action={addBatchDeadlineAction} className="mt-4 space-y-4">
               <input name="batchId" type="hidden" value={id} />
@@ -266,11 +272,13 @@ export default async function InstructorBatchDetailPage({
 
         <Card>
           <CardContent>
-            <h2 className="font-heading text-xl">ঘোষণা পাঠান — পাঠানো, খসড়া নয়</h2>
+            <h2 className="font-heading text-xl">
+              ঘোষণা পাঠান — পাঠানো, খসড়া নয়
+            </h2>
             <p className="mt-1 text-sm text-muted-foreground">
               এই ফর্ম সত্যিই পাঠায় (রেকর্ড তৈরি হয়)। সেলার-ড্যাশবোর্ডের বাল্ক
-              ঘোষণা শুধু খসড়া — তার সাথে গুলিয়ে ফেলবেন না। ইমেইল/SMS
-              পাঠানো হয়েছে বলে এখানে দাবি করা হচ্ছে না।
+              ঘোষণা শুধু খসড়া — তার সাথে গুলিয়ে ফেলবেন না। ইমেইল/SMS পাঠানো
+              হয়েছে বলে এখানে দাবি করা হচ্ছে না।
             </p>
             <form
               action={sendBatchAnnouncementAction}
@@ -295,8 +303,7 @@ export default async function InstructorBatchDetailPage({
         <CardContent className="space-y-2">
           <h2 className="font-heading text-xl">ব্যাচ লিডারবোর্ড</h2>
           <p className="text-sm text-muted-foreground">
-            ব্যাচ-স্কোপ লিডারবোর্ড — অন্য শিক্ষার্থীর ইমেইল এখানে দেখানো হয়
-            না।
+            ব্যাচ-স্কোপ লিডারবোর্ড — অন্য শিক্ষার্থীর ইমেইল এখানে দেখানো হয় না।
           </p>
           {leaderboard.length === 0 ? (
             <p className="text-sm text-muted-foreground">

@@ -1,11 +1,9 @@
 import { ProgressiveImage } from "@/components/progressive-image"
 import Link from "next/link"
-import { ArrowRight, CalendarDays, ImageIcon, Sparkles } from "lucide-react"
+import { ArrowUpRight, ImageIcon } from "lucide-react"
 import type { CourseLevel, CourseListResponse } from "@/lib/types"
 
 import { publicApiFetch } from "@/lib/api-client"
-import { Badge } from "@/components/ui/badge"
-import { ProgressThread } from "@/components/ui/progress-thread"
 import { PublicShell } from "@/components/public-shell"
 
 import { CourseFilterForm } from "./course-filter-form"
@@ -22,35 +20,45 @@ interface CoursesPageProps {
   }>
 }
 
+type Course = CourseListResponse["courses"][number]
+
+const levelLabels: Record<string, string> = {
+  beginner: "শুরুর স্তর",
+  intermediate: "মাঝারি স্তর",
+  advanced: "অ্যাডভান্সড",
+  all_levels: "সব স্তর",
+}
+
+const thumbColors = ["bg-[#315B54]", "bg-[#3E596A]", "bg-[#6F5144]"]
+
+const bn = (n: number) => n.toLocaleString("bn-BD")
+
 function buildQuery(params: Awaited<CoursesPageProps["searchParams"]>) {
   const query = new URLSearchParams()
-
   for (const [key, value] of Object.entries(params)) {
-    if (value) {
-      query.set(key, value)
-    }
+    if (value) query.set(key, value)
   }
-
   return query.toString()
 }
 
-function formatPrice(currency: string, price: string) {
-  return Number(price) === 0 ? "ফ্রি" : `৳ ${Number(price).toLocaleString("bn-BD")}`
+function formatPrice(price: string) {
+  return Number(price) === 0 ? "ফ্রি" : `৳${bn(Number(price))}`
 }
 
-function enrollmentIsOpen(course: CourseListResponse["courses"][number]) {
+function enrollmentIsOpen(course: Course) {
   return (
     course.enrollmentEnabled !== false &&
     (!course.enrollmentEndsAt || new Date(course.enrollmentEndsAt) > new Date())
   )
 }
 
-function formatEnrollmentDate(value: string | null) {
-  if (!value) return "No closing date"
-  return new Intl.DateTimeFormat("en-GB", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(new Date(value))
+function enrollmentText(course: Course) {
+  if (!enrollmentIsOpen(course)) return "ভর্তি বন্ধ"
+  if (!course.enrollmentEndsAt) return "ভর্তি চলছে"
+  const date = new Intl.DateTimeFormat("bn-BD", { dateStyle: "medium" }).format(
+    new Date(course.enrollmentEndsAt)
+  )
+  return `ভর্তি চলছে · শেষ ${date}`
 }
 
 export default async function CoursesPage({ searchParams }: CoursesPageProps) {
@@ -61,28 +69,31 @@ export default async function CoursesPage({ searchParams }: CoursesPageProps) {
     { cache: "no-store" }
   )
 
+  const hasFilters = Boolean(
+    params.q || params.level || params.category || params.maxPrice
+  )
+  const totalPages = Math.max(data.pagination.totalPages, 1)
+  const pageHref = (page: number) => {
+    const q = new URLSearchParams(buildQuery(params))
+    q.set("page", String(page))
+    return `/courses?${q.toString()}`
+  }
+
   return (
-    <PublicShell>
-      <main className="courses-page px-4 py-8 sm:px-6 sm:py-12">
-        <section className="mx-auto max-w-6xl">
-          <div className="course-page-kicker mb-8"><ProgressThread /></div>
-          <div className="courses-hero grid gap-8 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-end">
-            <div>
-              <p className="eyebrow">বাংলাদেশের স্কিল-ফার্স্ট লার্নিং প্ল্যাটফর্ম</p>
-              <h1 className="mt-3 font-heading text-4xl leading-[1.05] tracking-tight sm:text-5xl">
-                শিখুন আজ, এগিয়ে থাকুন আগামীকাল
-              </h1>
-              <div className="mt-4 flex items-center gap-2 text-sm text-primary"><span className="size-2 rounded-full bg-primary shadow-[0_0_0_5px_color-mix(in_srgb,var(--primary)_12%,transparent)]" /> নতুন ব্যাচে ভর্তি চলছে</div>
-              <p className="mt-5 max-w-xl text-base leading-7 text-muted-foreground">
-                বাংলায় সাজানো, মেন্টর-গাইডেড কোর্সে নিজের ক্যারিয়ারকে পরের স্তরে নিয়ে যান।
-                {" "}{data.pagination.total}টি যাচাই করা কোর্স আপনার অপেক্ষায়।
-              </p>
-              <div className="mt-7 flex flex-wrap gap-3 text-xs text-muted-foreground">
-                <span className="course-trust-pill">ক্যারিয়ার-রেডি স্কিল</span>
-                <span className="course-trust-pill">বাংলাদেশি মেন্টর</span>
-                <span className="course-trust-pill">সার্টিফিকেটসহ</span>
-              </div>
-            </div>
+    <PublicShell variant="home">
+      <main className="bg-[#12151C] leading-[1.85] text-[#F2EFE7] [&_a:focus-visible]:outline-2 [&_a:focus-visible]:outline-offset-4 [&_a:focus-visible]:outline-[#C9A15A]">
+        <div className="mx-auto w-[min(1200px,calc(100%-2.5rem))] py-10 sm:py-16">
+          <header className="max-w-3xl">
+            <h1 className="text-[2.2rem] leading-[1.3] font-semibold text-balance sm:text-5xl">
+              সব কোর্স, এক জায়গায়।
+            </h1>
+            <p className="mt-4 text-lg text-[#A3A5AE]">
+              বাংলায় সাজানো {bn(data.pagination.total)}টি কোর্স। ক্যাটাগরি,
+              স্তর বা বাজেট দিয়ে আপনারটা বেছে নিন।
+            </p>
+          </header>
+
+          <div className="mt-8">
             <CourseFilterForm
               defaults={{
                 category: params.category,
@@ -100,125 +111,141 @@ export default async function CoursesPage({ searchParams }: CoursesPageProps) {
             />
           </div>
 
-          <div className="course-results-bar mt-12 flex items-center justify-between gap-4 border-y border-border py-4">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Sparkles className="size-4 text-primary" />
+          <div className="mt-10 flex flex-wrap items-center justify-between gap-3 border-b border-[#343943] pb-4 text-sm text-[#A3A5AE]">
+            <p>
+              {bn(data.pagination.total)}টির মধ্যে {bn(data.courses.length)}টি
+              কোর্স দেখানো হচ্ছে
+            </p>
+            <div className="flex items-center gap-4">
+              {hasFilters ? (
+                <Link
+                  className="text-[#C9A15A] underline underline-offset-4"
+                  href="/courses"
+                >
+                  ফিল্টার মুছুন
+                </Link>
+              ) : null}
               <span>
-                {data.pagination.total}টির মধ্যে {data.courses.length}টি কোর্স দেখানো হচ্ছে
+                পৃষ্ঠা {bn(data.pagination.page)} / {bn(totalPages)}
               </span>
             </div>
-            <span className="font-mono text-xs text-muted-foreground">
-              পৃষ্ঠা {data.pagination.page} / {Math.max(data.pagination.totalPages, 1)}
-            </span>
           </div>
 
-          <div className="course-grid mt-6 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-            {data.courses.map((course, index) => (
-              <Link
-                className="course-card group interactive-card flex flex-col overflow-hidden rounded-2xl bg-card ring-1 ring-foreground/10 transition-colors hover:ring-primary/50"
-                href={`/courses/${course.slug}`}
-                key={course.id}
-              >
-                <div className="relative aspect-video w-full overflow-hidden bg-background">
-                  {course.thumbnailUrl ? (
-                    <ProgressiveImage
-                      alt={course.title}
-                      className="object-cover"
-                      fill
-                      priority={index === 0}
-                      sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
-                      src={course.thumbnailUrl}
-                    />
-                  ) : (
-                    <div className="flex h-full items-center justify-center text-muted-foreground">
-                      <ImageIcon className="size-8" />
-                    </div>
-                  )}
-                  <div className="absolute top-3 right-3 rounded-full bg-background/90 px-3 py-1 font-mono text-xs text-primary backdrop-blur-sm">
-                    {formatPrice(course.currency, course.price)}
+          {data.courses.length > 0 ? (
+            <div className="mt-8 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+              {data.courses.map((course, index) => (
+                <Link
+                  className="group flex flex-col overflow-hidden rounded-xl border border-[#343943] bg-[#1B1F29] transition-colors hover:border-[#C9A15A]"
+                  href={`/courses/${course.slug}`}
+                  key={course.id}
+                >
+                  <div
+                    className={`relative aspect-video w-full overflow-hidden ${thumbColors[index % 3]}`}
+                  >
+                    {course.thumbnailUrl ? (
+                      <ProgressiveImage
+                        alt={course.title}
+                        className="object-cover"
+                        fill
+                        priority={index === 0}
+                        sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
+                        src={course.thumbnailUrl}
+                      />
+                    ) : (
+                      <div className="flex h-full items-center justify-center text-white/70">
+                        <ImageIcon aria-hidden className="size-8" />
+                      </div>
+                    )}
                   </div>
-                  <ProgressThread className="absolute inset-x-0 bottom-0 w-0 transition-[width] duration-500 group-hover:w-full" />
-                </div>
 
-                <div className="flex min-w-0 flex-1 flex-col p-5">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <Badge
-                      className="font-mono text-[11px] text-muted-foreground"
-                      variant="outline"
+                  <div className="flex min-w-0 flex-1 flex-col p-5">
+                    <p className="text-sm text-[#C9A15A]">
+                      {(course.category ?? "সাধারণ").replaceAll("-", " ")} ·{" "}
+                      {levelLabels[course.level] ??
+                        course.level.replace("_", " ")}
+                    </p>
+                    <h2 className="mt-2 text-xl leading-[1.5] font-semibold text-balance">
+                      {course.title}
+                    </h2>
+                    <p className="mt-2 line-clamp-3 text-[0.95rem] text-[#A3A5AE]">
+                      {course.shortDescription ??
+                        "গোছানো ক্লাস ও হাতে-কলমে শেখার সুযোগ।"}
+                    </p>
+                    <p
+                      className={`mt-4 mb-5 text-sm ${
+                        enrollmentIsOpen(course)
+                          ? "text-[#7FB8A8]"
+                          : "text-[#A3A5AE]"
+                      }`}
                     >
-                      {(course.category ?? "General").replaceAll("-", " ")}
-                    </Badge>
-                    <Badge
-                      className="border-primary/40 bg-primary/10 font-mono text-[11px] text-primary capitalize"
-                      variant="outline"
-                    >
-                      {course.level.replace("_", " ")}
-                    </Badge>
-                  </div>
-                  <h2 className="mt-4 font-heading text-2xl leading-tight tracking-tight">
-                    {course.title}
-                  </h2>
-                  <p className="mt-3 line-clamp-3 text-sm leading-6 text-muted-foreground">
-                    {course.shortDescription ?? "A focused learning path designed to help you build practical skills."}
-                  </p>
-                  <div className="mt-5 flex items-start gap-2 text-xs text-muted-foreground">
-                    <CalendarDays className="mt-0.5 size-3.5 shrink-0 text-primary" />
-                    <span>
-                      {enrollmentIsOpen(course)
-                        ? course.enrollmentEndsAt
-                          ? `Enrollment ends ${formatEnrollmentDate(course.enrollmentEndsAt)}`
-                          : "Enrollment open · no closing date"
-                        : "Enrollment closed"}
-                    </span>
-                  </div>
-                  <div className="mt-auto pt-6">
-                    <div className="h-px w-full bg-border" />
-                    <div className="mt-4 flex items-center justify-between gap-3 text-sm">
-                      <span className="truncate text-muted-foreground">
-                        {course.instructorName ?? "Instructor"}
-                      </span>
-                      <span className="flex shrink-0 items-center gap-1 text-sm text-primary">
-                        View course <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-1" />
-                      </span>
+                      {enrollmentText(course)}
+                    </p>
+                    <div className="mt-auto flex items-center justify-between gap-3 border-t border-[#343943] pt-4">
+                      <div className="min-w-0">
+                        <strong className="block text-xl">
+                          {formatPrice(course.price)}
+                        </strong>
+                        <span className="block truncate text-sm text-[#A3A5AE]">
+                          {course.instructorName ?? "ইনস্ট্রাক্টর"}
+                        </span>
+                      </div>
+                      <ArrowUpRight
+                        aria-hidden
+                        className="size-5 flex-none text-[#C9A15A] transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                      />
                     </div>
                   </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-
-          {data.courses.length === 0 ? (
-            <div className="mt-12 rounded-2xl border border-dashed border-border p-10 text-center">
-              <ImageIcon className="mx-auto size-6 text-muted-foreground" />
-              <p className="mt-3 text-sm text-muted-foreground">
-                No published courses match your filters.
-              </p>
+                </Link>
+              ))}
             </div>
-          ) : null}
+          ) : (
+            <div className="mt-10 rounded-xl border border-dashed border-[#343943] p-10 text-center">
+              <ImageIcon
+                aria-hidden
+                className="mx-auto size-6 text-[#A3A5AE]"
+              />
+              <p className="mt-3 text-[#A3A5AE]">
+                এই ফিল্টারে কোনো প্রকাশিত কোর্স নেই। ফিল্টার বদলে বা মুছে আবার
+                দেখুন।
+              </p>
+              <Link
+                className="mt-5 inline-flex min-h-12 items-center rounded-lg border border-[#C9A15A] bg-[#C9A15A] px-5 font-semibold text-[#12151C] transition-colors hover:bg-[#A88A4A]"
+                href="/courses"
+              >
+                সব কোর্স দেখুন
+              </Link>
+            </div>
+          )}
 
           {data.pagination.totalPages > 1 ? (
-            <div className="mt-8 flex justify-center gap-2">
-              {Array.from({ length: data.pagination.totalPages }, (_, index) => {
-                const page = index + 1
-                const query = new URLSearchParams(buildQuery(params))
-                query.set("page", String(page))
-                return (
-                  <Link
-                    className={`flex size-9 items-center justify-center rounded-full border text-sm ${
-                      page === data.pagination.page
-                        ? "border-primary bg-primary text-primary-foreground"
-                        : "border-border text-muted-foreground hover:border-primary hover:text-primary"
-                    }`}
-                    href={`/courses?${query.toString()}`}
-                    key={page}
-                  >
-                    {page}
-                  </Link>
-                )
-              })}
-            </div>
+            <nav
+              aria-label="পৃষ্ঠা"
+              className="mt-10 flex flex-wrap justify-center gap-2"
+            >
+              {Array.from(
+                { length: data.pagination.totalPages },
+                (_, index) => {
+                  const page = index + 1
+                  const current = page === data.pagination.page
+                  return (
+                    <Link
+                      aria-current={current ? "page" : undefined}
+                      className={`flex size-11 items-center justify-center rounded-lg border text-sm transition-colors ${
+                        current
+                          ? "border-[#C9A15A] bg-[#C9A15A] font-semibold text-[#12151C]"
+                          : "border-[#343943] text-[#A3A5AE] hover:border-[#C9A15A] hover:text-[#C9A15A]"
+                      }`}
+                      href={pageHref(page)}
+                      key={page}
+                    >
+                      {bn(page)}
+                    </Link>
+                  )
+                }
+              )}
+            </nav>
           ) : null}
-        </section>
+        </div>
       </main>
     </PublicShell>
   )

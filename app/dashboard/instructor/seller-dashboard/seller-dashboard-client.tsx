@@ -82,7 +82,9 @@ export function AnnouncementDraftForm({
         className="space-y-4"
       >
         <div className="space-y-2">
-          <Label htmlFor="draft-course">কোর্স (ফাঁকা রাখলে সব নিজের কোর্স)</Label>
+          <Label htmlFor="draft-course">
+            কোর্স (ফাঁকা রাখলে সব নিজের কোর্স)
+          </Label>
           <select
             className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
             id="draft-course"

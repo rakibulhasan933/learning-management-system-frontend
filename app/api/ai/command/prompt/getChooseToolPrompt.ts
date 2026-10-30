@@ -1,19 +1,19 @@
-import type { ChatMessage } from '@/components/editor/use-chat';
+import type { ChatMessage } from "@/components/editor/use-chat"
 
-import dedent from 'dedent';
+import dedent from "dedent"
 
 import {
   buildStructuredPrompt,
   formatTextFromMessages,
   getLastUserInstruction,
-} from '../utils';
+} from "../utils"
 
 export function getChooseToolPrompt({
   isSelecting,
   messages,
 }: {
-  isSelecting: boolean;
-  messages: ChatMessage[];
+  isSelecting: boolean
+  messages: ChatMessage[]
 }) {
   const generateExamples = [
     dedent`
@@ -52,7 +52,7 @@ export function getChooseToolPrompt({
       generate
       </output>
     `,
-  ];
+  ]
 
   const editExamples = [
     dedent`
@@ -91,7 +91,7 @@ export function getChooseToolPrompt({
       edit
       </output>
     `,
-  ];
+  ]
 
   const commentExamples = [
     dedent`
@@ -112,15 +112,15 @@ export function getChooseToolPrompt({
       comment
       </output>
     `,
-  ];
+  ]
 
   const examples = isSelecting
     ? [...generateExamples, ...editExamples, ...commentExamples]
-    : [...generateExamples, ...commentExamples];
+    : [...generateExamples, ...commentExamples]
 
   const editRule = `
 - Return "edit" only for requests that require rewriting the selected text as a replacement in-place (e.g., fix grammar, improve writing, make shorter/longer, translate, simplify).
-- Requests like summarize/explain/extract/takeaways/table/questions should be "generate" even if text is selected.`;
+- Requests like summarize/explain/extract/takeaways/table/questions should be "generate" even if text is selected.`
 
   const rules =
     dedent`
@@ -128,9 +128,9 @@ export function getChooseToolPrompt({
     - Only return "comment" if the user explicitly asks for comments, feedback, annotations, or review. Do not infer "comment" implicitly.
     - Return only one enum value with no explanation.
     - CRITICAL: Examples are for format reference only. NEVER output content from examples.
-  `.trim() + (isSelecting ? editRule : '');
+  `.trim() + (isSelecting ? editRule : "")
 
-  const task = `You are a strict classifier. Classify the user's last request as ${isSelecting ? '"generate", "edit", or "comment"' : '"generate" or "comment"'}.`;
+  const task = `You are a strict classifier. Classify the user's last request as ${isSelecting ? '"generate", "edit", or "comment"' : '"generate" or "comment"'}.`
 
   return buildStructuredPrompt({
     examples,
@@ -138,5 +138,5 @@ export function getChooseToolPrompt({
     instruction: getLastUserInstruction(messages),
     rules,
     task,
-  });
+  })
 }

@@ -42,8 +42,8 @@ export function BundleBuyButton({ bundleId }: { bundleId: string }) {
         {pending ? "অর্ডার তৈরি হচ্ছে…" : "বান্ডেল কিনুন"}
       </Button>
       <p className="text-xs leading-5 text-muted-foreground">
-        কেনার পর বিদ্যমান PayConfirm প্রমাণ ফ্লোতে (sender number +
-        Transaction ID) পেমেন্ট যাচাই হবে।
+        কেনার পর বিদ্যমান PayConfirm প্রমাণ ফ্লোতে (sender number + Transaction
+        ID) পেমেন্ট যাচাই হবে।
       </p>
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
     </div>

@@ -49,9 +49,7 @@ export default async function StudentAnalyticsPage() {
       <div className="mt-5 grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(280px,0.85fr)]">
         <Card size="sm">
           <CardContent>
-            <p className="font-mono text-xs text-muted-foreground">
-              গত ৭ দিন
-            </p>
+            <p className="font-mono text-xs text-muted-foreground">গত ৭ দিন</p>
             <h2 className="mt-1 font-heading text-xl">
               সাপ্তাহিক শেখার কার্যক্রম
             </h2>
@@ -62,7 +60,9 @@ export default async function StudentAnalyticsPage() {
         </Card>
         <Card size="sm">
           <CardContent>
-            <p className="font-mono text-xs text-muted-foreground">কোর্স অনুযায়ী</p>
+            <p className="font-mono text-xs text-muted-foreground">
+              কোর্স অনুযায়ী
+            </p>
             <h2 className="mt-1 font-heading text-xl">কোর্সের অগ্রগতি</h2>
             <div className="mt-5 grid gap-4">
               {analytics.courses.map((course) => (

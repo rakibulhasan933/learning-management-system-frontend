@@ -33,7 +33,13 @@ export default async function QuestionBankPage({
 }) {
   const params = (await searchParams) ?? {}
   const query = new URLSearchParams()
-  for (const key of ["subject", "chapter", "topic", "difficulty", "courseId"] as const) {
+  for (const key of [
+    "subject",
+    "chapter",
+    "topic",
+    "difficulty",
+    "courseId",
+  ] as const) {
     if (params[key]) query.set(key, params[key])
   }
   const queryString = query.toString()
@@ -57,11 +63,10 @@ export default async function QuestionBankPage({
 
   let courses: InstructorCourseListResponse["courses"] = []
   try {
-    const response =
-      await authenticatedApiFetch<InstructorCourseListResponse>(
-        "/instructor/courses",
-        { cache: "no-store" }
-      )
+    const response = await authenticatedApiFetch<InstructorCourseListResponse>(
+      "/instructor/courses",
+      { cache: "no-store" }
+    )
     courses = response.courses
   } catch {
     courses = []
@@ -80,9 +85,9 @@ export default async function QuestionBankPage({
           <h2 className="font-heading text-xl">CSV আমদানি</h2>
           <p className="text-sm leading-6 text-muted-foreground">
             কলাম: question, options (pipe দিয়ে আলাদা) অথবা option1–option5,
-            correct (অক্ষর, সূচক বা হুবহু অপশন লেখা), subject, chapter,
-            topic, difficulty (easy / medium / hard, ডিফল্ট medium),
-            explanation। ত্রুটিপূর্ণ লাইন বাদ যাবে, পুরো আমদানি ব্যর্থ হবে না।
+            correct (অক্ষর, সূচক বা হুবহু অপশন লেখা), subject, chapter, topic,
+            difficulty (easy / medium / hard, ডিফল্ট medium), explanation।
+            ত্রুটিপূর্ণ লাইন বাদ যাবে, পুরো আমদানি ব্যর্থ হবে না।
           </p>
           <QuestionImportForm />
         </CardContent>
@@ -91,7 +96,10 @@ export default async function QuestionBankPage({
       <Card>
         <CardContent>
           <h2 className="font-heading text-xl">ফিল্টার</h2>
-          <form className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5" method="get">
+          <form
+            className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5"
+            method="get"
+          >
             {(
               [
                 ["subject", "বিষয়"],
@@ -178,7 +186,7 @@ export default async function QuestionBankPage({
         </div>
       )}
       <div>
-        <Button asChild variant="outline">
+        <Button variant="outline">
           <Link href="/dashboard/instructor/model-tests">
             মডেল টেস্ট তৈরি করুন
           </Link>

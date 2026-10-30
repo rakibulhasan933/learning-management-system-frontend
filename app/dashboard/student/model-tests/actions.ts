@@ -1,9 +1,6 @@
 "use server"
 
-import type {
-  ModelTestAttemptDto,
-  ModelTestSubmitResponse,
-} from "@/lib/types"
+import type { ModelTestAttemptDto, ModelTestSubmitResponse } from "@/lib/types"
 import { authenticatedApiFetch } from "@/lib/api-client"
 
 /** Starts (or resumes an unexpired, unsubmitted) attempt. Questions carry no correct answers. */

@@ -33,11 +33,10 @@ export default async function SellerDashboardPage() {
 
   let courses: InstructorCourseListResponse["courses"] = []
   try {
-    const response =
-      await authenticatedApiFetch<InstructorCourseListResponse>(
-        "/instructor/courses",
-        { cache: "no-store" }
-      )
+    const response = await authenticatedApiFetch<InstructorCourseListResponse>(
+      "/instructor/courses",
+      { cache: "no-store" }
+    )
     courses = response.courses
   } catch {
     courses = []
@@ -61,10 +60,7 @@ export default async function SellerDashboardPage() {
               label="মোট বিক্রি (paid অর্ডারের যোগফল)"
               value={formatCurrency(data.sales.total)}
             />
-            <StatTile
-              label="Paid অর্ডার"
-              value={String(data.sales.paid)}
-            />
+            <StatTile label="Paid অর্ডার" value={String(data.sales.paid)} />
             <StatTile
               label="Pending / প্রত্যাখ্যাত"
               value={`${data.sales.pending} / ${data.sales.rejected}`}
@@ -76,16 +72,17 @@ export default async function SellerDashboardPage() {
           </div>
           <p className="text-sm text-muted-foreground">
             সংরক্ষিত অর্থ: {formatCurrency(data.payoutBalance.reservedAmount)} ·
-            মোট আয়: {formatCurrency(data.payoutBalance.totalRevenue)} ·
-            মুলতুবি পেআউট অনুরোধ:{" "}
-            {data.payoutBalance.pendingPayoutRequestCount}টি · মোট রিফান্ড:{" "}
-            {formatCurrency(data.refundTotal)}
+            মোট আয়: {formatCurrency(data.payoutBalance.totalRevenue)} · মুলতুবি
+            পেআউট অনুরোধ: {data.payoutBalance.pendingPayoutRequestCount}টি · মোট
+            রিফান্ড: {formatCurrency(data.refundTotal)}
           </p>
 
           <section className="grid gap-4 lg:grid-cols-2">
             <Card>
               <CardContent className="space-y-2">
-                <h2 className="font-heading text-xl">পেমেন্ট মাধ্যম অনুযায়ী (paid অর্ডার)</h2>
+                <h2 className="font-heading text-xl">
+                  পেমেন্ট মাধ্যম অনুযায়ী (paid অর্ডার)
+                </h2>
                 {data.ordersByPaymentMethod.length === 0 ? (
                   <p className="text-sm text-muted-foreground">
                     এখনও কোনো অর্ডার নেই।
@@ -134,7 +131,9 @@ export default async function SellerDashboardPage() {
             </Card>
             <Card>
               <CardContent className="space-y-2">
-                <h2 className="font-heading text-xl">কোর্সপ্রতি সম্পন্নের হার</h2>
+                <h2 className="font-heading text-xl">
+                  কোর্সপ্রতি সম্পন্নের হার
+                </h2>
                 {data.completionPerCourse.map((row) => (
                   <p className="text-sm" key={row.courseId}>
                     {row.courseTitle}: {row.completionRate}% (
@@ -193,7 +192,10 @@ export default async function SellerDashboardPage() {
                   </p>
                 ) : (
                   data.atRiskStudents.map((student) => (
-                    <p className="text-sm" key={`${student.userId}-${student.courseId}`}>
+                    <p
+                      className="text-sm"
+                      key={`${student.userId}-${student.courseId}`}
+                    >
                       {student.studentName ?? student.studentEmail} ·{" "}
                       {student.courseTitle} · শেষ অ্যাক্টিভিটি{" "}
                       {formatDateTime(student.lastActivityAt)}
@@ -211,17 +213,14 @@ export default async function SellerDashboardPage() {
           <CardContent className="space-y-4">
             <h2 className="font-heading text-xl">বাল্ক এক্সপোর্ট</h2>
             <p className="text-sm text-muted-foreground">
-              আপনার নিজের কোর্সের শিক্ষার্থীদের তালিকা CSV হিসেবে ডাউনলোড
-              করুন।
+              আপনার নিজের কোর্সের শিক্ষার্থীদের তালিকা CSV হিসেবে ডাউনলোড করুন।
             </p>
             <SellerExportButton />
           </CardContent>
         </Card>
         <Card>
           <CardContent>
-            <h2 className="font-heading text-xl">
-              বাল্ক ঘোষণা — খসড়া মাত্র
-            </h2>
+            <h2 className="font-heading text-xl">বাল্ক ঘোষণা — খসড়া মাত্র</h2>
             <p className="mt-1 text-sm text-muted-foreground">
               এই ফর্ম কিছু পাঠায় না। শুধু খসড়া ও প্রাপকের প্রিভিউ তৈরি হয়।
             </p>

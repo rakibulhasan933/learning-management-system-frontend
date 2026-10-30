@@ -1,74 +1,74 @@
-'use client';
+"use client"
 
-import * as React from 'react';
+import * as React from "react"
 
-import { acceptSuggestion, rejectSuggestion } from '@platejs/suggestion';
-import { SuggestionPlugin } from '@platejs/suggestion/react';
-import { CheckIcon, XIcon } from 'lucide-react';
-import { useEditorPlugin, usePluginOption } from 'platejs/react';
+import { acceptSuggestion, rejectSuggestion } from "@platejs/suggestion"
+import { SuggestionPlugin } from "@platejs/suggestion/react"
+import { CheckIcon, XIcon } from "lucide-react"
+import { useEditorPlugin, usePluginOption } from "platejs/react"
 
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Button } from "@/components/ui/button"
 import {
   type TDiscussion,
   discussionPlugin,
-} from '@/components/editor/plugins/discussion-kit';
+} from "@/components/editor/plugins/discussion-kit"
 
-import { Comment, CommentCreateForm, formatCommentDate } from './comment';
+import { Comment, CommentCreateForm, formatCommentDate } from "./comment"
 import {
   BLOCK_SUGGESTION_TOKEN,
   type ResolvedSuggestion,
-} from '@/lib/block-discussion-index';
+} from "@/lib/block-discussion-index"
 
 export function BlockSuggestionCard({
   idx,
   isLast,
   suggestion,
 }: {
-  idx: number;
-  isLast: boolean;
-  suggestion: ResolvedSuggestion;
+  idx: number
+  isLast: boolean
+  suggestion: ResolvedSuggestion
 }) {
-  const { api, editor } = useEditorPlugin(SuggestionPlugin);
+  const { api, editor } = useEditorPlugin(SuggestionPlugin)
 
-  const userInfo = usePluginOption(discussionPlugin, 'user', suggestion.userId);
+  const userInfo = usePluginOption(discussionPlugin, "user", suggestion.userId)
 
   const accept = (suggestion: ResolvedSuggestion) => {
     api.suggestion.withoutSuggestions(() => {
-      acceptSuggestion(editor, suggestion);
-    });
-  };
+      acceptSuggestion(editor, suggestion)
+    })
+  }
 
   const reject = (suggestion: ResolvedSuggestion) => {
     api.suggestion.withoutSuggestions(() => {
-      rejectSuggestion(editor, suggestion);
-    });
-  };
+      rejectSuggestion(editor, suggestion)
+    })
+  }
 
-  const [hovering, setHovering] = React.useState(false);
+  const [hovering, setHovering] = React.useState(false)
 
   const suggestionText2Array = (text: string) => {
-    if (text === BLOCK_SUGGESTION_TOKEN) return ['line breaks'];
+    if (text === BLOCK_SUGGESTION_TOKEN) return ["line breaks"]
 
-    return text.split(BLOCK_SUGGESTION_TOKEN).filter(Boolean);
-  };
+    return text.split(BLOCK_SUGGESTION_TOKEN).filter(Boolean)
+  }
 
   const getRemoveSummaryItems = (text: string) => {
     const items = suggestionText2Array(text).map((item) => {
-      if (item === 'column_group') return 'Column';
-      if (item === 'code_block') return 'Code Block';
+      if (item === "column_group") return "Column"
+      if (item === "code_block") return "Code Block"
 
-      return item;
-    });
+      return item
+    })
 
-    if (items.includes('Table')) return ['Table'];
-    if (items.includes('Code Block')) return ['Code Block'];
-    if (items.includes('Column')) return ['Column'];
+    if (items.includes("Table")) return ["Table"]
+    if (items.includes("Code Block")) return ["Code Block"]
+    if (items.includes("Column")) return ["Column"]
 
-    return items;
-  };
+    return items
+  }
 
-  const [editingId, setEditingId] = React.useState<string | null>(null);
+  const [editingId, setEditingId] = React.useState<string | null>(null)
 
   return (
     <div
@@ -84,10 +84,10 @@ export function BlockSuggestionCard({
             <AvatarImage alt={userInfo?.name} src={userInfo?.avatarUrl} />
             <AvatarFallback>{userInfo?.name?.[0]}</AvatarFallback>
           </Avatar>
-          <h4 className="mx-2 font-semibold text-sm leading-none">
+          <h4 className="mx-2 text-sm leading-none font-semibold">
             {userInfo?.name}
           </h4>
-          <div className="text-muted-foreground/80 text-xs leading-none">
+          <div className="text-xs leading-none text-muted-foreground/80">
             <span className="mr-1">
               {formatCommentDate(new Date(suggestion.createdAt))}
             </span>
@@ -96,10 +96,10 @@ export function BlockSuggestionCard({
 
         <div className="relative mt-1 mb-4 pl-[32px]">
           <div className="flex flex-col gap-2">
-            {suggestion.type === 'remove' &&
+            {suggestion.type === "remove" &&
               getRemoveSummaryItems(suggestion.text!).map((text, index) => (
                 <div key={index} className="flex items-center gap-2">
-                  <span className="text-muted-foreground text-sm">Delete:</span>
+                  <span className="text-sm text-muted-foreground">Delete:</span>
 
                   <span key={index} className="text-sm">
                     {text}
@@ -107,18 +107,18 @@ export function BlockSuggestionCard({
                 </div>
               ))}
 
-            {suggestion.type === 'insert' &&
+            {suggestion.type === "insert" &&
               suggestionText2Array(suggestion.newText!).map((text, index) => (
                 <div key={index} className="flex items-center gap-2">
-                  <span className="text-muted-foreground text-sm">Add:</span>
+                  <span className="text-sm text-muted-foreground">Add:</span>
 
                   <span key={index} className="text-sm">
-                    {text || 'line breaks'}
+                    {text || "line breaks"}
                   </span>
                 </div>
               ))}
 
-            {suggestion.type === 'replace' && (
+            {suggestion.type === "replace" && (
               <div className="flex flex-col gap-2">
                 {suggestionText2Array(suggestion.newText!).map(
                   (text, index) => (
@@ -128,7 +128,7 @@ export function BlockSuggestionCard({
                         className="flex items-start gap-2 text-brand/80"
                       >
                         <span className="text-sm">with:</span>
-                        <span className="text-sm">{text || 'line breaks'}</span>
+                        <span className="text-sm">{text || "line breaks"}</span>
                       </div>
                     </React.Fragment>
                   )
@@ -137,19 +137,19 @@ export function BlockSuggestionCard({
                 {suggestionText2Array(suggestion.text!).map((text, index) => (
                   <React.Fragment key={index}>
                     <div key={index} className="flex items-start gap-2">
-                      <span className="text-muted-foreground text-sm">
-                        {index === 0 ? 'Replace:' : 'Delete:'}
+                      <span className="text-sm text-muted-foreground">
+                        {index === 0 ? "Replace:" : "Delete:"}
                       </span>
-                      <span className="text-sm">{text || 'line breaks'}</span>
+                      <span className="text-sm">{text || "line breaks"}</span>
                     </div>
                   </React.Fragment>
                 ))}
               </div>
             )}
 
-            {suggestion.type === 'update' && (
+            {suggestion.type === "update" && (
               <div className="flex items-center gap-2">
-                <span className="text-muted-foreground text-sm">
+                <span className="text-sm text-muted-foreground">
                   {Object.keys(suggestion.properties).map((key) => (
                     <span key={key}>Un{key}</span>
                   ))}
@@ -203,9 +203,9 @@ export function BlockSuggestionCard({
 
       {!isLast && <div className="h-px w-full bg-muted" />}
     </div>
-  );
+  )
 }
 
 export const isResolvedSuggestion = (
   suggestion: ResolvedSuggestion | TDiscussion
-): suggestion is ResolvedSuggestion => 'suggestionId' in suggestion;
+): suggestion is ResolvedSuggestion => "suggestionId" in suggestion

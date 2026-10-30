@@ -73,7 +73,10 @@ export default async function InstructorAffiliatesPage() {
   const stats: Array<{ label: string; value: string }> = []
   if (dashboard) {
     if (dashboard.clicks !== null && dashboard.clicks !== undefined)
-      stats.push({ label: "ট্র্যাক করা ক্লিক", value: String(dashboard.clicks) })
+      stats.push({
+        label: "ট্র্যাক করা ক্লিক",
+        value: String(dashboard.clicks),
+      })
     if (dashboard.conversions !== null && dashboard.conversions !== undefined)
       stats.push({
         label: "কমিশন পাওয়া অর্ডার",
@@ -101,17 +104,24 @@ export default async function InstructorAffiliatesPage() {
         <CardContent className="space-y-2 text-sm leading-6 text-muted-foreground">
           <h2 className="font-heading text-xl text-foreground">নিয়ম</h2>
           <ul className="list-disc space-y-1 pl-5">
-            <li>নিজেকে রেফার করা যাবে না — নিজের লিংকে নিজের অর্ডারে কমিশন জমা হয় না।</li>
-            <li>কমিশন শুধু PayConfirm-এ paid হওয়া অর্ডারের পরে জমা হবে; pending বা rejected অর্ডারে নয়।</li>
+            <li>
+              নিজেকে রেফার করা যাবে না — নিজের লিংকে নিজের অর্ডারে কমিশন জমা হয়
+              না।
+            </li>
+            <li>
+              কমিশন শুধু PayConfirm-এ paid হওয়া অর্ডারের পরে জমা হবে; pending
+              বা rejected অর্ডারে নয়।
+            </li>
             <li>এক অর্ডারে একবারের বেশি কমিশন নয়।</li>
-            <li>পেআউট ম্যানুয়াল অনুমোদন মাত্র — অটো পেআউট নয়। অ্যাডমিন অনুমোদন করলে তবেই পেমেন্ট পাঠানো হয়।</li>
+            <li>
+              পেআউট ম্যানুয়াল অনুমোদন মাত্র — অটো পেআউট নয়। অ্যাডমিন অনুমোদন
+              করলে তবেই পেমেন্ট পাঠানো হয়।
+            </li>
           </ul>
         </CardContent>
       </Card>
 
-      {migrationPending ? (
-        <MigrationNotice feature="অ্যাফিলিয়েট" />
-      ) : null}
+      {migrationPending ? <MigrationNotice feature="অ্যাফিলিয়েট" /> : null}
       {loadError ? (
         <p className="rounded-xl border border-border px-4 py-3 text-sm text-muted-foreground">
           {loadError}
@@ -130,10 +140,7 @@ export default async function InstructorAffiliatesPage() {
         <Card>
           <CardContent>
             <h2 className="font-heading text-xl">নতুন লিংক তৈরি করুন</h2>
-            <form
-              action={createAffiliateLinkAction}
-              className="mt-4 space-y-4"
-            >
+            <form action={createAffiliateLinkAction} className="mt-4 space-y-4">
               <input
                 name="revalidatePath"
                 type="hidden"

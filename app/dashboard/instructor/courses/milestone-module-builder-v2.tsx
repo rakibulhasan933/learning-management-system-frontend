@@ -285,7 +285,9 @@ export function MilestoneModuleBuilder({
                               />
                               <div className="flex flex-wrap gap-2">
                                 {!video.isPublished && video.videoRef ? (
-                                  <ActionToastForm action={publishInstructorVideoAction}>
+                                  <ActionToastForm
+                                    action={publishInstructorVideoAction}
+                                  >
                                     <input
                                       name="courseId"
                                       type="hidden"
@@ -301,7 +303,9 @@ export function MilestoneModuleBuilder({
                                     </SubmitButton>
                                   </ActionToastForm>
                                 ) : null}
-                                <ActionToastForm action={deleteInstructorVideoAction}>
+                                <ActionToastForm
+                                  action={deleteInstructorVideoAction}
+                                >
                                   <input
                                     name="courseId"
                                     type="hidden"
@@ -353,7 +357,7 @@ export function MilestoneModuleBuilder({
                               value=""
                             />
                             <p className="rounded-xl border border-border bg-card p-3 text-sm text-muted-foreground sm:col-span-2">
-                                <span className="font-medium text-foreground">
+                              <span className="font-medium text-foreground">
                                 Add video {videos.length + 1}
                               </span>
                               <span className="mt-1 block text-xs">

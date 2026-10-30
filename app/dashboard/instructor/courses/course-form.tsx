@@ -143,7 +143,8 @@ export function CourseForm({
                   />
                   {existingSlugs.some(
                     (existingSlug) =>
-                      existingSlug.toLowerCase() === slug.trim().toLowerCase() &&
+                      existingSlug.toLowerCase() ===
+                        slug.trim().toLowerCase() &&
                       existingSlug.toLowerCase() !== course?.slug.toLowerCase()
                   ) ? (
                     <p className="mt-1.5 pl-1 text-xs text-destructive">
@@ -315,11 +316,14 @@ export function CourseForm({
 
       <SubmitButton
         className="w-full sm:w-fit sm:px-8"
-        disabled={pending || existingSlugs.some(
-          (existingSlug) =>
-            existingSlug.toLowerCase() === slug.trim().toLowerCase() &&
-            existingSlug.toLowerCase() !== course?.slug.toLowerCase()
-        )}
+        disabled={
+          pending ||
+          existingSlugs.some(
+            (existingSlug) =>
+              existingSlug.toLowerCase() === slug.trim().toLowerCase() &&
+              existingSlug.toLowerCase() !== course?.slug.toLowerCase()
+          )
+        }
         pendingLabel={`${submitLabel}...`}
       >
         {submitLabel}

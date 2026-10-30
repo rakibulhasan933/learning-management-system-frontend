@@ -99,15 +99,50 @@ export default function GatewayCheckout({
         <div className="border-b border-slate-100 px-5 py-6 sm:px-8">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <span className="text-xl font-extrabold tracking-tight" style={{ color: details.accent }}>Pay-Confirm</span>
-              <p className="mt-1 text-xs text-slate-400">Secure automatic payment verification via PayConfirm</p>
+              <span
+                className="text-xl font-extrabold tracking-tight"
+                style={{ color: details.accent }}
+              >
+                Pay-Confirm
+              </span>
+              <p className="mt-1 text-xs text-slate-400">
+                Secure automatic payment verification via PayConfirm
+              </p>
             </div>
-            <span className="rounded-full px-3 py-1 text-xs font-semibold" style={{ backgroundColor: `${details.accent}15`, color: details.accent }}>{details.name}</span>
+            <span
+              className="rounded-full px-3 py-1 text-xs font-semibold"
+              style={{
+                backgroundColor: `${details.accent}15`,
+                color: details.accent,
+              }}
+            >
+              {details.name}
+            </span>
           </div>
-          <div className="mt-6 grid grid-cols-2 gap-2" aria-label="Checkout progress">
+          <div
+            className="mt-6 grid grid-cols-2 gap-2"
+            aria-label="Checkout progress"
+          >
             {["Your number", "Verify payment"].map((label, index) => {
               const active = step === index + 1
-              return <div className="flex items-center gap-2 text-xs font-medium" key={label} style={{ color: active ? details.accent : "#94a3b8" }}><span className="flex size-6 items-center justify-center rounded-full text-[11px]" style={{ backgroundColor: active ? details.accent : "#f1f5f9", color: active ? "white" : "#94a3b8" }}>{index + 1}</span>{label}</div>
+              return (
+                <div
+                  className="flex items-center gap-2 text-xs font-medium"
+                  key={label}
+                  style={{ color: active ? details.accent : "#94a3b8" }}
+                >
+                  <span
+                    className="flex size-6 items-center justify-center rounded-full text-[11px]"
+                    style={{
+                      backgroundColor: active ? details.accent : "#f1f5f9",
+                      color: active ? "white" : "#94a3b8",
+                    }}
+                  >
+                    {index + 1}
+                  </span>
+                  {label}
+                </div>
+              )
             })}
           </div>
         </div>

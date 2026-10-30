@@ -31,7 +31,12 @@ export async function broadcastMessageAction(
     throw new Error("মেসেজ সর্বোচ্চ ২০০০ অক্ষরের হতে পারে।")
   }
 
-  const payload: { courseId?: string; batchId?: string; subject: string; body: string } = {
+  const payload: {
+    courseId?: string
+    batchId?: string
+    subject: string
+    body: string
+  } = {
     body,
     subject,
   }

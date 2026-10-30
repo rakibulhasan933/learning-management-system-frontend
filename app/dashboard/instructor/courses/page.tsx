@@ -21,7 +21,7 @@ export default async function InstructorCoursesPage() {
     <div className="instructor-page instructor-courses-page">
       <PageHeader
         action={
-          <Button asChild>
+          <Button>
             <Link href="/dashboard/instructor/courses/new">
               <Plus className="size-3.5" />
               নতুন কোর্স তৈরি করুন
@@ -38,7 +38,7 @@ export default async function InstructorCoursesPage() {
       {data.courses.length === 0 ? (
         <EmptyState
           action={
-            <Button asChild variant="outline">
+            <Button variant="outline">
               <Link href="/dashboard/instructor/courses/new">
                 <Plus className="size-3.5" />
                 নতুন কোর্স তৈরি করুন

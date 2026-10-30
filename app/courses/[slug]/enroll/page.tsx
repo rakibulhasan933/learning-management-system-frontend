@@ -156,7 +156,7 @@ export default async function EnrollPage({
                     <CheckCircle2 className="mt-0.5 size-4 shrink-0" />
                     <p>This order is paid. Your course enrollment is active.</p>
                   </div>
-                  <Button className="w-full" asChild>
+                  <Button className="w-full">
                     <Link href="/dashboard/student">Open dashboard</Link>
                   </Button>
                 </div>

@@ -7,7 +7,6 @@ export function getBackendApiUrl(origin?: string) {
     ? process.env.NEXT_PUBLIC_BACKEND_API_URL
     : (process.env.BACKEND_URL ?? process.env.NEXT_PUBLIC_BACKEND_API_URL)
 
-
   if (!url && (origin || isBrowser)) {
     const base = origin ?? window.location.origin
     return `${base.replace(/\/$/, "")}/api`

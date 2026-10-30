@@ -27,7 +27,7 @@ export default async function InstructorDashboardPage() {
         title="কোর্স পরিচালনা"
       />
       <div className="flex justify-start">
-        <Button asChild>
+        <Button>
           <Link href="/dashboard/instructor/courses">কোর্স পরিচালনা করুন</Link>
         </Button>
       </div>
@@ -56,8 +56,10 @@ export default async function InstructorDashboardPage() {
             </p>
             <h2 className="mt-2 font-heading text-2xl">আপনার কোর্সগুলো</h2>
           </div>
-          <Button asChild size="sm" variant="outline">
-            <Link href="/dashboard/instructor/courses/new">নতুন কোর্স তৈরি করুন</Link>
+          <Button size="sm" variant="outline">
+            <Link href="/dashboard/instructor/courses/new">
+              নতুন কোর্স তৈরি করুন
+            </Link>
           </Button>
         </div>
         <div className="mt-5 grid gap-4 lg:grid-cols-2">
@@ -87,12 +89,12 @@ export default async function InstructorDashboardPage() {
                     {course.totalLectureCount} lectures
                   </p>
                   <div className="mt-5 grid gap-2 sm:grid-cols-2">
-                    <Button asChild variant="outline">
+                    <Button variant="outline">
                       <Link href={`/dashboard/instructor/courses/${course.id}`}>
                         কোর্স পরিচালনা
                       </Link>
                     </Button>
-                    <Button asChild variant="outline">
+                    <Button variant="outline">
                       <Link
                         href={`/dashboard/instructor/courses/${course.id}/students`}
                       >

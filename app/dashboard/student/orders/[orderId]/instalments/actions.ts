@@ -2,10 +2,7 @@
 
 import { revalidatePath } from "next/cache"
 
-import type {
-  InstalmentScheduleResponse,
-  OrderBumpResponse,
-} from "@/lib/types"
+import type { InstalmentScheduleResponse, OrderBumpResponse } from "@/lib/types"
 import { authenticatedApiFetch } from "@/lib/api-client"
 
 /**
@@ -41,7 +38,9 @@ export async function payInstalmentAction(formData: FormData) {
     typeof senderNumber !== "string" ||
     typeof transactionId !== "string"
   ) {
-    throw new Error("Order, instalment, sender number and transaction id are required.")
+    throw new Error(
+      "Order, instalment, sender number and transaction id are required."
+    )
   }
   const response = await authenticatedApiFetch<InstalmentScheduleResponse>(
     `/orders/${orderId.trim()}/instalments/${instalmentId.trim()}/pay`,
@@ -67,7 +66,10 @@ export async function addOrderBumpAction(formData: FormData) {
   const response = await authenticatedApiFetch<OrderBumpResponse>(
     "/checkout/order-bump",
     {
-      body: JSON.stringify({ courseId: courseId.trim(), orderId: orderId.trim() }),
+      body: JSON.stringify({
+        courseId: courseId.trim(),
+        orderId: orderId.trim(),
+      }),
       headers: { "Content-Type": "application/json" },
       method: "POST",
     }

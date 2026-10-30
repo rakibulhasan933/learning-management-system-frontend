@@ -36,9 +36,7 @@ export default async function StudentLiveClassesPage() {
         title="লাইভ ক্লাস"
       />
 
-      {migrationPending ? (
-        <MigrationNotice feature="লাইভ ক্লাস" />
-      ) : null}
+      {migrationPending ? <MigrationNotice feature="লাইভ ক্লাস" /> : null}
       {loadError ? (
         <p className="rounded-xl border border-border px-4 py-3 text-sm text-muted-foreground">
           {loadError}
@@ -65,7 +63,7 @@ export default async function StudentLiveClassesPage() {
                     : ""}
                 </p>
                 <div className="flex flex-wrap gap-2">
-                  <Button asChild>
+                  <Button>
                     <a
                       href={liveClass.meetingUrl}
                       rel="noreferrer"
@@ -75,7 +73,7 @@ export default async function StudentLiveClassesPage() {
                     </a>
                   </Button>
                   {liveClass.recordingUrl ? (
-                    <Button asChild variant="outline">
+                    <Button variant="outline">
                       <a
                         href={liveClass.recordingUrl}
                         rel="noreferrer"
@@ -87,8 +85,7 @@ export default async function StudentLiveClassesPage() {
                   ) : null}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  রেকর্ডিং শুধু একটি লিংক — এই প্ল্যাটফর্ম রেকর্ডিং সার্ভার
-                  নয়।
+                  রেকর্ডিং শুধু একটি লিংক — এই প্ল্যাটফর্ম রেকর্ডিং সার্ভার নয়।
                 </p>
               </CardContent>
             </Card>

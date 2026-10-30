@@ -54,14 +54,15 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           </h1>
           <ProgressThread className="mt-8 w-20" />
           <p className="mt-6 max-w-md text-base leading-7 text-muted-foreground">
-            কোর্স চালিয়ে যান, পেমেন্টের অবস্থা দেখুন, অথবা আপনার workspace খুলুন।
+            কোর্স চালিয়ে যান, পেমেন্টের অবস্থা দেখুন, অথবা আপনার workspace
+            খুলুন।
           </p>
 
           {/* Sample resume card */}
           <div className="surface-raised relative mt-12 max-w-sm rounded-2xl p-5">
             <div className="flex items-center justify-between">
               <p className="eyebrow">চালিয়ে যান</p>
-              <span className="font-mono text-xs tabular-nums text-muted-foreground">
+              <span className="font-mono text-xs text-muted-foreground tabular-nums">
                 68%
               </span>
             </div>

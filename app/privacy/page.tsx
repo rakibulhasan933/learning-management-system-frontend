@@ -5,7 +5,8 @@ import { ProgressThread } from "@/components/ui/progress-thread"
 
 export const metadata: Metadata = {
   title: "Privacy policy",
-  description: "How Folio collects, uses and protects account and learning data.",
+  description:
+    "How Folio collects, uses and protects account and learning data.",
 }
 
 export default function PrivacyPage() {

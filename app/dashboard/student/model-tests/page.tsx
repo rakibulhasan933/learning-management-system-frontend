@@ -19,11 +19,11 @@ export default function StudentModelTestsPage() {
       <Card>
         <CardContent className="space-y-4">
           <p className="text-sm leading-6 text-muted-foreground">
-            টেস্টে অংশ নিতে শিক্ষকের দেওয়া টেস্ট আইডি দিন। টেস্টটি আপনার
-            এনরোল করা কোর্সের হতে হবে।
+            টেস্টে অংশ নিতে শিক্ষকের দেওয়া টেস্ট আইডি দিন। টেস্টটি আপনার এনরোল
+            করা কোর্সের হতে হবে।
           </p>
           <ModelTestEntryForm />
-          <Button asChild variant="outline">
+          <Button variant="outline">
             <Link href="/dashboard/student/mistake-bank">
               Mistake Bank দেখুন
             </Link>

@@ -19,9 +19,15 @@ export const dynamic = "force-dynamic"
 
 type ReportName = "funnel" | "cohorts" | "refund-reasons" | "teachers"
 
-function ExportButton({ report, label }: { report: ReportName; label: string }) {
+function ExportButton({
+  report,
+  label,
+}: {
+  report: ReportName
+  label: string
+}) {
   return (
-    <Button asChild size="sm" variant="outline">
+    <Button size="sm" variant="outline">
       <Link download href={`/api/admin/analytics/${report}`}>
         <Download className="size-4" />
         {label}
@@ -59,7 +65,8 @@ export default async function AdminAnalyticsPage() {
       { cache: "no-store" }
     )
   } catch (error) {
-    funnelError = error instanceof Error ? error.message : "ফানেল লোড করা যায়নি।"
+    funnelError =
+      error instanceof Error ? error.message : "ফানেল লোড করা যায়নি।"
   }
   try {
     cohorts = await authenticatedApiFetch<AnalyticsCohortsResponse>(
@@ -71,11 +78,10 @@ export default async function AdminAnalyticsPage() {
       error instanceof Error ? error.message : "কোহর্ট লোড করা যায়নি।"
   }
   try {
-    refundReasons =
-      await authenticatedApiFetch<AnalyticsRefundReasonsResponse>(
-        "/admin/analytics/refund-reasons",
-        { cache: "no-store" }
-      )
+    refundReasons = await authenticatedApiFetch<AnalyticsRefundReasonsResponse>(
+      "/admin/analytics/refund-reasons",
+      { cache: "no-store" }
+    )
   } catch (error) {
     refundReasonsError =
       error instanceof Error ? error.message : "রিফান্ড কারণ লোড করা যায়নি।"
@@ -87,7 +93,9 @@ export default async function AdminAnalyticsPage() {
     )
   } catch (error) {
     teachersError =
-      error instanceof Error ? error.message : "শিক্ষক র‍্যাংকিং লোড করা যায়নি।"
+      error instanceof Error
+        ? error.message
+        : "শিক্ষক র‍্যাংকিং লোড করা যায়নি।"
   }
 
   const funnelSteps: AnalyticsFunnelStepDto[] = funnel
@@ -126,8 +134,8 @@ export default async function AdminAnalyticsPage() {
           <div className="flex gap-3 rounded-xl border border-border bg-background px-3 py-2.5">
             <Info className="size-4 shrink-0 text-primary" />
             <p className="text-sm text-muted-foreground">
-              ভিজিট ট্র্যাক করা হয় না, সাইনআপ থেকে শুরু। প্রতিটি ধাপের
-              কনভার্সন % আগের ধাপের তুলনায় হিসাব করা।
+              ভিজিট ট্র্যাক করা হয় না, সাইনআপ থেকে শুরু। প্রতিটি ধাপের কনভার্সন
+              % আগের ধাপের তুলনায় হিসাব করা।
             </p>
           </div>
           {funnelError ? (
@@ -202,7 +210,10 @@ export default async function AdminAnalyticsPage() {
                 </thead>
                 <tbody>
                   {(cohorts?.cohorts ?? []).map((cohort) => (
-                    <tr className="border-b border-border/60" key={cohort.month}>
+                    <tr
+                      className="border-b border-border/60"
+                      key={cohort.month}
+                    >
                       <td className="py-4 font-mono">{cohort.month}</td>
                       <td className="font-mono tabular-nums">
                         {cohort.enrolled.toLocaleString("en-US")}

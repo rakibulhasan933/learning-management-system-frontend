@@ -2,7 +2,6 @@
 
 import { useState } from "react"
 
-import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 
@@ -23,7 +22,7 @@ export function RefundRequestForm({ orderId }: { orderId: string }) {
         setError(null)
         setSaved(false)
         if (!reason.trim()) {
-          setError("রিফান্ডের কারণ লিখুন — কারণ ছাড়া রিকোয়েস্ট জমা হবে না।")
+          setError("রিফান্ডের কারণ লিখুন। কারণ ছাড়া রিকোয়েস্ট জমা হবে না।")
           return
         }
         setPending(true)
@@ -64,14 +63,18 @@ export function RefundRequestForm({ orderId }: { orderId: string }) {
         </p>
       ) : null}
       {saved ? (
-        <p className="text-sm text-muted-foreground" role="status">
-          রিফান্ড রিকোয়েস্ট জমা হয়েছে। অ্যাডমিন সিদ্ধান্ত নিলে এখানেই স্ট্যাটাস
-          দেখা যাবে।
+        <p className="text-sm text-foreground" role="status">
+          রিফান্ড রিকোয়েস্ট জমা হয়েছে। অ্যাডমিন সিদ্ধান্ত নিলে এখানেই
+          স্ট্যাটাস দেখা যাবে।
         </p>
       ) : null}
-      <Button disabled={pending} type="submit">
+      <button
+        className="inline-flex min-h-12 w-full items-center justify-center rounded-lg bg-primary px-5 font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60 sm:w-fit"
+        disabled={pending}
+        type="submit"
+      >
         {pending ? "জমা হচ্ছে…" : "রিফান্ড রিকোয়েস্ট পাঠান"}
-      </Button>
+      </button>
     </form>
   )
 }

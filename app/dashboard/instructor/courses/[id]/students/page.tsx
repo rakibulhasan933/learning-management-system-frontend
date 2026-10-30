@@ -114,13 +114,13 @@ export default async function InstructorCourseStudentsPage({
       />
 
       <div className="mt-6 flex flex-wrap items-center gap-3">
-        <Button asChild variant="outline">
+        <Button variant="outline">
           <Link href="/dashboard/instructor">
             <ArrowLeft className="size-3.5" />
             Dashboard
           </Link>
         </Button>
-        <Button asChild>
+        <Button>
           <Link
             href={`/dashboard/instructor/courses/${response.course.id}/edit`}
           >

@@ -42,14 +42,14 @@ export async function attachBankQuestionAction(formData: FormData) {
   if (typeof questionId !== "string" || typeof testId !== "string") {
     throw new Error("Question id and model test id are required.")
   }
-  const result = await authenticatedApiFetch<{ questionId: string; testId: string }>(
-    `/instructor/question-bank/${questionId.trim()}/attach`,
-    {
-      body: JSON.stringify({ testId: testId.trim() }),
-      headers: { "Content-Type": "application/json" },
-      method: "POST",
-    }
-  )
+  const result = await authenticatedApiFetch<{
+    questionId: string
+    testId: string
+  }>(`/instructor/question-bank/${questionId.trim()}/attach`, {
+    body: JSON.stringify({ testId: testId.trim() }),
+    headers: { "Content-Type": "application/json" },
+    method: "POST",
+  })
   revalidatePath("/dashboard/instructor/question-bank")
   return result
 }

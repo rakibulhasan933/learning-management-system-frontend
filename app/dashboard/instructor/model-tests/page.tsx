@@ -25,10 +25,15 @@ export default async function InstructorModelTestsPage() {
   const [courses, bank] = await Promise.all([
     authenticatedApiFetch<InstructorCourseListResponse>("/instructor/courses", {
       cache: "no-store",
-    }).catch(() => ({ courses: [] as InstructorCourseListResponse["courses"] })),
-    authenticatedApiFetch<QuestionBankListResponse>("/instructor/question-bank", {
-      cache: "no-store",
-    }).catch((error: unknown) => {
+    }).catch(() => ({
+      courses: [] as InstructorCourseListResponse["courses"],
+    })),
+    authenticatedApiFetch<QuestionBankListResponse>(
+      "/instructor/question-bank",
+      {
+        cache: "no-store",
+      }
+    ).catch((error: unknown) => {
       if (isMigrationPendingError(error)) return null
       throw error
     }),
@@ -41,9 +46,7 @@ export default async function InstructorModelTestsPage() {
         lede="পরীক্ষার মতো টেস্ট: টাইমার, প্রশ্ন এলোমেলো করা ও একবারের চেষ্টা ডিফল্ট। কোনো প্রক্টরিং, ওয়েবক্যাম বা ট্যাব নজরদারি নেই।"
         title="মডেল টেস্ট তৈরি করুন"
       />
-      {bank === null ? (
-        <MigrationNotice feature="মডেল টেস্ট" />
-      ) : null}
+      {bank === null ? <MigrationNotice feature="মডেল টেস্ট" /> : null}
       {courses.courses.length === 0 ? (
         <EmptyState
           description="Create a course first, then attach a model test to it."
@@ -104,7 +107,9 @@ export default async function InstructorModelTestsPage() {
                   </p>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="maxAttempts">সর্বোচ্চ চেষ্টা (ডিফল্ট ১)</Label>
+                  <Label htmlFor="maxAttempts">
+                    সর্বোচ্চ চেষ্টা (ডিফল্ট ১)
+                  </Label>
                   <Input
                     defaultValue={1}
                     id="maxAttempts"
@@ -117,7 +122,11 @@ export default async function InstructorModelTestsPage() {
               </div>
               <div className="flex flex-wrap gap-6">
                 <label className="flex items-center gap-2 text-sm">
-                  <input defaultChecked name="shuffleQuestions" type="checkbox" />
+                  <input
+                    defaultChecked
+                    name="shuffleQuestions"
+                    type="checkbox"
+                  />
                   প্রশ্ন এলোমেলো করুন (ডিফল্ট চালু)
                 </label>
                 <label className="flex items-center gap-2 text-sm">
@@ -164,11 +173,13 @@ export default async function InstructorModelTestsPage() {
         </Card>
       )}
       <p className="text-sm text-muted-foreground">
-        তৈরি করা টেস্টের বিস্তারিত, লিডারবোর্ড ও টপিক রিপোর্ট দেখতে টেস্ট
-        তৈরির পরের পাতাটি ব্যবহার করুন।
+        তৈরি করা টেস্টের বিস্তারিত, লিডারবোর্ড ও টপিক রিপোর্ট দেখতে টেস্ট তৈরির
+        পরের পাতাটি ব্যবহার করুন।
       </p>
-      <Button variant="outline" asChild>
-        <Link href="/dashboard/instructor/question-bank">প্রশ্নব্যাংকে ফিরুন</Link>
+      <Button variant="outline">
+        <Link href="/dashboard/instructor/question-bank">
+          প্রশ্নব্যাংকে ফিরুন
+        </Link>
       </Button>
     </div>
   )

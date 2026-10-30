@@ -5,7 +5,13 @@ import { useRef, useState } from "react"
 import { SubmitButton } from "@/components/submit-button"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { updateAdminSettingsAction } from "@/app/dashboard/admin/actions"
 
 type Coupon = {
@@ -37,7 +43,16 @@ function parseCoupons(value: string): Coupon[] {
 
   return coupons.length > 0
     ? coupons
-    : [{ code: "", enabled: true, expiresAt: "", kind: "percent", limit: "", value: "" }]
+    : [
+        {
+          code: "",
+          enabled: true,
+          expiresAt: "",
+          kind: "percent",
+          limit: "",
+          value: "",
+        },
+      ]
 }
 
 export function CouponSettingsForm({ value }: { value: string }) {
@@ -59,7 +74,16 @@ export function CouponSettingsForm({ value }: { value: string }) {
       const next = current.filter((_, couponIndex) => couponIndex !== index)
       return next.length > 0
         ? next
-        : [{ code: "", enabled: true, expiresAt: "", kind: "percent", limit: "", value: "" }]
+        : [
+            {
+              code: "",
+              enabled: true,
+              expiresAt: "",
+              kind: "percent",
+              limit: "",
+              value: "",
+            },
+          ]
     })
   }
 
@@ -103,7 +127,9 @@ export function CouponSettingsForm({ value }: { value: string }) {
           value={coupon.value}
         />
         <Select
-          onValueChange={(status) => update(index, { enabled: status === "active" })}
+          onValueChange={(status) =>
+            update(index, { enabled: status === "active" })
+          }
           value={coupon.enabled ? "active" : "disabled"}
         >
           <SelectTrigger aria-label="Coupon status">
@@ -123,7 +149,7 @@ export function CouponSettingsForm({ value }: { value: string }) {
           type="number"
           value={coupon.limit}
         />
-        <label className="flex items-center gap-2 whitespace-nowrap rounded-xl border border-border px-3 text-xs text-muted-foreground">
+        <label className="flex items-center gap-2 rounded-xl border border-border px-3 text-xs whitespace-nowrap text-muted-foreground">
           <input
             checked={!coupon.limit}
             onChange={(event) =>
@@ -147,7 +173,12 @@ export function CouponSettingsForm({ value }: { value: string }) {
         >
           {coupon.enabled ? "Disable" : "Enable"}
         </Button>
-        <Button className="w-full" onClick={() => remove(index)} type="button" variant="ghost">
+        <Button
+          className="w-full"
+          onClick={() => remove(index)}
+          type="button"
+          variant="ghost"
+        >
           Remove
         </Button>
       </div>
@@ -163,10 +194,28 @@ export function CouponSettingsForm({ value }: { value: string }) {
     if (totalPages === 1) return null
     return (
       <div className="flex items-center justify-between text-xs text-muted-foreground">
-        <span>Page {page} of {totalPages}</span>
+        <span>
+          Page {page} of {totalPages}
+        </span>
         <div className="flex gap-2">
-          <Button disabled={page === 1} onClick={() => setPage(page - 1)} size="sm" type="button" variant="outline">Previous</Button>
-          <Button disabled={page === totalPages} onClick={() => setPage(page + 1)} size="sm" type="button" variant="outline">Next</Button>
+          <Button
+            disabled={page === 1}
+            onClick={() => setPage(page - 1)}
+            size="sm"
+            type="button"
+            variant="outline"
+          >
+            Previous
+          </Button>
+          <Button
+            disabled={page === totalPages}
+            onClick={() => setPage(page + 1)}
+            size="sm"
+            type="button"
+            variant="outline"
+          >
+            Next
+          </Button>
         </div>
       </div>
     )
@@ -180,7 +229,8 @@ export function CouponSettingsForm({ value }: { value: string }) {
         if (hiddenValue.current) {
           hiddenValue.current.value = coupons
             .filter((coupon) => coupon.code.trim() && coupon.value.trim())
-            .map((coupon) =>
+            .map(
+              (coupon) =>
                 `${coupon.code.trim().toUpperCase()}:${coupon.kind}:${coupon.value.trim()}:${coupon.enabled ? "active" : "disabled"}:${coupon.limit.trim()}:${coupon.expiresAt ? Date.parse(coupon.expiresAt) : ""}`
             )
             .join(",")
@@ -194,29 +244,55 @@ export function CouponSettingsForm({ value }: { value: string }) {
           <div className="flex flex-wrap items-end justify-between gap-2 border-b border-border pb-3">
             <div>
               <h3 className="font-heading text-lg">Active coupons</h3>
-              <p className="mt-1 text-xs text-muted-foreground">Available to students at checkout.</p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Available to students at checkout.
+              </p>
             </div>
             <span className="rounded-full bg-secondary/10 px-2.5 py-1 font-mono text-xs text-secondary">
               {activeCoupons.length} active
             </span>
           </div>
-          {renderRows(activeCoupons.slice((activePage - 1) * pageSize, activePage * pageSize))}
-          {activeCoupons.length === 0 ? <p className="text-sm text-muted-foreground">No active coupons.</p> : null}
+          {renderRows(
+            activeCoupons.slice(
+              (activePage - 1) * pageSize,
+              activePage * pageSize
+            )
+          )}
+          {activeCoupons.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No active coupons.</p>
+          ) : null}
           {renderPagination(activeCoupons.length, activePage, setActivePage)}
         </section>
         <section className="grid gap-3 border-t border-border pt-6">
           <div className="flex flex-wrap items-end justify-between gap-2 border-b border-border pb-3">
             <div>
-              <h3 className="font-heading text-lg text-muted-foreground">Disabled coupons</h3>
-              <p className="mt-1 text-xs text-muted-foreground">Keep old campaigns for reporting without making them redeemable.</p>
+              <h3 className="font-heading text-lg text-muted-foreground">
+                Disabled coupons
+              </h3>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Keep old campaigns for reporting without making them redeemable.
+              </p>
             </div>
             <span className="rounded-full bg-muted px-2.5 py-1 font-mono text-xs text-muted-foreground">
               {disabledCoupons.length} disabled
             </span>
           </div>
-          {renderRows(disabledCoupons.slice((disabledPage - 1) * pageSize, disabledPage * pageSize))}
-          {disabledCoupons.length === 0 ? <p className="text-sm text-muted-foreground">No disabled coupons.</p> : null}
-          {renderPagination(disabledCoupons.length, disabledPage, setDisabledPage)}
+          {renderRows(
+            disabledCoupons.slice(
+              (disabledPage - 1) * pageSize,
+              disabledPage * pageSize
+            )
+          )}
+          {disabledCoupons.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              No disabled coupons.
+            </p>
+          ) : null}
+          {renderPagination(
+            disabledCoupons.length,
+            disabledPage,
+            setDisabledPage
+          )}
         </section>
       </div>
 
@@ -225,7 +301,14 @@ export function CouponSettingsForm({ value }: { value: string }) {
           onClick={() =>
             setCoupons((current) => [
               ...current,
-              { code: "", enabled: true, expiresAt: "", kind: "percent", limit: "", value: "" },
+              {
+                code: "",
+                enabled: true,
+                expiresAt: "",
+                kind: "percent",
+                limit: "",
+                value: "",
+              },
             ])
           }
           type="button"

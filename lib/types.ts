@@ -1004,7 +1004,13 @@ export interface RefundEstimateResponse {
 }
 
 export interface SellerDashboardResponse {
-  sales: { total: number; paid: number; pending: number; refunded: number; rejected: number }
+  sales: {
+    total: number
+    paid: number
+    pending: number
+    refunded: number
+    rejected: number
+  }
   refundTotal: number
   payoutBalance: {
     availableBalance: number
@@ -1012,19 +1018,50 @@ export interface SellerDashboardResponse {
     totalRevenue: number
     pendingPayoutRequestCount: number
   }
-  ordersByPaymentMethod: Array<{ paymentMethod: string; count: number; total: number }>
-  couponPerformance: Array<{ couponCode: string; uses: number; discountGiven: number; revenue: number }>
-  enrolmentsPerCourse: Array<{ courseId: string; courseTitle: string; enrolments: number; activeEnrolments: number }>
-  completionPerCourse: Array<{ courseId: string; courseTitle: string; completedEnrolments: number; completionRate: number }>
+  ordersByPaymentMethod: Array<{
+    paymentMethod: string
+    count: number
+    total: number
+  }>
+  couponPerformance: Array<{
+    couponCode: string
+    uses: number
+    discountGiven: number
+    revenue: number
+  }>
+  enrolmentsPerCourse: Array<{
+    courseId: string
+    courseTitle: string
+    enrolments: number
+    activeEnrolments: number
+  }>
+  completionPerCourse: Array<{
+    courseId: string
+    courseTitle: string
+    completedEnrolments: number
+    completionRate: number
+  }>
   dropOffPerCourse: Array<{
     courseId: string
     courseTitle: string
-    dropOffLesson: { lectureId: string; lectureTitle: string; rateAfter: number; rateBefore: number } | null
+    dropOffLesson: {
+      lectureId: string
+      lectureTitle: string
+      rateAfter: number
+      rateBefore: number
+    } | null
   }>
   topicWeakness: {
     note: string
     source: string
-    quizzes: Array<{ quizId: string; quizTitle: string; courseId: string; courseTitle: string; attempts: number; averagePercentage: number | null }>
+    quizzes: Array<{
+      quizId: string
+      quizTitle: string
+      courseId: string
+      courseTitle: string
+      attempts: number
+      averagePercentage: number | null
+    }>
   }
   atRiskStudents: Array<{
     courseId: string
@@ -1042,7 +1079,11 @@ export interface AnnouncementDraftResponse {
   draft: { body: string; courseId: string | null; title: string }
   note?: string
   recipientCount: number
-  recipientsPreview: Array<{ email?: string; fullName?: string | null; userId?: string }>
+  recipientsPreview: Array<{
+    email?: string
+    fullName?: string | null
+    userId?: string
+  }>
   sent: false
 }
 
@@ -1116,7 +1157,10 @@ export interface ModelTestSubmitResponse {
   percentage: number
   negativeMark: number
   negativeMarkApplied: number
-  topicBreakdown: Record<string, { blank: number; correct: number; total: number; wrong: number }>
+  topicBreakdown: Record<
+    string,
+    { blank: number; correct: number; total: number; wrong: number }
+  >
   wrongQuestionIds: string[]
   submittedLate: boolean
   finishedInSeconds: number
@@ -1143,7 +1187,14 @@ export interface LeaderboardResponse {
 export interface TopicReportResponse {
   testId: string
   attemptsCount: number
-  topics: Array<{ topic: string; correct: number; wrong: number; blank: number; total: number; accuracy: number }>
+  topics: Array<{
+    topic: string
+    correct: number
+    wrong: number
+    blank: number
+    total: number
+    accuracy: number
+  }>
 }
 
 export interface MistakeBankResponse {

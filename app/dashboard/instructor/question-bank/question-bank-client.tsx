@@ -8,16 +8,9 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { SubmitButton } from "@/components/submit-button"
 
-import {
-  attachBankQuestionAction,
-  importQuestionBankAction,
-} from "./actions"
+import { attachBankQuestionAction, importQuestionBankAction } from "./actions"
 
-export function QuestionImportForm({
-  courseId,
-}: {
-  courseId?: string
-}) {
+export function QuestionImportForm({ courseId }: { courseId?: string }) {
   const [report, setReport] = useState<QuestionImportResponse | null>(null)
   const [error, setError] = useState<string | null>(null)
 
@@ -44,10 +37,18 @@ export function QuestionImportForm({
         ) : null}
         <div className="space-y-2">
           <Label htmlFor="csv-file">CSV ফাইল</Label>
-          <Input accept=".csv,text/csv" id="csv-file" name="file" required type="file" />
+          <Input
+            accept=".csv,text/csv"
+            id="csv-file"
+            name="file"
+            required
+            type="file"
+          />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="quiz-id">মডেল টেস্ট আইডি (ঐচ্ছিক — আমদানি করা প্রশ্ন সরাসরি যুক্ত হবে)</Label>
+          <Label htmlFor="quiz-id">
+            মডেল টেস্ট আইডি (ঐচ্ছিক — আমদানি করা প্রশ্ন সরাসরি যুক্ত হবে)
+          </Label>
           <Input id="quiz-id" name="quizId" placeholder="মডেল টেস্টের UUID" />
         </div>
         <SubmitButton>আমদানি করুন</SubmitButton>
@@ -78,11 +79,7 @@ export function QuestionImportForm({
   )
 }
 
-export function AttachQuestionForm({
-  questionId,
-}: {
-  questionId: string
-}) {
+export function AttachQuestionForm({ questionId }: { questionId: string }) {
   return (
     <form
       action={async (formData) => {

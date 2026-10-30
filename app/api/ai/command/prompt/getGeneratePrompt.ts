@@ -1,7 +1,7 @@
-import type { ChatMessage } from '@/components/editor/use-chat';
-import type { SlateEditor } from 'platejs';
+import type { ChatMessage } from "@/components/editor/use-chat"
+import type { SlateEditor } from "platejs"
 
-import dedent from 'dedent';
+import dedent from "dedent"
 
 import {
   addSelection,
@@ -10,8 +10,8 @@ import {
   getLastUserInstruction,
   getMarkdownWithSelection,
   isMultiBlocks,
-} from '../utils';
-import { commonGenerateRules } from './common';
+} from "../utils"
+import { commonGenerateRules } from "./common"
 
 function buildGenerateFreeformPrompt(messages: ChatMessage[]) {
   return buildStructuredPrompt({
@@ -54,7 +54,7 @@ function buildGenerateFreeformPrompt(messages: ChatMessage[]) {
       Generate content based on the user's instructions.
       Directly produce the final result without asking for additional information.
     `,
-  });
+  })
 }
 
 function buildGenerateContextPrompt(
@@ -62,10 +62,10 @@ function buildGenerateContextPrompt(
   messages: ChatMessage[]
 ) {
   if (!isMultiBlocks(editor)) {
-    addSelection(editor);
+    addSelection(editor)
   }
 
-  const selectingMarkdown = getMarkdownWithSelection(editor);
+  const selectingMarkdown = getMarkdownWithSelection(editor)
 
   return buildStructuredPrompt({
     context: selectingMarkdown,
@@ -143,7 +143,7 @@ function buildGenerateContextPrompt(
       If the instruction requests creation or transformation (e.g., summarize, translate, rewrite, create a table), directly produce the final result.
       Do not ask the user for additional content.
     `,
-  });
+  })
 }
 
 export function getGeneratePrompt(
@@ -152,8 +152,8 @@ export function getGeneratePrompt(
 ) {
   // Freeform generation: open-ended creation without context
   if (!isSelecting) {
-    return buildGenerateFreeformPrompt(messages);
+    return buildGenerateFreeformPrompt(messages)
   }
   // Context-based generation: use selected text as context
-  return buildGenerateContextPrompt(editor, messages);
+  return buildGenerateContextPrompt(editor, messages)
 }

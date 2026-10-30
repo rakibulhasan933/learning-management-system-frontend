@@ -23,7 +23,7 @@ export default async function AdminUsersPage() {
     <>
       <PageHeader
         action={
-          <Button className="w-full sm:w-auto" variant="outline" asChild>
+          <Button className="w-full sm:w-auto" variant="outline">
             <Link href="/dashboard/admin">
               <ArrowLeft className="size-3.5" />
               Dashboard

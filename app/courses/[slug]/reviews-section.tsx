@@ -18,17 +18,24 @@ import { ReviewForm } from "./review-form"
 import { ReviewHideButton, ReviewReplyForm } from "./review-staff-actions"
 
 /** Five stars, filled up to the rounded rating. Never invented: only renders. */
-export function RatingStars({ rating, size = "size-4" }: { rating: number; size?: string }) {
+export function RatingStars({
+  rating,
+  size = "size-4",
+}: {
+  rating: number
+  size?: string
+}) {
   const rounded = Math.round(rating)
   return (
     <span className="flex items-center gap-0.5" aria-label={`${rating} / 5`}>
       {[1, 2, 3, 4, 5].map((star) => (
         <Star
+          aria-hidden
           className={cn(
             size,
             star <= rounded
-              ? "fill-primary text-primary"
-              : "fill-transparent text-muted-foreground"
+              ? "fill-[#C9A15A] text-[#C9A15A]"
+              : "fill-transparent text-[#5b5e66]"
           )}
           key={star}
         />
@@ -53,51 +60,45 @@ function ReviewCard({
   const canReply = viewerRole === "admin" || viewerRole === "instructor"
   const canHide = viewerRole === "admin"
   return (
-    <article className="rounded-xl border border-border bg-background p-4">
+    <article className="rounded-xl border border-[#343943] bg-[#1B1F29] p-5">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="text-sm font-medium">{review.reviewerName}</p>
-        <p className="font-mono text-xs text-muted-foreground">
+        <p className="font-semibold">{review.reviewerName}</p>
+        <p className="text-sm text-[#A3A5AE]">
           {formatDateTime(review.createdAt)}
         </p>
       </div>
-      <div className="mt-2">
+      <div className="mt-1">
         <RatingStars rating={review.rating} />
       </div>
-      {review.body ? (
-        <p className="mt-2 text-sm leading-6">{review.body}</p>
-      ) : null}
+      {review.body ? <p className="mt-3">{review.body}</p> : null}
       {review.replies.length > 0 ? (
-        <div className="mt-3 space-y-2 border-t border-border/60 pt-3">
+        <div className="mt-4 space-y-2 border-t border-[#343943] pt-4">
           {review.replies.map((reply) => (
-            <div
-              className="rounded-lg bg-card px-3 py-2"
-              key={reply.id}
-            >
-              <p className="font-mono text-xs text-muted-foreground">
-                {reply.authorRole === "instructor" ? "শিক্ষকের উত্তর" : "অ্যাডমিনের উত্তর"}
+            <div className="rounded-lg bg-[#12151C] px-4 py-3" key={reply.id}>
+              <p className="text-sm text-[#C9A15A]">
+                {reply.authorRole === "instructor"
+                  ? "শিক্ষকের উত্তর"
+                  : "অ্যাডমিনের উত্তর"}
                 {reply.authorName ? ` · ${reply.authorName}` : ""}
-                {" · "}
-                {formatDateTime(reply.createdAt)}
+                <span className="text-[#A3A5AE]">
+                  {" · "}
+                  {formatDateTime(reply.createdAt)}
+                </span>
               </p>
-              <p className="mt-1 text-sm leading-6">{reply.body}</p>
+              <p className="mt-1">{reply.body}</p>
             </div>
           ))}
         </div>
       ) : null}
-      {canReply ? (
-        <ReviewReplyForm reviewId={review.id} slug={slug} />
-      ) : null}
-      {canHide ? (
-        <ReviewHideButton reviewId={review.id} slug={slug} />
-      ) : null}
+      {canReply ? <ReviewReplyForm reviewId={review.id} slug={slug} /> : null}
+      {canHide ? <ReviewHideButton reviewId={review.id} slug={slug} /> : null}
     </article>
   )
 }
 
 /**
  * Reviews section for the public course sales page. Data comes only from
- * GET /courses/:courseId/reviews; nothing is invented. When the backend has
- * no reviews table or no reviews, the original "এখনো রিভিউ নেই" stands.
+ * GET /courses/:courseId/reviews; nothing is invented.
  */
 export async function CourseReviewsSection({
   courseId,
@@ -134,9 +135,7 @@ export async function CourseReviewsSection({
     } catch {
       mine = null
     }
-    // Staff-only UI (instructor reply, admin hide) needs the viewer role.
-    // The backend still enforces ownership, so a wrong guess here cannot
-    // grant anything.
+    // Staff-only UI needs the viewer role; the backend still enforces ownership.
     try {
       const me = await optionalAuthenticatedApiFetch<{ role?: string }>(
         "/auth/me",
@@ -153,23 +152,21 @@ export async function CourseReviewsSection({
   const reviews = data?.reviews ?? []
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       {reviews.length === 0 ? (
-        <p className="text-sm leading-6 text-muted-foreground">
-          এখনো রিভিউ নেই
-        </p>
+        <p className="text-[#A3A5AE]">এখনো রিভিউ নেই</p>
       ) : (
         <>
           <div className="flex flex-wrap items-center gap-3">
             {averageRating !== null ? (
               <>
                 <RatingStars rating={averageRating} size="size-5" />
-                <p className="font-mono text-lg tabular-nums">
+                <p className="text-2xl font-semibold tabular-nums">
                   {toBnDigits(averageRating.toFixed(1))}
                 </p>
               </>
             ) : null}
-            <p className="text-sm text-muted-foreground">
+            <p className="text-[#A3A5AE]">
               {toBnDigits(String(reviewCount))}টি রিভিউ
             </p>
           </div>
@@ -186,9 +183,9 @@ export async function CourseReviewsSection({
         </>
       )}
 
-      <div className="pt-2">
-        <h3 className="mb-3 flex items-center gap-2 font-heading text-lg tracking-tight">
-          <MessageCircle className="size-5 text-primary" />
+      <div className="border-t border-[#343943] pt-6">
+        <h3 className="mb-3 flex items-center gap-2 text-xl font-semibold">
+          <MessageCircle aria-hidden className="size-5 text-[#C9A15A]" />
           রিভিউ দিন
         </h3>
         <ReviewForm

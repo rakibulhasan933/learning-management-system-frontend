@@ -88,10 +88,7 @@ export default async function InstructorRefundRequestsPage() {
                 </thead>
                 <tbody>
                   {requests.map((request) => (
-                    <tr
-                      className="border-b border-border/60"
-                      key={request.id}
-                    >
+                    <tr className="border-b border-border/60" key={request.id}>
                       <td className="py-4">{request.studentName}</td>
                       <td>{request.courseTitle}</td>
                       <td className="font-mono tabular-nums">

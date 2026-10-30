@@ -58,8 +58,8 @@ export default async function AdminAffiliatePayoutsPage() {
             মুলতুবি অনুরোধ ({pending.length}টি)
           </h2>
           <p className="text-sm text-muted-foreground">
-            শুধু PayConfirm-এ paid অর্ডার থেকে জমা হওয়া কমিশনের পেআউট
-            অনুমোদন করুন। এক অর্ডারে একবারের বেশি কমিশন দেওয়া হয় না।
+            শুধু PayConfirm-এ paid অর্ডার থেকে জমা হওয়া কমিশনের পেআউট অনুমোদন
+            করুন। এক অর্ডারে একবারের বেশি কমিশন দেওয়া হয় না।
           </p>
           {pending.length === 0 ? (
             <p className="text-sm text-muted-foreground">

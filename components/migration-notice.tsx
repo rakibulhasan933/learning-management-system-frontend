@@ -12,14 +12,13 @@ export function MigrationNotice({ feature }: { feature: string }) {
       <CardContent className="space-y-2">
         <h2 className="font-heading text-xl">{feature} এখনও চালু হয়নি</h2>
         <p className="text-sm leading-6 text-muted-foreground">
-          এই ফিচারটি চালু করতে ডেটাবেস মাইগ্রেশন বাকি আছে। মাইগ্রেশন প্রয়োগ
-          হলে এই পাতাটি স্বয়ংক্রিয়ভাবে কাজ করবে। কোনো তথ্য অনুমান করে
-          দেখানো হচ্ছে না।
+          এই ফিচারটি চালু করতে ডেটাবেস মাইগ্রেশন বাকি আছে। মাইগ্রেশন প্রয়োগ হলে
+          এই পাতাটি স্বয়ংক্রিয়ভাবে কাজ করবে। কোনো তথ্য অনুমান করে দেখানো হচ্ছে
+          না।
         </p>
         <p className="text-sm leading-6 text-muted-foreground">
           This feature is waiting on a database migration. Nothing here is
-          estimated or invented while the backend reports the table as
-          missing.
+          estimated or invented while the backend reports the table as missing.
         </p>
       </CardContent>
     </Card>

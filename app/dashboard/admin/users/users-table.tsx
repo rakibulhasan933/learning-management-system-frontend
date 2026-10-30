@@ -50,7 +50,7 @@ export function UsersTable({ rows, total, hasFilters }: UsersTableProps) {
           <EmptyState
             action={
               hasFilters ? (
-                <Button asChild variant="outline">
+                <Button variant="outline">
                   <Link href="/dashboard/admin/users">Clear filters</Link>
                 </Button>
               ) : undefined

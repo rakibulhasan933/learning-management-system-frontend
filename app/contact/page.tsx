@@ -28,8 +28,8 @@ export default function ContactPage() {
           চলুন, একসাথে সমস্যার সমাধান করি।
         </h1>
         <p className="mt-5 max-w-2xl text-base leading-7 text-muted-foreground">
-          পেমেন্ট, এনরোলমেন্ট বা অ্যাকাউন্ট সংক্রান্ত সাহায্যের জন্য অর্ডার রেফারেন্স
-          এবং অ্যাকাউন্টে ব্যবহৃত ইমেইল পাঠান।
+          পেমেন্ট, এনরোলমেন্ট বা অ্যাকাউন্ট সংক্রান্ত সাহায্যের জন্য অর্ডার
+          রেফারেন্স এবং অ্যাকাউন্টে ব্যবহৃত ইমেইল পাঠান।
         </p>
         <div className="mt-10 grid gap-5 md:grid-cols-2">
           <Card>
@@ -39,7 +39,7 @@ export default function ContactPage() {
               <p className="mt-2 text-sm leading-6 text-muted-foreground">
                 পেমেন্ট যাচাই ও অ্যাকাউন্ট-সংক্রান্ত প্রশ্নের জন্য উপযুক্ত।
               </p>
-              <Button asChild className="mt-6">
+              <Button className="mt-6">
                 <a href={`mailto:${email}`}>{email}</a>
               </Button>
             </CardContent>
@@ -49,10 +49,10 @@ export default function ContactPage() {
               <MessageCircle className="size-5 text-primary" />
               <h2 className="mt-5 font-heading text-2xl">লেখার আগে</h2>
               <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                আপনার অ্যাকাউন্ট ইমেইল, কোর্সের নাম, অর্ডার রেফারেন্স এবং সমস্যার
-                সংক্ষিপ্ত বিবরণ দিন।
+                আপনার অ্যাকাউন্ট ইমেইল, কোর্সের নাম, অর্ডার রেফারেন্স এবং
+                সমস্যার সংক্ষিপ্ত বিবরণ দিন।
               </p>
-              <Button asChild className="mt-6" variant="outline">
+              <Button className="mt-6" variant="outline">
                 <Link href="/faq">সাধারণ জিজ্ঞাসা দেখুন</Link>
               </Button>
             </CardContent>

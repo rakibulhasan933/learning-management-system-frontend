@@ -47,11 +47,10 @@ export default async function InstructorBatchesPage({
   }
 
   try {
-    const response =
-      await authenticatedApiFetch<InstructorCourseListResponse>(
-        "/instructor/courses",
-        { cache: "no-store" }
-      )
+    const response = await authenticatedApiFetch<InstructorCourseListResponse>(
+      "/instructor/courses",
+      { cache: "no-store" }
+    )
     courses = response.courses
   } catch {
     courses = []
@@ -65,9 +64,7 @@ export default async function InstructorBatchesPage({
         title="ব্যাচ"
       />
 
-      {migrationPending ? (
-        <MigrationNotice feature="ব্যাচ" />
-      ) : null}
+      {migrationPending ? <MigrationNotice feature="ব্যাচ" /> : null}
       {loadError ? (
         <p className="rounded-xl border border-border px-4 py-3 text-sm text-muted-foreground">
           {loadError}
@@ -135,10 +132,7 @@ export default async function InstructorBatchesPage({
           {params.courseId ? (
             <p className="text-sm text-muted-foreground">
               কোর্স ফিল্টার সক্রিয়।{" "}
-              <Link
-                className="underline"
-                href="/dashboard/instructor/batches"
-              >
+              <Link className="underline" href="/dashboard/instructor/batches">
                 সব ব্যাচ দেখুন
               </Link>
             </p>
@@ -170,7 +164,7 @@ export default async function InstructorBatchesPage({
                       : ""}
                   </p>
                 </div>
-                <Button asChild variant="outline">
+                <Button variant="outline">
                   <Link href={`/dashboard/instructor/batches/${batch.id}`}>
                     বিস্তারিত
                   </Link>

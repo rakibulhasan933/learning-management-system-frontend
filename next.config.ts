@@ -9,13 +9,13 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       {
-        protocol: 'https',
-        hostname: '**',
-        port: '',
+        protocol: "https",
+        hostname: "**",
+        port: "",
       },
     ],
     qualities: [100],
-    formats: ['image/avif', 'image/webp'],
+    formats: ["image/avif", "image/webp"],
   },
 }
 

@@ -50,9 +50,7 @@ export async function requestInstructorPayoutAction(formData: FormData) {
     })
   } catch (error) {
     failure =
-      error instanceof ApiClientError
-        ? error.message
-        : "Payout request failed."
+      error instanceof ApiClientError ? error.message : "Payout request failed."
   }
 
   if (failure) {

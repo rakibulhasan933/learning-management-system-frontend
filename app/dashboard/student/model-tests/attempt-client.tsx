@@ -2,10 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react"
 
-import type {
-  ModelTestAttemptDto,
-  ModelTestSubmitResponse,
-} from "@/lib/types"
+import type { ModelTestAttemptDto, ModelTestSubmitResponse } from "@/lib/types"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 
@@ -70,9 +67,9 @@ export function ModelTestAttemptClient({ testId }: { testId: string }) {
           </p>
           {result.submittedLate ? (
             <p className="rounded-xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
-              দেরিতে জমা দেওয়া হয়েছে (submittedLate) — নির্ধারিত সময়
-              পেরিয়ে জমা দেওয়ায় স্কোর যেমন আছে তেমনই গণনা করা হয়েছে,
-              জমা বাতিল করা হয়নি।
+              দেরিতে জমা দেওয়া হয়েছে (submittedLate) — নির্ধারিত সময় পেরিয়ে
+              জমা দেওয়ায় স্কোর যেমন আছে তেমনই গণনা করা হয়েছে, জমা বাতিল করা
+              হয়নি।
             </p>
           ) : null}
           <div className="space-y-1">
@@ -116,8 +113,8 @@ export function ModelTestAttemptClient({ testId }: { testId: string }) {
           {pending ? "শুরু হচ্ছে…" : "টেস্ট শুরু করুন"}
         </Button>
         <p className="text-xs text-muted-foreground">
-          প্রশ্নগুলোতে সঠিক উত্তর পাঠানো হয় না; টাইমার শেষ হলে জমা দিলেও
-          স্কোর গণনা হবে এবং দেরি হিসেবে চিহ্নিত হবে।
+          প্রশ্নগুলোতে সঠিক উত্তর পাঠানো হয় না; টাইমার শেষ হলে জমা দিলেও স্কোর
+          গণনা হবে এবং দেরি হিসেবে চিহ্নিত হবে।
         </p>
         {error ? <p className="text-sm text-destructive">{error}</p> : null}
       </div>
@@ -151,7 +148,10 @@ export function ModelTestAttemptClient({ testId }: { testId: string }) {
             </p>
             <p>{question.questionText}</p>
             {question.options.map((option) => (
-              <label className="flex items-center gap-2 text-sm" key={option.id}>
+              <label
+                className="flex items-center gap-2 text-sm"
+                key={option.id}
+              >
                 <input
                   checked={(answers[question.id] ?? []).includes(option.id)}
                   onChange={() => toggleOption(question.id, option.id)}
@@ -170,7 +170,11 @@ export function ModelTestAttemptClient({ testId }: { testId: string }) {
           setError(null)
           try {
             setResult(
-              await submitModelTestAttemptAction(testId, attempt.attemptId, answers)
+              await submitModelTestAttemptAction(
+                testId,
+                attempt.attemptId,
+                answers
+              )
             )
           } catch (caught) {
             setError(

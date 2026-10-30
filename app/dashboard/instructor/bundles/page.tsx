@@ -36,9 +36,7 @@ export default async function InstructorBundlesPage() {
         lede="শুধুমাত্র আপনার নিজের কোর্স দিয়ে বান্ডেল তৈরি করুন। বান্ডেল কেনার পর শিক্ষার্থীর পেমেন্ট বিদ্যমান PayConfirm প্রমাণ ফ্লোতে যাচাই হবে।"
         title="বান্ডেল তৈরি করুন"
       />
-      {migrationPending ? (
-        <MigrationNotice feature="বান্ডেল তৈরি" />
-      ) : null}
+      {migrationPending ? <MigrationNotice feature="বান্ডেল তৈরি" /> : null}
       {data.courses.length === 0 ? (
         <EmptyState
           description="Create a course first, then bundle your own courses together."
@@ -55,15 +53,33 @@ export default async function InstructorBundlesPage() {
               <div className="grid gap-4 sm:grid-cols-3">
                 <div className="space-y-2">
                   <Label htmlFor="price">মূল্য</Label>
-                  <Input id="price" min={0} name="price" required type="number" step="0.01" />
+                  <Input
+                    id="price"
+                    min={0}
+                    name="price"
+                    required
+                    type="number"
+                    step="0.01"
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="originalPrice">আগের মূল্য (ঐচ্ছিক)</Label>
-                  <Input id="originalPrice" min={0} name="originalPrice" type="number" step="0.01" />
+                  <Input
+                    id="originalPrice"
+                    min={0}
+                    name="originalPrice"
+                    type="number"
+                    step="0.01"
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="durationDays">মেয়াদ, দিনে (ঐচ্ছিক)</Label>
-                  <Input id="durationDays" min={1} name="durationDays" type="number" />
+                  <Input
+                    id="durationDays"
+                    min={1}
+                    name="durationDays"
+                    type="number"
+                  />
                 </div>
               </div>
               <div className="space-y-2">
@@ -79,7 +95,10 @@ export default async function InstructorBundlesPage() {
                   আপনার কোর্স বাছুন (কমপক্ষে একটি)
                 </legend>
                 {data.courses.map((course) => (
-                  <label className="flex items-center gap-2 text-sm" key={course.id}>
+                  <label
+                    className="flex items-center gap-2 text-sm"
+                    key={course.id}
+                  >
                     <input name="courseIds" type="checkbox" value={course.id} />
                     {course.title}
                   </label>

@@ -27,6 +27,12 @@ export function BackgroundRipple() {
     }
   }, [])
 
-  return <div aria-hidden className="background-ripple" data-pulse={pulse} ref={ref} />
+  return (
+    <div
+      aria-hidden
+      className="background-ripple"
+      data-pulse={pulse}
+      ref={ref}
+    />
+  )
 }
-

@@ -72,9 +72,7 @@ export default async function VerifyCertificatePage({
           <CardContent className="space-y-4">
             <form action="/verify" className="grid gap-3" method="get">
               <label className="grid gap-1 text-sm" htmlFor="code">
-                <span className="text-muted-foreground">
-                  যাচাইকরণ কোড
-                </span>
+                <span className="text-muted-foreground">যাচাইকরণ কোড</span>
                 <input
                   className="h-10 rounded-xl border border-input bg-input/30 px-3 font-mono"
                   defaultValue={code}

@@ -1,22 +1,22 @@
-import type { ChatMessage } from '@/components/editor/use-chat';
-import type { SlateEditor } from 'platejs';
+import type { ChatMessage } from "@/components/editor/use-chat"
+import type { SlateEditor } from "platejs"
 
-import { getMarkdown } from '@platejs/ai';
-import dedent from 'dedent';
+import { getMarkdown } from "@platejs/ai"
+import dedent from "dedent"
 
 import {
   buildStructuredPrompt,
   formatTextFromMessages,
   getLastUserInstruction,
-} from '../utils';
+} from "../utils"
 
 export function buildEditTableMultiCellPrompt(
   editor: SlateEditor,
   messages: ChatMessage[]
 ): string {
   const tableCellMarkdown = getMarkdown(editor, {
-    type: 'tableCellWithId',
-  });
+    type: "tableCellWithId",
+  })
 
   return buildStructuredPrompt({
     context: tableCellMarkdown,
@@ -113,5 +113,5 @@ export function buildEditTableMultiCellPrompt(
       Your task is to modify the content of the selected cells according to the user's instruction.
       Output ONLY a valid JSON array with the modified cell contents.
     `,
-  });
+  })
 }

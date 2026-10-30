@@ -1,10 +1,7 @@
 import { NextResponse } from "next/server"
 import { cookies } from "next/headers"
 
-import {
-  accessTokenCookieName,
-  getBackendApiUrl,
-} from "@/lib/api-client"
+import { accessTokenCookieName, getBackendApiUrl } from "@/lib/api-client"
 
 const allowedReports = [
   "funnel",
