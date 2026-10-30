@@ -85,7 +85,7 @@ export default async function SellerDashboardPage() {
           <section className="grid gap-4 lg:grid-cols-2">
             <Card>
               <CardContent className="space-y-2">
-                <h2 className="font-heading text-xl">পেমেন্ট মাধ্যম অনুযায়ী</h2>
+                <h2 className="font-heading text-xl">পেমেন্ট মাধ্যম অনুযায়ী (paid অর্ডার)</h2>
                 {data.ordersByPaymentMethod.length === 0 ? (
                   <p className="text-sm text-muted-foreground">
                     এখনও কোনো অর্ডার নেই।

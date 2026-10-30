@@ -5,20 +5,28 @@ import type {
 
 import { authenticatedApiFetch } from "@/lib/api-client"
 import { PageHeader } from "@/components/ui/page-header"
+import { isMigrationPendingError } from "@/components/migration-notice"
 
 import { BroadcastForm } from "./broadcast-form"
 
 export const dynamic = "force-dynamic"
 
 export default async function InstructorBroadcastPage() {
-  const [coursesResponse, batchesResponse] = await Promise.all([
-    authenticatedApiFetch<InstructorCourseListResponse>("/instructor/courses", {
-      cache: "no-store",
-    }),
-    authenticatedApiFetch<BatchListResponse>("/instructor/batches", {
-      cache: "no-store",
-    }),
-  ])
+  const coursesResponse = await authenticatedApiFetch<InstructorCourseListResponse>(
+    "/instructor/courses",
+    { cache: "no-store" }
+  )
+  let batches: BatchListResponse["batches"] = []
+
+  try {
+    const batchesResponse = await authenticatedApiFetch<BatchListResponse>(
+      "/instructor/batches",
+      { cache: "no-store" }
+    )
+    batches = batchesResponse.batches ?? []
+  } catch (error) {
+    if (!isMigrationPendingError(error)) throw error
+  }
 
   return (
     <div className="space-y-8">
@@ -28,7 +36,7 @@ export default async function InstructorBroadcastPage() {
         title="সবাইকে মেসেজ পাঠান"
       />
       <BroadcastForm
-        batches={batchesResponse.batches}
+        batches={batches}
         courses={coursesResponse.courses}
       />
     </div>

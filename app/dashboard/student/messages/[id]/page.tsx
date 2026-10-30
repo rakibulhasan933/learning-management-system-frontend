@@ -4,6 +4,10 @@ import type { MessageThreadDetailResponse } from "@/lib/types"
 
 import { ApiClientError, authenticatedApiFetch } from "@/lib/api-client"
 import { PageHeader } from "@/components/ui/page-header"
+import {
+  MigrationNotice,
+  isMigrationPendingError,
+} from "@/components/migration-notice"
 
 import { ThreadView } from "../../../messages/thread-view"
 
@@ -16,7 +20,8 @@ export default async function StudentMessageThreadPage({
 }) {
   const { id } = await params
 
-  let detail: MessageThreadDetailResponse
+  let detail: MessageThreadDetailResponse | null = null
+  let migrationPending = false
 
   try {
     detail = await authenticatedApiFetch<MessageThreadDetailResponse>(
@@ -27,9 +32,27 @@ export default async function StudentMessageThreadPage({
     if (caught instanceof ApiClientError && caught.status === 404) {
       notFound()
     }
-
-    throw caught
+    if (isMigrationPendingError(caught)) {
+      migrationPending = true
+    } else {
+      throw caught
+    }
   }
+
+  if (migrationPending) {
+    return (
+      <div className="space-y-8">
+        <PageHeader
+          eyebrow="শিক্ষার্থী ড্যাশবোর্ড"
+          lede="মেসেজ ফিচারটি চালু করতে ডেটাবেস মাইগ্রেশন প্রয়োজন।"
+          title="মেসেজ"
+        />
+        <MigrationNotice feature="মেসেজ" />
+      </div>
+    )
+  }
+
+  if (!detail) throw new Error("Message thread could not be loaded.")
 
   const threadPath = `/dashboard/student/messages/${detail.thread.id}`
 
