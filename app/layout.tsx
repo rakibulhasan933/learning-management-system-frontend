@@ -1,50 +1,9 @@
 import type { Metadata } from "next"
-import {
-  Fraunces,
-  Noto_Sans_Bengali,
-  IBM_Plex_Mono,
-  Inter,
-  Noto_Serif_Bengali,
-} from "next/font/google"
-
 import "@uploadthing/react/styles.css"
 import "./globals.css"
 import { Toaster } from "@/components/ui/sonner"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { BackgroundRipple } from "@/components/background-ripple"
-
-// English / Latin fonts (unchanged)
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-sans-src",
-  weight: ["400", "500", "600", "700"],
-})
-
-const fraunces = Fraunces({
-  axes: ["SOFT", "WONK", "opsz"],
-  subsets: ["latin"],
-  variable: "--font-display-src",
-})
-
-const ibmPlexMono = IBM_Plex_Mono({
-  subsets: ["latin"],
-  variable: "--font-mono-src",
-  weight: ["400", "500", "600"],
-})
-
-// Bengali fallbacks: Fraunces and Inter have no Bengali glyphs,
-// so Bengali text uses these automatically.
-const bnSans = Noto_Sans_Bengali({
-  subsets: ["bengali", "latin"],
-  variable: "--font-bn-sans-src",
-  weight: ["300", "400", "500", "600", "700"],
-})
-
-const bnSerif = Noto_Serif_Bengali({
-  subsets: ["bengali", "latin"],
-  variable: "--font-bn-display-src",
-  weight: ["300", "400", "500", "600", "700"],
-})
 
 export const metadata: Metadata = {
   metadataBase: new URL(
@@ -91,7 +50,7 @@ export default function RootLayout({
     <html
       lang="bn"
       data-scroll-behavior="smooth"
-      className={`dark ${inter.variable} ${fraunces.variable} ${ibmPlexMono.variable} ${bnSans.variable} ${bnSerif.variable}`}
+      className="dark"
       suppressHydrationWarning
     >
       <body className="min-h-screen font-sans antialiased">

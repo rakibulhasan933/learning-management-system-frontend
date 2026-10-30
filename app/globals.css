@@ -61,6 +61,11 @@
 }
 
 :root {
+  --font-sans-src: Inter, ui-sans-serif, system-ui, sans-serif;
+  --font-display-src: Fraunces, Georgia, serif;
+  --font-mono-src: "IBM Plex Mono", ui-monospace, monospace;
+  --font-bn-sans-src: "Noto Sans Bengali", sans-serif;
+  --font-bn-display-src: "Noto Serif Bengali", serif;
   --background: #12151C;
   --foreground: #F2EFE7;
   --card: #1B1F29;
